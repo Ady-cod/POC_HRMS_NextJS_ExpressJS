@@ -1,3 +1,42 @@
+# VSCode settings
+.vscode/
+
+# WebStorm settings
+.idea/
+
+# macOS Finder metadata
+.DS_Store
+
+# Windows metadata
+Thumbs.db
+
+# Linux temporary files
+.directory
+
+# Temporary files
+*.tmp
+*.swp
+
+# Editor backup files
+*.bak
+*.orig
+
+# Optional pnpm cache directory
+.pnpm-store
+.pnpm
+
+# Distribution/build output
+/dist/
+/build/
+
+# Docker specific files
+Dockerfile
+docker-compose.yml
+.env.docker
+
+# Generated Documentation
+/docs/
+
 # Logs
 logs
 *.log
@@ -128,3 +167,10 @@ dist
 .yarn/build-state.yml
 .yarn/install-state.gz
 .pnp.*
+
+# Jest testing
+/coverage/
+
+# Cypress testing
+/cypress/videos/
+/cypress/screenshots/

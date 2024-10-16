@@ -23,9 +23,21 @@ This project is a proof of concept (POC) for a Human Resource Management System 
 
 1. **Clone the repository**:
 
-   ```bash
-   git clone https://github.com/Ady-cod/POC_HRMS_NextJS_ExpressJS
-   ```
+To clone this repository, you have two options:
+
+#### Option 1: Using HTTPS
+
+```bash
+git clone https://github.com/Ady-cod/POC_HRMS_NextJS_ExpressJS.git
+```
+
+#### Option 2: Using SSH
+
+```bash
+git clone git@github.com:Ady-cod/POC_HRMS_NextJS_ExpressJS.git
+```
+
+Note: If you’re not familiar with SSH keys, you can use HTTPS to easily clone the repository.
 
 2. **Navigate into the backend folder**:
 

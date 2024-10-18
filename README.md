@@ -17,7 +17,9 @@ This project is a proof of concept (POC) for a Human Resource Management System 
 - **TypeScript** (Type Safety)
 - **Prisma** (Database ORM)
 - **pnpm** (Package Manager)
-- **tsx** (Development Hot-Reloading)
+- **tsx** (Development Backend Hot-Reloading)
+- **cross-env** (Injecting in Backend scripts Environment Variables)
+- **npm-run-all** (Running Multiple Scripts in the Backend)
 
 ## Installation
 
@@ -77,12 +79,14 @@ To start the backend server in development mode, run:
 pnpm dev
 ```
 
-This will start the Express server with hot-reloading enabled.
+This will start the Express server with hot-reloading enabled and will inject NODE_ENV value as "development".
 
 Other available backend scripts:
 
-- **`pnpm start`**: Runs the compiled JavaScript from the `dist` folder.
-- **`pnpm build`**: Compiles TypeScript to JavaScript in the `dist` folder.
+- **`pnpm start`**: Runs the compiled JavaScript from the `dist` folder and injects NODE_ENV value as "production".
+- **`pnpm clean`**: Deletes the `dist` folder.
+- **`pnpm compile`**: Compiles TypeScript to JavaScript in the `dist` folder.
+- **`pnpm build`**: Combine `clean` and `compile` scripts, compiling the code on a clean slate in the `dist` folder.
 - **`pnpm prod`**: Builds and starts the production server.
 
 To start the frontend server in development mode, navigate to the `hrms-frontend-nextjs` folder and run:
@@ -122,6 +126,21 @@ Other available frontend scripts:
     ├── tsconfig.json
     └── ... (other files for the Next.js setup)
 ```
+
+## Prisma Client Usage
+
+The backend utilizes a singleton pattern for the Prisma Client to ensure type-safe, consistent database access. This is implemented in the client.ts file, which should be used wherever Prisma is required in the application.
+
+To use Prisma, always import it from the client.ts file, like so:
+
+```bash
+import prisma from "../prisma/client";
+
+// Usage
+const users = await prisma.user.findMany();
+```
+
+This pattern ensures that only one instance of the Prisma Client is active at any time during development, preventing potential issues with database connection limits due to multiple instances.
 
 ## Current State & Future Steps
 

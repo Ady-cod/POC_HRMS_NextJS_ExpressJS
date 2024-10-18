@@ -6,10 +6,12 @@
   "type": "module",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
-    "start": "node dist/server.js",
-    "dev": "tsx watch src/server.ts",
-    "build": "tsc",
-    "prod": "pnpm build && pnpm start"
+    "start": "cross-env NODE_ENV=production node dist/server.js",
+    "dev": "cross-env NODE_ENV=development tsx watch src/server.ts",
+    "clean": "rimraf dist",
+    "compile": "tsc",
+    "build": "npm-run-all clean compile",
+    "prod": "npm-run-all build start"
   },
   "keywords": [
     "HRMS",
@@ -28,8 +30,11 @@
   "devDependencies": {
     "@types/express": "^5.0.0",
     "@types/node": "^22.7.5",
+    "cross-env": "^7.0.3",
     "eslint": "^9.12.0",
+    "npm-run-all": "^4.1.5",
     "prisma": "^5.21.0",
+    "rimraf": "^6.0.1",
     "tsx": "^4.19.1",
     "typescript": "^5.6.3"
   }

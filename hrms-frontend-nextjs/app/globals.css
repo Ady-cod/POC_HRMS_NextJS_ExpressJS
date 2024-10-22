@@ -1,9 +1,11 @@
+@import "~normalize.css";
+
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
 
 :root {
-  --background: #ffffff;
+  --background: #fafafa;
   --foreground: #171717;
 }
 
@@ -14,10 +16,19 @@
   }
 }
 
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+  margin: 0;
+  border: 0;
+}
+
 body {
   color: var(--foreground);
   background: var(--background);
-  font-family: Arial, Helvetica, sans-serif;
+  font-family: "Lucida Sans", "Lucida Grande", "Helvetica Neue", Arial,
+    sans-serif;
 }
 
 @layer utilities {

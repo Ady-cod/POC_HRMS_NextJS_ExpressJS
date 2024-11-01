@@ -1,7 +1,11 @@
 import express, { Request, Response } from "express";
+import dotenv from "dotenv";
+
+// Load environment variables from .env file
+dotenv.config();
 
 const app = express();
-const PORT = process.env.PORT || 5000;
+const PORT = process.env.PORT || 5001;
 
 // Middleware to parse JSON bodies
 app.use(express.json());

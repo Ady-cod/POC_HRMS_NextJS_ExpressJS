@@ -9,6 +9,260 @@ generator client {
 }
 
 datasource db {
-  provider = "postgresql"
+  provider = "mongodb"
   url      = env("DATABASE_URL")
 }
+
+model Employee {
+  id                  String              @id @default(auto()) @map("_id") @db.ObjectId // Using `@map("_id")` to map the id field to MongoDB's default `_id` field for ObjectId. This ensures compatibility with MongoDB conventions, which expect a unique `_id` field as the primary identifier.
+  firstName           String
+  lastName            String
+  email               String              @unique
+  inductionCompleted  Boolean             @default(false) // Indicates whether the employee has completed the induction process
+  phoneNumber         String?
+  profilePhotoUrl     String? // Optional URL for the employee's profile photo
+  timezone            String // IANA time zone identifier (e.g., "America/New_York"). Chosen for its global standard and flexibility in representing time across different regions.
+  role                Role // Enum representing the employee role (e.g., "EMPLOYEE", "INTERN", "MANAGER")
+  status              Status              @default(ACTIVE) // Enum representing the employee status (e.g., "ACTIVE", "INACTIVE", "ON_LEAVE")
+  employeeProjects    EmployeeProject[]
+  attendanceRecords   Attendance[] // Link to the Attendance model for tracking attendance
+  attendanceSummaries AttendanceSummary[] // Link to the AttendanceSummary model for aggregated attendance data
+
+  departmentId String?     @db.ObjectId
+  department   Department? @relation(fields: [departmentId], references: [id], onDelete: SetNull) // Reference to the Department model will be set to null if the department is deleted
+
+  EmployeeLearningPathProgress EmployeeLearningPathProgress? // One-to-one relationship with EmployeeLearningPathProgress
+
+  createdAt DateTime @default(now()) // Records when the employee record was created
+  updatedAt DateTime @updatedAt // Records the last time the employee record was updated
+
+  @@index([departmentId]) // Adding an index on departmentId to make queries that filter by department faster
+  @@map("employees")
+}
+
+model Department {
+  id                 String  @id @default(auto()) @map("_id") @db.ObjectId
+  name               String  @unique // e.g., "Sales", "Engineering", etc.
+  timezone           String // IANA time zone identifier for the department (e.g., "America/New_York"). Chosen for its global standard and flexibility in representing time across different regions.
+  deptHeadEmployeeId String? // Optional reference to an employee ID representing the head of the department                       // Reference to an employee ID for tracking the department head
+
+  employees Employee[]
+
+  createdAt DateTime @default(now()) // Records when the department was created
+  updatedAt DateTime @updatedAt // Records the last time the department was updated
+
+  @@map("departments")
+}
+
+model Project {
+  id          String    @id @default(auto()) @map("_id") @db.ObjectId
+  name        String
+  description String?
+  startDate   DateTime?
+  endDate     DateTime?
+
+  employeeProjects EmployeeProject[] // This field will track all employees associated with the project
+
+  createdAt DateTime @default(now()) // Records when the project was created
+  updatedAt DateTime @updatedAt // Records the last time the project was updated
+
+  @@map("projects")
+}
+
+model EmployeeProject {
+  id        String                @id @default(auto()) @map("_id") @db.ObjectId
+  role      ProjectRole // Enum to specify the employee's role in the project (e.g., "DEVELOPER", "SCRUM_MASTER")
+  status    EmployeeProjectStatus @default(ACTIVE) // Enum to track if the employee is "ACTIVE", "PAUSED", or "LEFT" the project
+  startDate DateTime? // When the employee joined the project
+  endDate   DateTime? // When the employee completed their involvement in the project
+  feedback  String? // Optional feedback or comments on the employee's performance in the project
+
+  pauseIntervals PauseInterval[] // Array of pause intervals, each with a start and end date
+
+  employeeId String   @db.ObjectId
+  employee   Employee @relation(fields: [employeeId], references: [id], onDelete: Cascade) // Cascade delete if the employee is deleted
+
+  projectId String  @db.ObjectId
+  project   Project @relation(fields: [projectId], references: [id], onDelete: Cascade) // Cascade delete if the project is deleted
+
+  createdAt DateTime @default(now()) // Records when the employee-project assignment was created
+  updatedAt DateTime @updatedAt // Records the last time the employee-project assignment was updated
+
+  @@index([employeeId]) // Adding an index on employeeId to optimize queries involving employee lookups
+  @@index([projectId]) // Adding an index on projectId to optimize queries involving project lookups
+  @@map("employee_projects")
+}
+
+model Attendance {
+  id           String           @id @default(auto()) @map("_id") @db.ObjectId
+  date         DateTime // Date of the attendance record
+  status       AttendanceStatus // Enum to indicate attendance status: PRESENT, ABSENT, ON_LEAVE
+  checkInTime  DateTime? // Optional, for employees who check in
+  checkOutTime DateTime? // Optional, for employees who check out
+
+  employeeId String   @db.ObjectId
+  employee   Employee @relation(fields: [employeeId], references: [id], onDelete: Cascade) // Cascade delete if the employee is deleted
+
+  createdAt DateTime @default(now()) // Records when the attendance record was created
+  updatedAt DateTime @updatedAt // Records the last time the attendance record was updated
+
+  @@index([employeeId]) // Adding an index on employeeId to optimize queries involving employee lookups
+  @@map("attendances")
+}
+
+model AttendanceSummary {
+  id          String @id @default(auto()) @map("_id") @db.ObjectId
+  employeeId  String @db.ObjectId
+  month       Int // The month for which the summary is recorded (e.g., 1 for January)
+  year        Int // The year for which the summary is recorded (e.g., 2024)
+  presentDays Int // Number of days employee was present in that month
+  absentDays  Int // Number of days employee was absent in that month
+  leaveDays   Int // Number of days employee was on approved leave
+
+  employee Employee @relation(fields: [employeeId], references: [id], onDelete: Cascade)
+
+  createdAt DateTime @default(now()) // Records when the attendance summary was created
+  updatedAt DateTime @updatedAt // Records the last time the attendance summary was updated
+
+  @@index([employeeId, month, year]) // Adding a composite index for efficiently querying by employee, month, and year
+  @@index([month, year]) // Adding a composite index for queries filtering by month and year
+  @@map("attendance_summaries")
+}
+
+model PauseInterval {
+  id        String    @id @default(auto()) @map("_id") @db.ObjectId
+  startDate DateTime // Start of the pause period
+  endDate   DateTime? // End of the pause period (optional if ongoing)
+
+  employeeProjectId String?          @db.ObjectId
+  EmployeeProject   EmployeeProject? @relation(fields: [employeeProjectId], references: [id], onDelete: Cascade)
+
+  createdAt DateTime @default(now()) // Records when the pause interval was created
+  updatedAt DateTime @updatedAt // Records the last time the pause interval was updated
+
+  @@index([employeeProjectId]) // Adding an index on employeeProjectId to optimize queries involving pause intervals used by an employee in a project
+  @@map("pause_intervals")
+}
+
+model LearningPath {
+  id          String  @id @default(auto()) @map("_id") @db.ObjectId
+  name        String // Name of the learning path (e.g., "Full Stack Developer Learning Path")
+  description String? // A brief description of what the path covers
+
+  learningModules LearningModule[] // List of modules/courses in the learning path
+
+  employeeLearningPathProgress EmployeeLearningPathProgress[] // Tracking progress for all employees following this path
+
+  createdAt DateTime @default(now()) // Records when the learning path was created
+  updatedAt DateTime @updatedAt // Records the last time the learning path was updated
+
+  @@map("learning_paths")
+}
+
+model LearningModule {
+  id            String  @id @default(auto()) @map("_id") @db.ObjectId
+  title         String // Title of the learning module
+  contentUrl    String? // Link to the module content (e.g., video, document, or quiz)
+  estimatedTime Int? // Estimated time to complete the module (in minutes)
+
+  learningPathId String       @db.ObjectId // Link to the LearningPath that this module belongs to
+  learningPath   LearningPath @relation(fields: [learningPathId], references: [id], onDelete: Cascade)
+
+  moduleProgress ModuleProgress[] // Tracking module progress for all employees
+
+  createdAt DateTime @default(now()) // Records when the learning module was created
+  updatedAt DateTime @updatedAt // Records the last time the learning module was updated
+
+  @@index([learningPathId]) // Adding an index on learningPathId to optimize queries involving module lookups by learning path
+  @@map("learning_modules")
+}
+
+model EmployeeLearningPathProgress {
+  id               String         @id @default(auto()) @map("_id") @db.ObjectId
+  completionStatus LearningStatus @default(IN_PROGRESS) // Enum: NOT_STARTED, IN_PROGRESS, COMPLETED
+
+  employeeId String   @unique @db.ObjectId // Foreign key pointing to Employee
+  employee   Employee @relation(fields: [employeeId], references: [id], onDelete: Cascade)
+
+  learningPathId String       @db.ObjectId
+  learningPath   LearningPath @relation(fields: [learningPathId], references: [id], onDelete: Cascade)
+
+  moduleProgress ModuleProgress[] // Tracking individual module progress within this path
+
+  createdAt DateTime @default(now()) // Records when the employee learning path progress was created
+  updatedAt DateTime @updatedAt // Records the last time the employee learning path progress was updated
+
+  @@map("employee_learning_path_progress")
+}
+
+model ModuleProgress {
+  id               String         @id @default(auto()) @map("_id") @db.ObjectId
+  completionStatus LearningStatus @default(NOT_STARTED) // Enum: NOT_STARTED, IN_PROGRESS, COMPLETED
+  startDate        DateTime? // The date the module was started
+  completionDate   DateTime? // The date the module was completed
+
+  learningModuleId String         @db.ObjectId
+  learningModule   LearningModule @relation(fields: [learningModuleId], references: [id], onDelete: Cascade)
+
+  employeeLearningPathProgressId String                       @db.ObjectId
+  employeeLearningPathProgress   EmployeeLearningPathProgress @relation(fields: [employeeLearningPathProgressId], references: [id], onDelete: Cascade)
+
+  createdAt DateTime @default(now()) // Records when the module progress was created
+  updatedAt DateTime @updatedAt // Records the last time the module progress was updated
+
+  @@index([learningModuleId]) // Adding an index on learningModuleId to optimize queries involving module lookups
+  @@map("module_progress")
+}
+
+// Enums
+enum Role {
+  EMPLOYEE
+  INTERN
+  HR_INTERN
+  HR_EMPLOYEE
+  HR_MANAGER
+  MANAGER
+  ADMIN
+}
+
+enum Status {
+  ACTIVE
+  INACTIVE
+  ON_LEAVE
+}
+
+enum ProjectStatus {
+  ACTIVE
+  COMPLETED
+  PLANNED
+}
+
+enum ProjectRole {
+  DEVELOPER
+  SCRUM_MASTER
+  UI_UX_DESIGNER
+  BUSINESS_ANALYST
+  PROJECT_MANAGER
+  QUALITY_ASSURANCE
+  TECHNICAL_LEAD
+}
+
+enum EmployeeProjectStatus {
+  ACTIVE
+  PAUSED
+  LEFT
+}
+
+enum AttendanceStatus {
+  PRESENT
+  ABSENT
+  ON_LEAVE
+}
+
+enum LearningStatus {
+  NOT_STARTED
+  IN_PROGRESS
+  COMPLETED
+}
+
+// Additional Note: We could extend these enums and models to define relations, validations, and other aspects to complete the HRMS as needed.

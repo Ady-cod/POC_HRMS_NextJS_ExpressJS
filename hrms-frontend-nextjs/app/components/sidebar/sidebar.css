@@ -1,0 +1,8 @@
+.sidebar{
+    height: 80vh;
+}
+.sidebaritems li{
+    padding: 15px;
+    font-weight: bold;
+    font-family: Verdana, Geneva, Tahoma, sans-serif;
+}

@@ -1,14 +1,5 @@
-"use client";
-import React, { useState } from 'react';
-import NavBar from '../components/navbar/navbar';
-import SideBar from '../components/sidebar/sidebar';
-
-const Page = () => {
-    const [isSideBarOpen, setIsSideBarOpen] = useState<boolean>(true);
-
-    const toggleSideBar = () => {
-        setIsSideBarOpen(!isSideBarOpen);
-    };
+import React from 'react'
+import NavBar from '../components/navBar/navBar'
 
     return (
         <div>

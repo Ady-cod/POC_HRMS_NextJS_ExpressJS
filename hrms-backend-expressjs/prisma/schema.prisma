@@ -16,14 +16,14 @@ datasource db {
 model Employee {
   id                  String              @id @default(auto()) @map("_id") @db.ObjectId // Using `@map("_id")` to map the id field to MongoDB's default `_id` field for ObjectId. This ensures compatibility with MongoDB conventions, which expect a unique `_id` field as the primary identifier.
   firstName           String
-  lastName            String
-  email               String              @unique
-  inductionCompleted  Boolean             @default(false) // Indicates whether the employee has completed the induction process
+  lastName            String?
+  email               String?              @unique
+  inductionCompleted  Boolean?             @default(false) // Indicates whether the employee has completed the induction process
   phoneNumber         String?
   profilePhotoUrl     String? // Optional URL for the employee's profile photo
-  timezone            String // IANA time zone identifier (e.g., "America/New_York"). Chosen for its global standard and flexibility in representing time across different regions.
-  role                Role // Enum representing the employee role (e.g., "EMPLOYEE", "INTERN", "MANAGER")
-  status              Status              @default(ACTIVE) // Enum representing the employee status (e.g., "ACTIVE", "INACTIVE", "ON_LEAVE")
+  timezone            String? // IANA time zone identifier (e.g., "America/New_York"). Chosen for its global standard and flexibility in representing time across different regions.
+  role                Role? // Enum representing the employee role (e.g., "EMPLOYEE", "INTERN", "MANAGER")
+  status              Status?              @default(ACTIVE) // Enum representing the employee status (e.g., "ACTIVE", "INACTIVE", "ON_LEAVE")
   employeeProjects    EmployeeProject[]
   attendanceRecords   Attendance[] // Link to the Attendance model for tracking attendance
   attendanceSummaries AttendanceSummary[] // Link to the AttendanceSummary model for aggregated attendance data
@@ -33,8 +33,8 @@ model Employee {
 
   EmployeeLearningPathProgress EmployeeLearningPathProgress? // One-to-one relationship with EmployeeLearningPathProgress
 
-  createdAt DateTime @default(now()) // Records when the employee record was created
-  updatedAt DateTime @updatedAt // Records the last time the employee record was updated
+  createdAt DateTime? @default(now()) // Records when the employee record was created
+  updatedAt DateTime? @updatedAt // Records the last time the employee record was updated
 
   @@index([departmentId]) // Adding an index on departmentId to make queries that filter by department faster
   @@map("employees")
@@ -149,12 +149,12 @@ model LearningPath {
   name        String // Name of the learning path (e.g., "Full Stack Developer Learning Path")
   description String? // A brief description of what the path covers
 
-  learningModules LearningModule[] // List of modules/courses in the learning path
+  learningModules LearningModule[] //One to many relation between learning path and learning modules
 
   employeeLearningPathProgress EmployeeLearningPathProgress[] // Tracking progress for all employees following this path
 
-  createdAt DateTime @default(now()) // Records when the learning path was created
-  updatedAt DateTime @updatedAt // Records the last time the learning path was updated
+  createdAt DateTime? @default(now()) // Records when the learning path was created
+  updatedAt DateTime? @updatedAt // Records the last time the learning path was updated
 
   @@map("learning_paths")
 }
@@ -189,8 +189,8 @@ model EmployeeLearningPathProgress {
 
   moduleProgress ModuleProgress[] // Tracking individual module progress within this path
 
-  createdAt DateTime @default(now()) // Records when the employee learning path progress was created
-  updatedAt DateTime @updatedAt // Records the last time the employee learning path progress was updated
+  createdAt DateTime? @default(now()) // Records when the employee learning path progress was created
+  updatedAt DateTime? @updatedAt // Records the last time the employee learning path progress was updated
 
   @@map("employee_learning_path_progress")
 }

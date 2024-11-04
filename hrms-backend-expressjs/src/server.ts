@@ -1,5 +1,7 @@
 import express, { Request, Response } from "express";
 import dotenv from "dotenv";
+import employeeRouter from "./routes/employee";
+import learningPathRouter from "./routes/learningPath";
 
 // Load environment variables from .env file
 dotenv.config();
@@ -16,6 +18,9 @@ app.use(express.urlencoded({ extended: true }));
 app.get("/", (req: Request, res: Response) => {
   res.send("Hello, HRMS Backend with TypeScript!");
 });
+
+app.use("/api/v1/employee" , employeeRouter);
+app.use("/api/v1/learningPaths" , learningPathRouter);
 
 app.listen(PORT, () => {
   console.log(`Server is working in the ${process.env.NODE_ENV} mode`);

@@ -1,12 +1,21 @@
-import React from 'react'
-import NavBar from '../components/NavBar/NavBar'
+"use client";
+import React, { useState } from 'react';
+import NavBar from '../components/navbar/navbar';
+import SideBar from '../components/sidebar/sidebar';
 
-const page = () => {
+const Page = () => {
+    const [isSideBarOpen, setIsSideBarOpen] = useState<boolean>(true);
+
+    const toggleSideBar = () => {
+        setIsSideBarOpen(!isSideBarOpen);
+    };
+
     return (
         <div>
-           <div> <NavBar/> </div>
+            <NavBar isSideBarOpen={isSideBarOpen} toggleSideBar={toggleSideBar} />
+            <SideBar isOpen={isSideBarOpen} />
         </div>
-    )
-}
+    );
+};
 
-export default page
+export default Page;

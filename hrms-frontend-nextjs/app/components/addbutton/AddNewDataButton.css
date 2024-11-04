@@ -1,0 +1,14 @@
+/* src/components/AddNewDataButton.css */
+.add-new-data-button {
+  background-color: #A7AEB4; /* Light gray */
+  border: none;
+  border-radius: 5px;
+  padding: 8px 16px;
+  font-size: 14px;
+  cursor: pointer;
+  margin-left: auto; /* Aligns to the right */
+}
+
+.add-new-data-button:hover {
+  background-color: #c0c0c0; /* Darker gray on hover */
+}

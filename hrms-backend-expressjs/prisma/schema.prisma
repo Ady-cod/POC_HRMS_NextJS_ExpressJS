@@ -31,7 +31,7 @@ model Employee {
   departmentId String?     @db.ObjectId
   department   Department? @relation(fields: [departmentId], references: [id], onDelete: SetNull) // Reference to the Department model will be set to null if the department is deleted
 
-  EmployeeLearningPathProgress EmployeeLearningPathProgress? // One-to-one relationship with EmployeeLearningPathProgress
+  employeeLearningPathProgress EmployeeLearningPathProgress? // One-to-one relationship with EmployeeLearningPathProgress
 
   createdAt DateTime? @default(now()) // Records when the employee record was created
   updatedAt DateTime? @updatedAt // Records the last time the employee record was updated
@@ -170,8 +170,8 @@ model LearningModule {
 
   moduleProgress ModuleProgress[] // Tracking module progress for all employees
 
-  createdAt DateTime @default(now()) // Records when the learning module was created
-  updatedAt DateTime @updatedAt // Records the last time the learning module was updated
+  createdAt DateTime? @default(now()) // Records when the learning module was created
+  updatedAt DateTime? @updatedAt // Records the last time the learning module was updated
 
   @@index([learningPathId]) // Adding an index on learningPathId to optimize queries involving module lookups by learning path
   @@map("learning_modules")

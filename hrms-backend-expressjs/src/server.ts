@@ -20,7 +20,7 @@ app.get("/", (req: Request, res: Response) => {
 });
 
 app.use("/api/v1/employee" , employeeRouter);
-app.use("/api/v1/learningPaths" , learningPathRouter);
+app.use("/api/v1/learningPath" , learningPathRouter);
 
 app.listen(PORT, () => {
   console.log(`Server is working in the ${process.env.NODE_ENV} mode`);

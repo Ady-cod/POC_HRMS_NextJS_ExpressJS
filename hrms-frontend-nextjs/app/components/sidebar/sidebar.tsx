@@ -9,7 +9,7 @@ interface SideBarProps {
 const SideBar = ({ isOpen }:SideBarProps) => {
     return (
         <>
-        <div className={`transition-transform ${isOpen ? 'translate-x-0' : '-translate-x-full'} fixed  left-0 h-full w-72 bg-gray-400 rounded-3xl m-3 p-6 sidebar absolute`}>
+        <div className={`transition-transform ${isOpen ? 'translate-x-0' : '-translate-x-full'} fixed  left-0 h-full w-72 bg-gray-300 rounded-3xl m-3 p-6 sidebar absolute`}>
             
                 <ul className="font-black font-medium sidebaritems">
                     <li>

@@ -1,0 +1,133 @@
+/* src/components/ModalForm.css */
+
+.modal-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(0, 0, 0, 0.5);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 1000;
+}
+
+.modal-content {
+  background: #b1b1b1;
+  padding: 30px;
+  border-radius: 8px;
+  width: 500px;
+  max-width: 90%;
+  position: relative;
+}
+
+.modal-close {
+  position: absolute;
+  top: 15px;
+  right: 15px;
+  background: none;
+  border: none;
+  font-size: 24px;
+  cursor: pointer;
+}
+
+.section-title {
+  font-size: 18px;
+  font-weight: bold;
+  margin-bottom: 10px;
+  color: #333;
+}
+
+.section-subtitle.bold {
+  font-size: 14px;
+  margin-bottom: 5px;
+  color: #333;
+  font-weight: bold;
+}
+
+.modal-form {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+
+.input-group {
+  display: flex;
+  gap: 10px;
+  flex-wrap: wrap;
+}
+
+.input-field {
+  flex: 1;
+  padding: 10px;
+  font-size: 14px;
+  border: 1px solid #d1d5db;
+  border-radius: 4px;
+  background: #fff;
+}
+
+.confirm-password-field {
+  width: 48%; /* Set width to half of the standard input field */
+  padding: 10px;
+  font-size: 14px;
+  border: 1px solid #d1d5db;
+  border-radius: 4px;
+  background: #fff; /* Half of the size of other input fields */
+}
+
+.input-field::placeholder {
+  color: #6b7280;
+}
+
+.date-field::placeholder {
+  color: transparent; /* Hides the placeholder for date fields */
+}
+
+.gender-selection {
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+  font-size: 14px;
+  color: #333;
+}
+
+.gender-selection label {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+}
+
+.terms {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  font-size: 14px;
+  color: #333;
+}
+
+.terms a {
+  color: #1d4ed8;
+  text-decoration: underline;
+}
+
+.submit-button-container {
+  display: flex;
+  justify-content: flex-end;
+}
+
+.submit-button {
+  background-color: #1d4ed8;
+  color: white;
+  padding: 12px 24px;
+  font-size: 16px;
+  font-weight: bold;
+  border: none;
+  border-radius: 20px; /* Adjusted for curve border */
+  cursor: pointer;
+  text-align: center;
+}
+
+.submit-button:hover {
+  background-color: #1e40af;
+}

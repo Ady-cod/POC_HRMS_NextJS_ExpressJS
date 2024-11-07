@@ -81,7 +81,7 @@
 }
 
 .date-field::placeholder {
-  color: transparent; /* Hides the placeholder for date fields */
+   /* Hides the placeholder for date fields */
 }
 
 .gender-selection {

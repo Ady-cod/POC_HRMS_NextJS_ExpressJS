@@ -48,7 +48,7 @@ const ModalForm: React.FC<ModalFormProps> = ({ isOpen, onClose }) => {
                     </div>
                     <div className="input-group">
                         <input type="text" placeholder="Country*" required className="input-field" />
-                        <input type="date" className="input-field date-field" />
+                        <input type="date" placeholder="date of birth" className="input-field date-field" />
                     </div>
                     
                     <div className="input-group gender-selection">

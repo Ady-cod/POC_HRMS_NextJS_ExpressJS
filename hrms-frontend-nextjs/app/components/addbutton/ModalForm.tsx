@@ -163,6 +163,8 @@ const ModalForm: React.FC<ModalFormProps> = ({ isOpen, onClose }) => {
                         <input type="text" placeholder="Country*" required className="input-field" 
                             value={country} onChange={(e) => setCountry(e.target.value)} />
                         {errors.country && <span className="error">{errors.country}</span>}
+                        <input type="date" className="input-field date-field" placeholder="Date of joining"
+                            value={dateOfBirth} onChange={(e) => setDateOfBirth(e.target.value)} />
                     </div>
                     
                     <div className="input-group gender-selection">

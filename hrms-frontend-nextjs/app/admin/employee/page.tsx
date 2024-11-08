@@ -22,9 +22,9 @@ setIsSideBarOpen(!isSideBarOpen)
     return (
         <div>
             {/* Header section with Add New Data button */}
-           
+            <div style={{display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '16px'}}>
                 <AddNewDataButton onClick={handleAddNewDataClick} />
-            
+                </div>
 
             {/* Modal Form for adding new data */}
             <ModalForm isOpen={isModalOpen} onClose={handleCloseModal} />

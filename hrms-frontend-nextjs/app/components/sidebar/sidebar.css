@@ -8,7 +8,7 @@
     font-family: cursive;
 }
 
- a img{
+ .sidebaritems  li a img{
     padding-right: 18px;
 }
 .logout{

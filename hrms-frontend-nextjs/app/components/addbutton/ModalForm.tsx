@@ -32,7 +32,7 @@ const ModalForm: React.FC<ModalFormProps> = ({ isOpen, onClose }) => {
                     </div>
                     <div className="input-group">
                         <input type="text" placeholder="Street" className="input-field" />
-                        <input type="date" className="input-field date-field" />
+                        <input type="date" className="input-field date-field" placeholder="Date"/>
                     </div>
                     <div className="input-group">
                         <input type="text" placeholder="City*" required className="input-field" />

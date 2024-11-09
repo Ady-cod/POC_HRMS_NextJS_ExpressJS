@@ -51,6 +51,7 @@ const ModalForm: React.FC<ModalFormProps> = ({ isOpen, onClose }) => {
                         <input type="date" className="input-field date-field" />
                     </div>
                     
+            
                     <div className="input-group gender-selection">
                         <h4 className="section-subtitle bold">Please select your gender identity:</h4>
                         <label><input type="radio" name="gender" value="man" /> Man</label>

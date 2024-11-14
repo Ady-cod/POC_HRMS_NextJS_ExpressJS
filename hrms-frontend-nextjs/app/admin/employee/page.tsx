@@ -7,6 +7,7 @@ import EmployeeTable from '../../components/employeeTable/employeeTable'
 const Page=()=>{
     const [isSideBarOpen,setIsSideBarOpen] = useState<boolean>(true)
     const [isModalOpen, setIsModalOpen] = useState(false);
+    const [submittedData,setsubmittedData] = useState(null)
 
     const toggleSideBar=()=>{
 setIsSideBarOpen(!isSideBarOpen)
@@ -19,6 +20,10 @@ setIsSideBarOpen(!isSideBarOpen)
         setIsModalOpen(false);
     };
 
+    const handleFormData=(data:any)=>{
+    setsubmittedData(data)
+    }
+
 
     return (
         <div>
@@ -28,10 +33,12 @@ setIsSideBarOpen(!isSideBarOpen)
                 </div>
 
             {/* Modal Form for adding new data */}
-            <ModalForm isOpen={isModalOpen} onClose={handleCloseModal} />
+            <ModalForm isOpen={isModalOpen} onClose={handleCloseModal} onSubmit={handleFormData} />
             
             {/* Other content like your table goes here */}
-            <EmployeeTable/>
+            
+                <EmployeeTable />
+            
               
             
         

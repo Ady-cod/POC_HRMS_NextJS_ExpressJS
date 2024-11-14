@@ -1,11 +1,10 @@
 // app/layout.tsx
 "use client";
-import React, { useState } from 'react';
-import NavBar from './components/navbar/navbar';
-import SideBar from './components/sidebar/sidebar';
-import Footer from './components/footer/footer';
-import './globals.css';
-
+import React, { useState } from "react";
+import NavBar from "./components/navbar/navbar";
+import SideBar from "./components/sidebar/sidebar";
+import Footer from "./components/footer/footer";
+import "./globals.css";
 
 export default function RootLayout({
   children,
@@ -20,16 +19,17 @@ export default function RootLayout({
 
   return (
     <html lang="en">
-      <body className="min-h-screen flex flex-col">
-        <NavBar isSideBarOpen={isSideBarOpen} toggleSideBar={toggleSideBar} />
-        <div className="flex flex-grow">
-          <SideBar isOpen={isSideBarOpen} />
-
-          <main className="flex-grow p-4">
-            {children}
-          </main>
+      <body>
+        <div className="flex flex-col h-dvh">
+          <NavBar isSideBarOpen={isSideBarOpen} toggleSideBar={toggleSideBar} />
+          <section className="flex flex-col justify-between h-dvh">
+            <section className="flex flex-col items-center justify-center sm:flex-row">
+              <SideBar isOpen={isSideBarOpen} />
+              <main className="flex-grow p-4 mb-4">{children}</main>
+            </section>
+            <Footer />
+          </section>
         </div>
-        <Footer />
       </body>
     </html>
   );

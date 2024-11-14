@@ -1,11 +1,15 @@
-import React from 'react'
+import React from "react";
 
 const page = () => {
-    return (
-        <div>
-            HR page
-        </div>
-    )
-}
+  return (
+    <>
+      <header className="mt-12 bg-gray-300">
+        <h1 className="text-center text-5xl font-bold">
+          HR page in progress ...
+        </h1>
+      </header>
+    </>
+  );
+};
 
-export default page
+export default page;

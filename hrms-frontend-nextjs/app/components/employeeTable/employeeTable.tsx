@@ -1,65 +1,3 @@
-// // // src/components/TargetComponent.tsx
-// // import React from 'react';
-
-// // interface TargetComponentProps {
-// //     data: {
-// //         email: string;
-// //         password: string;
-// //         confirmPassword: string;
-// //         employeeName: string;
-// //         phoneNumber: string;
-// //         street: string;
-// //         city: string;
-// //         country: string;
-// //         dateOfBirth: string;
-// //         dateOfJoining: string;
-// //         department: string;
-// //         gender: string;
-// //         privacyPolicy: boolean;
-// //         rulesAgreement: boolean;
-// //     };
-// // }
-
-// // const TargetComponent: React.FC<TargetComponentProps> = ({ data }) => {
-// //     return (
-// //         <div>
-
-// //         </div>
-
-// //     );
-// // };
-
-// // export default TargetComponent;
-// import {Table, TableHeader, TableColumn, TableBody, TableRow, TableCell, getKeyValue} from "@nextui-org/table";
-// import React from 'react'
-// const rows = [];
-
-// const columns = [];
-
-// export default function EmployeeTable() {
-//   return (
-//       <>
-//     <Table aria-label="Example table with dynamic content">
-//       <TableHeader>
-//         {columns.map((column) =>
-//           <TableColumn key={column.key}>{column.label}</TableColumn>
-//         )}
-//       </TableHeader>
-//       <TableBody>
-//         {rows.map((row) =>
-//           <TableRow key={row.key}>
-//             {(columnKey) => <TableCell>{getKeyValue(row, columnKey)}</TableCell>}
-//           </TableRow>
-//         )}
-//       </TableBody>
-//     </Table>
-//     <div>
-//         ghujkofk
-//     </div>
-//     </>
-//   );
-// }
-
 import React,{useState,useEffect} from 'react'
 import DataTable from 'react-data-table-component';
 
@@ -133,4 +71,4 @@ const employeeTable = () => {
     )
 }
 
-export default employeeTable
+export default employeeTable;

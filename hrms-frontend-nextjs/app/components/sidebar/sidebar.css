@@ -1,10 +1,9 @@
 .sidebar{
-    height: 70vh;
     transition: transform 0.6s ease-in-out;
 }
 .sidebaritems li{
-    padding: 15px;
-    font-size: 18px;
+    padding: 10px;
+    font-size: 15px;
     font-family: cursive;
 }
 

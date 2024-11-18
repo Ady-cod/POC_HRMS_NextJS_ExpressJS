@@ -10,6 +10,9 @@
   },
   "dependencies": {
     "@nextui-org/date-input": "^2.1.4",
+    "@nextui-org/react": "^2.4.8",
+    "DatePicker": "^2.0.0",
+    "from": "^0.1.7",
     "next": "14.2.15",
     "normalize.css": "^8.0.1",
     "react": "^18",

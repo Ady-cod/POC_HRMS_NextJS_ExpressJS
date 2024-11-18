@@ -2,7 +2,7 @@
 "use client";
 import React, { useState } from "react";
 import NavBar from "./components/Navbar/Navbar";
-import SideBar from "./components/Sidebar/Sidebar";
+import SideBar from "./components/SidebarMenu/Sidebar";
 import Footer from "./components/Footer/Footer";
 import "./globals.css";
 

@@ -2,7 +2,7 @@ import React,{useState,useEffect} from 'react'
 import DataTable from 'react-data-table-component';
 
 
-const employeeTable = () => {
+const EmployeeTable = () => {
     const [employee,setEmployee]= useState([])
 
     useEffect(() => {
@@ -71,4 +71,4 @@ const employeeTable = () => {
     )
 }
 
-export default employeeTable;
+export default EmployeeTable;

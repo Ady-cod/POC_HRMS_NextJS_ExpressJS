@@ -1,16 +1,16 @@
 "use client"
-import React,{useState} from 'react'
-import AddNewDataButton from '../../components/addbutton/AddNewDataButton';
-import ModalForm from '../../components/addbutton/ModalForm';
-import EmployeeTable from '../../components/employeeTable/employeeTable'
+import React,{useState} from 'react';
+import AddNewDataButton from '../../components/AddButton/AddNewDataButton';
+import ModalForm from '../../components/AddButton/ModalForm';
+import EmployeeTable from '../../components/EmployeeTable/EmployeeTable';
 
-const Page=()=>{
+const EmployeePage=()=>{
     const [isSideBarOpen,setIsSideBarOpen] = useState<boolean>(true)
     const [isModalOpen, setIsModalOpen] = useState(false);
     const [submittedData,setsubmittedData] = useState(null)
 
     const toggleSideBar=()=>{
-setIsSideBarOpen(!isSideBarOpen)
+    setIsSideBarOpen(!isSideBarOpen)
     }
      // Open and close handlers for the modal
      const handleAddNewDataClick = () => {
@@ -47,4 +47,4 @@ setIsSideBarOpen(!isSideBarOpen)
     );
 };
 
-export default Page;
+export default EmployeePage;

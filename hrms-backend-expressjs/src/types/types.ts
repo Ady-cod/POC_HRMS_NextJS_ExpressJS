@@ -55,7 +55,7 @@ export interface CreateEmployeePrismaData {
   phoneNumber: string | null;
   birthDate: string | null;
   dateOfJoining: string | null;
-  gender: string | null;
+  gender: EmployeeGender | null;
   inductionCompleted: boolean;
   profilePhotoUrl: string | null;
   timezone: string | null;

@@ -3,6 +3,7 @@ import { Request, Response } from "express";
 import {
   EmployeeRole,
   EmployeeStatus,
+  EmployeeGender,
   CreateEmployeeInput,
   CreateEmployeePrismaData,
 } from "../types/types";
@@ -71,7 +72,7 @@ export const createEmployee = async (req: Request, res: Response): Promise<void>
       phoneNumber: phoneNumber || null,
       birthDate: birthDate || null,
       dateOfJoining: dateOfJoining || null,
-      gender: gender || null,
+      gender: gender || EmployeeGender.OTHER,
       inductionCompleted: inductionCompleted ?? false,
       profilePhotoUrl: profilePhotoUrl || null,
       timezone: timezone || null,

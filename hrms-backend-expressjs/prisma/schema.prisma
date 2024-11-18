@@ -15,7 +15,7 @@ datasource db {
 
 model Employee {
   id                  String              @id @default(auto()) @map("_id") @db.ObjectId // Using `@map("_id")` to map the id field to MongoDB's default `_id` field for ObjectId. This ensures compatibility with MongoDB conventions, which expect a unique `_id` field as the primary identifier.
-  fullName            String
+  fullName            String?
   email               String?              @unique
   password            String?               // Storing hashed passwords for security
   phoneNumber         String?

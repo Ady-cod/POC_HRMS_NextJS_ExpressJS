@@ -1,7 +1,7 @@
 // app/layout.tsx
 "use client";
 import React, { useState } from "react";
-import NavBar from "./components/Navbar/Navbar";
+import NavBar from "./components/NavbarSection/Navbar";
 import SideBar from "./components/SidebarMenu/Sidebar";
 import Footer from "./components/Footer/FooterSection";
 import "./globals.css";

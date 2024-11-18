@@ -2,6 +2,7 @@
 import React,{useState} from 'react'
 import AddNewDataButton from '../../components/addbutton/AddNewDataButton';
 import ModalForm from '../../components/addbutton/ModalForm';
+import EmployeeTable from '../../components/employeeTable/employeeTable'
 
 const Page=()=>{
     const [isSideBarOpen,setIsSideBarOpen] = useState<boolean>(true)
@@ -30,7 +31,8 @@ setIsSideBarOpen(!isSideBarOpen)
             <ModalForm isOpen={isModalOpen} onClose={handleCloseModal} />
             
             {/* Other content like your table goes here */}
-
+            <EmployeeTable/>
+              
             
         
 

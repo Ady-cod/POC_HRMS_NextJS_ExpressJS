@@ -17,8 +17,11 @@
   background: #b1b1b1;
   padding: 30px;
   border-radius: 8px;
-  width: 500px;
-  max-width: 90%;
+  width:auto;
+  /* max-width: 450px; */
+  margin: 0 35px;
+  max-height: 90dvh;
+  overflow-y: auto;
   position: relative;
 }
 
@@ -78,10 +81,6 @@
 
 .input-field::placeholder {
   color: #6b7280;
-}
-
-.date-field::placeholder {
-   /* Hides the placeholder for date fields */
 }
 
 .gender-selection {

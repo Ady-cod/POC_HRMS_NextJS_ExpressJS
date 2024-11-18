@@ -3,11 +3,27 @@
 
 import React, { useState } from 'react';
 import './ModalForm.css';
-
+import {DatePicker} from "@nextui-org/react";
 interface ModalFormProps {
-    isOpen: boolean;
-    onClose: () => void;
+isOpen: boolean;
+onClose: () => void;
 }
+
+interface CalendarInputState {
+isOpen: boolean;
+isInteracting: boolean;
+}
+
+interface InputRefs {
+birthDate: React.RefObject<HTMLInputElement>;
+joinDate: React.RefObject<HTMLInputElement>;
+}
+
+type InputRefKey = keyof InputRefs;
+
+type CalendarState = {
+    [key in InputRefKey]: CalendarInputState;
+};
 
 const ModalForm: React.FC<ModalFormProps> = ({ isOpen, onClose }) => {
     const [email, setEmail] = useState('');
@@ -19,6 +35,7 @@ const ModalForm: React.FC<ModalFormProps> = ({ isOpen, onClose }) => {
     const [city, setCity] = useState('');
     const [country, setCountry] = useState('');
     const [dateOfBirth, setDateOfBirth] = useState('');
+    const [dateOfjoining, setDateOfJoining] = useState('');
     const [department, setDepartment] = useState('');
     const [gender, setGender] = useState('');
     const [privacyPolicy, setPrivacyPolicy] = useState(false);
@@ -80,6 +97,7 @@ const ModalForm: React.FC<ModalFormProps> = ({ isOpen, onClose }) => {
                 city,
                 country,
                 dateOfBirth,
+                dateOfjoining,
                 department,
                 gender,
                 privacyPolicy,
@@ -98,6 +116,7 @@ const ModalForm: React.FC<ModalFormProps> = ({ isOpen, onClose }) => {
             setCity('');
             setCountry('');
             setDateOfBirth('');
+            setDateOfJoining('');
             setDepartment('');
             setGender('');
             setPrivacyPolicy(false);
@@ -140,9 +159,11 @@ const ModalForm: React.FC<ModalFormProps> = ({ isOpen, onClose }) => {
                     <div className="input-group">
                         <input type="text" placeholder="Street" className="input-field" 
                             value={street} onChange={(e) => setStreet(e.target.value)} />
-                        
-                        <input type="date" className="input-field date-field" placeholder="Date of Birth"
-                            value={dateOfBirth} onChange={(e) => setDateOfBirth(e.target.value)} />
+                        {/* date of birth */}
+                        {/* <label>date of birth</label> */}
+                        {/* <input type="date" className="input-field date-field" placeholder="Date of Birth" */}
+                            {/* value={dateOfBirth} onChange={(e) => setDateOfBirth(e.target.value)} /> */}
+                            <DatePicker label="Birth date" className="max-w-[284px]" />
                     </div>
                     <div className="input-group">
                         <input type="text" placeholder="City*" required className="input-field" 
@@ -163,8 +184,9 @@ const ModalForm: React.FC<ModalFormProps> = ({ isOpen, onClose }) => {
                         <input type="text" placeholder="Country*" required className="input-field" 
                             value={country} onChange={(e) => setCountry(e.target.value)} />
                         {errors.country && <span className="error">{errors.country}</span>}
+                        {/* date of joining */}
                         <input type="date" className="input-field date-field" placeholder="Date of joining"
-                            value={dateOfBirth} onChange={(e) => setDateOfBirth(e.target.value)} />
+                            value={dateOfjoining} onChange={(e) => setDateOfJoining(e.target.value)} />
                     </div>
                     
                     <div className="input-group gender-selection">

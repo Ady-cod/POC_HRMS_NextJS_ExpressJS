@@ -26,10 +26,9 @@ type CalendarState = {
 };
 
 const ModalForm: React.FC<ModalFormProps> = ({ isOpen, onClose }) => {
-  if (!isOpen) return null;
 
   // State object to track open/interaction status for each date input
-  const [calendarState, setCalendarState] = useState <CalendarState> ({
+  const [calendarState, setCalendarState] = useState<CalendarState>({
     birthDate: { isOpen: false, isInteracting: false },
     joinDate: { isOpen: false, isInteracting: false },
   });
@@ -43,15 +42,15 @@ const ModalForm: React.FC<ModalFormProps> = ({ isOpen, onClose }) => {
   useEffect(() => {
     const handleCalendarInteraction = (event: MouseEvent) => {
       // Loop through each input to detect if interaction is within one of the calendar popups
-        Object.keys(inputRefs).forEach((key: string) => {
-          const inputRefKey = key as InputRefKey;
+      Object.keys(inputRefs).forEach((key: string) => {
+        const inputRefKey = key as InputRefKey;
         if (
           inputRefs[inputRefKey].current &&
           inputRefs[inputRefKey].current!.contains(event.target as Node)
         ) {
           setCalendarState((prevState) => ({
             ...prevState,
-            [key]: {
+            [inputRefKey]: {
               ...prevState[inputRefKey],
               isInteracting: true,
             },
@@ -59,7 +58,7 @@ const ModalForm: React.FC<ModalFormProps> = ({ isOpen, onClose }) => {
           setTimeout(() => {
             setCalendarState((prevState) => ({
               ...prevState,
-              [key]: {
+              [inputRefKey]: {
                 ...prevState[inputRefKey],
                 isInteracting: false,
               },
@@ -74,7 +73,8 @@ const ModalForm: React.FC<ModalFormProps> = ({ isOpen, onClose }) => {
     return () => {
       document.removeEventListener("mousedown", handleCalendarInteraction);
     };
-  }, []);
+          // Safe to omit inputRefs from dependencies because it's stable
+  }, []); // eslint-disable-line react-hooks/exhaustive-deps
 
   const handleFocus = (key: InputRefKey) => {
     setCalendarState((prevState) => ({
@@ -90,15 +90,17 @@ const ModalForm: React.FC<ModalFormProps> = ({ isOpen, onClose }) => {
         [key]: { ...prevState[key], isOpen: false },
       }));
     }
-    };
+  };
 
-    const handleHoverCalendar = (key: InputRefKey, isOpen: boolean) => {
-      setCalendarState((prevState) => ({
-        ...prevState,
-        [key]: { ...prevState[key], isOpen },
-      }));
-    };
-
+  const handleHover = (key: InputRefKey, isOpen: boolean) => {
+    setCalendarState((prevState) => ({
+      ...prevState,
+      [key]: { ...prevState[key], isOpen },
+    }));
+  };
+  
+  // Ensure all hooks run consistently before conditionally returning null.
+  if (!isOpen) return null;
 
   return (
     <div className="modal-overlay">
@@ -153,8 +155,8 @@ const ModalForm: React.FC<ModalFormProps> = ({ isOpen, onClose }) => {
               className="input-field date-field"
               onFocus={() => handleFocus("birthDate")}
               onBlur={() => handleBlur("birthDate")}
-              onMouseEnter={() => handleHoverCalendar("birthDate", true)}
-              onMouseLeave={() => handleHoverCalendar("birthDate", false)}
+              onMouseEnter={() => handleHover("birthDate", true)}
+              onMouseLeave={() => handleHover("birthDate", false)}
             />
           </div>
           <div className="input-group">
@@ -188,8 +190,8 @@ const ModalForm: React.FC<ModalFormProps> = ({ isOpen, onClose }) => {
               className="input-field date-field"
               onFocus={() => handleFocus("joinDate")}
               onBlur={() => handleBlur("joinDate")}
-            //   onMouseEnter={() => handleHoverCalendar("joinDate", true)}
-            //   onMouseLeave={() => handleHoverCalendar("joinDate", false)}
+              // onMouseEnter={() => handleHover("joinDate", true)}
+              // onMouseLeave={() => handleHover("joinDate", false)}
             />
           </div>
 

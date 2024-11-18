@@ -16,13 +16,27 @@ export enum EmployeeStatus {
   ON_LEAVE = "ON_LEAVE",
 }
 
+// Define EmployeeGender enum
+export enum
+  EmployeeGender {
+  MALE = "MALE",
+  FEMALE = "FEMALE",
+  OTHER = "OTHER",
+}
+
 // Interface for creating a new employee. Define the structure of a request body for creating a new employee
 export interface CreateEmployeeInput {
-  firstName: string;
-  lastName?: string;
+  fullName: string;
   email: string;
-  inductionCompleted?: boolean;
+  password?: string;
+  country?: string;
+  city?: string;
+  streetAddress?: string;
   phoneNumber?: string;
+  birthDate?: string;
+  dateOfJoining?: string;
+  gender?: EmployeeGender;
+  inductionCompleted?: boolean;
   profilePhotoUrl?: string;
   timezone?: string;
   role?: EmployeeRole;
@@ -32,11 +46,17 @@ export interface CreateEmployeeInput {
 
 // Interface for the data object to be passed to Prisma for creating a new employee
 export interface CreateEmployeePrismaData {
-  firstName: string;
-  lastName: string | null;
+  fullName: string;
   email: string;
-  inductionCompleted: boolean;
+  password: string | null;
+  country: string | null;
+  city: string | null;
+  streetAddress: string | null;
   phoneNumber: string | null;
+  birthDate: string | null;
+  dateOfJoining: string | null;
+  gender: EmployeeGender | null;
+  inductionCompleted: boolean;
   profilePhotoUrl: string | null;
   timezone: string | null;
   role: EmployeeRole;

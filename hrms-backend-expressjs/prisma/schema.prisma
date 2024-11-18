@@ -15,11 +15,17 @@ datasource db {
 
 model Employee {
   id                  String              @id @default(auto()) @map("_id") @db.ObjectId // Using `@map("_id")` to map the id field to MongoDB's default `_id` field for ObjectId. This ensures compatibility with MongoDB conventions, which expect a unique `_id` field as the primary identifier.
-  firstName           String
-  lastName            String?
+  fullName            String
   email               String?              @unique
-  inductionCompleted  Boolean?             @default(false) // Indicates whether the employee has completed the induction process
+  password            String?               // Storing hashed passwords for security
   phoneNumber         String?
+  country             String?
+  city                String?
+  streetAddress       String?
+  birthDate           DateTime?
+  dateOfJoining       DateTime?            // Date when the employee joined the company
+  gender              Gender? // Enum representing the employee gender
+  inductionCompleted  Boolean?             @default(false) // Indicates whether the employee has completed the induction process
   profilePhotoUrl     String? // Optional URL for the employee's profile photo
   timezone            String? // IANA time zone identifier (e.g., "America/New_York"). Chosen for its global standard and flexibility in representing time across different regions.
   role                Role? // Enum representing the employee role (e.g., "EMPLOYEE", "INTERN", "MANAGER")
@@ -42,8 +48,8 @@ model Employee {
 
 model Department {
   id                 String  @id @default(auto()) @map("_id") @db.ObjectId
-  name               String  @unique // e.g., "Sales", "Engineering", etc.
-  timezone           String // IANA time zone identifier for the department (e.g., "America/New_York"). Chosen for its global standard and flexibility in representing time across different regions.
+  name               String  @unique // e.g., "HR", "Web Dev", etc.
+  timezone           String? // IANA time zone identifier for the department (e.g., "America/New_York"). Chosen for its global standard and flexibility in representing time across different regions.
   deptHeadEmployeeId String? // Optional reference to an employee ID representing the head of the department                       // Reference to an employee ID for tracking the department head
 
   employees Employee[]
@@ -215,6 +221,13 @@ model ModuleProgress {
 }
 
 // Enums
+
+enum Gender {
+  MALE
+  FEMALE
+  OTHER
+}
+
 enum Role {
   EMPLOYEE
   INTERN

@@ -33,11 +33,17 @@ export const getAllEmployees = async (req: Request, res: Response): Promise<void
 export const createEmployee = async (req: Request, res: Response): Promise<void> => {
   try {
     const {
-      firstName,
-      lastName,
+      fullName,
       email,
-      inductionCompleted,
+      password,
+      country,
+      city,
+      streetAddress,
       phoneNumber,
+      birthDate,
+      dateOfJoining,
+      gender,
+      inductionCompleted,
       profilePhotoUrl,
       timezone,
       role,
@@ -46,21 +52,27 @@ export const createEmployee = async (req: Request, res: Response): Promise<void>
     }: CreateEmployeeInput = req.body;
 
     // console.log("Request Body:", req.body);
-    // console.log("firstName:", firstName);
+    // console.log("fullName:", fullName);
     // console.log("email:", email);
 
-    if (!firstName || !email) {
+    if (!fullName || !email) {
       res.status(400).json({ error: "First name and email are required." });
       return;
     }
 
     // Prepare the data to handle undefined -> default or null conversion for Prisma compatibility
     const newEmployeeData: CreateEmployeePrismaData = {
-      firstName,
-      lastName: lastName || null,
+      fullName,
       email,
-      inductionCompleted: inductionCompleted ?? false,
+      password: password || null,
+      country: country || null,
+      city: city || null,
+      streetAddress: streetAddress || null,
       phoneNumber: phoneNumber || null,
+      birthDate: birthDate || null,
+      dateOfJoining: dateOfJoining || null,
+      gender: gender || null,
+      inductionCompleted: inductionCompleted ?? false,
       profilePhotoUrl: profilePhotoUrl || null,
       timezone: timezone || null,
       role: role || EmployeeRole.EMPLOYEE,

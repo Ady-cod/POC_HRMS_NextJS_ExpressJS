@@ -9,7 +9,7 @@ export const getAllEmployees = async(req : Request , res : Response) => {
         attendanceRecords: true,
         attendanceSummaries: true,
         department: true,
-        employeeLearningPathProgress: true
+        EmployeeLearningPathProgress: true
       },
     });
 

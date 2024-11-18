@@ -64,7 +64,7 @@ const ModalForm: React.FC<ModalFormProps> = ({ isOpen, onClose }) => {
                 isInteracting: false,
               },
             }));
-          }, 300); // Reset after interaction
+          }, 300); // Reset after interaction 
         }
       });
     };

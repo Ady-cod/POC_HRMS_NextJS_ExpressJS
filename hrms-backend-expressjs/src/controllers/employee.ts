@@ -12,11 +12,22 @@ export const getAllEmployees = async (req: Request, res: Response): Promise<void
   try {
     const employees = await prisma.employee.findMany({
       include: {
-        employeeProjects: true,
-        attendanceRecords: true,
-        attendanceSummaries: true,
-        department: true,
-        employeeLearningPathProgress: true,
+        employeeProjects: {
+          select: {
+            project: {
+              select: {
+                id: true,
+                name: true,
+              }
+            }
+          }
+        },
+        department: {
+          select: {
+            id: true,
+            name: true, 
+          }
+        },
       },
     });
 

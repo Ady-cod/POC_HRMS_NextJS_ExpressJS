@@ -49,8 +49,8 @@ const EmployeeTable = () => {
             sortable: true
         },
         {
-            name: 'First Name',
-            selector: row => row.firstName || 'N/A',
+            name: 'Full Name',
+            selector: row => row.fullName || 'N/A',
             sortable: true
         },
         {

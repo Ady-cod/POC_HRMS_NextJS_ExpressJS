@@ -1,7 +1,7 @@
 import React from "react";
 import Link from "next/link";
 import Image from "next/image";
-import "./sidebar.css";
+import "./Sidebar.css";
 
 interface SideBarProps {
   isOpen: boolean;

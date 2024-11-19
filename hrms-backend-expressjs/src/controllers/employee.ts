@@ -1,15 +1,17 @@
 import prisma from "../lib/client";
 import { Request, Response } from "express";
-import {
-  EmployeeRole,
-  EmployeeStatus,
-  EmployeeGender,
-  CreateEmployeeInput,
-  CreateEmployeePrismaData,
-} from "../types/types";
-import { Employee } from "@prisma/client";
+import { Prisma, Employee, Department } from "@prisma/client";
 
-export const getAllEmployees = async (req: Request, res: Response): Promise<void> => {
+import { createEmployeeSchema } from "../schemas/employeeSchema";
+import { z } from "zod";
+
+// Infer type from Zod schema
+type CreateEmployeeInput = z.infer<typeof createEmployeeSchema>;
+
+export const getAllEmployees = async (
+  req: Request,
+  res: Response
+): Promise<void> => {
   try {
     const employees = await prisma.employee.findMany({
       include: {
@@ -28,57 +30,44 @@ export const getAllEmployees = async (req: Request, res: Response): Promise<void
     console.error("Error fetching employees:", error);
     res.status(500).json({ error: "Failed to fetch employees" });
   }
-
 };
 
-export const createEmployee = async (req: Request, res: Response): Promise<void> => {
+const DEMO_MODE = process.env.DEMO_MODE || true; // Set this based on your environment
+
+export const createEmployee = async (
+  req: Request,
+  res: Response
+): Promise<void> => {
   try {
-    const {
-      fullName,
-      email,
-      password,
-      country,
-      city,
-      streetAddress,
-      phoneNumber,
-      birthDate,
-      dateOfJoining,
-      gender,
-      inductionCompleted,
-      profilePhotoUrl,
-      timezone,
-      role,
-      status,
-      departmentId,
-    }: CreateEmployeeInput = req.body;
+    // Validate request body using Zod
+    const validatedData: CreateEmployeeInput = createEmployeeSchema.parse(
+      req.body
+    );
 
-    // console.log("Request Body:", req.body);
-    // console.log("fullName:", fullName);
-    // console.log("email:", email);
+    const { departmentName, ...employeeData } = validatedData;
 
-    if (!fullName || !email) {
-      res.status(400).json({ error: "First name and email are required." });
-      return;
+    // Find or create department
+    let department  = (await prisma.department.findUnique({
+      where: { name: departmentName },
+    })) as Department | null;
+
+    if (!department) {
+      if (DEMO_MODE) {
+        // Create department in demo mode
+        department = await prisma.department.create({
+          data: { name: departmentName },
+        });
+      } else {
+        // Return error in strict mode
+        res.status(400).json({ error: "Department not found." });
+        return;
+      }
     }
 
-    // Prepare the data to handle undefined -> default or null conversion for Prisma compatibility
-    const newEmployeeData: CreateEmployeePrismaData = {
-      fullName,
-      email,
-      password: password || null,
-      country: country || null,
-      city: city || null,
-      streetAddress: streetAddress || null,
-      phoneNumber: phoneNumber || null,
-      birthDate: birthDate || null,
-      dateOfJoining: dateOfJoining || null,
-      gender: gender || EmployeeGender.OTHER,
-      inductionCompleted: inductionCompleted ?? false,
-      profilePhotoUrl: profilePhotoUrl || null,
-      timezone: timezone || null,
-      role: role || EmployeeRole.EMPLOYEE,
-      status: status || EmployeeStatus.ACTIVE,
-      departmentId: departmentId || null,
+    // Prepare the data for Prisma
+    const newEmployeeData: Prisma.EmployeeCreateInput = {
+      ...employeeData,
+      department: { connect: { id: department.id } },
     };
 
     // Create the employee
@@ -88,7 +77,14 @@ export const createEmployee = async (req: Request, res: Response): Promise<void>
 
     res.status(201).json(newEmployee);
   } catch (error) {
-    console.error("Error creating employee:", error);
-    res.status(500).json({ error: "Failed to create employee" });
+    if (error instanceof z.ZodError) {
+      // Handle Zod validation errors
+      res.status(400).json({ errors: error.errors });
+    } else {
+      console.error("Error creating employee:", error);
+      res
+        .status(500)
+        .json({ error: "Internal server error while creating employee" });
+    }
   }
 };

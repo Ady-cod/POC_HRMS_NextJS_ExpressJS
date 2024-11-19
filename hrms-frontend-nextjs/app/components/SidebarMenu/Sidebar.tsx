@@ -1,13 +1,13 @@
 import React from "react";
 import Link from "next/link";
 import Image from "next/image";
-import "./sidebar.css";
+import "./Sidebar.css";
 
 interface SideBarProps {
   isOpen: boolean;
 }
 
-const SideBar = ({ isOpen }: SideBarProps) => {
+const Sidebar = ({ isOpen }: SideBarProps) => {
     
   return (
     <>
@@ -123,4 +123,4 @@ const SideBar = ({ isOpen }: SideBarProps) => {
   );
 };
 
-export default SideBar;
+export default Sidebar;

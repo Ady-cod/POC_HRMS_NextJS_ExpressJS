@@ -4,8 +4,7 @@ import { getAllEmployees } from '@/actions/employee';
 
 
 const EmployeeTable = () => {
-  
-  // const employees = await getAllEmployees();
+    const [employee,setEmployee]= useState([])
 
   const [employees, setEmployees] = useState([]);
 

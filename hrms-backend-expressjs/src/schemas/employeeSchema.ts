@@ -1,6 +1,14 @@
+import { Gender, Role, Status } from "@prisma/client";
 import { z } from "zod";
 import { isValid, parseISO } from "date-fns";
-import { Gender, Role, Status } from "@prisma/client";
+import { parsePhoneNumberFromString } from "libphonenumber-js";
+
+// Helper function to check if a string is a valid phone number
+const isValidPhoneNumber = (phoneNumber: string | null): boolean => {
+  if (!phoneNumber) return true; // Allow null (optional field)
+  const parsedPhoneNumber = parsePhoneNumberFromString(phoneNumber);
+  return parsedPhoneNumber?.isValid() || false;
+};
 
 // Helper function to check if a string is a valid date
 const isValidDate = (dateString: string | null): boolean => {
@@ -16,7 +24,13 @@ export const createEmployeeSchema = z.object({
   fullName: z.string().min(1, "Employee name is required"),
   email: z.string().email("Invalid email address"),
   password: z.string().min(6, "Password must be at least 6 characters"),
-  phoneNumber: z.union([z.string(), z.null()]).optional().default(null), // Add specific patterns if needed
+  phoneNumber: z
+    .union([z.string(), z.null()])
+    .refine(isValidPhoneNumber, {
+      message: "Invalid phone number format",
+    }) // Validate as a phone number
+    .optional()
+    .default(null), 
   country: z.string().min(2, "Country is required"),
   city: z.string().min(2, "City is required"),
   streetAddress: z.union([z.string(), z.null()]).optional().default(null),

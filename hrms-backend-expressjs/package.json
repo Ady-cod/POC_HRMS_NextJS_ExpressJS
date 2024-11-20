@@ -28,6 +28,7 @@
     "date-fns": "^4.1.0",
     "dotenv": "^16.4.5",
     "express": "^4.21.1",
+    "libphonenumber-js": "^1.11.14",
     "zod": "^3.23.8"
   },
   "devDependencies": {

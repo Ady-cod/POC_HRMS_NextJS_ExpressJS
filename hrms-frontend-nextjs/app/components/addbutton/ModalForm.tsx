@@ -120,7 +120,7 @@ const ModalForm: React.FC<ModalFormProps> = ({ isOpen, onClose }) => {
             />
             <input
               type="password"
-              placeholder="Password*"
+              placeholder="Password (min 6 characters)*"
               required
               className="input-field"
             />
@@ -142,7 +142,7 @@ const ModalForm: React.FC<ModalFormProps> = ({ isOpen, onClose }) => {
             />
             <input
               type="text"
-              placeholder="Phone Number"
+              placeholder="Phone number (e.g., +40715632783)"
               className="input-field"
             />
           </div>

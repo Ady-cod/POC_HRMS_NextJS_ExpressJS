@@ -1,12 +1,30 @@
-import prisma from "../lib/client";
 import { Request, Response } from "express";
+
+import prisma from "../lib/client";
 import { Prisma, Employee, Department } from "@prisma/client";
 
 import { createEmployeeSchema } from "../schemas/employeeSchema";
 import { z } from "zod";
 
+import bcrypt from "bcrypt";  
+
 // Infer type from Zod schema
 type CreateEmployeeInput = z.infer<typeof createEmployeeSchema>;
+
+// Define a function to hash passwords
+const hashPassword = async (password: string): Promise<string> => {
+  const saltRounds = 10;
+  const hashedPassword = await bcrypt.hash(password, saltRounds);
+  return hashedPassword;
+};
+
+// Define a function to verify passwords
+const verifyPassword = async (
+  password: string,
+  hashedPassword: string
+): Promise<boolean> => {
+  return bcrypt.compare(password, hashedPassword);
+};
 
 export const getAllEmployees = async (
   req: Request,
@@ -44,7 +62,10 @@ export const createEmployee = async (
       req.body
     );
 
-    const { departmentName, ...employeeData } = validatedData;
+    const { departmentName, password, ...employeeData } = validatedData;
+
+    // Hash the password
+    const hashedPassword = await hashPassword(password);
 
     // Find or create department
     let department  = (await prisma.department.findUnique({
@@ -67,6 +88,7 @@ export const createEmployee = async (
     // Prepare the data for Prisma
     const newEmployeeData: Prisma.EmployeeCreateInput = {
       ...employeeData,
+      password: hashedPassword,
       department: { connect: { id: department.id } },
     };
 
@@ -76,6 +98,7 @@ export const createEmployee = async (
     });
 
     res.status(201).json(newEmployee);
+    
   } catch (error) {
     if (error instanceof z.ZodError) {
       // Handle Zod validation errors

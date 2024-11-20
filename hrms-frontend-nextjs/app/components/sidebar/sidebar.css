@@ -1,0 +1,20 @@
+.sidebar{
+    transition: transform 0.6s ease-in-out;
+}
+.sidebaritems li{
+    padding: 10px;
+    font-size: 15px;
+    font-family: cursive;
+}
+
+ .sidebaritems  li a img{
+    padding-right: 18px;
+}
+.logout{
+    width: 80%;
+    font-size: 18px;
+    font-family: cursive;
+    list-style: none;
+    display: block;
+    border-top: 2px solid black;
+}

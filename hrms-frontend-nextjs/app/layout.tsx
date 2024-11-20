@@ -1,9 +1,9 @@
 // app/layout.tsx
 "use client";
 import React, { useState } from "react";
-import NavBar from "./components/Navbar/Navbar";
+import NavBar from "./components/navbar/navbar";
 import SideBar from "./components/SidebarMenu/Sidebar";
-import Footer from "./components/Footer/Footer";
+import Footer from "./components/footer/footer";
 import "./globals.css";
 
 export default function RootLayout({

@@ -4,18 +4,15 @@ import { getAllEmployees } from '@/actions/employee';
 
 
 const EmployeeTable = () => {
-<<<<<<< HEAD
-  
-  // const employees = await getAllEmployees();
-=======
     const [employee,setEmployee]= useState([])
->>>>>>> main
 
   const [employees, setEmployees] = useState([]);
 
   useEffect(() => {
     async function fetchEmployees() {
       const employees = await getAllEmployees();
+      console.log(employees);
+      
       setEmployees(employees);
     }
     fetchEmployees();

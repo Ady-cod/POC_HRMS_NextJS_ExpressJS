@@ -7,7 +7,7 @@ interface NavBarProps {
     toggleSideBar: () => void;
 }
 
-const NavBar = ({ isSideBarOpen, toggleSideBar }:NavBarProps) => {
+const Navbar = ({ isSideBarOpen, toggleSideBar }:NavBarProps) => {
     return (
         <div className="border border-gray-400 h-20 flex justify-between items-center px-4">
             <div className="flex justify-center">
@@ -41,4 +41,4 @@ const NavBar = ({ isSideBarOpen, toggleSideBar }:NavBarProps) => {
     );
 };
 
-export default NavBar;
+export default Navbar;

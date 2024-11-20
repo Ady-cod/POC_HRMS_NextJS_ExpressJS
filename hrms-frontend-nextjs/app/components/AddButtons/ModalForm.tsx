@@ -5,18 +5,18 @@ import "./ModalForm.css";
 import { useState, useEffect, useRef } from "react";
 
 interface ModalFormProps {
-  isOpen: boolean;
-  onClose: () => void;
+isOpen: boolean;
+onClose: () => void;
 }
 
 interface CalendarInputState {
-  isOpen: boolean;
-  isInteracting: boolean;
+isOpen: boolean;
+isInteracting: boolean;
 }
 
 interface InputRefs {
-  birthDate: React.RefObject<HTMLInputElement>;
-  joinDate: React.RefObject<HTMLInputElement>;
+birthDate: React.RefObject<HTMLInputElement>;
+joinDate: React.RefObject<HTMLInputElement>;
 }
 
 type InputRefKey = keyof InputRefs;
@@ -63,7 +63,7 @@ const ModalForm: React.FC<ModalFormProps> = ({ isOpen, onClose }) => {
                 isInteracting: false,
               },
             }));
-          }, 300); // Reset after interaction
+          }, 300); // Reset after interaction 
         }
       });
     };

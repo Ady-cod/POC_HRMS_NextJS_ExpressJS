@@ -48,3 +48,23 @@ export async function getAllEmployees(): Promise<EmployeeListItem[]> {
     return [];
   }
 }
+
+export async function deleteEmployee(id:string): Promise<{message:string}>{
+  try{
+    const response = await fetch(`http://localhost:5000/api/v1/employee/${id}`,{
+      method:"DELETE",
+    });
+
+    if(!response.ok){
+      const errorResponse = await response.json();
+      const errorMessage = errorResponse.error || "Unknown error occurred";
+
+      throw { status: response.status, message: errorMessage };
+    }
+    return await response.json();
+  }catch(error){
+    console.error("Error deleting employee:", error);
+    throw { status: 500, message: "Internal Server Error while deleting employee." };
+
+  }
+}

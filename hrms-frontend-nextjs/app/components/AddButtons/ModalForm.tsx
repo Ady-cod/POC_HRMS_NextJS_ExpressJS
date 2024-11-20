@@ -120,7 +120,7 @@ const ModalForm: React.FC<ModalFormProps> = ({ isOpen, onClose }) => {
             />
             <input
               type="password"
-              placeholder="Password*"
+              placeholder="Password (min 6 characters)*"
               required
               className="input-field"
             />
@@ -142,7 +142,7 @@ const ModalForm: React.FC<ModalFormProps> = ({ isOpen, onClose }) => {
             />
             <input
               type="text"
-              placeholder="Phone Number"
+              placeholder="Phone number (e.g., +40715632783)"
               className="input-field"
             />
           </div>
@@ -200,13 +200,13 @@ const ModalForm: React.FC<ModalFormProps> = ({ isOpen, onClose }) => {
               Please select your gender identity:
             </h4>
             <label>
-              <input type="radio" name="gender" value="man" /> Man
+              <input type="radio" name="gender" value="MALE" /> Male
             </label>
             <label>
-              <input type="radio" name="gender" value="woman" /> Woman
+              <input type="radio" name="gender" value="FEMALE" /> Female
             </label>
             <label>
-              <input type="radio" name="gender" value="others" /> Others
+              <input type="radio" name="gender" value="OTHER" /> Other
             </label>
           </div>
 

@@ -1,15 +1,35 @@
-import prisma from "../lib/client";
 import { Request, Response } from "express";
-import {
-  EmployeeRole,
-  EmployeeStatus,
-  EmployeeGender,
-  CreateEmployeeInput,
-  CreateEmployeePrismaData,
-} from "../types/types";
-import { Employee } from "@prisma/client";
 
-export const getAllEmployees = async (req: Request, res: Response): Promise<void> => {
+import prisma from "../lib/client";
+import { Prisma, Employee, Department } from "@prisma/client";
+
+import { createEmployeeSchema } from "../schemas/employeeSchema";
+import { z } from "zod";
+
+import bcrypt from "bcrypt";  
+
+// Infer type from Zod schema
+type CreateEmployeeInput = z.infer<typeof createEmployeeSchema>;
+
+// Define a function to hash passwords
+const hashPassword = async (password: string): Promise<string> => {
+  const saltRounds = 10;
+  const hashedPassword = await bcrypt.hash(password, saltRounds);
+  return hashedPassword;
+};
+
+// Define a function to verify passwords
+const verifyPassword = async (
+  password: string,
+  hashedPassword: string
+): Promise<boolean> => {
+  return bcrypt.compare(password, hashedPassword);
+};
+
+export const getAllEmployees = async (
+  req: Request,
+  res: Response
+): Promise<void> => {
   try {
     const employees = await prisma.employee.findMany({
       include: {
@@ -39,57 +59,48 @@ export const getAllEmployees = async (req: Request, res: Response): Promise<void
     console.error("Error fetching employees:", error);
     res.status(500).json({ error: "Failed to fetch employees" });
   }
-
 };
 
-export const createEmployee = async (req: Request, res: Response): Promise<void> => {
+const DEMO_MODE = process.env.DEMO_MODE || true; // Set this based on your environment
+
+export const createEmployee = async (
+  req: Request,
+  res: Response
+): Promise<void> => {
   try {
-    const {
-      fullName,
-      email,
-      password,
-      country,
-      city,
-      streetAddress,
-      phoneNumber,
-      birthDate,
-      dateOfJoining,
-      gender,
-      inductionCompleted,
-      profilePhotoUrl,
-      timezone,
-      role,
-      status,
-      departmentId,
-    }: CreateEmployeeInput = req.body;
+    // Validate request body using Zod
+    const validatedData: CreateEmployeeInput = createEmployeeSchema.parse(
+      req.body
+    );
 
-    // console.log("Request Body:", req.body);
-    // console.log("fullName:", fullName);
-    // console.log("email:", email);
+    const { departmentName, password, ...employeeData } = validatedData;
 
-    if (!fullName || !email) {
-      res.status(400).json({ error: "First name and email are required." });
-      return;
+    // Hash the password
+    const hashedPassword = await hashPassword(password);
+
+    // Find or create department
+    let department = (await prisma.department.findUnique({
+      where: { name: departmentName },
+    })) as Department | null;
+
+    if (!department) {
+      if (DEMO_MODE) {
+        // Create department in demo mode
+        department = await prisma.department.create({
+          data: { name: departmentName },
+        });
+      } else {
+        // Return error in strict mode
+        res.status(400).json({ error: "Department not found." });
+        return;
+      }
     }
 
-    // Prepare the data to handle undefined -> default or null conversion for Prisma compatibility
-    const newEmployeeData: CreateEmployeePrismaData = {
-      fullName,
-      email,
-      password: password || null,
-      country: country || null,
-      city: city || null,
-      streetAddress: streetAddress || null,
-      phoneNumber: phoneNumber || null,
-      birthDate: birthDate || null,
-      dateOfJoining: dateOfJoining || null,
-      gender: gender || EmployeeGender.OTHER,
-      inductionCompleted: inductionCompleted ?? false,
-      profilePhotoUrl: profilePhotoUrl || null,
-      timezone: timezone || null,
-      role: role || EmployeeRole.EMPLOYEE,
-      status: status || EmployeeStatus.ACTIVE,
-      departmentId: departmentId || null,
+    // Prepare the data for Prisma
+    const newEmployeeData: Prisma.EmployeeCreateInput = {
+      ...employeeData,
+      password: hashedPassword,
+      department: { connect: { id: department.id } },
     };
 
     // Create the employee
@@ -99,8 +110,38 @@ export const createEmployee = async (req: Request, res: Response): Promise<void>
 
     res.status(201).json(newEmployee);
   } catch (error) {
-    console.error("Error creating employee:", error);
-    res.status(500).json({ error: "Failed to create employee" });
+    if (error instanceof z.ZodError) {
+      // Handle Zod validation errors
+      res.status(400).json({ errors: error.errors });
+
+    } else if (error instanceof Prisma.PrismaClientKnownRequestError) {
+      // Handle Prisma-specific errors
+      if (error.code === "P2002") {
+        // Unique constraint violation
+        const targetField = error.meta?.target || "unique field"; // Field causing the error (e.g., "email")
+        const message = `A record with this ${targetField} already exists.`;
+        console.error("Prisma Unique Constraint Error:", message);
+        res.status(409).json({ error: message }); // 409 Conflict
+      } else {
+        // General Prisma errors
+        console.error("Prisma Error:", error.message);
+        res
+          .status(500)
+          .json({
+            error: "A database error occurred. Please try again later.",
+          });
+      }
+    } else if (error instanceof Error) {
+      // Handle known JavaScript errors
+      console.error("Error creating employee:", error.message);
+      res.status(500).json({ error: error.message });
+    } else {
+      // Fallback for unknown error types
+      console.error("Unknown error:", error);
+      res
+        .status(500)
+        .json({ error: "An unknown error occurred. Please try again later." });
+    }
   }
 };
 

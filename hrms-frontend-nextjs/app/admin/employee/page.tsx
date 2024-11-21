@@ -45,21 +45,12 @@ const EmployeePage=()=>{
         onSubmit={handleFormData}
       />
 
-<<<<<<<<< Temporary merge branch 1
-      {/* Other content like your table goes here */}
-=========
             {/* Modal Form for adding new data */}
             <ModalForm isOpen={isModalOpen} onClose={handleCloseModal} onSubmit={handleFormData} />
             
             {/* Other content like your table goes here */}
             
                 <EmployeeTable />
-            
-            
-        
->>>>>>>>> Temporary merge branch 2
-
-      <EmployeeTable />
     </div>
   );
 };

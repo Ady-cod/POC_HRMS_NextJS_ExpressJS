@@ -1,24 +1,24 @@
-"use client";
-import React, { useState } from "react";
-import AddNewDataButton from "@/components/addbutton/AddNewDataButton";
-import ModalForm from "@/components/addbutton/ModalForm";
-import EmployeeTable from "@/components/EmployeeTable/EmployeeTable";
+"use client"
+import React,{useState} from 'react';
+import AddNewDataButton from '../../components/AddButtons/AddNewDataButton';
+import ModalForm from '../../components/AddButtons/ModalForm';
+import EmployeeTable from '../../components/EmployeeTables/EmployeeTable';
 
-const EmployeeListPage = () => {
-  const [isSideBarOpen, setIsSideBarOpen] = useState<boolean>(true);
-  const [isModalOpen, setIsModalOpen] = useState(false);
-  const [submittedData, setsubmittedData] = useState(null);
+const EmployeePage=()=>{
+    const [isSideBarOpen,setIsSideBarOpen] = useState<boolean>(true)
+    const [isModalOpen, setIsModalOpen] = useState(false);
+    const [submittedData,setsubmittedData] = useState(null)
 
-  const toggleSideBar = () => {
-    setIsSideBarOpen(!isSideBarOpen);
-  };
-  // Open and close handlers for the modal
-  const handleAddNewDataClick = () => {
-    setIsModalOpen(true);
-  };
-  const handleCloseModal = () => {
-    setIsModalOpen(false);
-  };
+    const toggleSideBar=()=>{
+    setIsSideBarOpen(!isSideBarOpen)
+    }
+     // Open and close handlers for the modal
+     const handleAddNewDataClick = () => {
+        setIsModalOpen(true);
+    };
+    const handleCloseModal = () => {
+        setIsModalOpen(false);
+    };
 
   const handleFormData = (data: any) => {
     setsubmittedData(data);
@@ -45,11 +45,23 @@ const EmployeeListPage = () => {
         onSubmit={handleFormData}
       />
 
+<<<<<<<<< Temporary merge branch 1
       {/* Other content like your table goes here */}
+=========
+            {/* Modal Form for adding new data */}
+            <ModalForm isOpen={isModalOpen} onClose={handleCloseModal} onSubmit={handleFormData} />
+            
+            {/* Other content like your table goes here */}
+            
+                <EmployeeTable />
+            
+            
+        
+>>>>>>>>> Temporary merge branch 2
 
       <EmployeeTable />
     </div>
   );
 };
 
-export default EmployeeListPage;
+export default EmployeePage;

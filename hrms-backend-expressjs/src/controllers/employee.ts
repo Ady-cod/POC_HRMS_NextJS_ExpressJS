@@ -104,6 +104,70 @@ export const createEmployee = async (req: Request, res: Response): Promise<void>
   }
 };
 
-export const updateEmployee = async(req :Request , res :Response) : Promise<void> => {
-  
-}
+export const updateEmployee = async (req: Request, res: Response): Promise<void> => {
+  try {
+    const { id } = req.params; // Get the employee ID from route params
+
+    if (!id) {
+      res.status(400).json({ error: "Employee ID is required." });
+      return;
+    }
+
+    const {
+      fullName,
+      email,
+      password,
+      country,
+      city,
+      streetAddress,
+      phoneNumber,
+      birthDate,
+      dateOfJoining,
+      gender,
+      inductionCompleted,
+      profilePhotoUrl,
+      timezone,
+      role,
+      status,
+      departmentId,
+    }: CreateEmployeeInput = req.body;
+    
+
+
+    const updatedEmployeeData: CreateEmployeePrismaData = {
+      fullName,
+      email,
+      password: password || null,
+      country: country || null,
+      city: city || null,
+      streetAddress: streetAddress || null,
+      phoneNumber: phoneNumber || null,
+      birthDate: birthDate || null,
+      dateOfJoining: dateOfJoining || null,
+      gender: gender || EmployeeGender.OTHER,
+      inductionCompleted: inductionCompleted ?? false,
+      profilePhotoUrl: profilePhotoUrl || null,
+      timezone: timezone || null,
+      role: role || EmployeeRole.EMPLOYEE,
+      status: status || EmployeeStatus.ACTIVE,
+      departmentId: departmentId || null,
+    };
+
+    // Update the employee record
+    const updatedEmployee = await prisma.employee.update({
+      where: { id },
+      data: updatedEmployeeData,
+    });
+
+    res.status(200).json(updatedEmployee);
+  } catch (error) {
+    console.error("Error updating employee:", error);
+
+    if (error.code === "P2025") {
+      // Prisma-specific error when no record is found
+      res.status(404).json({ error: "Employee not found." });
+    } else {
+      res.status(500).json({ error: "Failed to update employee." });
+    }
+  }
+};

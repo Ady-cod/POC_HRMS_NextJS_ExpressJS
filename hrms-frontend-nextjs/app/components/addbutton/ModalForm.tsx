@@ -225,7 +225,7 @@ const ModalForm: React.FC<ModalFormProps> = ({ isOpen, onClose }) => {
             <input
               name="phoneNumber"
               type="text"
-              placeholder="Phone number (e.g., +40715632783)"
+              placeholder="Phone number* (e.g., +40715632783)"
               className={`input-field ${errors.phoneNumber ? "error" : ""}`}
             />
             {errors.phoneNumber && (
@@ -246,7 +246,7 @@ const ModalForm: React.FC<ModalFormProps> = ({ isOpen, onClose }) => {
               name="birthDate"
               ref={inputRefs.birthDate}
               type={calendarState.birthDate.isOpen ? "date" : "text"}
-              placeholder="Birth Date"
+              placeholder="Birth Date*"
               onFocus={() => handleFocus("birthDate")}
               onBlur={() => handleBlur("birthDate")}
               onMouseEnter={() => handleHover("birthDate", true)}
@@ -273,7 +273,7 @@ const ModalForm: React.FC<ModalFormProps> = ({ isOpen, onClose }) => {
               name="departmentName"
               className={`input-field ${errors.departmentName ? "error" : ""}`}
             >
-              <option value="">Select Department</option>
+              <option value="">Select Department*</option>
               <option value="HR">HR</option>
               <option value="Web Development">Web Dev</option>
               <option value="UI/UX">UI/UX</option>
@@ -300,7 +300,7 @@ const ModalForm: React.FC<ModalFormProps> = ({ isOpen, onClose }) => {
               name="dateOfJoining"
               ref={inputRefs.joinDate}
               type={calendarState.joinDate.isOpen ? "date" : "text"}
-              placeholder="Date of Joining"
+              placeholder="Date of Joining*"
               onFocus={() => handleFocus("joinDate")}
               onBlur={() => handleBlur("joinDate")}
               // onMouseEnter={() => handleHover("joinDate", true)}

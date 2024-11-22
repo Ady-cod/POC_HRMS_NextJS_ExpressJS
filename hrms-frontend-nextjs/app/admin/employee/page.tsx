@@ -1,7 +1,7 @@
 "use client"
 import React,{useState} from 'react';
 import AddNewDataButton from '../../components/AddNewDataButton/AddNewDataButton';
-import ModalForm from '../../components/AddNewDataButton/ModalForm';
+import ModalForm from '../../components/ModalForm/ModalForm';
 import EmployeeTable from '../../components/EmployeeTable/EmployeeTable';
 
 const EmployeePage=()=>{

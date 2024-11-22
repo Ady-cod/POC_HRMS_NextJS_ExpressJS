@@ -1,5 +1,6 @@
 import express, { Request, Response } from "express";
 import dotenv from "dotenv";
+import cors from "cors";
 import employeeRouter from "./routes/employee";
 import learningPathRouter from "./routes/learningPath";
 
@@ -8,6 +9,9 @@ dotenv.config();
 
 const app = express();
 const PORT = process.env.PORT || 5001;
+
+// Enable All CORS Requests
+app.use(cors())
 
 // Middleware to parse JSON bodies
 app.use(express.json());

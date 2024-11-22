@@ -3,7 +3,7 @@
 import React, { useState } from "react";
 import NavBar from "./components/Navbar/Navbar";
 import SideBar from "./components/Sidebar/Sidebar";
-import Footer from "./components/Footer/FooterSection";
+import Footer from "./components/Footer/Footer";
 import "./globals.css";
 
 export default function RootLayout({

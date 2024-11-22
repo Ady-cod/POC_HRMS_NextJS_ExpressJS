@@ -1,6 +1,8 @@
 "use server";
-
 import { EmployeeListItem } from "@/types/types";
+import { createEmployeeSchema } from "@/schemas/employeeSchema";
+import { z } from "zod";
+
 
 export async function getAllEmployees(): Promise<EmployeeListItem[]> {
   try {
@@ -68,9 +70,6 @@ export async function deleteEmployee(id:string): Promise<{message:string}>{
 
   }
 }
-"use server";
-import { createEmployeeSchema } from "@/schemas/employeeSchema";
-import { z } from "zod";
 
 export async function createEmployee(
   validatedData: z.infer<typeof createEmployeeSchema>

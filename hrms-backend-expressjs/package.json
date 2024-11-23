@@ -31,18 +31,18 @@
     "express": "^4.21.1",
     "libphonenumber-js": "^1.11.14",
     "mongodb": "^6.10.0",
-    "zod": "^3.23.8"
+    "zod": "^3.23.8",
+    "cross-env": "^7.0.3",
+    "npm-run-all": "^4.1.5",
+    "prisma": "^5.21.0",
+    "rimraf": "^6.0.1",
+    "typescript": "^5.6.3"
   },
   "devDependencies": {
     "@types/bcrypt": "^5.0.2",
     "@types/express": "^5.0.0",
     "@types/node": "^22.7.5",
-    "cross-env": "^7.0.3",
     "eslint": "^9.12.0",
-    "npm-run-all": "^4.1.5",
-    "prisma": "^5.21.0",
-    "rimraf": "^6.0.1",
-    "tsx": "^4.19.1",
-    "typescript": "^5.6.3"
+    "tsx": "^4.19.1"
   }
 }

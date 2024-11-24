@@ -47,5 +47,8 @@
   "devDependencies": {
     "eslint": "^9.12.0",
     "tsx": "^4.19.1"
+  },
+  "engines": {
+    "node": "20.x"
   }
 }

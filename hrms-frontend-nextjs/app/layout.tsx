@@ -21,7 +21,7 @@ export default function RootLayout({
     <html lang="en">
       <body>
         <div className="flex flex-col h-dvh">
-          <NavBar isSideBarOpen={isSideBarOpen} toggleSideBar={toggleSideBar} />
+          <NavBar toggleSideBar={toggleSideBar} />
           <section className="flex flex-col justify-between h-dvh">
             <section className="flex flex-col items-center justify-center sm:flex-row">
               <SideBar isOpen={isSideBarOpen} />

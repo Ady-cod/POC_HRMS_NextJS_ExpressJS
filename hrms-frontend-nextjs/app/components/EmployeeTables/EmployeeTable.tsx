@@ -1,10 +1,12 @@
 import React, { useState, useEffect } from 'react'
-import DataTable from 'react-data-table-component';
+import DataTable, {TableColumn} from 'react-data-table-component';
 import { getAllEmployees, deleteEmployee } from '@/actions/employee';
+import { EmployeeListItem } from '@/types/types';
 
 
 const EmployeeTable = () => {
-  const [employees, setEmployees] = useState([]);
+  
+  const [employees, setEmployees] = useState<EmployeeListItem[]>([]);
 
   useEffect(() => {
     async function fetchEmployees() {
@@ -14,7 +16,7 @@ const EmployeeTable = () => {
     fetchEmployees();
   }, []);
 
-  const handleDelete = async (id) => {
+  const handleDelete = async (id: string) => {
      console.log(id)
     try {
       const response = await deleteEmployee(id);
@@ -22,14 +24,18 @@ const EmployeeTable = () => {
       // Update the UI on successful deletion
     setEmployees(employees.filter(employee => employee.id !== id));
     } catch (err) {
-      console.error("Error deleting employee:", err.message || "An error occurred");
+      if (err instanceof Error) {
+        console.error("Error deleting employee:", err.message);
+      } else {
+        console.error("Error deleting employee:", "An error occurred");
+      }
     }
   }
   const handleEdit = () => {
 
   }
 
-  const columns = [
+  const columns: TableColumn<EmployeeListItem>[] = [
     {
       name: 'SNo.',
       selector: row => row.id,

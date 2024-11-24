@@ -25,7 +25,10 @@
   "license": "ISC",
   "dependencies": {
     "@prisma/client": "^5.21.0",
+    "@types/bcrypt": "^5.0.2",
     "@types/cors": "^2.8.17",
+    "@types/express": "^5.0.0",
+    "@types/node": "^22.7.5",
     "bcrypt": "^5.1.1",
     "cors": "^2.8.5",
     "cross-env": "^7.0.3",
@@ -42,9 +45,6 @@
     "zod": "^3.23.8"
   },
   "devDependencies": {
-    "@types/bcrypt": "^5.0.2",
-    "@types/express": "^5.0.0",
-    "@types/node": "^22.7.5",
     "eslint": "^9.12.0",
     "tsx": "^4.19.1"
   }

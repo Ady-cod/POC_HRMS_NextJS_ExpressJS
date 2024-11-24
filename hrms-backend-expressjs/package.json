@@ -11,7 +11,7 @@
     "clean": "rimraf dist",
     "compile": "tsc",
     "add-js-extension": "ts-add-js-extension --dir=dist",
-    "build": "npm-run-all clean compile add-js-extension",
+    "build": "npx npm-run-all clean compile add-js-extension",
     "prod": "npm-run-all build start"
   },
   "keywords": [

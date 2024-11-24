@@ -47,6 +47,9 @@ importers:
       rimraf:
         specifier: ^6.0.1
         version: 6.0.1
+      ts-add-js-extension:
+        specifier: ^1.6.5
+        version: 1.6.5
       typescript:
         specifier: ^5.6.3
         version: 5.6.3
@@ -1466,6 +1469,10 @@ packages:
   tr46@4.1.1:
     resolution: {integrity: sha512-2lv/66T7e5yNyhAAC4NaKe5nVavzuGJQVVtRYLyQ2OI8tsJ61PMLlelehb0wi2Hx6+hT/OJUWZcw8MjlSRnxvw==}
     engines: {node: '>=14'}
+
+  ts-add-js-extension@1.6.5:
+    resolution: {integrity: sha512-ijPXEuexDZorzkqBRGwYSS9tyqJYhhCvK92qIRussMnQD7FC4b38aL58XDI5OhLMQUR5fAyA9FCQmV+RCRfukA==}
+    hasBin: true
 
   tsx@4.19.1:
     resolution: {integrity: sha512-0flMz1lh74BR4wOvBjuh9olbnwqCPc35OOlfyzHba0Dc+QNUeWX/Gq2YTbnwcWPO3BMd8fkzRVrHcsR+a7z7rA==}
@@ -3048,6 +3055,10 @@ snapshots:
   tr46@4.1.1:
     dependencies:
       punycode: 2.3.1
+
+  ts-add-js-extension@1.6.5:
+    dependencies:
+      typescript: 5.6.3
 
   tsx@4.19.1:
     dependencies:

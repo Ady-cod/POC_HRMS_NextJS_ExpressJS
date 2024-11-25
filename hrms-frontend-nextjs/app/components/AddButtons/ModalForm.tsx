@@ -8,6 +8,7 @@ import { createEmployeeSchema } from "@/schemas/employeeSchema";
 import { formatZodErrors } from "@/utils/formatZodErrors";
 import { ZodError } from "zod";
 import axios from "axios";
+import { useRouter } from "next/navigation";
 
 interface ModalFormProps {
 isOpen: boolean;
@@ -33,6 +34,10 @@ type CalendarState = {
 };
 
 const ModalForm: React.FC<ModalFormProps> = ({ isOpen, onClose, data }) => {
+
+  //Router 
+  const router = useRouter();
+
   // Refs for password check input field
   const confirmPasswordRef = useRef<HTMLInputElement>(null);
   console.log(data);
@@ -162,8 +167,8 @@ const ModalForm: React.FC<ModalFormProps> = ({ isOpen, onClose, data }) => {
   };
 
   const handleEdit = async(e: React.FormEvent<HTMLFormElement>) => {
-    e.preventDefault();
-    console.log("IN THE HANDLE EDIT!! :)");
+    // e.preventDefault();
+    // console.log("IN THE HANDLE EDIT!! :)");
     try{
       console.log(formData);
       const response = await axios.
@@ -172,9 +177,11 @@ const ModalForm: React.FC<ModalFormProps> = ({ isOpen, onClose, data }) => {
                         }).
                         then(function(response){
                           console.log(response);
+                          router.push("/admin/EmployeePage/")
                         }).catch(function(error){
                           console.log(error);
                         });
+                        
     }catch(e){
       console.log(e);
     }

@@ -10,9 +10,10 @@
   },
   "dependencies": {
     "@nextui-org/date-input": "^2.1.4",
+    "@nextui-org/table": "^2.0.40",
+    "axios": "^1.7.7",
     "date-fns": "^4.1.0",
     "libphonenumber-js": "^1.11.14",
-    "@nextui-org/table": "^2.0.40",
     "next": "14.2.15",
     "normalize.css": "^8.0.1",
     "react": "^18",

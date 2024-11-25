@@ -1,12 +1,19 @@
 import React,{useState,useEffect} from 'react'
 import DataTable from 'react-data-table-component';
+import ModalForm from '../AddButtons/ModalForm';
 import { getAllEmployees } from '@/actions/employee';
 
 
 const EmployeeTable = () => {
-    const [employee,setEmployee]= useState([])
-
+  const [employee,setEmployee]= useState([]);
+  const [isModalOpen, setIsModalOpen] = useState(false);
   const [employees, setEmployees] = useState([]);
+
+  const handleEdit = (row) => {
+    //console.log(row);
+    setEmployee(row);
+    setIsModalOpen(true);
+  } 
 
   useEffect(() => {
     async function fetchEmployees() {
@@ -41,6 +48,10 @@ const EmployeeTable = () => {
     
     //     fetchEmployees();
     //   },[]);
+
+    const handleCloseModal = () => {
+      setIsModalOpen(false);
+  };
     
     const columns = [
         {
@@ -82,9 +93,15 @@ const EmployeeTable = () => {
           }
     ];
     return (
-      <div>
-        <DataTable columns={columns} data={employees} />
-      </div>
+      <>
+        <div>
+          <DataTable columns={columns} data={employees} />
+        </div>
+        {
+          isModalOpen &&
+          <ModalForm isOpen={isModalOpen} onClose={handleCloseModal} data={employee} />
+        }
+      </>
     );
 }
 

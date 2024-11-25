@@ -4,6 +4,7 @@ import prisma from "../lib/client";
 import { Prisma, Employee, Department } from "@prisma/client";
 
 import { createEmployeeSchema } from "../schemas/employeeSchema";
+import { CreateEmployeePrismaData , EmployeeGender, EmployeeRole, EmployeeStatus } from "../types/types";
 import { z } from "zod";
 
 import bcrypt from "bcrypt";  
@@ -53,8 +54,10 @@ export const getAllEmployees = async (
     });
 
     // console.log("Employees:", employees);
-
-    res.status(200).json(employees);
+    const employees2 = employees.map((employee) =>{
+      return {...employee , departmentName : employee.department?.name}
+    })
+    res.status(200).json(employees2);
   } catch (error) {
     console.error("Error fetching employees:", error);
     res.status(500).json({ error: "Failed to fetch employees" });
@@ -148,6 +151,9 @@ export const createEmployee = async (
 export const updateEmployee = async (req: Request, res: Response): Promise<void> => {
   try {
     const { id } = req.params; // Get the employee ID from route params
+    
+    console.log(req.body);
+    
 
     if (!id) {
       res.status(400).json({ error: "Employee ID is required." });
@@ -166,8 +172,8 @@ export const updateEmployee = async (req: Request, res: Response): Promise<void>
       dateOfJoining,
       gender,
       inductionCompleted,
-      profilePhotoUrl,
       timezone,
+      profilePhotoUrl,
       role,
       status,
       departmentId,

@@ -3,11 +3,10 @@ import React from 'react';
 import Image from "next/image";
 
 interface NavBarProps {
-    isSideBarOpen: boolean;
     toggleSideBar: () => void;
 }
 
-const Navbar = ({ isSideBarOpen, toggleSideBar }:NavBarProps) => {
+const Navbar = ({toggleSideBar }:NavBarProps) => {
     return (
         <div className="border border-gray-400 h-20 flex justify-between items-center px-4">
             <div className="flex justify-center">

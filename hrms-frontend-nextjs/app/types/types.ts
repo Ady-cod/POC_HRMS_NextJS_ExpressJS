@@ -24,7 +24,7 @@ export interface DepartmentListItem {
 
 // Define EmployeeListItem interface
 export interface EmployeeListItem {
-  id: number;
+  id: string;
   fullName: string;
   email: string;
   role: EmployeeRole;

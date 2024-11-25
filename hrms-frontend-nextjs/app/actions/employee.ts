@@ -1,11 +1,14 @@
 "use server";
+import { EmployeeListItem } from "@/types/types";
 import { createEmployeeSchema } from "@/schemas/employeeSchema";
 import { z } from "zod";
-import { EmployeeListItem } from "@/types/types";
+
+const BACKEND_BASE_URL = process.env.NEXT_PUBLIC_BACKEND_BASE_URL;
+const EMPLOYEE_ENDPOINT = process.env.NEXT_PUBLIC_EMPLOYEE_ENDPOINT;
 
 export async function getAllEmployees(): Promise<EmployeeListItem[]> {
   try {
-    const response = await fetch("http://localhost:5000/api/v1/employee", {
+    const response = await fetch(`${BACKEND_BASE_URL}${EMPLOYEE_ENDPOINT}`, {
       cache: "no-store", // Ensure no caching for fresh data
     });
 
@@ -50,13 +53,35 @@ export async function getAllEmployees(): Promise<EmployeeListItem[]> {
   }
 }
 
+export async function deleteEmployee(id:string): Promise<{message:string}>{
+  try{
+    const response = await fetch(`${BACKEND_BASE_URL}${EMPLOYEE_ENDPOINT}/${id}`,
+      {
+        method: "DELETE",
+      }
+    );
+
+    if(!response.ok){
+      const errorResponse = await response.json();
+      const errorMessage = errorResponse.error || "Unknown error occurred";
+
+      throw { status: response.status, message: errorMessage };
+    }
+    return await response.json();
+  }catch(error){
+    console.error("Error deleting employee:", error);
+    throw { status: 500, message: "Internal Server Error while deleting employee." };
+
+  }
+}
+
 export async function createEmployee(
   validatedData: z.infer<typeof createEmployeeSchema>
 ): Promise<void> {
 
   try {
     // Send the data to the server
-    const response = await fetch("http://localhost:5000/api/v1/employee", {
+    const response = await fetch(`${BACKEND_BASE_URL}${EMPLOYEE_ENDPOINT}`, {
       method: "POST",
       headers: {
         "Content-Type": "application/json",

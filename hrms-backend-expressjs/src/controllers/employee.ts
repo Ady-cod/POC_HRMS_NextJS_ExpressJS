@@ -1,4 +1,5 @@
 import { Request, Response } from "express";
+import {ObjectId} from "mongodb"
 
 import prisma from "../lib/client";
 import { Prisma, Employee, Department } from "@prisma/client";
@@ -147,6 +148,25 @@ export const createEmployee = async (
     }
   }
 };
+
+export const deleteEmployee = async(req:Request,res:Response): Promise<void>=>{
+  try{
+    const {id} = req.params
+    if (!ObjectId.isValid(id)) {
+      res.status(400).json({ error: "Employee ID is required" });
+      return;
+    }
+    const deletedEmployee = await prisma.employee.delete({
+      where: { id },
+    });
+    res.status(200).json({ message: "Employee deleted successfully", deletedEmployee });
+  }catch(error){
+    console.log("Error on deleting Employee:",error);
+    res.status(500).json({error:"Failed to delete employee"})
+
+  }
+
+}
 
 export const updateEmployee = async (req: Request, res: Response): Promise<void> => {
   try {

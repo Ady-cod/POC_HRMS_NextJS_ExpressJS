@@ -1,8 +1,8 @@
-
+"use client"
 import React from "react";
 import Link from "next/link";
 import Image from "next/image";
-import "./Siderbar.css";
+import "./Sidebar.css";
 
 interface SideBarProps {
   isOpen: boolean;

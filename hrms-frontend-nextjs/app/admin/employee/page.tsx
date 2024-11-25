@@ -2,10 +2,12 @@
 import React,{useState} from 'react';
 import AddNewDataButton from '../../components/AddButtons/AddNewDataButton';
 import ModalForm from '../../components/AddButtons/ModalForm';
-import EmployeeTable from '../../components/EmployeeTables/EmployeeTable';
+import EmployeeTable from '../../components/employeeTable/employeeTable';
 
 const EmployeePage=()=>{
+    const [isSideBarOpen,setIsSideBarOpen] = useState<boolean>(true)
     const [isModalOpen, setIsModalOpen] = useState(false);
+    const [submittedData,setsubmittedData] = useState(null)
 
      // Open and close handlers for the modal
      const handleAddNewDataClick = () => {
@@ -14,6 +16,10 @@ const EmployeePage=()=>{
     const handleCloseModal = () => {
         setIsModalOpen(false);
     };
+
+    const handleFormData=(data:any)=>{
+      setsubmittedData(data)
+      }
 
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
   return (
@@ -34,10 +40,8 @@ const EmployeePage=()=>{
       <ModalForm
         isOpen={isModalOpen}
         onClose={handleCloseModal}
+        onSubmit={handleFormData}
       />
-
-            {/* Modal Form for adding new data */}
-            <ModalForm isOpen={isModalOpen} onClose={handleCloseModal} />
             
             {/* Other content like your table goes here */}
             

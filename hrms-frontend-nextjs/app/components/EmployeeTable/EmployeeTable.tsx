@@ -1,11 +1,12 @@
-import React, { useState, useEffect } from 'react';
-import DataTable from 'react-data-table-component';
-import { ToastContainer, toast } from 'react-toastify';
-import 'react-toastify/dist/ReactToastify.css';
+import React, { useState, useEffect } from 'react'
+import DataTable, {TableColumn} from 'react-data-table-component';
 import { getAllEmployees, deleteEmployee } from '@/actions/employee';
+import { EmployeeListItem } from '@/types/types';
+
 
 const EmployeeTable = () => {
-  const [employees, setEmployees] = useState([]);
+  
+  const [employees, setEmployees] = useState<EmployeeListItem[]>([]);
 
   useEffect(() => {
     async function fetchEmployees() {
@@ -15,27 +16,30 @@ const EmployeeTable = () => {
     fetchEmployees();
   }, []);
 
-  const handleDelete = async (id) => {
-    const employee = employees.find(emp => emp.id === id);
+  const handleDelete = async (id: string) => {
+     console.log(id)
     try {
       const response = await deleteEmployee(id);
       console.log("Delete successful:", response.message);
-      toast.success(`You deleted ${employee.fullName}`);
-      setEmployees(employees.filter(employee => employee.id !== id));
+      // Update the UI on successful deletion
+    setEmployees(employees.filter(employee => employee.id !== id));
     } catch (err) {
-      console.error("Error deleting employee:", err.message || "An error occurred");
-      toast.error("Failed to delete employee");
+      if (err instanceof Error) {
+        console.error("Error deleting employee:", err.message);
+      } else {
+        console.error("Error deleting employee:", "An error occurred");
+      }
     }
-  };
-
+  }
   const handleEdit = () => {
-    // Edit logic
-  };
 
-  const columns = [
+  }
+
+  const columns: TableColumn<EmployeeListItem>[] = [
     {
       name: 'SNo.',
-      selector: (row, index) => index + 1,
+      selector: row => row.id,
+      cell: (id, row) => row + 1,
       sortable: true
     },
     {
@@ -60,30 +64,21 @@ const EmployeeTable = () => {
     },
     {
       name: 'Action',
+
       sortable: true,
       cell: row => (
         <>
           <button onClick={handleEdit} className="bg-green-500 rounded-lg p-2">Edit</button>
-          <button onClick={() => handleDelete(row.id)} className="bg-red-500 rounded-lg p-2 ms-2">Delete</button>
+          <button onClick={() => handleDelete(row.id)} className="bg-red-500  rounded-lg p-2 ms-2">Delete</button>
         </>
       ),
     }
   ];
-
   return (
     <div>
       <DataTable columns={columns} data={employees} />
-      <ToastContainer
-        position="top-center"
-        autoClose={3000}
-        closeOnClick
-        pauseOnHover
-        draggable
-        theme="light"
-        style={{ fontSize: '1.5rem', textAlign: 'center' }}
-      />
     </div>
   );
-};
+}
 
 export default EmployeeTable;

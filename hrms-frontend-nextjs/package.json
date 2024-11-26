@@ -11,12 +11,14 @@
   "dependencies": {
     "@nextui-org/date-input": "^2.1.4",
     "@nextui-org/table": "^2.0.40",
+    "date-fns": "^4.1.0",
+    "libphonenumber-js": "^1.11.14",
     "next": "14.2.15",
     "normalize.css": "^8.0.1",
     "react": "^18",
     "react-data-table-component": "^7.6.2",
     "react-dom": "^18",
-    "react-toastify": "^10.0.6"
+    "zod": "^3.23.8"
   },
   "devDependencies": {
     "@types/node": "^20",

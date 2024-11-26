@@ -5,13 +5,8 @@ import ModalForm from '../../components/ModalForm/ModalForm';
 import EmployeeTable from '../../components/EmployeeTable/EmployeeTable';
 
 const EmployeePage=()=>{
-    const [isSideBarOpen,setIsSideBarOpen] = useState<boolean>(true)
     const [isModalOpen, setIsModalOpen] = useState(false);
-    const [submittedData,setsubmittedData] = useState(null)
 
-    const toggleSideBar=()=>{
-    setIsSideBarOpen(!isSideBarOpen)
-    }
      // Open and close handlers for the modal
      const handleAddNewDataClick = () => {
         setIsModalOpen(true);
@@ -20,10 +15,7 @@ const EmployeePage=()=>{
         setIsModalOpen(false);
     };
 
-  const handleFormData = (data: any) => {
-    setsubmittedData(data);
-  };
-
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   return (
     <div>
       {/* Header section with Add New Data button */}
@@ -42,11 +34,10 @@ const EmployeePage=()=>{
       <ModalForm
         isOpen={isModalOpen}
         onClose={handleCloseModal}
-        onSubmit={handleFormData}
       />
 
             {/* Modal Form for adding new data */}
-            <ModalForm isOpen={isModalOpen} onClose={handleCloseModal} onSubmit={handleFormData} />
+            <ModalForm isOpen={isModalOpen} onClose={handleCloseModal} />
             
             {/* Other content like your table goes here */}
             

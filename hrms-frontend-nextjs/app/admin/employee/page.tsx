@@ -1,19 +1,25 @@
-"use client"
-import React,{useState} from 'react';
-import AddNewDataButton from '../../components/AddButtons/AddNewDataButton';
-import ModalForm from '../../components/AddButtons/ModalForm';
-import EmployeeTable from '../../components/EmployeeTables/EmployeeTable';
+"use client";
+import React, { useState } from "react";
+import AddNewDataButton from "../../components/AddButtons/AddNewDataButton";
+import ModalForm from "../../components/AddButtons/ModalForm";
+import EmployeeTable from "../../components/EmployeeTables/EmployeeTable";
 
-const EmployeePage=()=>{
-    const [isModalOpen, setIsModalOpen] = useState(false);
+const EmployeePage = () => {
 
-     // Open and close handlers for the modal
-     const handleAddNewDataClick = () => {
-        setIsModalOpen(true);
-    };
-    const handleCloseModal = () => {
-        setIsModalOpen(false);
-    };
+  const [isModalOpen, setIsModalOpen] = useState(false);
+  const [refreshFlag, setRefreshFlag] = useState(false);
+
+  // Open and close handlers for the modal
+  const handleAddNewDataClick = () => {
+    setIsModalOpen(true);
+  };
+  const handleCloseModal = () => {
+    setIsModalOpen(false);
+  };
+
+  const refreshEmployees = () => {
+    setRefreshFlag(!refreshFlag);
+  };
 
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
   return (
@@ -34,14 +40,12 @@ const EmployeePage=()=>{
       <ModalForm
         isOpen={isModalOpen}
         onClose={handleCloseModal}
+        refreshEmployees={refreshEmployees}
       />
 
-            {/* Modal Form for adding new data */}
-            <ModalForm isOpen={isModalOpen} onClose={handleCloseModal} />
-            
-            {/* Other content like your table goes here */}
-            
-                <EmployeeTable />
+      {/* Other content like your table goes here */}
+
+      <EmployeeTable refreshFlag={refreshFlag} />
     </div>
   );
 };

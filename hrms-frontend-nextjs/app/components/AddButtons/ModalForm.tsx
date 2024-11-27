@@ -9,18 +9,19 @@ import { formatZodErrors } from "@/utils/formatZodErrors";
 import { ZodError } from "zod";
 
 interface ModalFormProps {
-isOpen: boolean;
-onClose: () => void;
+  isOpen: boolean;
+  onClose: () => void;
+  refreshEmployees: () => void;
 }
 
 interface CalendarInputState {
-isOpen: boolean;
-isInteracting: boolean;
+  isOpen: boolean;
+  isInteracting: boolean;
 }
 
 interface InputRefs {
-birthDate: React.RefObject<HTMLInputElement>;
-joinDate: React.RefObject<HTMLInputElement>;
+  birthDate: React.RefObject<HTMLInputElement>;
+  joinDate: React.RefObject<HTMLInputElement>;
 }
 
 type InputRefKey = keyof InputRefs;
@@ -29,7 +30,12 @@ type CalendarState = {
   [key in InputRefKey]: CalendarInputState;
 };
 
-const ModalForm: React.FC<ModalFormProps> = ({ isOpen, onClose }) => {
+const ModalForm: React.FC<ModalFormProps> = ({
+  isOpen,
+  onClose,
+  refreshEmployees
+}) => {
+
   // Refs for password check input field
   const confirmPasswordRef = useRef<HTMLInputElement>(null);
 
@@ -71,7 +77,7 @@ const ModalForm: React.FC<ModalFormProps> = ({ isOpen, onClose }) => {
                 isInteracting: false,
               },
             }));
-          }, 300); // Reset after interaction 
+          }, 300); // Reset after interaction
         }
       });
     };
@@ -135,17 +141,22 @@ const ModalForm: React.FC<ModalFormProps> = ({ isOpen, onClose }) => {
 
       alert("Employee created successfully!");
 
+      // // Re-fetch employees in EmployeeTable, to show the new employee
+      refreshEmployees();
+
       // Reset the form after successful submission
       form.reset();
+
     } catch (error) {
       if (error instanceof ZodError) {
-        const errorValidationMessage = error.errors.map((err) => err.message).join("\n\n");
+        const errorValidationMessage = error.errors
+          .map((err) => err.message)
+          .join("\n\n");
         alert(`Validation Error(s):\n\n${errorValidationMessage}`);
 
         // Format Zod error messages
         const formattedErrors = formatZodErrors(error);
         setErrors(formattedErrors);
-
       } else if (error instanceof Error) {
         // General JavaScript Error handling
         alert(`Error in creating employee:\n\n${error.message}`);

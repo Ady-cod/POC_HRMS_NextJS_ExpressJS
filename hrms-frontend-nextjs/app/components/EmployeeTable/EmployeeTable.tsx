@@ -27,9 +27,7 @@ const EmployeeTable: React.FC<EmployeeTableProps> = ({ refreshFlag }) => {
       console.log("Delete successful:", response.message);
 
       // Update the UI on successful deletion
-      toast.success(`You deleted ${employee?.fullName || "an employee"}`, {
-        style: { fontSize: "1.2rem" }, // Customize toast style
-      });
+      toast.success(`You deleted ${employee?.fullName || "an employee"}`);
 
       setEmployees(employees.filter((employee) => employee.id !== id));
     } catch (err) {
@@ -37,16 +35,12 @@ const EmployeeTable: React.FC<EmployeeTableProps> = ({ refreshFlag }) => {
         console.error("Error deleting employee:", err.message);
 
         // display the regular error message
-        toast.error(`Failed to delete employee: ${err.message}`, {
-          style: { fontSize: "1.2rem" },
-        });
+        toast.error(`Failed to delete employee: ${err.message}`);
       } else {
         console.error("Error deleting employee:", "An error occurred");
 
         // display a generic error message
-        toast.error("Failed to delete employee: unknown error appeared", {
-          style: { fontSize: "1.2rem" },
-        });
+        toast.error("Failed to delete employee: unknown error appeared");
       }
     }
   };
@@ -108,7 +102,7 @@ const EmployeeTable: React.FC<EmployeeTableProps> = ({ refreshFlag }) => {
         pauseOnHover
         draggable
         theme="light"
-        style={{ fontSize: "1.5rem", textAlign: "center" }}
+        style={{ fontSize: "1.2rem", textAlign: "center", width: "500px" }}
       />
     </div>
   );

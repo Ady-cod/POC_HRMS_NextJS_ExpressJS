@@ -52,7 +52,7 @@ export async function getAllEmployees(): Promise<EmployeeListItem[]> {
     return [];
   }
 }
-
+//delete operations
 export async function deleteEmployee(id:string): Promise<{message:string}>{
   try{
     const response = await fetch(`${BACKEND_BASE_URL}${EMPLOYEE_ENDPOINT}/${id}`,

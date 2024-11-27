@@ -2,6 +2,8 @@ import React, { useState, useEffect } from "react";
 import DataTable, { TableColumn } from "react-data-table-component";
 import { getAllEmployees, deleteEmployee } from "@/actions/employee";
 import { EmployeeListItem } from "@/types/types";
+import { ToastContainer, toast } from "react-toastify";
+import "react-toastify/dist/ReactToastify.css";
 
 interface EmployeeTableProps {
   refreshFlag: boolean;
@@ -19,17 +21,32 @@ const EmployeeTable: React.FC<EmployeeTableProps> = ({ refreshFlag }) => {
   }, [refreshFlag]);
 
   const handleDelete = async (id: string) => {
-    console.log(id);
+    const employee = employees.find((emp) => emp.id === id); // Find employee by ID
     try {
       const response = await deleteEmployee(id);
       console.log("Delete successful:", response.message);
+
       // Update the UI on successful deletion
+      toast.success(`You deleted ${employee?.fullName || "an employee"}`, {
+        style: { fontSize: "1.2rem" }, // Customize toast style
+      });
+
       setEmployees(employees.filter((employee) => employee.id !== id));
     } catch (err) {
       if (err instanceof Error) {
         console.error("Error deleting employee:", err.message);
+
+        // display the regular error message
+        toast.error(`Failed to delete employee: ${err.message}`, {
+          style: { fontSize: "1.2rem" },
+        });
       } else {
         console.error("Error deleting employee:", "An error occurred");
+
+        // display a generic error message
+        toast.error("Failed to delete employee: unknown error appeared", {
+          style: { fontSize: "1.2rem" },
+        });
       }
     }
   };
@@ -84,6 +101,15 @@ const EmployeeTable: React.FC<EmployeeTableProps> = ({ refreshFlag }) => {
   return (
     <div>
       <DataTable columns={columns} data={employees} />
+      <ToastContainer
+        position="top-center"
+        autoClose={3000}
+        closeOnClick
+        pauseOnHover
+        draggable
+        theme="light"
+        style={{ fontSize: "1.5rem", textAlign: "center" }}
+      />
     </div>
   );
 };

@@ -4,58 +4,88 @@ import { isValid, parseISO } from "date-fns";
 import { parsePhoneNumberFromString } from "libphonenumber-js";
 
 // Helper function to check if a string is a valid phone number
-const isValidPhoneNumber = (phoneNumber: string | null): boolean => {
-  if (!phoneNumber) return true; // Allow null (optional field)
+const isValidPhoneNumber = (phoneNumber: string): boolean => {
+  if (!phoneNumber) return false; // Disallow empty strings
   const parsedPhoneNumber = parsePhoneNumberFromString(phoneNumber);
   return parsedPhoneNumber?.isValid() || false;
 };
 
 // Helper function to check if a string is a valid date
-const isValidDate = (dateString: string | null): boolean => {
-  if (!dateString) return true; // Allow null (optional field)
+const isValidDate = (dateString: string): boolean => {
+  if (!dateString) return false; // Disallow empty strings
   const parsedDate = parseISO(dateString);
   return (
     isValid(parsedDate) && dateString.match(/^\d{4}-\d{2}-\d{2}$/) !== null
   ); // Ensures it's a valid ISO date
 };
 
+// Helper function to check if a string contains hacking attempts
+const isSafeString = (input: string): boolean => {
+  return !input.match(/[<>"&`]/); // Prevents XSS attacks
+};
+
+// Helper function to check if a string is a valid Unicode name
+const isValidUnicodeName = (input: string): boolean =>
+  /^[\p{L}\s'\-]+$/u.test(input);
+
 // Zod schema for employee creation
 export const createEmployeeSchema = z.object({
-  fullName: z.string().min(1, "Employee name is required"),
+  fullName: z
+    .string()
+    .min(3, "Employee name is required with a minimum of 3 characters")
+    .refine(isValidUnicodeName, {
+      message:
+        "Employee name must only contain letters, spaces, apostrophes, and hyphens",
+    })
+    .refine(isSafeString, {
+      message: 'Employee name contains unsafe characters like <, >, ", `, or &',
+    }),
   email: z.string().email("Invalid email address"),
   password: z.string().min(6, "Password must be at least 6 characters"),
-  phoneNumber: z
-    .union([z.string(), z.null()])
-    .refine(isValidPhoneNumber, {
-      message: "Invalid phone number format",
-    }) // Validate as a phone number
-    .optional()
-    .default(null)
-    .transform((value) => (value === "" ? null : value)),
-  country: z.string().min(2, "Country is required"),
-  city: z.string().min(2, "City is required"),
+  phoneNumber: z.string().refine(isValidPhoneNumber, {
+    message:
+      "Invalid phone number format. Use international format (e.g., +123456789)",
+  }), // Validate as a phone number
+  country: z
+    .string()
+    .min(2, "Country is required")
+    .refine(isValidUnicodeName, {
+      message:
+        "Country must only contain letters, spaces, apostrophes, and hyphens",
+    })
+    .refine(isSafeString, {
+      message: 'Country contains unsafe characters like <, >, ", ` or &',
+    }),
+  city: z
+    .string()
+    .min(3, "City is required with a minimum of 3 characters")
+    .refine(isValidUnicodeName, {
+      message:
+        "City must only contain letters, spaces, apostrophes, and hyphens",
+    })
+    .refine(isSafeString, {
+      message: 'City contains unsafe characters like <, >, " , `, or &',
+    }),
   streetAddress: z
-    .union([z.string(), z.null()])
+    .string()
+    .refine(isSafeString, {
+      message: 'Street contains unsafe characters like <, >, ", `, or &',
+    })
     .optional()
-    .default(null)
-    .transform((value) => (value === "" ? null : value)),
+    .transform((value) => (!value ? null : value)),
   birthDate: z
-    .union([z.string(), z.null()])
+    .string()
     .refine(isValidDate, {
       message: "Invalid birth date format, expected a valid YYYY-MM-DD",
     }) // Validate as a date format
-    .optional()
-    .default(null)
-    .transform((date) => (date ? `${date}T00:00:00.000Z` : null)), // Appends time if date exists
+    .transform((date) => `${date}T00:00:00.000Z`), // Appends time to the date to match Prisma's DateTime
   dateOfJoining: z
-    .union([z.string(), z.null()])
+    .string()
     .refine(isValidDate, {
       message: "Invalid date of joining format, expected a valid YYYY-MM-DD",
     }) // Validate as a date format
-    .optional()
-    .default(null)
-    .transform((date) => (date ? `${date}T00:00:00.000Z` : null)), // Appends time if date exists
-  departmentName: z.string().min(1, "Department name is required"),
+    .transform((date) => `${date}T00:00:00.000Z`), // Appends time to the date to match Prisma's DateTime
+  departmentName: z.string().min(2, "Department name is required"),
   gender: z.nativeEnum(Gender).optional().default(Gender.OTHER), // Based on radio buttons
   inductionCompleted: z.boolean().optional().default(false), // Default to false
   role: z.nativeEnum(Role).optional().default(Role.EMPLOYEE), // Default to EMPLOYEE

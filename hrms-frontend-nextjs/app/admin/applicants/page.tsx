@@ -1,6 +1,6 @@
 import React from "react";
 
-const Applicants = () => {
+const ApplicantsPage = () => {
   return (
     <>
       <header className="mt-12 bg-gray-300">
@@ -12,4 +12,4 @@ const Applicants = () => {
   );
 };
 
-export default Applicants;
+export default ApplicantsPage;

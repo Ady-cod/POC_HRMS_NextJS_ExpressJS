@@ -9,18 +9,19 @@ import { formatZodErrors } from "@/utils/formatZodErrors";
 import { ZodError } from "zod";
 
 interface ModalFormProps {
-isOpen: boolean;
-onClose: () => void;
+  isOpen: boolean;
+  onClose: () => void;
+  refreshEmployees: () => void;
 }
 
 interface CalendarInputState {
-isOpen: boolean;
-isInteracting: boolean;
+  isOpen: boolean;
+  isInteracting: boolean;
 }
 
 interface InputRefs {
-birthDate: React.RefObject<HTMLInputElement>;
-joinDate: React.RefObject<HTMLInputElement>;
+  birthDate: React.RefObject<HTMLInputElement>;
+  joinDate: React.RefObject<HTMLInputElement>;
 }
 
 type InputRefKey = keyof InputRefs;
@@ -29,7 +30,12 @@ type CalendarState = {
   [key in InputRefKey]: CalendarInputState;
 };
 
-const ModalForm: React.FC<ModalFormProps> = ({ isOpen, onClose }) => {
+const ModalForm: React.FC<ModalFormProps> = ({
+  isOpen,
+  onClose,
+  refreshEmployees
+}) => {
+
   // Refs for password check input field
   const confirmPasswordRef = useRef<HTMLInputElement>(null);
 
@@ -71,7 +77,7 @@ const ModalForm: React.FC<ModalFormProps> = ({ isOpen, onClose }) => {
                 isInteracting: false,
               },
             }));
-          }, 300); // Reset after interaction 
+          }, 300); // Reset after interaction
         }
       });
     };
@@ -135,17 +141,22 @@ const ModalForm: React.FC<ModalFormProps> = ({ isOpen, onClose }) => {
 
       alert("Employee created successfully!");
 
+      // // Re-fetch employees in EmployeeTable, to show the new employee
+      refreshEmployees();
+
       // Reset the form after successful submission
       form.reset();
+
     } catch (error) {
       if (error instanceof ZodError) {
-        const errorValidationMessage = error.errors.map((err) => err.message).join("\n\n");
+        const errorValidationMessage = error.errors
+          .map((err) => err.message)
+          .join("\n\n");
         alert(`Validation Error(s):\n\n${errorValidationMessage}`);
 
         // Format Zod error messages
         const formattedErrors = formatZodErrors(error);
         setErrors(formattedErrors);
-
       } else if (error instanceof Error) {
         // General JavaScript Error handling
         alert(`Error in creating employee:\n\n${error.message}`);
@@ -225,7 +236,8 @@ const ModalForm: React.FC<ModalFormProps> = ({ isOpen, onClose }) => {
             <input
               name="phoneNumber"
               type="text"
-              placeholder="Phone number (e.g., +40715632783)"
+              placeholder="Phone number* (e.g., +40715632783)"
+              required
               className={`input-field ${errors.phoneNumber ? "error" : ""}`}
             />
             {errors.phoneNumber && (
@@ -246,7 +258,8 @@ const ModalForm: React.FC<ModalFormProps> = ({ isOpen, onClose }) => {
               name="birthDate"
               ref={inputRefs.birthDate}
               type={calendarState.birthDate.isOpen ? "date" : "text"}
-              placeholder="Birth Date"
+              placeholder="Birth Date*"
+              required
               onFocus={() => handleFocus("birthDate")}
               onBlur={() => handleBlur("birthDate")}
               onMouseEnter={() => handleHover("birthDate", true)}
@@ -271,9 +284,10 @@ const ModalForm: React.FC<ModalFormProps> = ({ isOpen, onClose }) => {
 
             <select
               name="departmentName"
+              required
               className={`input-field ${errors.departmentName ? "error" : ""}`}
             >
-              <option value="">Select Department</option>
+              <option value="">Select Department*</option>
               <option value="HR">HR</option>
               <option value="Web Development">Web Dev</option>
               <option value="UI/UX">UI/UX</option>
@@ -300,7 +314,8 @@ const ModalForm: React.FC<ModalFormProps> = ({ isOpen, onClose }) => {
               name="dateOfJoining"
               ref={inputRefs.joinDate}
               type={calendarState.joinDate.isOpen ? "date" : "text"}
-              placeholder="Date of Joining"
+              placeholder="Date of Joining*"
+              required
               onFocus={() => handleFocus("joinDate")}
               onBlur={() => handleBlur("joinDate")}
               // onMouseEnter={() => handleHover("joinDate", true)}

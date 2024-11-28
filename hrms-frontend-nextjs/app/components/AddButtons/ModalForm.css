@@ -130,3 +130,15 @@
 .submit-button:hover {
   background-color: #1e40af;
 }
+
+.input-field.error,
+.confirm-password-field.error {
+  border: solid 3px red;
+}
+
+.error-message {
+  color: red;
+  font-size: 0.9rem;
+  font-weight:700;
+  margin-top: 0.50rem;
+}

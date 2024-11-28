@@ -1,10 +1,14 @@
 "use server";
-
 import { EmployeeListItem } from "@/types/types";
+import { createEmployeeSchema } from "@/schemas/employeeSchema";
+import { z } from "zod";
+
+const BACKEND_BASE_URL = process.env.NEXT_PUBLIC_BACKEND_BASE_URL;
+const EMPLOYEE_ENDPOINT = process.env.NEXT_PUBLIC_EMPLOYEE_ENDPOINT;
 
 export async function getAllEmployees(): Promise<EmployeeListItem[]> {
   try {
-    const response = await fetch("http://localhost:5000/api/v1/employee", {
+    const response = await fetch(`${BACKEND_BASE_URL}${EMPLOYEE_ENDPOINT}`, {
       cache: "no-store", // Ensure no caching for fresh data
     });
 
@@ -48,12 +52,14 @@ export async function getAllEmployees(): Promise<EmployeeListItem[]> {
     return [];
   }
 }
-
+//delete operations
 export async function deleteEmployee(id:string): Promise<{message:string}>{
   try{
-    const response = await fetch(`http://localhost:5000/api/v1/employee/${id}`,{
-      method:"DELETE",
-    });
+    const response = await fetch(`${BACKEND_BASE_URL}${EMPLOYEE_ENDPOINT}/${id}`,
+      {
+        method: "DELETE",
+      }
+    );
 
     if(!response.ok){
       const errorResponse = await response.json();
@@ -66,5 +72,44 @@ export async function deleteEmployee(id:string): Promise<{message:string}>{
     console.error("Error deleting employee:", error);
     throw { status: 500, message: "Internal Server Error while deleting employee." };
 
+  }
+}
+
+export async function createEmployee(
+  validatedData: z.infer<typeof createEmployeeSchema>
+): Promise<void> {
+
+  try {
+    // Send the data to the server
+    const response = await fetch(`${BACKEND_BASE_URL}${EMPLOYEE_ENDPOINT}`, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify(validatedData),
+    });
+
+    if (!response.ok) {
+      const error = await response.json();
+      console.error("Failed to create employee:", error);
+
+      // Use a meaningful fallback message if the server doesn't send one
+      const errorMessage =
+        error.error || "An unknown error occurred on the server.";
+      throw new Error(errorMessage);
+
+      //   throw new Error(`Error from the server: ${error.message}`);
+    }
+
+    const result = await response.json();
+    console.log("Employee successfully created:", result);
+  } catch (error) {
+    if (error instanceof Error) {
+      console.error("Error creating employee:", error);
+      throw new Error(`Failed to create employee: ${error.message}`);
+    } else {
+      console.error("Error creating employee:", error);
+      throw new Error("Failed to create employee: Unknown error");
+    }
   }
 }

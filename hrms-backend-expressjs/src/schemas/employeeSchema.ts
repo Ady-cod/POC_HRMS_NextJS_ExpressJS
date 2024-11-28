@@ -30,10 +30,15 @@ export const createEmployeeSchema = z.object({
       message: "Invalid phone number format",
     }) // Validate as a phone number
     .optional()
-    .default(null), 
+    .default(null)
+    .transform((value) => (value === "" ? null : value)),
   country: z.string().min(2, "Country is required"),
   city: z.string().min(2, "City is required"),
-  streetAddress: z.union([z.string(), z.null()]).optional().default(null),
+  streetAddress: z
+    .union([z.string(), z.null()])
+    .optional()
+    .default(null)
+    .transform((value) => (value === "" ? null : value)),
   birthDate: z
     .union([z.string(), z.null()])
     .refine(isValidDate, {

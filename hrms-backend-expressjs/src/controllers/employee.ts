@@ -80,7 +80,7 @@ export const createEmployee = async (
     const hashedPassword = await hashPassword(password);
 
     // Find or create department
-    let department  = (await prisma.department.findUnique({
+    let department = (await prisma.department.findUnique({
       where: { name: departmentName },
     })) as Department | null;
 
@@ -110,16 +110,38 @@ export const createEmployee = async (
     });
 
     res.status(201).json(newEmployee);
-    
   } catch (error) {
     if (error instanceof z.ZodError) {
       // Handle Zod validation errors
       res.status(400).json({ errors: error.errors });
+
+    } else if (error instanceof Prisma.PrismaClientKnownRequestError) {
+      // Handle Prisma-specific errors
+      if (error.code === "P2002") {
+        // Unique constraint violation
+        const targetField = error.meta?.target || "unique field"; // Field causing the error (e.g., "email")
+        const message = `A record with this ${targetField} already exists.`;
+        console.error("Prisma Unique Constraint Error:", message);
+        res.status(409).json({ error: message }); // 409 Conflict
+      } else {
+        // General Prisma errors
+        console.error("Prisma Error:", error.message);
+        res
+          .status(500)
+          .json({
+            error: "A database error occurred. Please try again later.",
+          });
+      }
+    } else if (error instanceof Error) {
+      // Handle known JavaScript errors
+      console.error("Error creating employee:", error.message);
+      res.status(500).json({ error: error.message });
     } else {
-      console.error("Error creating employee:", error);
+      // Fallback for unknown error types
+      console.error("Unknown error:", error);
       res
         .status(500)
-        .json({ error: "Internal server error while creating employee" });
+        .json({ error: "An unknown error occurred. Please try again later." });
     }
   }
 };

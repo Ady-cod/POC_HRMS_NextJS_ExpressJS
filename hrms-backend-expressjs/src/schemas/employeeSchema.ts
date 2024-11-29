@@ -2,6 +2,25 @@ import { Gender, Role, Status } from "@prisma/client";
 import { z } from "zod";
 import { isValid, parseISO } from "date-fns";
 import { parsePhoneNumberFromString } from "libphonenumber-js";
+import dns from "dns/promises";
+
+// Helper function to check if a string is a valid email address
+interface DomainValidationResult {
+  exchange: string;
+  priority: number;
+}
+
+async function isDomainValid(email: string): Promise<boolean> {
+  // Extract the domain part of the email
+  const domain = email.split("@")[1];
+  if (!domain) return false; // Invalid if no domain part exists
+  try {
+    const records: DomainValidationResult[] = await dns.resolveMx(domain); // Checks for MX records
+    return records.length > 0; // Valid if there are mail servers
+  } catch {
+    return false; // Invalid if no MX records
+  }
+}
 
 // Helper function to check if a string is a valid phone number
 const isValidPhoneNumber = (phoneNumber: string): boolean => {
@@ -40,7 +59,13 @@ export const createEmployeeSchema = z.object({
     .refine(isSafeString, {
       message: 'Employee name contains unsafe characters like <, >, ", `, or &',
     }),
-  email: z.string().email("Invalid email address"),
+  email: z
+    .string()
+    .email("Invalid email address")
+    .refine(async (email) => await isDomainValid(email), {
+      message:
+        "This domain doesn't exist, use a valid domain format like example.com",
+    }),
   password: z.string().min(6, "Password must be at least 6 characters"),
   phoneNumber: z.string().refine(isValidPhoneNumber, {
     message:

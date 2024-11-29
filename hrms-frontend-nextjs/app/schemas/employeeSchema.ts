@@ -1,6 +1,16 @@
 import { z } from "zod";
 import { isValid, parseISO } from "date-fns";
 import { parsePhoneNumberFromString } from "libphonenumber-js";
+import {parse} from "tldts"
+
+// Helper function to check if an email has a valid domain
+const isValidEmailDomain = (email: string): boolean => {
+  // Parse the email into the object containing the domain
+  const result = parse(email);
+
+  // Check if the domain is valid
+  return result.domain !== null && result.isIcann === true;
+};
 
 // Helper function to check if a string is a valid phone number
 const isValidPhoneNumber = (phoneNumber: string): boolean => {
@@ -41,7 +51,10 @@ export const createEmployeeSchema = z.object({
     }),
   email: z
     .string()
-    .email("Invalid email address, use the format email@example.com"),
+    .email("Invalid email address, use the format email@example.com")
+    .refine((email) => isValidEmailDomain(email), {
+      message: "Invalid email domain, use a valid format like example.com",
+    }),
   password: z.string().min(6, "Password must be at least 6 characters"),
   phoneNumber: z.string().refine(isValidPhoneNumber, {
     // Validate as a phone number

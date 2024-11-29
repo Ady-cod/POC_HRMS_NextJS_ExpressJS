@@ -93,12 +93,19 @@ export async function createEmployee(
       const error = await response.json();
       console.error("Failed to create employee:", error);
 
+      // Check if backend returned zod validation errors
+      if (response.status === 400 && error.errors) {
+        // Throw validation errors packed into a single message, to be handled by ModalForm
+        const errorValidationMessage: string = error.errors
+          .map((err: { message: string }) => err.message)
+          .join("\n\n");
+        throw new Error(`Validation Error(s):\n\n${errorValidationMessage}`);
+      }
+
       // Use a meaningful fallback message if the server doesn't send one
       const errorMessage =
         error.error || "An unknown error occurred on the server.";
       throw new Error(errorMessage);
-
-      //   throw new Error(`Error from the server: ${error.message}`);
     }
 
     const result = await response.json();
@@ -106,7 +113,7 @@ export async function createEmployee(
   } catch (error) {
     if (error instanceof Error) {
       console.error("Error creating employee:", error);
-      throw new Error(`Failed to create employee: ${error.message}`);
+      throw new Error(`${error.message}`);
     } else {
       console.error("Error creating employee:", error);
       throw new Error("Failed to create employee: Unknown error");

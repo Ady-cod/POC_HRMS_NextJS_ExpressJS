@@ -45,7 +45,7 @@ const isSafeString = (input: string): boolean => {
 
 // Helper function to check if a string is a valid Unicode name
 const isValidUnicodeName = (input: string): boolean =>
-  /^[\p{L}\s'\-]+$/u.test(input);
+  /^[\p{L}][\p{L}\s'\-]*$/u.test(input);
 
 // Zod schema for employee creation
 export const createEmployeeSchema = z.object({
@@ -54,7 +54,7 @@ export const createEmployeeSchema = z.object({
     .min(3, "Employee name is required with a minimum of 3 characters")
     .refine(isValidUnicodeName, {
       message:
-        "Employee name must only contain letters, spaces, apostrophes, and hyphens",
+        "Employee name must only contain letters, spaces, apostrophes, hyphens and start with a letter",
     })
     .refine(isSafeString, {
       message: 'Employee name contains unsafe characters like <, >, ", `, or &',
@@ -64,7 +64,7 @@ export const createEmployeeSchema = z.object({
     .email("Invalid email address")
     .refine(async (email) => await isDomainValid(email), {
       message:
-        "This domain doesn't exist, use a valid domain format like example.com",
+        "This email domain doesn't exist, use a valid domain format like example.com",
     }),
   password: z.string().min(6, "Password must be at least 6 characters"),
   phoneNumber: z.string().refine(isValidPhoneNumber, {

@@ -35,7 +35,7 @@ const isSafeString = (input: string): boolean => {
 
 // Helper function to check if a string is a valid Unicode name
 const isValidUnicodeName = (input: string): boolean =>
-  /^[\p{L}\s'\-]+$/u.test(input);
+  /^[\p{L}][\p{L}\s'\-]*$/u.test(input);
 
 // Zod schema for employee creation
 export const createEmployeeSchema = z.object({
@@ -44,7 +44,7 @@ export const createEmployeeSchema = z.object({
     .min(3, "Employee name is required, min 3 characters")
     .refine(isValidUnicodeName, {
       message:
-        "Employee name must only contain letters, spaces, apostrophes, and hyphens",
+        "Employee name must only contain letters, spaces, apostrophes, hyphens and start with a letter",
     })
     .refine(isSafeString, {
       message: 'Employee name contains unsafe characters like <, >, ", `, or &',

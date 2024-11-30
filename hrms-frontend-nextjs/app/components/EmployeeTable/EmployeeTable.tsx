@@ -18,6 +18,7 @@ const EmployeeTable: React.FC<EmployeeTableProps> = ({ refreshFlag }) => {
       setEmployees(employees);
     }
     fetchEmployees();
+   // console.log(employees)
   }, [refreshFlag]);
 
   const handleDelete = async (id: string) => {
@@ -45,13 +46,14 @@ const EmployeeTable: React.FC<EmployeeTableProps> = ({ refreshFlag }) => {
     }
   };
   const handleEdit = () => {};
+  
 
   const columns: TableColumn<EmployeeListItem>[] = [
     {
       name: "SNo.",
       selector: (row) => row.id,
       cell: (id, row) => row + 1,
-      sortable: true,
+      sortable: false,
     },
     {
       name: "Full Name",
@@ -61,22 +63,17 @@ const EmployeeTable: React.FC<EmployeeTableProps> = ({ refreshFlag }) => {
     {
       name: "Email",
       selector: (row) => row.email || "N/A",
-      sortable: true,
     },
     {
       name: "Status",
       selector: (row) => row.status || "N/A",
-      sortable: true,
     },
     {
       name: "Role",
       selector: (row) => row.role || "N/A",
-      sortable: true,
     },
     {
       name: "Action",
-
-      sortable: true,
       cell: (row) => (
         <>
           <button onClick={handleEdit} className="bg-green-500 rounded-lg p-2">
@@ -94,7 +91,7 @@ const EmployeeTable: React.FC<EmployeeTableProps> = ({ refreshFlag }) => {
   ];
   return (
     <div>
-      <DataTable columns={columns} data={employees} />
+      <DataTable columns={columns} data={employees}  pagination/>
       <ToastContainer
         position="top-center"
         autoClose={3000}

@@ -21,20 +21,19 @@ export default function RootLayout({
     <html lang="en">
       <body>
         <div className="flex flex-col h-dvh">
-          <NavBar toggleSideBar={toggleSideBar} />
+          <header className="sticky top-0 z-10 bg-white shadow-lg">
+            <NavBar toggleSideBar={toggleSideBar} />
+          </header>
 
           <section className="flex flex-col justify-between h-dvh">
-            <section className="flex flex-col items-center justify-center sm:flex-row">
-
+            <section className="flex flex-col items-center sm:flex-row sm:items-start">
               {/* Sticky SideBar */}
-              <div
-                className="sticky top-10 mb-20"
-              >
+              <div className="sticky top-24 mt-24">
                 <SideBar isOpen={isSideBarOpen} />
               </div>
 
               {/* Main Content */}
-              <main className="flex-grow p-6 mb-12 mx-4">{children}</main>
+              <main className="flex-grow p-6">{children}</main>
             </section>
             <Footer />
           </section>

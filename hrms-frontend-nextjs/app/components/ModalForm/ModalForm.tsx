@@ -136,8 +136,8 @@ const ModalForm: React.FC<ModalFormProps> = ({
       const response = await createEmployee(validatedData);
 
       if (!response.success) {
+        // Check if the server returned validation errors
         if (response.errors) {
-          // Check if the server returned validation errors
           // Format Zod error messages for inline display, each error message will be displayed next to the related field
           const formattedErrors = formatZodErrors(response.errors);
           setErrors(formattedErrors);
@@ -148,6 +148,8 @@ const ModalForm: React.FC<ModalFormProps> = ({
             .join("\n\n");
           alert(`${response.message}:\n\n${errorValidationMessage}`);
         } else {
+          setErrors({}); // Reset errors on non-validation errors
+          // Display a general alert error message for non-validation errors
           alert(`Error in creating employee:\n\n${response.message}`);
         }
         return;
@@ -163,8 +165,8 @@ const ModalForm: React.FC<ModalFormProps> = ({
       // Reset the form after successful submission
       form.reset();
     } catch (error) {
+      // Check frontend validation errors
       if (error instanceof ZodError) {
-        // Check frontend validation errors
         // Format Zod error messages to be displayed inline
         const formattedErrors = formatZodErrors(error.errors);
         setErrors(formattedErrors);
@@ -175,20 +177,21 @@ const ModalForm: React.FC<ModalFormProps> = ({
           .join("\n\n");
         alert(`Validation Error(s):\n\n${errorValidationMessage}`);
       } else if (error instanceof Error) {
+        setErrors({}); // Reset errors on unexpected error (which is not a validation error)
+
         // General JavaScript Error handling
         alert(`Error in creating employee:\n\n${error.message}`);
-        console.error("Error in creating employee:", error);
-        // throw error;
+        // console.error("Error in creating employee:", error);
       } else {
+        setErrors({}); // Reset errors on error of unknown type
         // Catch-all for unexpected errors that don't match known types
         alert(
           "An unknown error occurred. Please check your connection or try again later."
         );
-        console.error(
-          "Unexpected non-standard error in creating employee:",
-          error
-        );
-        // throw new Error("Unexpected error in creating employee.");
+        // console.error(
+        //   "Unexpected non-standard error in creating employee:",
+        //   error
+        // );
       }
     }
   };

@@ -33,9 +33,8 @@ type CalendarState = {
 const ModalForm: React.FC<ModalFormProps> = ({
   isOpen,
   onClose,
-  refreshEmployees
+  refreshEmployees,
 }) => {
-
   // Refs for password check input field
   const confirmPasswordRef = useRef<HTMLInputElement>(null);
 
@@ -130,14 +129,31 @@ const ModalForm: React.FC<ModalFormProps> = ({
     }
 
     try {
-      // Clear errors on new submission
-      setErrors({});
-
       // Validate the form data
       const validatedData = createEmployeeSchema.parse(employeeData);
 
       // Send the data to the server action
-      await createEmployee(validatedData);
+      const response = await createEmployee(validatedData);
+
+      if (!response.success) {
+        if (response.errors) {
+          // Check if the server returned validation errors
+          // Format Zod error messages for inline display, each error message will be displayed next to the related field
+          const formattedErrors = formatZodErrors(response.errors);
+          setErrors(formattedErrors);
+
+          // Display a combined general alert error message for all validation errors
+          const errorValidationMessage = response.errors
+            .map((err) => err.message)
+            .join("\n\n");
+          alert(`${response.message}:\n\n${errorValidationMessage}`);
+        } else {
+          alert(`Error in creating employee:\n\n${response.message}`);
+        }
+        return;
+      }
+
+      setErrors({}); // Reset errors on successful submission
 
       alert("Employee created successfully!");
 
@@ -146,17 +162,18 @@ const ModalForm: React.FC<ModalFormProps> = ({
 
       // Reset the form after successful submission
       form.reset();
-
     } catch (error) {
       if (error instanceof ZodError) {
+        // Check frontend validation errors
+        // Format Zod error messages to be displayed inline
+        const formattedErrors = formatZodErrors(error.errors);
+        setErrors(formattedErrors);
+
+        // Display a combined general alert error message for all validation errors
         const errorValidationMessage = error.errors
           .map((err) => err.message)
           .join("\n\n");
         alert(`Validation Error(s):\n\n${errorValidationMessage}`);
-
-        // Format Zod error messages
-        const formattedErrors = formatZodErrors(error);
-        setErrors(formattedErrors);
       } else if (error instanceof Error) {
         // General JavaScript Error handling
         alert(`Error in creating employee:\n\n${error.message}`);
@@ -176,13 +193,18 @@ const ModalForm: React.FC<ModalFormProps> = ({
     }
   };
 
+  const handleClose = () => {
+    setErrors({}); // Reset errors when the modal is closed
+    onClose();
+  };
+
   // Ensure all hooks run consistently before conditionally returning null.
   if (!isOpen) return null;
 
   return (
     <div className="modal-overlay">
       <div className="modal-content">
-        <button className="modal-close" onClick={onClose}>
+        <button className="modal-close" onClick={handleClose}>
           ×
         </button>
 

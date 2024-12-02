@@ -9,7 +9,7 @@ const EmployeeTable = () => {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [employees, setEmployees] = useState([]);
 
-  const handleEdit = (row) => {
+  const handleEdit = (row : any) => {
     //console.log(row);
     setEmployee(row);
     setIsModalOpen(true);
@@ -102,7 +102,7 @@ const EmployeeTable = () => {
       sortable: true,
       cell: row => (
         <>
-          <button onClick={handleEdit} className="bg-green-500 rounded-lg p-2">Edit</button>
+          <button onClick={() => handleEdit(row)} className="bg-green-500 rounded-lg p-2">Edit</button>
           <button onClick={() => handleDelete(row.id)} className="bg-red-500  rounded-lg p-2 ms-2">Delete</button>
         </>
       ),

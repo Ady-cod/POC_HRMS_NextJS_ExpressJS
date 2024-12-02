@@ -172,7 +172,7 @@ export const updateEmployee = async (req: Request, res: Response): Promise<void>
   try {
     const { id } = req.params; // Get the employee ID from route params
     
-    console.log(req.body);
+    //console.log(req.body);
     
 
     if (!id) {
@@ -180,7 +180,7 @@ export const updateEmployee = async (req: Request, res: Response): Promise<void>
       return;
     }
 
-    const {
+    let {
       fullName,
       email,
       password,
@@ -198,13 +198,31 @@ export const updateEmployee = async (req: Request, res: Response): Promise<void>
       status,
       departmentId,
     }: CreateEmployeeInput = req.body;
-    
 
+    const currentEmployee = await prisma.employee.findUnique({
+      where: { id },
+      select: { password: true }, // Fetch only the password
+    });
+
+    
+    if (!currentEmployee) {
+      res.status(404).json({ error: "Employee not found." });
+      return;
+    }
+    
+    console.log(`Current employee password...  ${currentEmployee.password}`);
+    
+    const finalPassword =
+      password && password.trim() !== "" ? await hashPassword(password) : currentEmployee.password;
+    
+    console.log(`The final password is ${finalPassword}`);
+      
 
     const updatedEmployeeData: CreateEmployeePrismaData = {
       fullName,
       email,
-      password: password || null,
+      // password: password || null,
+      password: finalPassword,
       country: country || null,
       city: city || null,
       streetAddress: streetAddress || null,
@@ -219,6 +237,9 @@ export const updateEmployee = async (req: Request, res: Response): Promise<void>
       status: status || EmployeeStatus.ACTIVE,
       departmentId: departmentId || null,
     };
+
+    console.log(updatedEmployeeData);
+    
 
     // Update the employee record
     const updatedEmployee = await prisma.employee.update({

@@ -13,7 +13,7 @@ import { useRouter } from "next/navigation";
 interface ModalFormProps {
 isOpen: boolean;
 onClose: () => void;
-onSubmit: () => void;
+onSubmit?: (data : any) => void;
 data?: {};
 }
 
@@ -74,7 +74,7 @@ const ModalForm: React.FC<ModalFormProps> = ({ isOpen, onClose, data }) => {
   useEffect(() => {
     if (data) {
       setFormData((prev)=>{
-        return {...prev , ...data}
+        return {...prev , ...data , password:""}
       }
       );
     } else {
@@ -185,7 +185,7 @@ const ModalForm: React.FC<ModalFormProps> = ({ isOpen, onClose, data }) => {
     }catch(e){
       console.log(e);
     }
-    console.log(e.currentTarget)
+    //console.log(e.currentTarget)
   }
 
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
@@ -292,6 +292,22 @@ const ModalForm: React.FC<ModalFormProps> = ({ isOpen, onClose, data }) => {
             {errors.confirmPassword && (
               <p className="error-message">{errors.confirmPassword}</p>
             )} </>}
+
+            { data && <><input
+              name="password"
+              type="password"
+              onChange={handleInputChange}
+              value={formData.password}
+              placeholder="New Password"
+              className={`input-field `}
+            />
+            {/* <input
+
+              type="password"
+              placeholder="Confirm Password"
+
+              className={`confirm-password-field `}
+            /> </>} */}</>}
           </div>
 
           <h3 className="section-title">Personal Information</h3>
@@ -418,13 +434,13 @@ const ModalForm: React.FC<ModalFormProps> = ({ isOpen, onClose, data }) => {
               Please select your gender identity:
             </h4>
             <label>
-              <input type="radio" name="gender" value="MALE" /> Male
+              <input type="radio" name="gender" onChange={handleInputChange} value="MALE" defaultChecked={data?.gender === "MALE" }/> Male
             </label>
             <label>
-              <input type="radio" name="gender" value="FEMALE" /> Female
+              <input type="radio" name="gender" onChange={handleInputChange} value="FEMALE" defaultChecked={data?.gender === "FEMALE" } /> Female
             </label>
             <label>
-              <input type="radio" name="gender" value="OTHER" /> Other
+              <input type="radio" name="gender" onChange={handleInputChange} value="OTHER" defaultChecked={data?.gender === "OTHER" } /> Other
             </label>
           </div>
 

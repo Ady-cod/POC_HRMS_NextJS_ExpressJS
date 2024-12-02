@@ -4,6 +4,8 @@ import { getAllEmployees, deleteEmployee } from "@/actions/employee";
 import { EmployeeListItem } from "@/types/types";
 import { ToastContainer, toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
+import { format } from "date-fns";
+import { AiOutlinePhone, AiOutlineMail } from "react-icons/ai";
 
 interface EmployeeTableProps {
   refreshFlag: boolean;
@@ -62,7 +64,49 @@ const EmployeeTable: React.FC<EmployeeTableProps> = ({ refreshFlag }) => {
     },
     {
       name: "Email",
-      selector: (row) => row.email || "N/A",
+      cell: (row) => (
+        <div
+          className="cursor-pointer flex items-center"
+          onClick={async () => {
+            if (row.email) {
+              try {
+                await navigator.clipboard.writeText(row.email);
+                toast.success(`Email ${row.email} copied to clipboard!`);
+              } catch (error) {
+                console.error("Failed to copy email:", error);
+                toast.error("Failed to copy email. Please try again.");
+              }
+            } else {
+              toast.error("Email not available!");
+            }
+          }}
+        >
+          <AiOutlineMail size={20} className="text-black" />
+          <span className="ml-2">Copy</span>
+        </div>
+      ),
+    },
+    {
+      name: "Phone No",
+      cell: (row) => (
+        <div
+          className="cursor-pointer flex items-center"
+          onClick={() => {
+            if (row.phoneNumber) {
+              navigator.clipboard.writeText(row.phoneNumber);
+              toast.success("Phone number copied to clipboard!");
+            } else {
+              toast.error("Phone number not available!");
+            }
+          }}
+        >
+          <AiOutlinePhone size={20} className="text-black"/><span className="ml-2">Copy</span>
+        </div>
+      ),
+    },
+    {
+      name: "Date Of Joining(DD/MM/YYYY)",
+      selector: (row) => row.dateOfJoining ?  format(new Date(row.dateOfJoining), "dd/MM/yyyy") : "N/A",
     },
     {
       name: "Status",

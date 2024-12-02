@@ -46,32 +46,38 @@ export async function getAllEmployees(): Promise<EmployeeListItem[]> {
     }
 
     // Fallback for unknown errors (unexpected issues)
-    throw { status: 500, message: "Internal Server Error while attempting retrieve employees." };
+    throw {
+      status: 500,
+      message: "Internal Server Error while attempting retrieve employees.",
+    };
 
     // Fallback return  to match the return type of the function
     return [];
   }
 }
 //delete operations
-export async function deleteEmployee(id:string): Promise<{message:string}>{
-  try{
-    const response = await fetch(`${BACKEND_BASE_URL}${EMPLOYEE_ENDPOINT}/${id}`,
+export async function deleteEmployee(id: string): Promise<{ message: string }> {
+  try {
+    const response = await fetch(
+      `${BACKEND_BASE_URL}${EMPLOYEE_ENDPOINT}/${id}`,
       {
         method: "DELETE",
       }
     );
 
-    if(!response.ok){
+    if (!response.ok) {
       const errorResponse = await response.json();
       const errorMessage = errorResponse.error || "Unknown error occurred";
 
       throw { status: response.status, message: errorMessage };
     }
     return await response.json();
-  }catch(error){
+  } catch (error) {
     console.error("Error deleting employee:", error);
-    throw { status: 500, message: "Internal Server Error while deleting employee." };
-
+    throw {
+      status: 500,
+      message: "Internal Server Error while deleting employee.",
+    };
   }
 }
 
@@ -98,7 +104,6 @@ export async function createEmployee(
 
       // Check if backend returned zod validation errors
       if (response.status === 400 && error.errors) {
-
         // Return structured validation errors, passing zod errors to the form
         return {
           success: false,
@@ -119,7 +124,12 @@ export async function createEmployee(
     return { success: true, message: result.message };
     // console.log("Employee successfully created:", result);
   } catch (error) {
-    if (error instanceof Error) {
+    if (error instanceof TypeError && error.message.includes("fetch")) {
+      console.error("Unable to successfully perform the server action:", error);
+      throw new Error("Unable to complete the server action." +
+        "This may be due to a network issue, server downtime, or an unexpected error.\n\n" + 
+        "Please check your internet connection and try again.");
+    } else if (error instanceof Error) {
       console.error("Error creating employee:", error);
       throw new Error(`${error.message}`);
     } else {

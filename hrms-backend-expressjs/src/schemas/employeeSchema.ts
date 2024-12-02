@@ -1,8 +1,19 @@
 import { Gender, Role, Status } from "@prisma/client";
+import prisma from "../lib/client";
 import { z } from "zod";
 import { isValid, parseISO } from "date-fns";
 import { parsePhoneNumberFromString } from "libphonenumber-js";
 import dns from "dns/promises";
+
+// helper function to check if an email breaks the unique constraint
+const isEmailUnique = async (email: string): Promise<boolean> => {
+  const existingEmployee = await prisma.employee.findUnique({
+    where: {
+      email: email,
+    },
+  });
+  return !existingEmployee;
+}
 
 // Helper function to check if a string is a valid email address
 interface DomainValidationResult {
@@ -61,7 +72,10 @@ export const createEmployeeSchema = z.object({
     }),
   email: z
     .string()
-    .email("Invalid email address")
+    .email("Invalid email address, use the format email@example.com")
+    .refine(async (email) => await isEmailUnique(email), {
+      message: "This email is already in use, please use a different email",
+    })
     .refine(async (email) => await isDomainValid(email), {
       message:
         "This email domain doesn't exist, use a valid domain format like example.com",

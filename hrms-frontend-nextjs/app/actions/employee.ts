@@ -77,8 +77,11 @@ export async function deleteEmployee(id:string): Promise<{message:string}>{
 
 export async function createEmployee(
   validatedData: z.infer<typeof createEmployeeSchema>
-): Promise<void> {
-
+): Promise<{
+  success: boolean;
+  message: string;
+  errors?: z.ZodError["errors"];
+}> {
   try {
     // Send the data to the server
     const response = await fetch(`${BACKEND_BASE_URL}${EMPLOYEE_ENDPOINT}`, {
@@ -91,25 +94,30 @@ export async function createEmployee(
 
     if (!response.ok) {
       const error = await response.json();
-      console.error("Failed to create employee:", error);
+      // console.error("Failed to create employee:", error);
 
       // Check if backend returned zod validation errors
       if (response.status === 400 && error.errors) {
-        // Throw validation errors packed into a single message, to be handled by ModalForm
-        const errorValidationMessage: string = error.errors
-          .map((err: { message: string }) => err.message)
-          .join("\n\n");
-        throw new Error(`Validation Error(s):\n\n${errorValidationMessage}`);
+
+        // Return structured validation errors, passing zod errors to the form
+        return {
+          success: false,
+          message: "Server validation error(s) occurred",
+          errors: error.errors,
+        };
       }
 
       // Use a meaningful fallback message if the server doesn't send one
       const errorMessage =
         error.error || "An unknown error occurred on the server.";
-      throw new Error(errorMessage);
+
+      // Return the error message to be displayed in the form
+      return { success: false, message: errorMessage };
     }
 
     const result = await response.json();
-    console.log("Employee successfully created:", result);
+    return { success: true, message: result.message };
+    // console.log("Employee successfully created:", result);
   } catch (error) {
     if (error instanceof Error) {
       console.error("Error creating employee:", error);

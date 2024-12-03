@@ -1,4 +1,3 @@
-// src/components/ModalForm.tsx
 "use client";
 
 import "./ModalForm.css";
@@ -7,20 +6,23 @@ import { createEmployee } from "@/actions/employee";
 import { createEmployeeSchema } from "@/schemas/employeeSchema";
 import { formatZodErrors } from "@/utils/formatZodErrors";
 import { ZodError } from "zod";
+import { ToastContainer, toast } from "react-toastify";
+import "react-toastify/dist/ReactToastify.css";
 
 interface ModalFormProps {
-isOpen: boolean;
-onClose: () => void;
+  isOpen: boolean;
+  onClose: () => void;
+  refreshEmployees: () => void;
 }
 
 interface CalendarInputState {
-isOpen: boolean;
-isInteracting: boolean;
+  isOpen: boolean;
+  isInteracting: boolean;
 }
 
 interface InputRefs {
-birthDate: React.RefObject<HTMLInputElement>;
-joinDate: React.RefObject<HTMLInputElement>;
+  birthDate: React.RefObject<HTMLInputElement>;
+  joinDate: React.RefObject<HTMLInputElement>;
 }
 
 type InputRefKey = keyof InputRefs;
@@ -29,19 +31,17 @@ type CalendarState = {
   [key in InputRefKey]: CalendarInputState;
 };
 
-const ModalForm: React.FC<ModalFormProps> = ({ isOpen, onClose }) => {
-  // Refs for password check input field
+const ModalForm: React.FC<ModalFormProps> = ({
+  isOpen,
+  onClose,
+  refreshEmployees,
+}) => {
   const confirmPasswordRef = useRef<HTMLInputElement>(null);
-
-  const [errors, setErrors] = useState<Record<string, string>>({}); // State to store form validation errors
-
-  // State object to track open/interaction status for each date input
+  const [errors, setErrors] = useState<Record<string, string>>({});
   const [calendarState, setCalendarState] = useState<CalendarState>({
     birthDate: { isOpen: false, isInteracting: false },
     joinDate: { isOpen: false, isInteracting: false },
   });
-
-  // Refs for each date input field
   const inputRefs: InputRefs = {
     birthDate: useRef(null),
     joinDate: useRef(null),
@@ -49,7 +49,6 @@ const ModalForm: React.FC<ModalFormProps> = ({ isOpen, onClose }) => {
 
   useEffect(() => {
     const handleCalendarInteraction = (event: MouseEvent) => {
-      // Loop through each input to detect if interaction is within one of the calendar popups
       Object.keys(inputRefs).forEach((key: string) => {
         const inputRefKey = key as InputRefKey;
         if (
@@ -71,7 +70,7 @@ const ModalForm: React.FC<ModalFormProps> = ({ isOpen, onClose }) => {
                 isInteracting: false,
               },
             }));
-          }, 300); // Reset after interaction 
+          }, 300);
         }
       });
     };
@@ -81,7 +80,6 @@ const ModalForm: React.FC<ModalFormProps> = ({ isOpen, onClose }) => {
     return () => {
       document.removeEventListener("mousedown", handleCalendarInteraction);
     };
-    // Safe to omit inputRefs from dependencies because it's stable
   }, []); // eslint-disable-line react-hooks/exhaustive-deps
 
   const handleFocus = (key: InputRefKey) => {
@@ -99,7 +97,6 @@ const ModalForm: React.FC<ModalFormProps> = ({ isOpen, onClose }) => {
       }));
     }
   };
-
   const handleHover = (key: InputRefKey, isOpen: boolean) => {
     setCalendarState((prevState) => ({
       ...prevState,
@@ -109,65 +106,39 @@ const ModalForm: React.FC<ModalFormProps> = ({ isOpen, onClose }) => {
 
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
-    const form = e.currentTarget; // Get the form element
+    const form = e.currentTarget;
     const formData = new FormData(form);
     const employeeData = Object.fromEntries(formData.entries());
-
-    // Access the Confirm Password value using the ref
     const confirmPassword = confirmPasswordRef.current?.value;
 
-    // Validate the password and confirm password match
     if (employeeData.password !== confirmPassword) {
       setErrors({ confirmPassword: "Passwords do not match!" });
-      alert("Passwords do not match!");
+      toast.error("Passwords do not match!");
       return;
     }
 
     try {
-      // Clear errors on new submission
       setErrors({});
-
-      // Validate the form data
       const validatedData = createEmployeeSchema.parse(employeeData);
-
-      // Send the data to the server action
       await createEmployee(validatedData);
-
-      alert("Employee created successfully!");
-
-      // Reset the form after successful submission
+      toast.success("Employee created successfully!");
+      //refreshEmployees();
       form.reset();
+      
     } catch (error) {
       if (error instanceof ZodError) {
-        const errorValidationMessage = error.errors.map((err) => err.message).join("\n\n");
-        alert(`Validation Error(s):\n\n${errorValidationMessage}`);
-
-        // Format Zod error messages
         const formattedErrors = formatZodErrors(error);
         setErrors(formattedErrors);
-
+        error.errors.forEach((err) => toast.error(err.message));
       } else if (error instanceof Error) {
-        // General JavaScript Error handling
-        alert(`Error in creating employee:\n\n${error.message}`);
-        console.error("Error in creating employee:", error);
-        // throw error;
+        toast.error(`Error: ${error.message}`);
       } else {
-        // Catch-all for unexpected errors that don't match known types
-        alert(
-          "An unknown error occurred. Please check your connection or try again later."
-        );
-        console.error(
-          "Unexpected non-standard error in creating employee:",
-          error
-        );
-        // throw new Error("Unexpected error in creating employee.");
+        toast.error("An unknown error occurred. Please try again later.");
       }
     }
   };
 
-  // Ensure all hooks run consistently before conditionally returning null.
   if (!isOpen) return null;
-
   return (
     <div className="modal-overlay">
       <div className="modal-content">
@@ -351,6 +322,7 @@ const ModalForm: React.FC<ModalFormProps> = ({ isOpen, onClose }) => {
             </button>
           </div>
         </form>
+        <ToastContainer />
       </div>
     </div>
   );

@@ -2,7 +2,7 @@
 import React,{useState} from 'react';
 import AddNewDataButton from '../../components/AddButtons/AddNewDataButton';
 import ModalForm from '../../components/AddButtons/ModalForm';
-import EmployeeTable from '../../components/employeeTable/employeeTable';
+import EmployeeTable from '../../components/EmployeeTable/employeeTable';
 
 const EmployeePage=()=>{
     const [isSideBarOpen,setIsSideBarOpen] = useState<boolean>(true)

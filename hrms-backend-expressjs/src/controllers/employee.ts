@@ -185,6 +185,7 @@ export const updateEmployee = async (req: Request, res: Response): Promise<void>
       password,
       country,
       city,
+      departmentName,
       streetAddress,
       phoneNumber,
       birthDate,
@@ -203,7 +204,16 @@ export const updateEmployee = async (req: Request, res: Response): Promise<void>
       select: { password: true }, // Fetch only the password
     });
 
+    const newDept = await prisma.department.findUnique({
+      where : {
+        name : departmentName
+      }
+    })
+
+    console.log(`Id of new dept ${newDept?.name} is ${newDept?.id}`);
     
+    const finalDeptId = newDept?.id || departmentId;
+
     if (!currentEmployee) {
       res.status(404).json({ error: "Employee not found." });
       return;
@@ -234,7 +244,8 @@ export const updateEmployee = async (req: Request, res: Response): Promise<void>
       timezone: timezone || null,
       role: role || EmployeeRole.EMPLOYEE,
       status: status || EmployeeStatus.ACTIVE,
-      departmentId: departmentId || null,
+      // departmentId: departmentId || null,
+      departmentId : finalDeptId
     };
 
     console.log(updatedEmployeeData);

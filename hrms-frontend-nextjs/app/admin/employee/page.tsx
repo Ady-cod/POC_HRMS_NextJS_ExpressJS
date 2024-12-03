@@ -1,13 +1,13 @@
-"use client"
-import React,{useState} from 'react';
-import AddNewDataButton from '../../components/AddButtons/AddNewDataButton.tsx';
-import ModalForm from '../../components/AddButtons/ModalForm';
-import EmployeeTable from '../../components/EmployeeTable/employeeTable';
-// "use client";
-// import React, { useState } from "react";
-// import AddNewDataButton from "../../components/AddNewDataButton/AddNewDataButton";
-// import ModalForm from "../../components/ModalForm/ModalForm";
-// import EmployeeTable from "../../components/EmployeeTable/EmployeeTable";
+// "use client"
+// import React,{useState} from 'react';
+// import AddNewDataButton from '../../components/AddButtons/AddNewDataButton.tsx';
+// import ModalForm from '../../components/AddButtons/ModalForm';
+// import EmployeeTable from '../../components/EmployeeTable/employeeTable';
+"use client";
+import React, { useState } from "react";
+import AddNewDataButton from "../../components/AddNewDataButton/AddNewDataButton";
+import ModalForm from "../../components/ModalForm/ModalForm";
+import EmployeeTable from "../../components/EmployeeTable/EmployeeTable";
 
 const EmployeePage = () => {
 

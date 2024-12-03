@@ -7,11 +7,14 @@ import { createEmployee } from "@/actions/employee";
 import { createEmployeeSchema } from "@/schemas/employeeSchema";
 import { formatZodErrors } from "@/utils/formatZodErrors";
 import { ZodError } from "zod";
+import axios from "axios"
 
 interface ModalFormProps {
   isOpen: boolean;
   onClose: () => void;
-  refreshEmployees: () => void;
+  refreshEmployees?: () => void;
+  onSubmit?: (data : any) => void;
+  data?: {};
 }
 
 interface CalendarInputState {
@@ -34,6 +37,7 @@ const ModalForm: React.FC<ModalFormProps> = ({
   isOpen,
   onClose,
   refreshEmployees,
+  data
 }) => {
   // Refs for password check input field
   const confirmPasswordRef = useRef<HTMLInputElement>(null);
@@ -51,6 +55,47 @@ const ModalForm: React.FC<ModalFormProps> = ({
     birthDate: useRef(null),
     joinDate: useRef(null),
   };
+
+  const [formData, setFormData] = useState({
+    email: "",
+    password: "",
+    fullName: "",
+    phoneNumber: "",
+    streetAddress: "",
+    birthDate: "",
+    city: "",
+    department: {id : 0 , name : ""},
+    departmentName: "",
+    country: "",
+    dateOfJoining: "",
+    gender: "",
+  });
+
+  useEffect(() => {
+    if (data) {
+      console.log(data);
+      setFormData((prev)=>{
+        return {...prev , ...data , password:""}
+      }
+      );
+    } else {
+      setFormData({
+        email: "",
+        password: "",
+        fullName: "",
+        phoneNumber: "",
+        streetAddress: "",
+        birthDate: "",
+        city: "",
+        department: {id : 0 , name : ""},
+        country: "",
+        departmentName: "",
+        dateOfJoining: "",
+        gender: "",
+      });
+    }
+    // setFormData(data);
+  }, [data]);
 
   useEffect(() => {
     const handleCalendarInteraction = (event: MouseEvent) => {
@@ -112,6 +157,38 @@ const ModalForm: React.FC<ModalFormProps> = ({
     }));
   };
 
+  const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
+    const { name, value } = e.target;
+    
+      setFormData((prev) => ({
+        ...prev,
+        [name]: value,
+      }));
+    
+  };
+
+  const handleEdit = async(e: React.FormEvent<HTMLFormElement>) => {
+    // e.preventDefault();
+    // console.log("IN THE HANDLE EDIT!! :)");
+    try{
+      console.log(formData);
+      const response = await axios.
+                        post(`http://localhost:5000/api/v1/employee/update/${formData.id}` , {
+                          ...formData
+                        }).
+                        then(function(response){
+                          console.log(response);
+                          //router.push("/admin/EmployeePage/")
+                        }).catch(function(error){
+                          console.log(error);
+                        });
+                        
+    }catch(e){
+      console.log(e);
+    }
+    //console.log(e.currentTarget)
+  }
+
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     const form = e.currentTarget; // Get the form element
@@ -160,7 +237,9 @@ const ModalForm: React.FC<ModalFormProps> = ({
       alert("Employee created successfully!");
 
       // // Re-fetch employees in EmployeeTable, to show the new employee
-      refreshEmployees();
+      if(refreshEmployees){
+        refreshEmployees();
+      }
 
       // Reset the form after successful submission
       form.reset();
@@ -212,20 +291,22 @@ const ModalForm: React.FC<ModalFormProps> = ({
         </button>
 
         <h3 className="section-title">Account Details</h3>
-        <form onSubmit={handleSubmit} method="post" className="modal-form">
+        <form onSubmit={(e) => {if(data) { handleEdit(e) }else{ handleSubmit(e)}}} method="post" className="modal-form">
           <div className="input-group">
             <input
               name="email"
               type="email"
               placeholder="Email*"
+              value={formData.email}
+              onChange={handleInputChange}
               required
               className={`input-field ${errors.email ? "error" : ""}`}
             />
-            {errors.email && <p className="error-message">{errors.email}</p>}
+            {!data && <>{errors.email && <p className="error-message">{errors.email}</p>}
             <input
               name="password"
               type="password"
-              placeholder="Password (min 6 characters)*"
+              placeholder="Password*"
               required
               className={`input-field ${errors.password ? "error" : ""}`}
             />
@@ -243,7 +324,23 @@ const ModalForm: React.FC<ModalFormProps> = ({
             />
             {errors.confirmPassword && (
               <p className="error-message">{errors.confirmPassword}</p>
-            )}
+            )} </>}
+
+            { data && <><input
+              name="password"
+              type="password"
+              onChange={handleInputChange}
+              value={formData.password}
+              placeholder="New Password"
+              className={`input-field `}
+            />
+            {/* <input
+
+              type="password"
+              placeholder="Confirm Password"
+
+              className={`confirm-password-field `}
+            /> </>} */}</>}
           </div>
 
           <h3 className="section-title">Personal Information</h3>
@@ -252,6 +349,8 @@ const ModalForm: React.FC<ModalFormProps> = ({
               name="fullName"
               type="text"
               placeholder="Employee Name*"
+              value={formData.fullName}
+              onChange={handleInputChange}
               required
               className={`input-field ${errors.fullName ? "error" : ""}`}
             />
@@ -262,6 +361,8 @@ const ModalForm: React.FC<ModalFormProps> = ({
               name="phoneNumber"
               type="text"
               placeholder="Phone number* (e.g., +40715632783)"
+              value={formData.phoneNumber}
+              onChange={handleInputChange}
               required
               className={`input-field ${errors.phoneNumber ? "error" : ""}`}
             />
@@ -274,6 +375,8 @@ const ModalForm: React.FC<ModalFormProps> = ({
               name="streetAddress"
               type="text"
               placeholder="Street"
+              value={formData.streetAddress}
+              onChange={handleInputChange}
               className={`input-field ${errors.streetAddress ? "error" : ""}`}
             />
             {errors.streetAddress && (
@@ -283,6 +386,8 @@ const ModalForm: React.FC<ModalFormProps> = ({
               name="birthDate"
               ref={inputRefs.birthDate}
               type={calendarState.birthDate.isOpen ? "date" : "text"}
+              value={formData.birthDate}
+              onChange={handleInputChange}
               placeholder="Birth Date*"
               required
               onFocus={() => handleFocus("birthDate")}
@@ -302,6 +407,8 @@ const ModalForm: React.FC<ModalFormProps> = ({
               name="city"
               type="text"
               placeholder="City*"
+              value={formData.city}
+              onChange={handleInputChange}
               required
               className={`input-field ${errors.city ? "error" : ""}`}
             />
@@ -309,16 +416,17 @@ const ModalForm: React.FC<ModalFormProps> = ({
 
             <select
               name="departmentName"
+              onChange={handleInputChange}
               required
               className={`input-field ${errors.departmentName ? "error" : ""}`}
             >
-              <option value="">Select Department*</option>
-              <option value="HR">HR</option>
-              <option value="Web Development">Web Dev</option>
-              <option value="UI/UX">UI/UX</option>
-              <option value="QA">QA</option>
-              <option value="BA">BA</option>
-              <option value="SM">SM</option>
+              <option value="">Select Department</option>
+              <option value="HR" selected={formData.departmentName === "HR" ? true : false}>HR</option>
+              <option selected={formData.departmentName === "Web Dev" || formData.departmentName === "Web Development" ? true : false} value="Web Development">Web Dev</option>
+              <option selected={formData.departmentName === "UI/UX" ? true : false} value="UI/UX">UI/UX</option>
+              <option selected={formData.departmentName === "QA" ? true : false} value="QA">QA</option>
+              <option selected={formData.departmentName === "BA" ? true : false} value="BA">BA</option>
+              <option selected={formData.departmentName === "SM" ? true : false} value="SM">SM</option>
             </select>
             {errors.departmentName && (
               <p className="error-message">{errors.departmentName}</p>
@@ -328,6 +436,8 @@ const ModalForm: React.FC<ModalFormProps> = ({
             <input
               name="country"
               type="text"
+              value={formData.country}
+              onChange={handleInputChange}
               placeholder="Country*"
               required
               className={`input-field ${errors.country ? "error" : ""}`}
@@ -339,6 +449,8 @@ const ModalForm: React.FC<ModalFormProps> = ({
               name="dateOfJoining"
               ref={inputRefs.joinDate}
               type={calendarState.joinDate.isOpen ? "date" : "text"}
+              value={formData.dateOfJoining}
+              onChange={handleInputChange}
               placeholder="Date of Joining*"
               required
               onFocus={() => handleFocus("joinDate")}
@@ -359,13 +471,13 @@ const ModalForm: React.FC<ModalFormProps> = ({
               Please select your gender identity:
             </h4>
             <label>
-              <input type="radio" name="gender" value="MALE" /> Male
+              <input type="radio" name="gender" onChange={handleInputChange} value="MALE" defaultChecked={data?.gender === "MALE" }/> Male
             </label>
             <label>
-              <input type="radio" name="gender" value="FEMALE" /> Female
+              <input type="radio" name="gender" onChange={handleInputChange} value="FEMALE" defaultChecked={data?.gender === "FEMALE" } /> Female
             </label>
             <label>
-              <input type="radio" name="gender" value="OTHER" /> Other
+              <input type="radio" name="gender" onChange={handleInputChange} value="OTHER" defaultChecked={data?.gender === "OTHER" } /> Other
             </label>
           </div>
 

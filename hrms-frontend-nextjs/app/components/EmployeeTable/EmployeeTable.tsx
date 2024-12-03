@@ -4,6 +4,7 @@ import { getAllEmployees, deleteEmployee } from "@/actions/employee";
 import { EmployeeListItem } from "@/types/types";
 import { ToastContainer, toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
+import ModalForm from "../ModalForm/ModalForm";
 
 interface EmployeeTableProps {
   refreshFlag: boolean;
@@ -11,6 +12,8 @@ interface EmployeeTableProps {
 
 const EmployeeTable: React.FC<EmployeeTableProps> = ({ refreshFlag }) => {
   const [employees, setEmployees] = useState<EmployeeListItem[]>([]);
+  const [employee,setEmployee]= useState([]);
+  const [isModalOpen, setIsModalOpen] = useState(false);
 
   useEffect(() => {
     async function fetchEmployees() {
@@ -44,7 +47,17 @@ const EmployeeTable: React.FC<EmployeeTableProps> = ({ refreshFlag }) => {
       }
     }
   };
-  const handleEdit = () => {};
+
+
+  const handleEdit = (row : any) => {
+    //console.log(row);
+    setEmployee(row);
+    setIsModalOpen(true);
+  } 
+
+  const handleCloseModal = () => {
+    setIsModalOpen(false);
+  };
 
   const columns: TableColumn<EmployeeListItem>[] = [
     {
@@ -79,7 +92,7 @@ const EmployeeTable: React.FC<EmployeeTableProps> = ({ refreshFlag }) => {
       sortable: true,
       cell: (row) => (
         <>
-          <button onClick={handleEdit} className="bg-green-500 rounded-lg p-2">
+          <button onClick={() => handleEdit(row)} className="bg-green-500 rounded-lg p-2">
             Edit
           </button>
           <button
@@ -93,18 +106,24 @@ const EmployeeTable: React.FC<EmployeeTableProps> = ({ refreshFlag }) => {
     },
   ];
   return (
-    <div>
-      <DataTable columns={columns} data={employees} />
-      <ToastContainer
-        position="top-center"
-        autoClose={3000}
-        closeOnClick
-        pauseOnHover
-        draggable
-        theme="light"
-        style={{ fontSize: "1.2rem", textAlign: "center", width: "500px" }}
-      />
-    </div>
+    <>
+      <div>
+        <DataTable columns={columns} data={employees} />
+        <ToastContainer
+          position="top-center"
+          autoClose={3000}
+          closeOnClick
+          pauseOnHover
+          draggable
+          theme="light"
+          style={{ fontSize: "1.2rem", textAlign: "center", width: "500px" }}
+          />
+      </div>
+      {
+          isModalOpen &&
+          <ModalForm isOpen={isModalOpen} onClose={handleCloseModal} data={employee} />
+      }
+    </>
   );
 };
 

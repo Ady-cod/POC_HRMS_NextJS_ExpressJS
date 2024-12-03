@@ -7,24 +7,21 @@ import { createEmployee } from "@/actions/employee";
 import { createEmployeeSchema } from "@/schemas/employeeSchema";
 import { formatZodErrors } from "@/utils/formatZodErrors";
 import { ZodError } from "zod";
-import axios from "axios";
-import { useRouter } from "next/navigation";
 
 interface ModalFormProps {
-isOpen: boolean;
-onClose: () => void;
-onSubmit?: (data : any) => void;
-data?: {};
+  isOpen: boolean;
+  onClose: () => void;
+  refreshEmployees: () => void;
 }
 
 interface CalendarInputState {
-isOpen: boolean;
-isInteracting: boolean;
+  isOpen: boolean;
+  isInteracting: boolean;
 }
 
 interface InputRefs {
-birthDate: React.RefObject<HTMLInputElement>;
-joinDate: React.RefObject<HTMLInputElement>;
+  birthDate: React.RefObject<HTMLInputElement>;
+  joinDate: React.RefObject<HTMLInputElement>;
 }
 
 type InputRefKey = keyof InputRefs;
@@ -33,15 +30,14 @@ type CalendarState = {
   [key in InputRefKey]: CalendarInputState;
 };
 
-const ModalForm: React.FC<ModalFormProps> = ({ isOpen, onClose, data }) => {
-
-  //Router 
-  const router = useRouter();
-
+const ModalForm: React.FC<ModalFormProps> = ({
+  isOpen,
+  onClose,
+  refreshEmployees,
+}) => {
   // Refs for password check input field
   const confirmPasswordRef = useRef<HTMLInputElement>(null);
-  console.log(data);
-  
+
   const [errors, setErrors] = useState<Record<string, string>>({}); // State to store form validation errors
 
   // State object to track open/interaction status for each date input
@@ -52,49 +48,9 @@ const ModalForm: React.FC<ModalFormProps> = ({ isOpen, onClose, data }) => {
 
   // Refs for each date input field
   const inputRefs: InputRefs = {
-    birthDate: useRef( null),
+    birthDate: useRef(null),
     joinDate: useRef(null),
   };
-
-  const [formData, setFormData] = useState({
-    email: "",
-    password: "",
-    fullName: "",
-    phoneNumber: "",
-    streetAddress: "",
-    birthDate: "",
-    city: "",
-    department: {id : 0 , name : ""},
-    departmentName: "",
-    country: "",
-    dateOfJoining: "",
-    gender: "",
-  });
-
-  useEffect(() => {
-    if (data) {
-      setFormData((prev)=>{
-        return {...prev , ...data , password:""}
-      }
-      );
-    } else {
-      setFormData({
-        email: "",
-        password: "",
-        fullName: "",
-        phoneNumber: "",
-        streetAddress: "",
-        birthDate: "",
-        city: "",
-        department: {id : 0 , name : ""},
-        country: "",
-        departmentName: "",
-        dateOfJoining: "",
-        gender: "",
-      });
-    }
-    // setFormData(data);
-  }, [data]);
 
   useEffect(() => {
     const handleCalendarInteraction = (event: MouseEvent) => {
@@ -120,7 +76,7 @@ const ModalForm: React.FC<ModalFormProps> = ({ isOpen, onClose, data }) => {
                 isInteracting: false,
               },
             }));
-          }, 300); // Reset after interaction 
+          }, 300); // Reset after interaction
         }
       });
     };
@@ -156,38 +112,6 @@ const ModalForm: React.FC<ModalFormProps> = ({ isOpen, onClose, data }) => {
     }));
   };
 
-  const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
-    const { name, value } = e.target;
-    
-      setFormData((prev) => ({
-        ...prev,
-        [name]: value,
-      }));
-    
-  };
-
-  const handleEdit = async(e: React.FormEvent<HTMLFormElement>) => {
-    // e.preventDefault();
-    // console.log("IN THE HANDLE EDIT!! :)");
-    try{
-      console.log(formData);
-      const response = await axios.
-                        post(`http://localhost:5000/api/v1/employee/update/${formData.id}` , {
-                          ...formData
-                        }).
-                        then(function(response){
-                          console.log(response);
-                          router.push("/admin/EmployeePage/")
-                        }).catch(function(error){
-                          console.log(error);
-                        });
-                        
-    }catch(e){
-      console.log(e);
-    }
-    //console.log(e.currentTarget)
-  }
-
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     const form = e.currentTarget; // Get the form element
@@ -205,45 +129,76 @@ const ModalForm: React.FC<ModalFormProps> = ({ isOpen, onClose, data }) => {
     }
 
     try {
-      // Clear errors on new submission
-      setErrors({});
-
       // Validate the form data
       const validatedData = createEmployeeSchema.parse(employeeData);
 
       // Send the data to the server action
-      await createEmployee(validatedData);
+      const response = await createEmployee(validatedData);
+
+      if (!response.success) {
+        // Check if the server returned validation errors
+        if (response.errors) {
+          // Format Zod error messages for inline display, each error message will be displayed next to the related field
+          const formattedErrors = formatZodErrors(response.errors);
+          setErrors(formattedErrors);
+
+          // Display a combined general alert error message for all validation errors
+          const errorValidationMessage = response.errors
+            .map((err) => err.message)
+            .join("\n\n");
+          alert(`${response.message}:\n\n${errorValidationMessage}`);
+        } else {
+          setErrors({}); // Reset errors on non-validation errors
+          // Display a general alert error message for non-validation errors
+          alert(`Error in creating employee:\n\n${response.message}`);
+        }
+        return;
+      }
+
+      setErrors({}); // Reset errors on successful submission
 
       alert("Employee created successfully!");
+
+      // // Re-fetch employees in EmployeeTable, to show the new employee
+      refreshEmployees();
 
       // Reset the form after successful submission
       form.reset();
     } catch (error) {
+      // Check frontend validation errors
       if (error instanceof ZodError) {
-        const errorValidationMessage = error.errors.map((err) => err.message).join("\n\n");
-        alert(`Validation Error(s):\n\n${errorValidationMessage}`);
-
-        // Format Zod error messages
-        const formattedErrors = formatZodErrors(error);
+        // Format Zod error messages to be displayed inline
+        const formattedErrors = formatZodErrors(error.errors);
         setErrors(formattedErrors);
 
+        // Display a combined general alert error message for all validation errors
+        const errorValidationMessage = error.errors
+          .map((err) => err.message)
+          .join("\n\n");
+        alert(`Validation Error(s):\n\n${errorValidationMessage}`);
       } else if (error instanceof Error) {
+        setErrors({}); // Reset errors on unexpected error (which is not a validation error)
+
         // General JavaScript Error handling
         alert(`Error in creating employee:\n\n${error.message}`);
-        console.error("Error in creating employee:", error);
-        // throw error;
+        // console.error("Error in creating employee:", error);
       } else {
+        setErrors({}); // Reset errors on error of unknown type
         // Catch-all for unexpected errors that don't match known types
         alert(
           "An unknown error occurred. Please check your connection or try again later."
         );
-        console.error(
-          "Unexpected non-standard error in creating employee:",
-          error
-        );
-        // throw new Error("Unexpected error in creating employee.");
+        // console.error(
+        //   "Unexpected non-standard error in creating employee:",
+        //   error
+        // );
       }
     }
+  };
+
+  const handleClose = () => {
+    setErrors({}); // Reset errors when the modal is closed
+    onClose();
   };
 
   // Ensure all hooks run consistently before conditionally returning null.
@@ -252,28 +207,25 @@ const ModalForm: React.FC<ModalFormProps> = ({ isOpen, onClose, data }) => {
   return (
     <div className="modal-overlay">
       <div className="modal-content">
-        <button className="modal-close" onClick={onClose}>
+        <button className="modal-close" onClick={handleClose}>
           ×
         </button>
 
         <h3 className="section-title">Account Details</h3>
-        <form onSubmit={(e) => {if(data) { handleEdit(e) }else{ handleSubmit(e)}}} method="post" className="modal-form">
+        <form onSubmit={handleSubmit} method="post" className="modal-form">
           <div className="input-group">
             <input
               name="email"
               type="email"
               placeholder="Email*"
-              value={formData.email}
-              onChange={handleInputChange}
               required
               className={`input-field ${errors.email ? "error" : ""}`}
             />
-
-            {!data && <>{errors.email && <p className="error-message">{errors.email}</p>}
+            {errors.email && <p className="error-message">{errors.email}</p>}
             <input
               name="password"
               type="password"
-              placeholder="Password*"
+              placeholder="Password (min 6 characters)*"
               required
               className={`input-field ${errors.password ? "error" : ""}`}
             />
@@ -291,23 +243,7 @@ const ModalForm: React.FC<ModalFormProps> = ({ isOpen, onClose, data }) => {
             />
             {errors.confirmPassword && (
               <p className="error-message">{errors.confirmPassword}</p>
-            )} </>}
-
-            { data && <><input
-              name="password"
-              type="password"
-              onChange={handleInputChange}
-              value={formData.password}
-              placeholder="New Password"
-              className={`input-field `}
-            />
-            {/* <input
-
-              type="password"
-              placeholder="Confirm Password"
-
-              className={`confirm-password-field `}
-            /> </>} */}</>}
+            )}
           </div>
 
           <h3 className="section-title">Personal Information</h3>
@@ -316,8 +252,6 @@ const ModalForm: React.FC<ModalFormProps> = ({ isOpen, onClose, data }) => {
               name="fullName"
               type="text"
               placeholder="Employee Name*"
-              value={formData.fullName}
-              onChange={handleInputChange}
               required
               className={`input-field ${errors.fullName ? "error" : ""}`}
             />
@@ -327,9 +261,8 @@ const ModalForm: React.FC<ModalFormProps> = ({ isOpen, onClose, data }) => {
             <input
               name="phoneNumber"
               type="text"
-              placeholder="Phone Number"
-              value={formData.phoneNumber}
-              onChange={handleInputChange}
+              placeholder="Phone number* (e.g., +40715632783)"
+              required
               className={`input-field ${errors.phoneNumber ? "error" : ""}`}
             />
             {errors.phoneNumber && (
@@ -340,9 +273,7 @@ const ModalForm: React.FC<ModalFormProps> = ({ isOpen, onClose, data }) => {
             <input
               name="streetAddress"
               type="text"
-              placeholder="Street Address"
-              value={formData.streetAddress}
-              onChange={handleInputChange}
+              placeholder="Street"
               className={`input-field ${errors.streetAddress ? "error" : ""}`}
             />
             {errors.streetAddress && (
@@ -352,12 +283,11 @@ const ModalForm: React.FC<ModalFormProps> = ({ isOpen, onClose, data }) => {
               name="birthDate"
               ref={inputRefs.birthDate}
               type={calendarState.birthDate.isOpen ? "date" : "text"}
-              placeholder="Birth Date"
-              value={formData.birthDate}
+              placeholder="Birth Date*"
+              required
               onFocus={() => handleFocus("birthDate")}
               onBlur={() => handleBlur("birthDate")}
               onMouseEnter={() => handleHover("birthDate", true)}
-              onChange={handleInputChange}
               onMouseLeave={() => handleHover("birthDate", false)}
               className={`input-field date-field ${
                 errors.birthDate ? "error" : ""
@@ -372,8 +302,6 @@ const ModalForm: React.FC<ModalFormProps> = ({ isOpen, onClose, data }) => {
               name="city"
               type="text"
               placeholder="City*"
-              value={formData.city}
-              onChange={handleInputChange}
               required
               className={`input-field ${errors.city ? "error" : ""}`}
             />
@@ -381,16 +309,16 @@ const ModalForm: React.FC<ModalFormProps> = ({ isOpen, onClose, data }) => {
 
             <select
               name="departmentName"
-              onChange={handleInputChange}
+              required
               className={`input-field ${errors.departmentName ? "error" : ""}`}
             >
-              <option value="">Select Department</option>
+              <option value="">Select Department*</option>
               <option value="HR">HR</option>
-              <option selected={formData.departmentName === "Web Dev" ? true : false} value="Web Development">Web Dev</option>
-              <option selected={formData.departmentName === "UI/UX" ? true : false} value="UI/UX">UI/UX</option>
-              <option selected={formData.departmentName === "QA" ? true : false} value="QA">QA</option>
-              <option selected={formData.departmentName === "BA" ? true : false} value="BA">BA</option>
-              <option selected={formData.departmentName === "SM" ? true : false} value="SM">SM</option>
+              <option value="Web Development">Web Dev</option>
+              <option value="UI/UX">UI/UX</option>
+              <option value="QA">QA</option>
+              <option value="BA">BA</option>
+              <option value="SM">SM</option>
             </select>
             {errors.departmentName && (
               <p className="error-message">{errors.departmentName}</p>
@@ -400,8 +328,6 @@ const ModalForm: React.FC<ModalFormProps> = ({ isOpen, onClose, data }) => {
             <input
               name="country"
               type="text"
-              value={formData.country}
-              onChange={handleInputChange}
               placeholder="Country*"
               required
               className={`input-field ${errors.country ? "error" : ""}`}
@@ -412,10 +338,9 @@ const ModalForm: React.FC<ModalFormProps> = ({ isOpen, onClose, data }) => {
             <input
               name="dateOfJoining"
               ref={inputRefs.joinDate}
-              value={formData.dateOfJoining}
-              onChange={handleInputChange}
               type={calendarState.joinDate.isOpen ? "date" : "text"}
-              placeholder="Date of Joining"
+              placeholder="Date of Joining*"
+              required
               onFocus={() => handleFocus("joinDate")}
               onBlur={() => handleBlur("joinDate")}
               // onMouseEnter={() => handleHover("joinDate", true)}
@@ -434,13 +359,13 @@ const ModalForm: React.FC<ModalFormProps> = ({ isOpen, onClose, data }) => {
               Please select your gender identity:
             </h4>
             <label>
-              <input type="radio" name="gender" onChange={handleInputChange} value="MALE" defaultChecked={data?.gender === "MALE" }/> Male
+              <input type="radio" name="gender" value="MALE" /> Male
             </label>
             <label>
-              <input type="radio" name="gender" onChange={handleInputChange} value="FEMALE" defaultChecked={data?.gender === "FEMALE" } /> Female
+              <input type="radio" name="gender" value="FEMALE" /> Female
             </label>
             <label>
-              <input type="radio" name="gender" onChange={handleInputChange} value="OTHER" defaultChecked={data?.gender === "OTHER" } /> Other
+              <input type="radio" name="gender" value="OTHER" /> Other
             </label>
           </div>
 

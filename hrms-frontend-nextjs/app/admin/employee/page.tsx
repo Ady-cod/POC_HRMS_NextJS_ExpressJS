@@ -1,25 +1,36 @@
 "use client"
 import React,{useState} from 'react';
-import AddNewDataButton from '../../components/AddButtons/AddNewDataButton';
+import AddNewDataButton from '../../components/AddButtons/AddNewDataButton.tsx';
 import ModalForm from '../../components/AddButtons/ModalForm';
 import EmployeeTable from '../../components/EmployeeTable/employeeTable';
+// "use client";
+// import React, { useState } from "react";
+// import AddNewDataButton from "../../components/AddNewDataButton/AddNewDataButton";
+// import ModalForm from "../../components/ModalForm/ModalForm";
+// import EmployeeTable from "../../components/EmployeeTable/EmployeeTable";
 
-const EmployeePage=()=>{
+const EmployeePage = () => {
+
     const [isSideBarOpen,setIsSideBarOpen] = useState<boolean>(true)
-    const [isModalOpen, setIsModalOpen] = useState(false);
+  const [isModalOpen, setIsModalOpen] = useState(false);
     const [submittedData,setsubmittedData] = useState(null)
+  const [refreshFlag, setRefreshFlag] = useState(false);
 
-     // Open and close handlers for the modal
-     const handleAddNewDataClick = () => {
-        setIsModalOpen(true);
-    };
-    const handleCloseModal = () => {
-        setIsModalOpen(false);
-    };
+  // Open and close handlers for the modal
+  const handleAddNewDataClick = () => {
+    setIsModalOpen(true);
+  };
+  const handleCloseModal = () => {
+    setIsModalOpen(false);
+  };
 
     const handleFormData=(data:any)=>{
       setsubmittedData(data)
       }
+
+  const refreshEmployees = () => {
+    setRefreshFlag(!refreshFlag);
+  };
 
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
   return (
@@ -40,12 +51,12 @@ const EmployeePage=()=>{
       <ModalForm
         isOpen={isModalOpen}
         onClose={handleCloseModal}
-        onSubmit={handleFormData}
+        refreshEmployees={refreshEmployees}
       />
-            
-            {/* Other content like your table goes here */}
-            
-                <EmployeeTable />
+
+      {/* Other content like your table goes here */}
+
+      <EmployeeTable refreshFlag={refreshFlag} />
     </div>
   );
 };

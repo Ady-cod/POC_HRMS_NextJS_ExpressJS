@@ -1,9 +1,9 @@
 // app/layout.tsx
 "use client";
 import React, { useState } from "react";
-import NavBar from "./components/NavbarSection/navbar";
-import SideBar from "./components/SidebarMenu/Sidebar";
-import Footer from "./components/FooterSection/FooterSection";
+import NavBar from "./components/Navbar/Navbar";
+import SideBar from "./components/Sidebar/Sidebar";
+import Footer from "./components/Footer/Footer";
 import "./globals.css";
 
 export default function RootLayout({
@@ -21,11 +21,19 @@ export default function RootLayout({
     <html lang="en">
       <body>
         <div className="flex flex-col h-dvh">
-          <NavBar toggleSideBar={toggleSideBar} />
+          <header className="sticky top-0 z-10 bg-white shadow-lg">
+            <NavBar toggleSideBar={toggleSideBar} />
+          </header>
+
           <section className="flex flex-col justify-between h-dvh">
-            <section className="flex flex-col items-center justify-center sm:flex-row">
-              <SideBar isOpen={isSideBarOpen} />
-              <main className="flex-grow p-4 mb-4">{children}</main>
+            <section className="flex flex-col items-center sm:flex-row sm:items-start">
+              {/* Sticky SideBar */}
+              <div className="sticky top-24 mt-24">
+                <SideBar isOpen={isSideBarOpen} />
+              </div>
+
+              {/* Main Content */}
+              <main className="flex-grow p-6">{children}</main>
             </section>
             <Footer />
           </section>

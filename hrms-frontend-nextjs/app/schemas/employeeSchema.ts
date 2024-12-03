@@ -1,6 +1,16 @@
 import { z } from "zod";
 import { isValid, parseISO } from "date-fns";
 import { parsePhoneNumberFromString } from "libphonenumber-js";
+import {parse} from "tldts"
+
+// Helper function to check if an email has a valid domain
+const isValidEmailDomain = (email: string): boolean => {
+  // Parse the email into the object containing the domain
+  const result = parse(email);
+
+  // Check if the domain is valid
+  return result.domain !== null && result.isIcann === true;
+};
 
 // Helper function to check if a string is a valid phone number
 const isValidPhoneNumber = (phoneNumber: string): boolean => {
@@ -25,7 +35,7 @@ const isSafeString = (input: string): boolean => {
 
 // Helper function to check if a string is a valid Unicode name
 const isValidUnicodeName = (input: string): boolean =>
-  /^[\p{L}\s'\-]+$/u.test(input);
+  /^[\p{L}][\p{L}\s'\-]*[\p{L}]$/u.test(input);
 
 // Zod schema for employee creation
 export const createEmployeeSchema = z.object({
@@ -34,14 +44,17 @@ export const createEmployeeSchema = z.object({
     .min(3, "Employee name is required, min 3 characters")
     .refine(isValidUnicodeName, {
       message:
-        "Employee name must only contain letters, spaces, apostrophes, and hyphens",
+        "Employee name must only contain letters, spaces, apostrophes, hyphens and start/end with a letter",
     })
     .refine(isSafeString, {
       message: 'Employee name contains unsafe characters like <, >, ", `, or &',
     }),
   email: z
     .string()
-    .email("Invalid email address, use the format email@example.com"),
+    .email("Invalid email address, use the format email@example.com")
+    .refine((email) => isValidEmailDomain(email), {
+      message: "Invalid email domain, use a valid format like example.com",
+    }),
   password: z.string().min(6, "Password must be at least 6 characters"),
   phoneNumber: z.string().refine(isValidPhoneNumber, {
     // Validate as a phone number

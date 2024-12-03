@@ -1,5 +1,5 @@
 import { Request, Response } from "express";
-import {ObjectId} from "mongodb"
+import { ObjectId } from "mongodb";
 
 import prisma from "../lib/client";
 import { Prisma, Employee, Department } from "@prisma/client";
@@ -8,7 +8,7 @@ import { createEmployeeSchema } from "../schemas/employeeSchema";
 import { CreateEmployeePrismaData , EmployeeGender, EmployeeRole, EmployeeStatus } from "../types/types";
 import { z } from "zod";
 
-import bcrypt from "bcrypt";  
+import bcrypt from "bcrypt";
 
 // Infer type from Zod schema
 type CreateEmployeeInput = z.infer<typeof createEmployeeSchema>;
@@ -41,15 +41,15 @@ export const getAllEmployees = async (
               select: {
                 id: true,
                 name: true,
-              }
-            }
-          }
+              },
+            },
+          },
         },
         department: {
           select: {
             id: true,
-            name: true, 
-          }
+            name: true,
+          },
         },
       },
     });
@@ -73,9 +73,8 @@ export const createEmployee = async (
 ): Promise<void> => {
   try {
     // Validate request body using Zod
-    const validatedData: CreateEmployeeInput = createEmployeeSchema.parse(
-      req.body
-    );
+    const validatedData: CreateEmployeeInput =
+      await createEmployeeSchema.parseAsync(req.body);
 
     const { departmentName, password, ...employeeData } = validatedData;
 
@@ -115,9 +114,8 @@ export const createEmployee = async (
     res.status(201).json(newEmployee);
   } catch (error) {
     if (error instanceof z.ZodError) {
-      // Handle Zod validation errors
+      // Handle Zod validation errors and passing them to the frontend
       res.status(400).json({ errors: error.errors });
-
     } else if (error instanceof Prisma.PrismaClientKnownRequestError) {
       // Handle Prisma-specific errors
       if (error.code === "P2002") {
@@ -129,11 +127,9 @@ export const createEmployee = async (
       } else {
         // General Prisma errors
         console.error("Prisma Error:", error.message);
-        res
-          .status(500)
-          .json({
-            error: "A database error occurred. Please try again later.",
-          });
+        res.status(500).json({
+          error: "A database error occurred. Please try again later.",
+        });
       }
     } else if (error instanceof Error) {
       // Handle known JavaScript errors
@@ -149,9 +145,12 @@ export const createEmployee = async (
   }
 };
 
-export const deleteEmployee = async(req:Request,res:Response): Promise<void>=>{
-  try{
-    const {id} = req.params
+export const deleteEmployee = async (
+  req: Request,
+  res: Response
+): Promise<void> => {
+  try {
+    const { id } = req.params;
     if (!ObjectId.isValid(id)) {
       res.status(400).json({ error: "Employee ID is required" });
       return;
@@ -159,14 +158,14 @@ export const deleteEmployee = async(req:Request,res:Response): Promise<void>=>{
     const deletedEmployee = await prisma.employee.delete({
       where: { id },
     });
-    res.status(200).json({ message: "Employee deleted successfully", deletedEmployee });
-  }catch(error){
-    console.log("Error on deleting Employee:",error);
-    res.status(500).json({error:"Failed to delete employee"})
-
+    res
+      .status(200)
+      .json({ message: "Employee deleted successfully", deletedEmployee });
+  } catch (error) {
+    console.log("Error on deleting Employee:", error);
+    res.status(500).json({ error: "Failed to delete employee" });
   }
-
-}
+};
 
 export const updateEmployee = async (req: Request, res: Response): Promise<void> => {
   try {

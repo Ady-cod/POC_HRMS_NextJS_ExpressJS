@@ -1,7 +1,37 @@
 import { Gender, Role, Status } from "@prisma/client";
+import prisma from "../lib/client";
 import { z } from "zod";
 import { isValid, parseISO } from "date-fns";
 import { parsePhoneNumberFromString } from "libphonenumber-js";
+import dns from "dns/promises";
+
+// helper function to check if an email breaks the unique constraint
+const isEmailUnique = async (email: string): Promise<boolean> => {
+  const existingEmployee = await prisma.employee.findUnique({
+    where: {
+      email: email,
+    },
+  });
+  return !existingEmployee;
+}
+
+// Helper function to check if a string is a valid email address
+interface DomainValidationResult {
+  exchange: string;
+  priority: number;
+}
+
+async function isDomainValid(email: string): Promise<boolean> {
+  // Extract the domain part of the email
+  const domain = email.split("@")[1];
+  if (!domain) return false; // Invalid if no domain part exists
+  try {
+    const records: DomainValidationResult[] = await dns.resolveMx(domain); // Checks for MX records
+    return records.length > 0; // Valid if there are mail servers
+  } catch {
+    return false; // Invalid if no MX records
+  }
+}
 
 // Helper function to check if a string is a valid phone number
 const isValidPhoneNumber = (phoneNumber: string): boolean => {
@@ -26,7 +56,7 @@ const isSafeString = (input: string): boolean => {
 
 // Helper function to check if a string is a valid Unicode name
 const isValidUnicodeName = (input: string): boolean =>
-  /^[\p{L}\s'\-]+$/u.test(input);
+  /^[\p{L}][\p{L}\s'\-]*[\p{L}]$/u.test(input);
 
 // Zod schema for employee creation
 export const createEmployeeSchema = z.object({
@@ -35,12 +65,21 @@ export const createEmployeeSchema = z.object({
     .min(3, "Employee name is required with a minimum of 3 characters")
     .refine(isValidUnicodeName, {
       message:
-        "Employee name must only contain letters, spaces, apostrophes, and hyphens",
+        "Employee name must only contain letters, spaces, apostrophes, hyphens and start/end with a letter",
     })
     .refine(isSafeString, {
       message: 'Employee name contains unsafe characters like <, >, ", `, or &',
     }),
-  email: z.string().email("Invalid email address"),
+  email: z
+    .string()
+    .email("Invalid email address, use the format email@example.com")
+    .refine(async (email) => await isEmailUnique(email), {
+      message: "This email is already in use, please use a different email",
+    })
+    .refine(async (email) => await isDomainValid(email), {
+      message:
+        "This email domain doesn't exist, use a valid domain format like example.com",
+    }),
   password: z.string().min(6, "Password must be at least 6 characters"),
   phoneNumber: z.string().refine(isValidPhoneNumber, {
     message:

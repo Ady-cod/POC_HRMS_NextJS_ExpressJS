@@ -5,6 +5,38 @@ import { isValid, parseISO } from "date-fns";
 import { parsePhoneNumberFromString } from "libphonenumber-js";
 import dns from "dns/promises";
 
+
+// Helper function to ensure the birth date is no older than 100 years ago
+const isNotMoreThan100YearsAgo = (dateString: string): boolean => {
+  const today = new Date();
+  const hundredYearsAgo = new Date(today.getFullYear() - 100, today.getMonth(), today.getDate());
+  const date = parseISO(dateString);
+  return isValid(date) && date >= hundredYearsAgo;
+};
+
+// Helper function to check if a birth date is at least 18 years in the past
+const isAtLeast18YearsAgo = (dateString: string): boolean => {
+  const today = new Date();
+  const eighteenYearsAgo = new Date(today.getFullYear() - 18, today.getMonth(), today.getDate());
+  const date = parseISO(dateString);
+  return isValid(date) && date <= eighteenYearsAgo;
+};
+
+// Helper function to check if a joining date is not before the company founding year
+const isAfterFoundingYear = (dateString: string): boolean => {
+  const foundingYear = 2021; // The founding year of the company
+  const minJoinDate = new Date(Date.UTC(foundingYear, 0, 1));
+  const date = parseISO(dateString);
+  return isValid(date) && date >= minJoinDate;
+};
+
+// Helper function to check if a joining date is not in the future
+const isNotFutureDate = (dateString: string): boolean => {
+  const today = new Date();
+  const date = parseISO(dateString);
+  return isValid(date) && date <= today;
+};
+
 // helper function to check if an email breaks the unique constraint
 const isEmailUnique = async (email: string): Promise<boolean> => {
   const existingEmployee = await prisma.employee.findUnique({
@@ -15,7 +47,7 @@ const isEmailUnique = async (email: string): Promise<boolean> => {
   return !existingEmployee;
 }
 
-// Helper function to check if a string is a valid email address
+// Helper function to check if a string is a valid email address, using a valid domain
 interface DomainValidationResult {
   exchange: string;
   priority: number;
@@ -116,13 +148,26 @@ export const createEmployeeSchema = z.object({
     .string()
     .refine(isValidDate, {
       message: "Invalid birth date format, expected a valid YYYY-MM-DD",
-    }) // Validate as a date format
+    })
+    .refine(isAtLeast18YearsAgo, {
+      message: "Birth date must be at least 18 years ago.",
+    })
+    .refine(isNotMoreThan100YearsAgo, {
+      message:
+        "Birth date goes too far in the past. Please check your typed year",
+    })
     .transform((date) => `${date}T00:00:00.000Z`), // Appends time to the date to match Prisma's DateTime
   dateOfJoining: z
     .string()
     .refine(isValidDate, {
       message: "Invalid date of joining format, expected a valid YYYY-MM-DD",
-    }) // Validate as a date format
+    })
+    .refine(isNotFutureDate, {
+      message: "Joining date cannot be in the future.",
+    })
+    .refine(isAfterFoundingYear, {
+      message: "Joining date cannot be less than 2021.",
+    })
     .transform((date) => `${date}T00:00:00.000Z`), // Appends time to the date to match Prisma's DateTime
   departmentName: z.string().min(2, "Department name is required"),
   gender: z.nativeEnum(Gender).optional().default(Gender.OTHER), // Based on radio buttons

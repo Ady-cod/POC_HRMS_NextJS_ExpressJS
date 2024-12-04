@@ -201,6 +201,28 @@ const ModalForm: React.FC<ModalFormProps> = ({
     onClose();
   };
 
+  const today = new Date();
+  const eighteenYearsAgo = new Date(
+    today.getFullYear() - 18,
+    today.getMonth(),
+    today.getDate()
+  );
+  const hundredYearsAgo = new Date(
+    today.getFullYear() - 100,
+    today.getMonth(),
+    today.getDate()
+  );
+  const foundingYear = 2021; //This is the founding year of the company
+
+  const maxBirthDate = eighteenYearsAgo.toISOString().split("T")[0];
+  const minBirthDate = hundredYearsAgo.toISOString().split("T")[0];
+
+  const minJoinDate = new Date(Date.UTC(foundingYear, 0, 1))
+    .toISOString()
+    .split("T")[0];
+  const maxJoinDate = today.toISOString().split("T")[0];
+
+
   // Ensure all hooks run consistently before conditionally returning null.
   if (!isOpen) return null;
 
@@ -284,6 +306,8 @@ const ModalForm: React.FC<ModalFormProps> = ({
               ref={inputRefs.birthDate}
               type={calendarState.birthDate.isOpen ? "date" : "text"}
               placeholder="Birth Date*"
+              min={minBirthDate}
+              max={maxBirthDate}
               required
               onFocus={() => handleFocus("birthDate")}
               onBlur={() => handleBlur("birthDate")}
@@ -340,6 +364,8 @@ const ModalForm: React.FC<ModalFormProps> = ({
               ref={inputRefs.joinDate}
               type={calendarState.joinDate.isOpen ? "date" : "text"}
               placeholder="Date of Joining*"
+              min={minJoinDate}
+              max={maxJoinDate}
               required
               onFocus={() => handleFocus("joinDate")}
               onBlur={() => handleBlur("joinDate")}

@@ -7,6 +7,8 @@ import { createEmployee } from "@/actions/employee";
 import { createEmployeeSchema } from "@/schemas/employeeSchema";
 import { formatZodErrors } from "@/utils/formatZodErrors";
 import { ZodError } from "zod";
+import { ToastContainer, toast } from "react-toastify";
+import "react-toastify/dist/ReactToastify.css";
 
 interface ModalFormProps {
   isOpen: boolean;
@@ -124,7 +126,7 @@ const ModalForm: React.FC<ModalFormProps> = ({
     // Validate the password and confirm password match
     if (employeeData.password !== confirmPassword) {
       setErrors({ confirmPassword: "Passwords do not match!" });
-      alert("Passwords do not match!");
+      toast.error("Passwords do not match!");
       return;
     }
 
@@ -132,31 +134,8 @@ const ModalForm: React.FC<ModalFormProps> = ({
       // Validate the form data
       const validatedData = createEmployeeSchema.parse(employeeData);
 
-      // Send the data to the server action
-      const response = await createEmployee(validatedData);
-
-      if (!response.success) {
-        // Check if the server returned validation errors
-        if (response.errors) {
-          // Format Zod error messages for inline display, each error message will be displayed next to the related field
-          const formattedErrors = formatZodErrors(response.errors);
-          setErrors(formattedErrors);
-
-          // Display a combined general alert error message for all validation errors
-          const errorValidationMessage = response.errors
-            .map((err) => err.message)
-            .join("\n\n");
-          alert(`${response.message}:\n\n${errorValidationMessage}`);
-        } else {
-          setErrors({}); // Reset errors on non-validation errors
-          // Display a general alert error message for non-validation errors
-          alert(`Error in creating employee:\n\n${response.message}`);
-        }
-        return;
-      }
-
       setErrors({}); // Reset errors on successful submission
-
+      await createEmployee(validatedData);
       alert("Employee created successfully!");
 
       // // Re-fetch employees in EmployeeTable, to show the new employee
@@ -175,17 +154,17 @@ const ModalForm: React.FC<ModalFormProps> = ({
         const errorValidationMessage = error.errors
           .map((err) => err.message)
           .join("\n\n");
-        alert(`Validation Error(s):\n\n${errorValidationMessage}`);
+          toast.error(`Validation Error(s):\n\n${errorValidationMessage}`);
       } else if (error instanceof Error) {
         setErrors({}); // Reset errors on unexpected error (which is not a validation error)
 
         // General JavaScript Error handling
-        alert(`Error in creating employee:\n\n${error.message}`);
+        toast.error(`Error in creating employee:\n\n${error.message}`);
         // console.error("Error in creating employee:", error);
       } else {
         setErrors({}); // Reset errors on error of unknown type
         // Catch-all for unexpected errors that don't match known types
-        alert(
+        toast.error(
           "An unknown error occurred. Please check your connection or try again later."
         );
         // console.error(
@@ -413,6 +392,7 @@ const ModalForm: React.FC<ModalFormProps> = ({
             </button>
           </div>
         </form>
+        <ToastContainer/>
       </div>
     </div>
   );

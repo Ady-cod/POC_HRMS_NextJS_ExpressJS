@@ -11,6 +11,7 @@
   "dependencies": {
     "@nextui-org/date-input": "^2.1.4",
     "@nextui-org/table": "^2.0.40",
+    "@radix-ui/react-toast": "^1.2.2",
     "date-fns": "^4.1.0",
     "libphonenumber-js": "^1.11.14",
     "next": "14.2.15",

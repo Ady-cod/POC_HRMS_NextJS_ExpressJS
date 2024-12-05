@@ -20,6 +20,7 @@
     "react-dom": "^18",
     "react-hot-toast": "^2.4.1",
     "react-toastify": "^10.0.6",
+    "tldts": "^6.1.64",
     "zod": "^3.23.8"
   },
   "devDependencies": {

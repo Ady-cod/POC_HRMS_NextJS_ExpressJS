@@ -1,3 +1,4 @@
+// src/components/ModalForm.tsx
 "use client";
 
 import "./ModalForm.css";
@@ -6,8 +7,6 @@ import { createEmployee } from "@/actions/employee";
 import { createEmployeeSchema } from "@/schemas/employeeSchema";
 import { formatZodErrors } from "@/utils/formatZodErrors";
 import { ZodError } from "zod";
-import { ToastContainer, toast } from "react-toastify";
-import "react-toastify/dist/ReactToastify.css";
 
 interface ModalFormProps {
   isOpen: boolean;
@@ -36,12 +35,18 @@ const ModalForm: React.FC<ModalFormProps> = ({
   onClose,
   refreshEmployees,
 }) => {
+  // Refs for password check input field
   const confirmPasswordRef = useRef<HTMLInputElement>(null);
-  const [errors, setErrors] = useState<Record<string, string>>({});
+
+  const [errors, setErrors] = useState<Record<string, string>>({}); // State to store form validation errors
+
+  // State object to track open/interaction status for each date input
   const [calendarState, setCalendarState] = useState<CalendarState>({
     birthDate: { isOpen: false, isInteracting: false },
     joinDate: { isOpen: false, isInteracting: false },
   });
+
+  // Refs for each date input field
   const inputRefs: InputRefs = {
     birthDate: useRef(null),
     joinDate: useRef(null),
@@ -49,6 +54,7 @@ const ModalForm: React.FC<ModalFormProps> = ({
 
   useEffect(() => {
     const handleCalendarInteraction = (event: MouseEvent) => {
+      // Loop through each input to detect if interaction is within one of the calendar popups
       Object.keys(inputRefs).forEach((key: string) => {
         const inputRefKey = key as InputRefKey;
         if (
@@ -70,7 +76,7 @@ const ModalForm: React.FC<ModalFormProps> = ({
                 isInteracting: false,
               },
             }));
-          }, 300);
+          }, 300); // Reset after interaction
         }
       });
     };
@@ -80,6 +86,7 @@ const ModalForm: React.FC<ModalFormProps> = ({
     return () => {
       document.removeEventListener("mousedown", handleCalendarInteraction);
     };
+    // Safe to omit inputRefs from dependencies because it's stable
   }, []); // eslint-disable-line react-hooks/exhaustive-deps
 
   const handleFocus = (key: InputRefKey) => {
@@ -97,6 +104,7 @@ const ModalForm: React.FC<ModalFormProps> = ({
       }));
     }
   };
+
   const handleHover = (key: InputRefKey, isOpen: boolean) => {
     setCalendarState((prevState) => ({
       ...prevState,
@@ -106,43 +114,122 @@ const ModalForm: React.FC<ModalFormProps> = ({
 
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
-    const form = e.currentTarget;
+    const form = e.currentTarget; // Get the form element
     const formData = new FormData(form);
     const employeeData = Object.fromEntries(formData.entries());
+
+    // Access the Confirm Password value using the ref
     const confirmPassword = confirmPasswordRef.current?.value;
 
+    // Validate the password and confirm password match
     if (employeeData.password !== confirmPassword) {
       setErrors({ confirmPassword: "Passwords do not match!" });
-      toast.error("Passwords do not match!");
+      alert("Passwords do not match!");
       return;
     }
 
     try {
-      setErrors({});
+      // Validate the form data
       const validatedData = createEmployeeSchema.parse(employeeData);
-      await createEmployee(validatedData);
-      toast.success("Employee created successfully!");
-      //refreshEmployees();
+
+      // Send the data to the server action
+      const response = await createEmployee(validatedData);
+
+      if (!response.success) {
+        // Check if the server returned validation errors
+        if (response.errors) {
+          // Format Zod error messages for inline display, each error message will be displayed next to the related field
+          const formattedErrors = formatZodErrors(response.errors);
+          setErrors(formattedErrors);
+
+          // Display a combined general alert error message for all validation errors
+          const errorValidationMessage = response.errors
+            .map((err) => err.message)
+            .join("\n\n");
+          alert(`${response.message}:\n\n${errorValidationMessage}`);
+        } else {
+          setErrors({}); // Reset errors on non-validation errors
+          // Display a general alert error message for non-validation errors
+          alert(`Error in creating employee:\n\n${response.message}`);
+        }
+        return;
+      }
+
+      setErrors({}); // Reset errors on successful submission
+
+      alert("Employee created successfully!");
+
+      // // Re-fetch employees in EmployeeTable, to show the new employee
+      refreshEmployees();
+
+      // Reset the form after successful submission
       form.reset();
-      
     } catch (error) {
+      // Check frontend validation errors
       if (error instanceof ZodError) {
-        const formattedErrors = formatZodErrors(error);
+        // Format Zod error messages to be displayed inline
+        const formattedErrors = formatZodErrors(error.errors);
         setErrors(formattedErrors);
-        error.errors.forEach((err) => toast.error(err.message));
+
+        // Display a combined general alert error message for all validation errors
+        const errorValidationMessage = error.errors
+          .map((err) => err.message)
+          .join("\n\n");
+        alert(`Validation Error(s):\n\n${errorValidationMessage}`);
       } else if (error instanceof Error) {
-        toast.error(`Error: ${error.message}`);
+        setErrors({}); // Reset errors on unexpected error (which is not a validation error)
+
+        // General JavaScript Error handling
+        alert(`Error in creating employee:\n\n${error.message}`);
+        // console.error("Error in creating employee:", error);
       } else {
-        toast.error("An unknown error occurred. Please try again later.");
+        setErrors({}); // Reset errors on error of unknown type
+        // Catch-all for unexpected errors that don't match known types
+        alert(
+          "An unknown error occurred. Please check your connection or try again later."
+        );
+        // console.error(
+        //   "Unexpected non-standard error in creating employee:",
+        //   error
+        // );
       }
     }
   };
 
+  const handleClose = () => {
+    setErrors({}); // Reset errors when the modal is closed
+    onClose();
+  };
+
+  const today = new Date();
+  const eighteenYearsAgo = new Date(
+    today.getFullYear() - 18,
+    today.getMonth(),
+    today.getDate()
+  );
+  const hundredYearsAgo = new Date(
+    today.getFullYear() - 100,
+    today.getMonth(),
+    today.getDate()
+  );
+  const foundingYear = 2021; //This is the founding year of the company
+
+  const maxBirthDate = eighteenYearsAgo.toISOString().split("T")[0];
+  const minBirthDate = hundredYearsAgo.toISOString().split("T")[0];
+
+  const minJoinDate = new Date(Date.UTC(foundingYear, 0, 1))
+    .toISOString()
+    .split("T")[0];
+  const maxJoinDate = today.toISOString().split("T")[0];
+
+
+  // Ensure all hooks run consistently before conditionally returning null.
   if (!isOpen) return null;
+
   return (
     <div className="modal-overlay">
       <div className="modal-content">
-        <button className="modal-close" onClick={onClose}>
+        <button className="modal-close" onClick={handleClose}>
           ×
         </button>
 
@@ -219,6 +306,8 @@ const ModalForm: React.FC<ModalFormProps> = ({
               ref={inputRefs.birthDate}
               type={calendarState.birthDate.isOpen ? "date" : "text"}
               placeholder="Birth Date*"
+              min={minBirthDate}
+              max={maxBirthDate}
               required
               onFocus={() => handleFocus("birthDate")}
               onBlur={() => handleBlur("birthDate")}
@@ -275,6 +364,8 @@ const ModalForm: React.FC<ModalFormProps> = ({
               ref={inputRefs.joinDate}
               type={calendarState.joinDate.isOpen ? "date" : "text"}
               placeholder="Date of Joining*"
+              min={minJoinDate}
+              max={maxJoinDate}
               required
               onFocus={() => handleFocus("joinDate")}
               onBlur={() => handleBlur("joinDate")}
@@ -322,7 +413,6 @@ const ModalForm: React.FC<ModalFormProps> = ({
             </button>
           </div>
         </form>
-        <ToastContainer />
       </div>
     </div>
   );

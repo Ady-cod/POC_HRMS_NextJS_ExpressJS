@@ -112,7 +112,7 @@ export const createEmployee = async (
   } catch (error) {
     if (error instanceof z.ZodError) {
       // Handle Zod validation errors and passing them to the frontend
-      res.status(400).json({ errors: error.errors });
+      res.status(400).json({ zodError: error });
     } else if (error instanceof Prisma.PrismaClientKnownRequestError) {
       // Handle Prisma-specific errors
       if (error.code === "P2002") {

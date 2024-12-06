@@ -86,7 +86,7 @@ export async function createEmployee(
 ): Promise<{
   success: boolean;
   message: string;
-  errors?: z.ZodError["errors"];
+  zodError?: z.ZodError;
 }> {
   try {
     // Send the data to the server
@@ -103,12 +103,12 @@ export async function createEmployee(
       // console.error("Failed to create employee:", error);
 
       // Check if backend returned zod validation errors
-      if (response.status === 400 && error.errors) {
+      if (response.status === 400 && error.zodError) {
         // Return structured validation errors, passing zod errors to the form
         return {
           success: false,
           message: "Server validation error(s) occurred",
-          errors: error.errors,
+          zodError: error.zodError,
         };
       }
 
@@ -127,8 +127,8 @@ export async function createEmployee(
     if (error instanceof TypeError && error.message.includes("fetch")) {
       console.error("Unable to successfully perform the server action:", error);
       throw new Error("Unable to complete the server action." +
-        "This may be due to a network issue, server downtime, or an unexpected error.\n\n" + 
-        "Please check your internet connection and try again.");
+        "This may be due to a network issue, server downtime, or an unexpected error.\n" + 
+        "Please check your internet connection or try again later.");
     } else if (error instanceof Error) {
       console.error("Error creating employee:", error);
       throw new Error(`${error.message}`);

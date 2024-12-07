@@ -2,10 +2,8 @@ import React, { useState, useEffect } from "react";
 import DataTable, { TableColumn } from "react-data-table-component";
 import { getAllEmployees, deleteEmployee } from "@/actions/employee";
 import { EmployeeListItem } from "@/types/types";
-import { ToastContainer, toast } from "react-toastify";
-import "react-toastify/dist/ReactToastify.css";
-import { format } from "date-fns";
-import { AiOutlinePhone, AiOutlineMail } from "react-icons/ai";
+import { toast } from "react-toastify";
+
 
 interface EmployeeTableProps {
   refreshFlag: boolean;
@@ -135,6 +133,7 @@ const EmployeeTable: React.FC<EmployeeTableProps> = ({ refreshFlag }) => {
   ];
   return (
     <div>
+<<<<<<< HEAD
       <DataTable columns={columns} data={employees}  pagination/>
       <ToastContainer
         position="top-center"
@@ -145,6 +144,9 @@ const EmployeeTable: React.FC<EmployeeTableProps> = ({ refreshFlag }) => {
         theme="light"
         style={{ fontSize: "1.2rem", textAlign: "center", width: "500px" }}
       />
+=======
+      <DataTable columns={columns} data={employees} />
+>>>>>>> 71f519602206438d37608c9352d4c14e369f07df
     </div>
   );
 };

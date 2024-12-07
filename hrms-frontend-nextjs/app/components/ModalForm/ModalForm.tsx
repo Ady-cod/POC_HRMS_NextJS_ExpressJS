@@ -8,7 +8,6 @@ import { createEmployeeSchema } from "@/schemas/employeeSchema";
 import { formatZodErrors } from "@/utils/formatZodErrors";
 import { ZodError } from "zod";
 import { toast } from "react-toastify";
-import "react-toastify/dist/ReactToastify.css";
 
 interface ModalFormProps {
   isOpen: boolean;

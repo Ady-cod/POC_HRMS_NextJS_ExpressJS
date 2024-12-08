@@ -3,8 +3,6 @@ import React, { useState } from "react";
 import AddNewDataButton from "../../components/AddNewDataButton/AddNewDataButton";
 import ModalForm from "../../components/ModalForm/ModalForm";
 import EmployeeTable from "../../components/EmployeeTable/EmployeeTable";
-import { ToastContainer } from "react-toastify";
-import "react-toastify/dist/ReactToastify.css";
 
 const EmployeePage = () => {
 
@@ -38,18 +36,7 @@ const EmployeePage = () => {
         refreshEmployees={refreshEmployees}
       />
 
-      {/* Other content like your table goes here */}
-
       <EmployeeTable refreshFlag={refreshFlag} />
-      <ToastContainer
-        position="top-center"
-        autoClose={3000}
-        closeOnClick
-        pauseOnHover
-        draggable
-        theme="light"
-        style={{ fontSize: "1.2rem", textAlign: "center", width: "500px" }}
-      />
     </div>
   );
 };

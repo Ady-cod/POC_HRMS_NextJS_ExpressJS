@@ -3,10 +3,14 @@ import { toast } from "react-toastify";
 type ToastType = "success" | "error" | "info" | "warning";
 
 // Create a toast style variable to be used for all toasts
-  const toastStyle = {
+  const toastStyle: React.CSSProperties = {
     border: "3px solid gray",
     borderRadius: "12px",
     boxShadow: "8px 8px 8px gray",
+    fontSize: "1.2rem",
+    textAlign: "center",
+    maxHeight: "90dvh",
+    overflow: "auto",
   };
 
 // Function to show toast messages

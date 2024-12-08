@@ -27,14 +27,7 @@ const EmployeePage = () => {
   return (
     <div>
       {/* Header section with Add New Data button */}
-      <div
-        style={{
-          display: "flex",
-          justifyContent: "space-between",
-          alignItems: "center",
-          padding: "16px",
-        }}
-      >
+      <div className="flex justify-between items-center p-4">
         <AddNewDataButton onClick={handleAddNewDataClick} />
       </div>
 

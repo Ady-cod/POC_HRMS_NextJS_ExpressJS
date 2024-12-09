@@ -119,7 +119,7 @@ export const createEmployeeSchema = z.object({
   }), // Validate as a phone number
   country: z
     .string()
-    .min(2, "Country is required")
+    .min(2, "Country is required with a minimum of 2 characters")
     .refine(isValidUnicodeName, {
       message:
         "Country must only contain letters, spaces, apostrophes, and hyphens",
@@ -174,4 +174,117 @@ export const createEmployeeSchema = z.object({
   inductionCompleted: z.boolean().optional().default(false), // Default to false
   role: z.nativeEnum(Role).optional().default(Role.EMPLOYEE), // Default to EMPLOYEE
   status: z.nativeEnum(Status).optional().default(Status.ACTIVE), // Default to ACTIVE
+});
+
+// Zod schema for employee update
+export const updateEmployeeSchema = z.object({
+  fullName: z
+    .string()
+    .min(3, "Employee name is required with a minimum of 3 characters")
+    .refine(isValidUnicodeName, {
+      message:
+        "Employee name must only contain letters, spaces, apostrophes, hyphens and start/end with a letter",
+    })
+    .refine(isSafeString, {
+      message: 'Employee name contains unsafe characters like <, >, ", `, or &',
+    })
+    .optional()
+    .transform((value) => (!value ? null : value)),
+  email: z
+    .string()
+    .email("Invalid email address, use the format email@example.com")
+    .refine(async (email) => await isEmailUnique(email), {
+      message: "This email is already in use, please use a different email",
+    })
+    .refine(async (email) => await isDomainValid(email), {
+      message:
+        "This email domain doesn't exist, use a valid domain format like example.com",
+    })
+    .optional()
+    .transform((value) => (!value ? null : value)),
+  password: z
+    .string()
+    .min(6, "Password must be at least 6 characters")
+    .optional()
+    .transform((value) => (!value ? null : value)),
+  phoneNumber: z
+    .string()
+    .refine(isValidPhoneNumber, {
+      message:
+        "Invalid phone number format. Use international format (e.g., +123456789)",
+    })
+    .optional()
+    .transform((value) => (!value ? null : value)),
+  country: z
+    .string()
+    .min(2, "Country is required with a minimum of 2 characters")
+    .refine(isValidUnicodeName, {
+      message:
+        "Country must only contain letters, spaces, apostrophes, and hyphens",
+    })
+    .refine(isSafeString, {
+      message: 'Country contains unsafe characters like <, >, ", ` or &',
+    })
+    .optional()
+    .transform((value) => (!value ? null : value)),
+  city: z
+    .string()
+    .min(3, "City is required with a minimum of 3 characters")
+    .refine(isValidUnicodeName, {
+      message:
+        "City must only contain letters, spaces, apostrophes, and hyphens",
+    })
+    .refine(isSafeString, {
+      message: 'City contains unsafe characters like <, >, " , `, or &',
+    })
+    .optional()
+    .transform((value) => (!value ? null : value)),
+  streetAddress: z
+    .string()
+    .refine(isSafeString, {
+      message: 'Street contains unsafe characters like <, >, ", `, or &',
+    })
+    .optional()
+    .transform((value) => (!value ? null : value)),
+  birthDate: z
+    .string()
+    .refine(isValidDate, {
+      message: "Invalid birth date format, expected a valid YYYY-MM-DD",
+    })
+    .refine(isAtLeast18YearsAgo, {
+      message: "Birth date must be at least 18 years ago.",
+    })
+    .refine(isNotMoreThan100YearsAgo, {
+      message:
+        "Birth date goes too far in the past. Please check your typed year",
+    })
+    .transform((date) => `${date}T00:00:00.000Z`) // Appends time to the date to match Prisma's DateTime
+    .optional()
+    .transform((value) => (!value ? null : value)),
+  dateOfJoining: z
+    .string()
+    .refine(isValidDate, {
+      message: "Invalid date of joining format, expected a valid YYYY-MM-DD",
+    })
+    .refine(isNotFutureDate, {
+      message: "Joining date cannot be in the future.",
+    })
+    .refine(isAfterFoundingYear, {
+      message: "Joining date cannot be less than 2021.",
+    })
+    .transform((date) => `${date}T00:00:00.000Z`) // Appends time to the date to match Prisma's DateTime
+    .optional()
+    .transform((value) => (!value ? null : value)),
+  departmentName: z
+    .string()
+    .min(2, "Department name must contain at least 2 characters")
+    .optional()
+    .transform((value) => (!value ? null : value)),
+  gender: z
+    .nativeEnum(Gender) // Based on radio buttons
+    .optional()
+    .transform((value) => (!value ? null : value)),
+  inductionCompleted: z.boolean().optional(),
+  role: z.nativeEnum(Role).optional(),
+  status: z.nativeEnum(Status).optional(),
 });

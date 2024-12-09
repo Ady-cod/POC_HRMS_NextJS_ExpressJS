@@ -5,12 +5,14 @@ import prisma from "../lib/client";
 import { Prisma, Employee, Department } from "@prisma/client";
 
 import { createEmployeeSchema } from "../schemas/employeeSchema";
+import { updateEmployeeSchema } from "../schemas/employeeSchema";
 import { z } from "zod";
 
 import bcrypt from "bcrypt";
 
 // Infer type from Zod schema
 type CreateEmployeeInput = z.infer<typeof createEmployeeSchema>;
+type UpdateEmployeeInput = z.infer<typeof updateEmployeeSchema>;
 
 // Define a function to hash passwords
 const hashPassword = async (password: string): Promise<string> => {
@@ -161,5 +163,97 @@ export const deleteEmployee = async (
   } catch (error) {
     console.log("Error on deleting Employee:", error);
     res.status(500).json({ error: "Failed to delete employee" });
+  }
+};
+
+export const updateEmployee = async (
+  req: Request,
+  res: Response
+): Promise<void> => {
+  try {
+    const { id } = req.params;
+    if (!ObjectId.isValid(id)) {
+      res.status(400).json({ error: "The update cannot be performed without a valid employee ID. \nContact support." });
+      return;
+    }
+
+    // Validate request body using Zod
+    const validatedData: UpdateEmployeeInput =
+      await updateEmployeeSchema.parseAsync(req.body);
+
+    const { departmentName, password, ...employeeData } = validatedData;
+
+    // Filter out undefined properties from employeeData in order to match Prisma's update type
+    const filteredEmployeeData = Object.fromEntries(
+      Object.entries(employeeData).filter(([_, value]) => value !== undefined && value !== null)
+    );
+
+    let hashedPassword: string | null = null;
+    if (password) {
+      // Hash the password
+      hashedPassword = await hashPassword(password);
+    }
+
+    let department: Department | null = null;
+    if (departmentName) {
+      // Find or create department
+      department = (await prisma.department.findUnique({
+        where: { name: departmentName },
+      }));
+
+      if (!department) {
+        if (DEMO_MODE) {
+          // Create department in demo mode
+          department = await prisma.department.create({
+            data: { name: departmentName },
+          });
+        } else {
+          // Return error in strict mode
+          res.status(400).json({ error: "Department not found." });
+          return;
+        }
+      }
+    }
+
+    // Prepare the data for Prisma
+    const updatedEmployeeData: Prisma.EmployeeUpdateInput = {
+      ...filteredEmployeeData,
+    };
+
+    if (password) {
+      updatedEmployeeData.password = hashedPassword;
+    }
+
+    if (department) {
+      updatedEmployeeData.department = { connect: { id: department.id } };
+    }
+
+    // Update the employee
+    const updatedEmployee: Employee = await prisma.employee.update({
+      where: { id },
+      data: updatedEmployeeData,
+    });
+
+    res.status(200).json(updatedEmployee);
+  } catch (error) {
+    if (error instanceof z.ZodError) {
+      // Handle Zod validation errors and passing them to the frontend
+      res.status(400).json({ zodError: error });
+    } else if (error instanceof Prisma.PrismaClientKnownRequestError) {
+      // Handle Prisma-specific errors
+      if (error.code === "P2002") {
+        // Unique constraint violation
+        const targetField = error.meta?.target || "unique field"; // Field causing the error (e.g., "email")
+        const message = `A record with this ${targetField} already exists.`;
+        console.error("Prisma Unique Constraint Error:", message);
+        res.status(409).json({ error: message }); // 409 Conflict
+      } else {
+        // General Prisma errors
+        console.error("Prisma Error:", error.message);
+        res.status(500).json({
+          error: "A database error occurred. Please try again later.",
+        });
+      }
+    }
   }
 };

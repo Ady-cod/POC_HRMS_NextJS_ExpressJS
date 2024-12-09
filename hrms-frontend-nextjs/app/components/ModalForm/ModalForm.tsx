@@ -106,6 +106,7 @@ const ModalForm: React.FC<ModalFormProps> = ({
     }
   };
 
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   const handleHover = (key: InputRefKey, isOpen: boolean) => {
     setCalendarState((prevState) => ({
       ...prevState,
@@ -163,7 +164,6 @@ const ModalForm: React.FC<ModalFormProps> = ({
     } catch (error) {
       // Check frontend validation errors
       if (error instanceof ZodError) {
-
         // Format Zod error messages to be displayed inline
         const formattedErrors = formatZodErrors(error);
         setErrors(formattedErrors);
@@ -171,7 +171,6 @@ const ModalForm: React.FC<ModalFormProps> = ({
         // Display a toast message with the Zod error details
         const errorMessages = error.issues.map((issue) => issue.message);
         showToast("error", "Validation Error(s):", errorMessages);
-
       } else if (error instanceof Error) {
         setErrors({}); // Reset errors on unexpected error (which is not a validation error)
 
@@ -180,14 +179,14 @@ const ModalForm: React.FC<ModalFormProps> = ({
         showToast("error", "Error in creating employee:", errorMessages);
 
         // console.error("Error in creating employee:", error);
-
       } else {
         setErrors({}); // Reset errors on error of unknown type
 
         // Display unexpected errors that don't match known types
         showToast("error", "Error in creating employee:", [
-          "An unknown error occurred. Please check your connection or try again later."]);
-        
+          "An unknown error occurred. Please check your connection or try again later.",
+        ]);
+
         // console.error(
         //   "Unexpected non-standard error in creating employee:",
         //   error

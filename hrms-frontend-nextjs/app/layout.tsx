@@ -48,9 +48,7 @@ export default function RootLayout({
             draggable
             theme="light"
             style={{
-              display: "flex",
-              justifyContent: "center",
-              width: "700px",
+              width: "500px",
             }}
           />
       </body>

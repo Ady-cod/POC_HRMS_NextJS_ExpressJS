@@ -6,7 +6,7 @@ type ToastType = "success" | "error" | "info" | "warning";
   const toastStyle: React.CSSProperties = {
     border: "3px solid gray",
     borderRadius: "12px",
-    boxShadow: "8px 8px 8px gray",
+    boxShadow: "12px 12px 4px gray",
     fontSize: "1.2rem",
     textAlign: "center",
     maxHeight: "90dvh",
@@ -30,7 +30,7 @@ export const showToast = (type: ToastType, title: string, messages: string[]) =>
       <ul>{formattedMessages}</ul>
     </>,
     {
-      style: toastStyle,
+      style: {...toastStyle, borderColor: type === "success" ? "green" : "red" },
     }
   );
 };

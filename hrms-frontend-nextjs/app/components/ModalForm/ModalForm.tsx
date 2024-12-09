@@ -310,8 +310,8 @@ const ModalForm: React.FC<ModalFormProps> = ({
               required
               onFocus={() => handleFocus("birthDate")}
               onBlur={() => handleBlur("birthDate")}
-              onMouseEnter={() => handleHover("birthDate", true)}
-              onMouseLeave={() => handleHover("birthDate", false)}
+              // onMouseEnter={() => handleHover("birthDate", true)}
+              // onMouseLeave={() => handleHover("birthDate", false)}
               className={`input-field date-field ${
                 errors.birthDate ? "error" : ""
               }`}

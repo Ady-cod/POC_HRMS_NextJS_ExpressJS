@@ -3,6 +3,9 @@ import DataTable, { TableColumn } from "react-data-table-component";
 import { getAllEmployees, deleteEmployee } from "@/actions/employee";
 import { EmployeeListItem } from "@/types/types";
 import { toast } from "react-toastify";
+import { format } from "date-fns";
+import { AiOutlinePhone, AiOutlineMail } from "react-icons/ai";
+//import './EmployeeTable.css'
 
 
 interface EmployeeTableProps {
@@ -103,7 +106,7 @@ const EmployeeTable: React.FC<EmployeeTableProps> = ({ refreshFlag }) => {
       ),
     },
     {
-      name: "Date Of Joining(DD/MM/YYYY)",
+      name: "Date Of Joining",
       selector: (row) => row.dateOfJoining ?  format(new Date(row.dateOfJoining), "dd/MM/yyyy") : "N/A",
     },
     {
@@ -117,36 +120,27 @@ const EmployeeTable: React.FC<EmployeeTableProps> = ({ refreshFlag }) => {
     {
       name: "Action",
       cell: (row) => (
-        <>
+      <div className="flex space-x-2">
           <button onClick={handleEdit} className="bg-green-500 rounded-lg p-2">
             Edit
           </button>
           <button
             onClick={() => handleDelete(row.id)}
-            className="bg-red-500  rounded-lg p-2 ms-2"
+            className="bg-red-500  rounded-lg p-2"
           >
             Delete
           </button>
-        </>
+        </div>
       ),
     },
   ];
   return (
-    <div>
-<<<<<<< HEAD
-      <DataTable columns={columns} data={employees}  pagination/>
-      <ToastContainer
-        position="top-center"
-        autoClose={3000}
-        closeOnClick
-        pauseOnHover
-        draggable
-        theme="light"
-        style={{ fontSize: "1.2rem", textAlign: "center", width: "500px" }}
-      />
-=======
-      <DataTable columns={columns} data={employees} />
->>>>>>> 71f519602206438d37608c9352d4c14e369f07df
+    <div className="w-full overflow-x-auto sm:px-2">
+      <DataTable columns={columns} data={employees} 
+      pagination className="w-full"
+      responsive
+      refreshFlag={refreshFlag}
+    fixedHeader/>
     </div>
   );
 };

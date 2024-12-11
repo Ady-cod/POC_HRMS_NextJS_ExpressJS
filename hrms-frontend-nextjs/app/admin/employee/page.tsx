@@ -46,8 +46,9 @@ const EmployeePage = () => {
       />
 
       {/* Other content like your table goes here */}
-
+<div className="w-screen max-w-screen-2xl mx-auto px-4">
       <EmployeeTable refreshFlag={refreshFlag} />
+      </div>
       <ToastContainer
         position="top-center"
         autoClose={3000}

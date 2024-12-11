@@ -5,6 +5,8 @@ import NavBar from "./components/Navbar/Navbar";
 import SideBar from "./components/Sidebar/Sidebar";
 import Footer from "./components/Footer/Footer";
 import "./globals.css";
+import { ToastContainer } from "react-toastify";
+import "react-toastify/dist/ReactToastify.css";
 
 export default function RootLayout({
   children,
@@ -38,6 +40,17 @@ export default function RootLayout({
             <Footer />
           </section>
         </div>
+          <ToastContainer
+            position="top-center"
+            autoClose={3000}
+            closeOnClick
+            pauseOnHover
+            draggable
+            theme="light"
+            style={{
+              width: "500px",
+            }}
+          />
       </body>
     </html>
   );

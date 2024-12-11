@@ -5,8 +5,7 @@ import { EmployeeListItem } from "@/types/types";
 import { toast } from "react-toastify";
 import { format } from "date-fns";
 import { AiOutlinePhone, AiOutlineMail } from "react-icons/ai";
-//import './EmployeeTable.css'
-
+import { showToast } from "@/utils/toastHelper";
 
 interface EmployeeTableProps {
   refreshFlag: boolean;
@@ -30,21 +29,29 @@ const EmployeeTable: React.FC<EmployeeTableProps> = ({ refreshFlag }) => {
       const response = await deleteEmployee(id);
       console.log("Delete successful:", response.message);
 
-      // Update the UI on successful deletion
-      toast.success(`You deleted ${employee?.fullName || "an employee"}`);
+      // Show a success toast message
+      showToast("success", "Employee Deleted!", [
+        `You deleted ${employee?.fullName || "an employee"}`,
+      ]);
 
+      // Update the UI on successful deletion
       setEmployees(employees.filter((employee) => employee.id !== id));
+
     } catch (err) {
       if (err instanceof Error) {
         console.error("Error deleting employee:", err.message);
 
-        // display the regular error message
-        toast.error(`Failed to delete employee: ${err.message}`);
+        // Display the regular error message
+        const errorMessages = err.message.split("\n");
+        showToast("error", "Failed to delete employee!", errorMessages);
+
       } else {
         console.error("Error deleting employee:", "An error occurred");
 
-        // display a generic error message
-        toast.error("Failed to delete employee: unknown error appeared");
+        // Display a generic error message
+        showToast("error", "Failed to delete employee!", [
+          "An unknown error occurred",
+        ]);
       }
     }
   };

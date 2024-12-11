@@ -7,7 +7,7 @@ import { createEmployee } from "@/actions/employee";
 import { createEmployeeSchema } from "@/schemas/employeeSchema";
 import { formatZodErrors } from "@/utils/formatZodErrors";
 import { ZodError } from "zod";
-import { toast } from "react-toastify";
+import { showToast } from "@/utils/toastHelper";
 
 interface ModalFormProps {
   isOpen: boolean;
@@ -51,13 +51,6 @@ const ModalForm: React.FC<ModalFormProps> = ({
   const inputRefs: InputRefs = {
     birthDate: useRef(null),
     joinDate: useRef(null),
-  };
-
-  // Create a toast style variable to be used for all toasts
-  const toastStyle = {
-      border: "3px solid gray",
-      borderRadius: "12px",
-      boxShadow: "8px 8px 8px gray",
   };
 
   useEffect(() => {
@@ -113,6 +106,7 @@ const ModalForm: React.FC<ModalFormProps> = ({
     }
   };
 
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   const handleHover = (key: InputRefKey, isOpen: boolean) => {
     setCalendarState((prevState) => ({
       ...prevState,
@@ -132,7 +126,10 @@ const ModalForm: React.FC<ModalFormProps> = ({
     // Validate the password and confirm password match
     if (employeeData.password !== confirmPassword) {
       setErrors({ confirmPassword: "Passwords do not match!" });
-      alert("Passwords do not match!");
+
+      // Display a toast message with the error
+      showToast("error", "Password check fail:", ["Passwords do not match!"]);
+
       return;
     }
 
@@ -156,9 +153,8 @@ const ModalForm: React.FC<ModalFormProps> = ({
 
       setErrors({}); // Reset errors on successful submission
 
-      toast.success("Employee created successfully!", {
-        style: toastStyle,
-      });
+      // Display a success toast message
+      showToast("success", "Success!", ["Employee created successfully!"]);
 
       // // Re-fetch employees in EmployeeTable, to show the new employee
       refreshEmployees();
@@ -173,65 +169,24 @@ const ModalForm: React.FC<ModalFormProps> = ({
         setErrors(formattedErrors);
 
         // Display a toast message with the Zod error details
-        toast.error(
-          <>
-            <strong>Validation Error(s):</strong>
-            <br />
-            <br />
-            <ul>
-              {error.issues.map((issue, index) => (
-                <li key={index}>
-                  {issue.message}
-                  <br />
-                  <br />
-                </li>
-              ))}
-            </ul>
-          </>,
-          {
-            style: toastStyle,
-          }
-        );
+        const errorMessages = error.issues.map((issue) => issue.message);
+        showToast("error", "Validation Error(s):", errorMessages);
       } else if (error instanceof Error) {
         setErrors({}); // Reset errors on unexpected error (which is not a validation error)
 
-        // General JavaScript Error handling
-        toast.error(
-          <>
-            <strong>Error in creating employee:</strong>
-            <br />
-            <br />
-            <ul>
-              {error.message.split("\n").map((line, index) => (
-                <li key={index}>
-                  {line}
-                  <br />
-                  <br />
-                </li>
-              ))}
-            </ul>
-          </>,
-          {
-            style: toastStyle,
-          }
-        );
+        // General JavaScript Error display in a toast
+        const errorMessages = error.message.split("\n");
+        showToast("error", "Error in creating employee:", errorMessages);
+
         // console.error("Error in creating employee:", error);
       } else {
         setErrors({}); // Reset errors on error of unknown type
-        
+
         // Display unexpected errors that don't match known types
-        toast.error(
-          <>
-            Error in creating employee:
-            <br />
-            <br />
-            An unknown error occurred. Please check your connection or try again
-            later.
-          </>,
-          {
-            style: toastStyle,
-          }
-        );
+        showToast("error", "Error in creating employee:", [
+          "An unknown error occurred. Please check your connection or try again later.",
+        ]);
+
         // console.error(
         //   "Unexpected non-standard error in creating employee:",
         //   error
@@ -354,8 +309,8 @@ const ModalForm: React.FC<ModalFormProps> = ({
               required
               onFocus={() => handleFocus("birthDate")}
               onBlur={() => handleBlur("birthDate")}
-              onMouseEnter={() => handleHover("birthDate", true)}
-              onMouseLeave={() => handleHover("birthDate", false)}
+              // onMouseEnter={() => handleHover("birthDate", true)}
+              // onMouseLeave={() => handleHover("birthDate", false)}
               className={`input-field date-field ${
                 errors.birthDate ? "error" : ""
               }`}

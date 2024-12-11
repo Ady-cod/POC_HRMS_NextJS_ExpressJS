@@ -3,8 +3,7 @@ import React, { useState } from "react";
 import AddNewDataButton from "../../components/AddNewDataButton/AddNewDataButton";
 import ModalForm from "../../components/ModalForm/ModalForm";
 import EmployeeTable from "../../components/EmployeeTable/EmployeeTable";
-import { ToastContainer } from "react-toastify";
-import "react-toastify/dist/ReactToastify.css";
+
 
 const EmployeePage = () => {
 
@@ -27,14 +26,7 @@ const EmployeePage = () => {
   return (
     <div>
       {/* Header section with Add New Data button */}
-      <div
-        style={{
-          display: "flex",
-          justifyContent: "space-between",
-          alignItems: "center",
-          padding: "16px",
-        }}
-      >
+      <div className="flex justify-between items-center p-4">
         <AddNewDataButton onClick={handleAddNewDataClick} />
       </div>
 
@@ -49,15 +41,6 @@ const EmployeePage = () => {
 <div className="w-screen max-w-screen-2xl mx-auto px-4">
       <EmployeeTable refreshFlag={refreshFlag} />
       </div>
-      <ToastContainer
-        position="top-center"
-        autoClose={3000}
-        closeOnClick
-        pauseOnHover
-        draggable
-        theme="light"
-        style={{ fontSize: "1.2rem", textAlign: "center", width: "500px" }}
-      />
     </div>
   );
 };

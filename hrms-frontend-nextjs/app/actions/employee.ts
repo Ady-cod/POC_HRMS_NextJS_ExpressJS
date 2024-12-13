@@ -1,6 +1,6 @@
 "use server";
 import { EmployeeListItem } from "@/types/types";
-import { createEmployeeSchema } from "@/schemas/employeeSchema";
+import { createEmployeeSchema, updateEmployeeSchema } from "@/schemas/employeeSchema";
 import { z } from "zod";
 
 const BACKEND_BASE_URL = process.env.NEXT_PUBLIC_BACKEND_BASE_URL;
@@ -137,4 +137,62 @@ export async function createEmployee(
       throw new Error("Failed to create employee: Unknown error");
     }
   }
-}
+};
+export async function updateEmployee(
+  id: string,
+  validatedData: z.infer<typeof updateEmployeeSchema>
+): Promise<{
+  success: boolean;
+  message: string;
+  zodError?: z.ZodError;
+}> {
+  try {
+    // Send the data to the server
+    const response = await fetch(`${BACKEND_BASE_URL}${EMPLOYEE_ENDPOINT}/${id}`, {
+      method: "PATCH",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify(validatedData),
+    });
+
+    if (!response.ok) {
+      const error = await response.json();
+      // console.error("Failed to update employee:", error);
+
+      // Check if backend returned zod validation errors
+      if (response.status === 400 && error.zodError) {
+        // Return structured validation errors, passing zod errors to the form
+        return {
+          success: false,
+          message: "Server validation error(s) occurred",
+          zodError: error.zodError,
+        };
+      }
+
+      // Use a meaningful fallback message if the server doesn't send one
+      const errorMessage =
+        error.error || "An unknown error occurred on the server.";
+
+      // Return the error message to be displayed in the form
+      return { success: false, message: errorMessage };
+    }
+
+    const result = await response.json();
+    return { success: true, message: result.message };
+    // console.log("Employee successfully updated:", result);
+  } catch (error) {
+    if (error instanceof TypeError && error.message.includes("fetch")) {
+      // console.error("Unable to successfully perform the server action:", error);
+      throw new Error("Unable to complete the server action." +
+        "This may be due to a network issue, server downtime, or an unexpected error.\n" + 
+        "Please check your internet connection or try again later.");
+    } else if (error instanceof Error) {
+      // console.error("Error updating employee:", error);
+      throw new Error(`${error.message}`);
+    } else {
+      // console.error("Error updating employee:", error);
+      throw new Error("Failed to update employee: Unknown error");
+    }
+  }
+};

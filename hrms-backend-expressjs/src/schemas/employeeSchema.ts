@@ -122,7 +122,7 @@ export const createEmployeeSchema = z.object({
     .min(2, "Country is required with a minimum of 2 characters")
     .refine(isValidUnicodeName, {
       message:
-        "Country must only contain letters, spaces, apostrophes, and hyphens",
+        "Country must only contain letters (2 minimum), spaces, apostrophes, hyphens and start/end with a letter",
     })
     .refine(isSafeString, {
       message: 'Country contains unsafe characters like <, >, ", ` or &',
@@ -132,7 +132,7 @@ export const createEmployeeSchema = z.object({
     .min(3, "City is required with a minimum of 3 characters")
     .refine(isValidUnicodeName, {
       message:
-        "City must only contain letters, spaces, apostrophes, and hyphens",
+        "City must only contain letters (3 minimum), spaces, apostrophes, hyphens and start/end with a letter",
     })
     .refine(isSafeString, {
       message: 'City contains unsafe characters like <, >, " , `, or &',
@@ -183,7 +183,7 @@ export const updateEmployeeSchema = z.object({
     .min(3, "Employee name is required with a minimum of 3 characters")
     .refine(isValidUnicodeName, {
       message:
-        "Employee name must only contain letters, spaces, apostrophes, hyphens and start/end with a letter",
+        "Employee name must only contain letters (3 minimum), spaces, apostrophes, hyphens and start/end with a letter",
     })
     .refine(isSafeString, {
       message: 'Employee name contains unsafe characters like <, >, ", `, or &',
@@ -220,7 +220,7 @@ export const updateEmployeeSchema = z.object({
     .min(2, "Country is required with a minimum of 2 characters")
     .refine(isValidUnicodeName, {
       message:
-        "Country must only contain letters, spaces, apostrophes, and hyphens",
+        "Country must only contain letters (2 minimum), spaces, apostrophes, hyphens and start/end with a letter",
     })
     .refine(isSafeString, {
       message: 'Country contains unsafe characters like <, >, ", ` or &',
@@ -232,7 +232,7 @@ export const updateEmployeeSchema = z.object({
     .min(3, "City is required with a minimum of 3 characters")
     .refine(isValidUnicodeName, {
       message:
-        "City must only contain letters, spaces, apostrophes, and hyphens",
+        "City must only contain letters (3 minimum), spaces, apostrophes, hyphens and start/end with a letter",
     })
     .refine(isSafeString, {
       message: 'City contains unsafe characters like <, >, " , `, or &',

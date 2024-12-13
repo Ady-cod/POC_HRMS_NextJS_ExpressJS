@@ -22,16 +22,30 @@ export interface DepartmentListItem {
   name: string;
 }
 
+// Define Employee gender enum
+export enum EmployeeGender {
+  MALE = "MALE",
+  FEMALE = "FEMALE",
+  OTHER = "OTHER",
+}
+
 // Define EmployeeListItem interface
 export interface EmployeeListItem {
   id: string;
   fullName: string;
   email: string;
+  password: string;
+  phoneNumber: string;
+  country: string;
+  city: string;
+  streetAddress?: string | null;
+  birthDate: string;
+  dateOfJoining: string;
+  department: DepartmentListItem | null;
+  gender: EmployeeGender;
   role: EmployeeRole;
   status: EmployeeStatus;
   inductionCompleted?: boolean | null;
-  phoneNumber?: string | null;
   profilePhotoUrl?: string | null;
   timezone?: string | null;
-  department?: DepartmentListItem | null;
 }

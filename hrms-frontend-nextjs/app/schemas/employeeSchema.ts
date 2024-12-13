@@ -72,10 +72,10 @@ const isValidUnicodeName = (input: string): boolean =>
 export const createEmployeeSchema = z.object({
   fullName: z
     .string()
-    .min(3, "Employee name is required, min 3 characters")
+    .min(3, "Employee name is required, with a minimum of 3 characters")
     .refine(isValidUnicodeName, {
       message:
-        "Employee name must only contain letters, spaces, apostrophes, hyphens and start/end with a letter",
+        "Employee name must only contain letters (3 minimum), spaces, apostrophes, hyphens and start/end with a letter",
     })
     .refine(isSafeString, {
       message: 'Employee name contains unsafe characters like <, >, ", `, or &',
@@ -94,20 +94,20 @@ export const createEmployeeSchema = z.object({
   }),
   country: z
     .string()
-    .min(2, "Country is required, min 2 characters")
+    .min(2, "Country is required with a minimum of 2 characters")
     .refine(isValidUnicodeName, {
       message:
-        "Country must only contain letters, spaces, apostrophes, and hyphens",
+        "Country must only contain letters (2 minimum), spaces, apostrophes, and hyphens",
     })
     .refine(isSafeString, {
       message: 'Country contains unsafe characters like <, >, ", ` or &',
     }),
   city: z
     .string()
-    .min(3, "City is required, min 3 characters")
+    .min(3, "City is required with a minimum of 3 characters")
     .refine(isValidUnicodeName, {
       message:
-        "City must only contain letters, spaces, apostrophes, and hyphens",
+        "City must only contain letters (3 minimum), spaces, apostrophes, hyphens and start/end with a letter",
     })
     .refine(isSafeString, {
       message: 'City contains unsafe characters like <, >, " , `, or &',
@@ -144,5 +144,97 @@ export const createEmployeeSchema = z.object({
   departmentName: z
     .string()
     .min(2, "Department name is required, select from the list"),
+  gender: z.enum(["MALE", "FEMALE", "OTHER"]).optional(), // Based on radio buttons
+});
+
+// Zod schema for employee update
+export const updateEmployeeSchema = z.object({
+  fullName: z
+    .string()
+    .min(3, "Employee name is required, with a minimum of 3 characters")
+    .refine(isValidUnicodeName, {
+      message:
+        "Employee name must only contain letters (3 minimum), spaces, apostrophes, hyphens and start/end with a letter",
+    })
+    .refine(isSafeString, {
+      message: 'Employee name contains unsafe characters like <, >, ", `, or &',
+    })
+    .optional(),
+  email: z
+    .string()
+    .email("Invalid email address, use the format email@example.com")
+    .refine((email) => isValidEmailDomain(email), {
+      message: "Invalid email domain, use a valid format like example.com",
+    })
+    .optional(),
+  password: z
+    .string()
+    .min(6, "Password must be at least 6 characters")
+    .optional(),
+  phoneNumber: z
+    .string()
+    .refine(isValidPhoneNumber, {
+      // Validate as a phone number
+      message:
+        "Invalid phone number format. Use international format (e.g., +123456789)",
+    })
+    .optional(),
+  country: z
+    .string()
+    .min(2, "Country is required with a minimum of 2 characters")
+    .refine(isValidUnicodeName, {
+      message:
+        "Country must only contain letters (2 minimum), spaces, apostrophes, hyphens and start/end with a letter",
+    })
+    .refine(isSafeString, {
+      message: 'Country contains unsafe characters like <, >, ", ` or &',
+    })
+    .optional(),
+  city: z
+    .string()
+    .min(3, "City is required with a minimum of 3 characters")
+    .refine(isValidUnicodeName, {
+      message:
+        "City must only contain letters (3 minimum), spaces, apostrophes, hyphens and start/end with a letter",
+    })
+    .refine(isSafeString, {
+      message: 'City contains unsafe characters like <, >, " , `, or &',
+    })
+    .optional(),
+  streetAddress: z
+    .string()
+    .refine(isSafeString, {
+      message: 'Street contains unsafe characters like <, >, ", `, or &',
+    })
+    .optional(),
+  birthDate: z
+    .string()
+    .refine(isValidDate, {
+      message: "Invalid birth date format, expected a valid YYYY-MM-DD",
+    })
+    .refine(isAtLeast18YearsAgo, {
+      message: "Birth date must be at least 18 years ago.",
+    })
+    .refine(isNotMoreThan100YearsAgo, {
+      message:
+        "Birth date goes too far in the past. Please check your typed year",
+    })
+    .optional(),
+  dateOfJoining: z
+    .string()
+    .refine(isValidDate, {
+      message: "Invalid date of joining format, expected a valid YYYY-MM-DD",
+    })
+    .refine(isNotFutureDate, {
+      message: "Joining date cannot be in the future.",
+    })
+    .refine(isAfterFoundingYear, {
+      message: "Joining date cannot be less than 2021.",
+    })
+    .optional(),
+  departmentName: z
+    .string()
+    .min(2, "Department name is required, select from the list")
+    .optional(),
   gender: z.enum(["MALE", "FEMALE", "OTHER"]).optional(), // Based on radio buttons
 });

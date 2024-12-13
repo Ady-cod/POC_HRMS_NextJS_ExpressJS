@@ -6,9 +6,10 @@ import { showToast } from "@/utils/toastHelper";
 
 interface EmployeeTableProps {
   refreshFlag: boolean;
+  handleEdit: (employeeData: EmployeeListItem) => void;
 }
 
-const EmployeeTable: React.FC<EmployeeTableProps> = ({ refreshFlag }) => {
+const EmployeeTable: React.FC<EmployeeTableProps> = ({ refreshFlag, handleEdit }) => {
   const [employees, setEmployees] = useState<EmployeeListItem[]>([]);
 
   useEffect(() => {
@@ -51,7 +52,9 @@ const EmployeeTable: React.FC<EmployeeTableProps> = ({ refreshFlag }) => {
       }
     }
   };
-  const handleEdit = () => {};
+  // const handleEdit = (employeeData: EmployeeListItem) => {
+  //   console.log("employeeData", employeeData);
+  // };
 
   const columns: TableColumn<EmployeeListItem>[] = [
     {
@@ -86,7 +89,7 @@ const EmployeeTable: React.FC<EmployeeTableProps> = ({ refreshFlag }) => {
       sortable: true,
       cell: (row) => (
         <>
-          <button onClick={handleEdit} className="bg-green-500 rounded-lg p-2">
+          <button onClick={() => handleEdit(row)} className="bg-green-500 rounded-lg p-2">
             Edit
           </button>
           <button

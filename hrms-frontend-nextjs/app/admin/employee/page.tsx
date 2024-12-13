@@ -3,11 +3,13 @@ import React, { useState } from "react";
 import AddNewDataButton from "../../components/AddNewDataButton/AddNewDataButton";
 import ModalForm from "../../components/ModalForm/ModalForm";
 import EmployeeTable from "../../components/EmployeeTable/EmployeeTable";
+import { EmployeeListItem } from "@/types/types";
 
 const EmployeePage = () => {
 
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [refreshFlag, setRefreshFlag] = useState(false);
+  const [employeeData, setEmployeeData] = useState<EmployeeListItem | null>(null);
 
   // Open and close handlers for the modal
   const handleAddNewDataClick = () => {
@@ -15,10 +17,21 @@ const EmployeePage = () => {
   };
   const handleCloseModal = () => {
     setIsModalOpen(false);
+    setEmployeeData(null);
   };
 
   const refreshEmployees = () => {
     setRefreshFlag(!refreshFlag);
+    if (employeeData) {
+      setEmployeeData(null);
+      setIsModalOpen(false);
+    }
+  };
+
+  const handleEdit = (employeeData: EmployeeListItem) => {
+    setEmployeeData(employeeData);
+    setIsModalOpen(true);
+    // console.log("employeeData", employeeData);
   };
 
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
@@ -34,9 +47,10 @@ const EmployeePage = () => {
         isOpen={isModalOpen}
         onClose={handleCloseModal}
         refreshEmployees={refreshEmployees}
+        employeeData={employeeData}
       />
 
-      <EmployeeTable refreshFlag={refreshFlag} />
+      <EmployeeTable refreshFlag={refreshFlag} handleEdit={handleEdit} />
     </div>
   );
 };

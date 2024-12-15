@@ -86,7 +86,17 @@ export const createEmployeeSchema = z.object({
     .refine((email) => isValidEmailDomain(email), {
       message: "Invalid email domain, use a valid format like example.com",
     }),
-  password: z.string().min(6, "Password must be at least 6 characters"),
+  password: z
+    .string()
+    .min(6, "Password must be at least 6 characters")
+    .max(16, "Password must not exceed 16 characters")
+    .regex(/\p{Ll}/u, "Password must include at least one lowercase letter")
+    .regex(/\p{Lu}/u, "Password must include at least one uppercase letter")
+    .regex(/\d/u, "Password must include at least one digit")
+    .regex(
+      /[^\p{L}\d]/u,
+      "Password must include at least one special character"
+    ),
   phoneNumber: z.string().refine(isValidPhoneNumber, {
     // Validate as a phone number
     message:
@@ -170,6 +180,14 @@ export const updateEmployeeSchema = z.object({
   password: z
     .string()
     .min(6, "Password must be at least 6 characters")
+    .max(16, "Password must not exceed 16 characters")
+    .regex(/\p{Ll}/u, "Password must include at least one lowercase letter")
+    .regex(/\p{Lu}/u, "Password must include at least one uppercase letter")
+    .regex(/\d/u, "Password must include at least one digit")
+    .regex(
+      /[^\p{L}\d]/u,
+      "Password must include at least one special character"
+    )
     .optional(),
   phoneNumber: z
     .string()

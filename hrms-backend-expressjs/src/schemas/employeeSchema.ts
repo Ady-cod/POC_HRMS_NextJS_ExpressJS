@@ -5,6 +5,9 @@ import { isValid, parseISO } from "date-fns";
 import { parsePhoneNumberFromString } from "libphonenumber-js";
 import dns from "dns/promises";
 
+// Helper function to capitalize the first letter of each word in a name
+const capitalizeEachWord = (name: string): string =>
+  name.replace(/\b[\p{L}]/ug, (char) => char.toUpperCase());
 
 // Helper function to ensure the birth date is no older than 100 years ago
 const isNotMoreThan100YearsAgo = (dateString: string): boolean => {
@@ -97,11 +100,12 @@ export const createEmployeeSchema = z.object({
     .min(3, "Employee name is required with a minimum of 3 characters")
     .refine(isValidUnicodeName, {
       message:
-        "Employee name must only contain letters, spaces, apostrophes, hyphens and start/end with a letter",
+        "Employee name must only contain letters (3 minimum), spaces, apostrophes, hyphens and start/end with a letter",
     })
     .refine(isSafeString, {
       message: 'Employee name contains unsafe characters like <, >, ", `, or &',
-    }),
+    })
+    .transform(capitalizeEachWord),
   email: z
     .string()
     .email("Invalid email address, use the format email@example.com")
@@ -126,7 +130,8 @@ export const createEmployeeSchema = z.object({
     })
     .refine(isSafeString, {
       message: 'Country contains unsafe characters like <, >, ", ` or &',
-    }),
+    })
+    .transform(capitalizeEachWord),
   city: z
     .string()
     .min(3, "City is required with a minimum of 3 characters")
@@ -136,7 +141,8 @@ export const createEmployeeSchema = z.object({
     })
     .refine(isSafeString, {
       message: 'City contains unsafe characters like <, >, " , `, or &',
-    }),
+    })
+    .transform(capitalizeEachWord),
   streetAddress: z
     .string()
     .refine(isSafeString, {
@@ -169,7 +175,10 @@ export const createEmployeeSchema = z.object({
       message: "Joining date cannot be less than 2021.",
     })
     .transform((date) => `${date}T00:00:00.000Z`), // Appends time to the date to match Prisma's DateTime
-  departmentName: z.string().min(2, "Department name is required"),
+  departmentName: z
+    .string()
+    .min(2, "Department name is required")
+    .transform(capitalizeEachWord),
   gender: z.nativeEnum(Gender).optional().default(Gender.OTHER), // Based on radio buttons
   inductionCompleted: z.boolean().optional().default(false), // Default to false
   role: z.nativeEnum(Role).optional().default(Role.EMPLOYEE), // Default to EMPLOYEE
@@ -189,7 +198,7 @@ export const updateEmployeeSchema = z.object({
       message: 'Employee name contains unsafe characters like <, >, ", `, or &',
     })
     .optional()
-    .transform((value) => (!value ? null : value)),
+    .transform((value) => (!value ? null : capitalizeEachWord(value))),
   email: z
     .string()
     .email("Invalid email address, use the format email@example.com")
@@ -226,7 +235,7 @@ export const updateEmployeeSchema = z.object({
       message: 'Country contains unsafe characters like <, >, ", ` or &',
     })
     .optional()
-    .transform((value) => (!value ? null : value)),
+    .transform((value) => (!value ? null : capitalizeEachWord(value))),
   city: z
     .string()
     .min(3, "City is required with a minimum of 3 characters")
@@ -238,7 +247,7 @@ export const updateEmployeeSchema = z.object({
       message: 'City contains unsafe characters like <, >, " , `, or &',
     })
     .optional()
-    .transform((value) => (!value ? null : value)),
+    .transform((value) => (!value ? null : capitalizeEachWord(value))),
   streetAddress: z
     .string()
     .refine(isSafeString, {
@@ -279,7 +288,7 @@ export const updateEmployeeSchema = z.object({
     .string()
     .min(2, "Department name must contain at least 2 characters")
     .optional()
-    .transform((value) => (!value ? null : value)),
+    .transform((value) => (!value ? null : capitalizeEachWord(value))),
   gender: z
     .nativeEnum(Gender) // Based on radio buttons
     .optional()

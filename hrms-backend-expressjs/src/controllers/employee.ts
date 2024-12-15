@@ -184,6 +184,7 @@ export const updateEmployee = async (
     const { departmentName, password, ...employeeData } = validatedData;
 
     // Filter out undefined properties from employeeData in order to match Prisma's update type
+    // and filter out null values to avoid frontend empty values (left unfilled) being set as null in the database
     const filteredEmployeeData = Object.fromEntries(
       Object.entries(employeeData).filter(([_, value]) => value !== undefined && value !== null)
     );

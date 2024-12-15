@@ -161,7 +161,8 @@ const ModalForm: React.FC<ModalFormProps> = ({
             );
           })
         );
-        console.log("filteredData", filteredData);
+        // console.log("filteredData", filteredData);
+        // console.log("employeeData", employeeData);
 
         // If no data has been updated, return early
         if (Object.entries(filteredData).length === 0) {

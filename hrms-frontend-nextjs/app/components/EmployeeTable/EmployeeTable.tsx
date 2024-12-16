@@ -20,30 +20,41 @@ const EmployeeTable: React.FC<EmployeeTableProps> = ({ refreshFlag, handleEdit }
     fetchEmployees();
   }, [refreshFlag]);
 
-  const handleDelete = async (id: string) => {
-    const employee = employees.find((emp) => emp.id === id); // Find employee by ID
+  const handleDelete = async (employee: EmployeeListItem) => {
     try {
-      const response = await deleteEmployee(id);
-      console.log("Delete successful:", response.message);
+      await deleteEmployee(employee.id);
+      // console.log("Delete successful:", response.message);
 
       // Show a success toast message
-      showToast("success", "Employee Deleted!", [
-        `You deleted ${employee?.fullName || "an employee"}`,
+      showToast("success", "Success!", [
+        `Employee "${employee?.fullName}" deleted successfully!`,
       ]);
 
       // Update the UI on successful deletion
-      setEmployees(employees.filter((employee) => employee.id !== id));
+      setEmployees(employees.filter((emp) => emp.id !== employee.id));
 
     } catch (err) {
       if (err instanceof Error) {
-        console.error("Error deleting employee:", err.message);
+        // console.error("Error deleting employee:", err.message);
 
         // Display the regular error message
         const errorMessages = err.message.split("\n");
         showToast("error", "Failed to delete employee!", errorMessages);
-
+      } else if (
+        err &&
+        typeof err === "object" &&
+        "status" in err &&
+        "message" in err
+      ) {
+        // Handle custom error object thrown from `deleteEmployee` and display its properties
+        const errorMessage = err.message;
+        showToast("error", "Failed to delete employee!", [
+          `Status: ${err.status}`,
+          errorMessage as string,
+        ]);
       } else {
-        console.error("Error deleting employee:", "An error occurred");
+        // Fallback for unknown errors
+        console.error("Error deleting employee, unexpected error occured: ", err);
 
         // Display a generic error message
         showToast("error", "Failed to delete employee!", [
@@ -52,48 +63,44 @@ const EmployeeTable: React.FC<EmployeeTableProps> = ({ refreshFlag, handleEdit }
       }
     }
   };
-  // const handleEdit = (employeeData: EmployeeListItem) => {
-  //   console.log("employeeData", employeeData);
-  // };
 
   const columns: TableColumn<EmployeeListItem>[] = [
     {
       name: "SNo.",
-      selector: (row) => row.id,
-      cell: (id, row) => row + 1,
-      sortable: true,
+      cell: (_, rowIndex) => rowIndex + 1,
     },
     {
       name: "Full Name",
-      selector: (row) => row.fullName || "N/A",
+      selector: (employee) => employee.fullName || "N/A",
       sortable: true,
     },
     {
       name: "Email",
-      selector: (row) => row.email || "N/A",
+      selector: (employee) => employee.email || "N/A",
       sortable: true,
     },
     {
       name: "Status",
-      selector: (row) => row.status || "N/A",
+      selector: (employee) => employee.status || "N/A",
       sortable: true,
     },
     {
       name: "Role",
-      selector: (row) => row.role || "N/A",
+      selector: (employee) => employee.role || "N/A",
       sortable: true,
     },
     {
       name: "Action",
-
-      sortable: true,
-      cell: (row) => (
+      cell: (employee) => (
         <>
-          <button onClick={() => handleEdit(row)} className="bg-green-500 rounded-lg p-2">
+          <button
+            onClick={() => handleEdit(employee)}
+            className="bg-green-500 rounded-lg p-2"
+          >
             Edit
           </button>
           <button
-            onClick={() => handleDelete(row.id)}
+            onClick={() => handleDelete(employee)}
             className="bg-red-500  rounded-lg p-2 ms-2"
           >
             Delete

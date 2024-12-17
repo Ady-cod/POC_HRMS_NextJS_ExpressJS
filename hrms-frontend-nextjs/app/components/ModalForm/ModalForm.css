@@ -70,8 +70,12 @@
   background: #fff;
 }
 
+.input-field.password {
+  padding-right: 50px;
+}
+
 .confirm-password-field {
-  width: 48%; /* Set width to half of the standard input field */
+  width: 49%; /* Set width to half of the standard input field */
   padding: 10px;
   font-size: 14px;
   border: 1px solid #d1d5db;

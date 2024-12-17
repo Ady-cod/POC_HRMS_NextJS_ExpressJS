@@ -12,6 +12,8 @@ import { formatZodErrors } from "@/utils/formatZodErrors";
 import { ZodError } from "zod";
 import { showToast } from "@/utils/toastHelper";
 import { EmployeeListItem } from "@/types/types";
+import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
+import { faEye, faEyeSlash } from "@fortawesome/free-solid-svg-icons";
 
 interface ModalFormProps {
   isOpen: boolean;
@@ -42,6 +44,9 @@ const ModalForm: React.FC<ModalFormProps> = ({
   refreshEmployees,
   employeeData,
 }) => {
+  // State to track password visibility
+  const [showPassword, setShowPassword] = useState(false);
+
   // Refs for password check input field
   const confirmPasswordRef = useRef<HTMLInputElement>(null);
 
@@ -203,13 +208,16 @@ const ModalForm: React.FC<ModalFormProps> = ({
 
       setErrors(null); // Reset errors on successful submission
 
+      // Reset visibility of the password field
+      setShowPassword(false);
+
       // Display a success toast message for fullfilling the action
       const action = employeeData ? "updated" : "created";
       showToast("success", "Success!", [
         `Employee "${employeeInputData.fullName}" ${action} successfully!`,
       ]);
 
-      // Re-fetch employees in EmployeeTable, to show the new employee
+      // Re-fetch employees in EmployeeTable, to show the new/updated employee
       refreshEmployees();
 
       // Reset the form after successful submission
@@ -252,6 +260,7 @@ const ModalForm: React.FC<ModalFormProps> = ({
 
   const handleClose = () => {
     setErrors({}); // Reset errors when the modal is closed
+    setShowPassword(false); // Reset password visibility
     onClose();
   };
 
@@ -300,15 +309,31 @@ const ModalForm: React.FC<ModalFormProps> = ({
               className={`input-field ${errors?.email ? "error" : ""}`}
             />
             {errors?.email && <p className="error-message">{errors.email}</p>}
-            <input
-              name="password"
-              type="password"
-              placeholder={`Password (min 6 characters)${
-                !employeeData ? "*" : ""
-              }`}
-              required={!employeeData}
-              className={`input-field ${errors?.password ? "error" : ""}`}
-            />
+            <div className="relative w-[49%]">
+              <input
+                name="password"
+                type={showPassword ? "text" : "password"}
+                placeholder={`Password (6-16 characters)${
+                  !employeeData ? "*" : ""
+                }`}
+                required={!employeeData}
+                className={`input-field w-full password ${
+                  errors?.password ? "error" : ""
+                }`}
+              />
+              <button
+                type="button"
+                onClick={() => setShowPassword(!showPassword)}
+                aria-label={showPassword ? "Hide password" : "Show password"}
+                className="absolute right-3 top-1/2 transform -translate-y-1/2"
+              >
+                <FontAwesomeIcon
+                  icon={showPassword ? faEyeSlash : faEye}
+                  size="lg"
+                  className="text-gray-600 hover:text-gray-800 hover:text-2xl"
+                />
+              </button>
+            </div>
             {errors?.password && (
               <p className="error-message">{errors.password}</p>
             )}

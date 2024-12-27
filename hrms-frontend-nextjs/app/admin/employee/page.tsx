@@ -6,10 +6,11 @@ import EmployeeTable from "../../components/EmployeeTable/EmployeeTable";
 import { EmployeeListItem } from "@/types/types";
 
 const EmployeePage = () => {
-
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [refreshFlag, setRefreshFlag] = useState(false);
-  const [employeeData, setEmployeeData] = useState<EmployeeListItem | null>(null);
+  const [employeeData, setEmployeeData] = useState<EmployeeListItem | null>(
+    null
+  );
 
   // Open and close handlers for the modal
   const handleAddNewDataClick = () => {
@@ -50,7 +51,8 @@ const EmployeePage = () => {
         employeeData={employeeData}
       />
 
-      <EmployeeTable refreshFlag={refreshFlag} handleEdit={handleEdit} />
+      {/* Table section */}
+        <EmployeeTable refreshFlag={refreshFlag} handleEdit={handleEdit} />
     </div>
   );
 };

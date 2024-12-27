@@ -173,7 +173,12 @@ export const updateEmployee = async (
   try {
     const { id } = req.params;
     if (!ObjectId.isValid(id)) {
-      res.status(400).json({ error: "The update cannot be performed without a valid employee ID. \nContact support." });
+      res
+        .status(400)
+        .json({
+          error:
+            "The update cannot be performed without a valid employee ID. \nContact support.",
+        });
       return;
     }
 
@@ -186,7 +191,9 @@ export const updateEmployee = async (
     // Filter out undefined properties from employeeData in order to match Prisma's update type
     // and filter out null values to avoid frontend empty values (left unfilled) being set as null in the database
     const filteredEmployeeData = Object.fromEntries(
-      Object.entries(employeeData).filter(([_, value]) => value !== undefined && value !== null)
+      Object.entries(employeeData).filter(
+        ([_, value]) => value !== undefined && value !== null
+      )
     );
 
     let hashedPassword: string | null = null;
@@ -198,9 +205,9 @@ export const updateEmployee = async (
     let department: Department | null = null;
     if (departmentName) {
       // Find or create department
-      department = (await prisma.department.findUnique({
+      department = await prisma.department.findUnique({
         where: { name: departmentName },
-      }));
+      });
 
       if (!department) {
         if (DEMO_MODE) {

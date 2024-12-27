@@ -28,29 +28,32 @@ export default function RootLayout({
           </header>
 
           <section className="flex flex-col justify-between h-dvh">
-            <section className="flex flex-col items-center sm:flex-row sm:items-start">
+            <section className="flex flex-col sm:flex-row sm:items-start">
               {/* Sticky SideBar */}
-              <div className="sticky top-24 mt-24">
+              <div className="sm:sticky sm:top-24 sm:mt-24 mx-auto">
                 <SideBar isOpen={isSideBarOpen} />
               </div>
 
               {/* Main Content */}
-              <main className="flex-grow p-6">{children}</main>
+              <main className="sm:flex-grow sm:overflow-auto my-8">{children}</main>
             </section>
-            <Footer />
+            <footer>
+              <Footer />
+            </footer>
           </section>
         </div>
-          <ToastContainer
-            position="top-center"
-            autoClose={3000}
-            closeOnClick
-            pauseOnHover
-            draggable
-            theme="light"
-            style={{
-              width: "500px",
-            }}
-          />
+        <ToastContainer
+          position="top-center"
+          autoClose={3000}
+          closeOnClick
+          pauseOnHover
+          draggable
+          theme="light"
+          style={{
+            width: "90%",
+            maxWidth: "500px",
+          }}
+        />
       </body>
     </html>
   );

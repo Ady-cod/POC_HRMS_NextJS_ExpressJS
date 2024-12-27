@@ -83,6 +83,12 @@
   background: #fff; /* Half of the size of other input fields */
 }
 
+@media (max-width: 639px) {
+  .confirm-password-field {
+    width: 100%; /* Set width to full width on smaller screens */
+  }
+}
+
 .input-field::placeholder {
   color: #6b7280;
 }

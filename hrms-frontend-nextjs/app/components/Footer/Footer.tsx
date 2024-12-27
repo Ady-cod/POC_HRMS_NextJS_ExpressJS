@@ -4,7 +4,7 @@ import Image from 'next/image';
 
 const Footer = () => {
     return (
-      <div >
+      <div>
         <div className="bg-gray-300 flex flex-col gap-2 sm:flex-row justify-between items-center py-4 sm:p-8">
           <div className="flex justify-center">ZummitLabs&copy;2024</div>
           <div>Privacy Policy | Terms & Conditions</div>

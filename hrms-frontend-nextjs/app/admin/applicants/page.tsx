@@ -3,7 +3,7 @@ import React from "react";
 const ApplicantsPage = () => {
   return (
     <>
-      <header className="mt-12 bg-gray-300">
+      <header className="bg-gray-300">
         <h1 className="text-center text-5xl font-bold">
           Applicants page in progress ...
         </h1>

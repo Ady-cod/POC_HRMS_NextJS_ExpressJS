@@ -23,7 +23,7 @@ const EmployeeTable: React.FC<EmployeeTableProps> = ({
   const [employees, setEmployees] = useState<EmployeeListItem[]>([]);
   const [activeSectionIndex, setActiveSectionIndex] = useState(0);
   const [activeColumnIndex, setActiveColumnIndex] = useState(0);
-  const [isSmallScreen, setIsSmallScreen] = useState(window.innerWidth < 640); // Track screen size
+  const [isSmallScreen, setIsSmallScreen] = useState(false); // Track screen size
 
   useEffect(() => {
     const handleResize = () => {

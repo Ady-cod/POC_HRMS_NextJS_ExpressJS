@@ -12,9 +12,10 @@
   - [Running the Project](#running-the-project)
   - [Folder Structure](#folder-structure)
   - [Environment Setup](#environment-setup)
-  - [Current State \& Future Steps](#current-state--future-steps)
+  - [Current State \& Progress](#current-state--progress)
     - [Backend:](#backend)
     - [Frontend:](#frontend)
+    - [Future Steps:](#future-steps)
 
 
 ## Introduction
@@ -185,18 +186,99 @@ Other available frontend scripts:
 
 You need to place your own `.env` files in the backend and frontend project root folders, following the `.env.example` template.
 
-## Current State & Future Steps
+## Current State & Progress
 
 The current state of the project includes a basic setup for both the backend and frontend, using Express and Next.js respectively, both written in TypeScript.
 
-In the backend section, the Prisma models have been created, and the basic CRUD operations for managing employee data are about to be implemented. 
-
 ### Backend:
 
-- Create controllers and routes for managing employee data.
-- Implement more detailed CRUD operations for managing employee data.
+In the backend section, the Prisma models have been created, and the basic CRUD operations for managing employee data are implemented. The backend is set up to handle employee data, including validation, error handling, and secure password management.
+
+- **Prisma Models**:
+  - **Employee**: Tracks employee details such as name, email, password, role, department, and attendance.
+    - Relationships:
+      - Linked to **Department** (many-to-one), **Attendance** (one-to-many), and **Project** (many-to-many via **EmployeeProject**).
+      - One-to-one link with **EmployeeLearningPathProgress** for tracking learning paths.
+    - Includes fields for timestamps, profile photo, and status.
+  - The Employee model integrates seamlessly with related models to support comprehensive HRMS functionality.
+  - Other models such as **Department** and **Attendance** are designed to complement the Employee model, ensuring a complete HRMS solution.
+  - These models can be further extended in future development to include additional HRMS features.
+
+- **CRUD Operations**:
+  - Fully implemented CRUD operations for employee management.
+  - Includes secure password handling with bcrypt.
+  - Employee data includes validation for fields such as name, email, phone number, and more using Zod.
+  - Supports department assignment with the ability to create new departments dynamically in DEMO mode.
+  - Handles comprehensive error scenarios including validation errors, Prisma-specific database errors, and general server errors.
+
+- **Validation**:
+  - Zod schemas used for input validation, ensuring data integrity for both creation and updates.
+  - Includes custom validation rules for email uniqueness, domain checks, and phone number formats.
+
+- **Other Features**:
+  - Password hashing and verification for secure employee management.
+  - Modular architecture with separate layers for routes, controllers, and validation schemas.
 
 ### Frontend:
 
-- Build the UI components to display, add, delete, and update employee information.
-- Develop user interfaces for managing authentication and user roles.
+The frontend is designed for seamless employee management with a responsive user interface built using Next.js and Tailwind CSS. It incorporates the following features:
+
+- **Employee Management**:
+  - The `EmployeeTable` component displays employee data in a tabular format with support for pagination and sorting.
+  - Provides `Edit` and `Delete` actions for each employee, with success/error toasts for feedback.
+  - Implements responsive column adjustments for small screens, ensuring usability across devices.
+
+- **Modal Form**:
+  - The `ModalForm` component allows creating or updating employee records.
+  - Integrates Zod schemas (`createEmployeeSchema`, `updateEmployeeSchema`) for robust client-side validation.
+  - Features:
+    - Password visibility toggle and confirm password validation.
+    - Dynamic input handling for `birthDate` and `joinDate` with minimum and maximum constraints.
+    - Error messages displayed inline and as toast notifications.
+
+- **Sidebar and Layout**:
+  - The `Sidebar` component provides easy navigation with links to key sections, such as Admin Dashboard, Employee Management, and more.
+  - Features:
+    - Responsive design that toggles visibility using a smooth animation.
+    - Styled with custom CSS (`Sidebar.css`) for a clean, user-friendly appearance.
+    - Dynamic state management to handle the open/close behavior based on screen size and user interaction.
+  - The layout integrates:
+    - A sticky navigation bar (`NavBar`) for quick access to the sidebar toggle.
+    - A footer for additional content or links.
+    - Centralized structure to handle responsive sidebar and main content alignment.
+
+- **Styling**:
+  - Uses Tailwind CSS for layout and component styling.
+  - Custom CSS (e.g. : `ModalForm.css`, `Sidebar.css`) enhances modal appearance and ensures responsiveness.
+
+- **State Management**:
+  - Centralized in `page.tsx`, managing modal visibility, employee data, and refresh states.
+  - `Add New Data` button opens the modal for new entries, while the table refreshes dynamically after updates.
+
+The frontend complements the backend, by building the UI components to display, add, delete, and update employee information, to provide a complete solution for managing employees within the HRMS.
+
+
+### Future Steps:
+
+As the project progresses, the following features and improvements are planned:
+
+- **Role-based Access Control (RBAC)**:
+  - Implementing authentication and authorization to provide role-specific views and permissions (e.g., admin, manager, employee).
+  
+- **Enhanced Analytics**:
+  - Adding dashboards with visualizations for employee data (e.g., attendance trends, department distribution).
+
+- **Notifications System**:
+  - Introducing email or in-app notifications for important events like employee onboarding or updates.
+
+- **Employee Attendance Module**:
+  - Developing a dedicated interface for tracking and managing employee attendance records.
+
+- **Mobile Optimization**:
+  - Further refining responsiveness and usability on mobile devices.
+
+- **Integration Testing**:
+  - Expanding test coverage with the help of the testing team to ensure both frontend and backend reliability.
+
+This roadmap ensures continuous improvement and alignment with the HRMS objectives.
+

@@ -138,25 +138,63 @@ Other available frontend scripts:
 ## Folder Structure
 
 ```
-├── hrms-backend-expressjs
-│   ├── prisma
-│   │   ├── client.ts
-│   │   └── schema.prisma
-│   ├── src
-│   │   └── server.ts
-│   ├── node_modules
+├── POC_HRMS_NEXTJS_EXPRESSJS
+│   ├── hrms-backend-expressjs
+│   │   ├── dist
+│   │   ├── prisma
+│   │   │   └── schema.prisma
+│   │   ├── src
+│   │   │   ├── controllers
+│   │   │   │   ├── employee.ts
+│   │   │   │   └── learningPath.ts
+│   │   │   ├── lib
+│   │   │   │   └── client.ts
+│   │   │   ├── routes
+│   │   │   │   ├── employee.ts
+│   │   │   │   └── learningPath.ts
+│   │   │   ├── schemas
+│   │   │   │   └── employeeSchema.ts
+│   │   │   ├── types
+│   │   │   │   └── types.ts
+│   │   │   └── server.ts
+│   │   ├── node_modules
+│   │   ├── package.json
+│   │   ├── pnpm-lock.yaml
+│   │   ├── tsconfig.json
+│   │   ├── .env
+│   │   ├── .env.example
+│   │   ├── .gitignore
+│   │   └── README.md
+│   ├── hrms-frontend-nextjs
+│   │   ├── app
+│   │   │   ├── actions
+│   │   │   ├── admin
+│   │   │   ├── components
+│   │   │   ├── fonts
+│   │   │   ├── schemas
+│   │   │   │   └── employeeSchema.ts
+│   │   │   ├── types
+│   │   │   │   └── types.ts
+│   │   │   ├── utils
+│   │   │   │   ├── formatZodErrors.ts
+│   │   │   │   └── toastHelper.tsx
+│   │   │   ├── layout.tsx
+│   │   │   ├── favicon.ico
+│   │   │   ├── globals.css
+│   │   │   └── page.tsx
+│   │   ├── node_modules
+│   │   ├── public
+│   │   ├── .env.example
+│   │   ├── .env.local
+│   │   ├── package.json
+│   │   ├── pnpm-lock.yaml
+│   │   ├── tailwind.config.js
+│   │   ├── tsconfig.json
+│   │   ├── ... (other files for the Next.js setup)
+│   ├── .gitignore
 │   ├── package.json
 │   ├── pnpm-lock.yaml
-│   └── .env.example
-│   └── ... (other files for the Express.js setup)
-└── hrms-frontend-nextjs
-    ├── app
-    ├── node_modules
-    ├── .env.example
-    ├── package.json
-    ├── pnpm-lock.yaml
-    ├── tsconfig.json
-    └── ... (other files for the Next.js setup)
+│   └── README.md
 ```
 
 ## Environment Setup

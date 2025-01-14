@@ -3,12 +3,11 @@ import React from "react";
 import Link from "next/link";
 import Image from "next/image";
 import "./Sidebar.css";
-import { useEffect, useState, useRef } from "react";
+import { useEffect, useState} from "react";
 
 import {
   Sheet,
   SheetContent,
-  SheetDescription,
   SheetHeader,
   SheetTitle,
   SheetTrigger,
@@ -84,11 +83,13 @@ const Sidebar = ({ isOpen, toggleSidebar }: SideBarProps) => {
   const renderSidebar = () => {
     return (
       <div
-        className={`transition-transform-500 ${
-          isOpen ? "transform-translate-x-0" : "transform -translate-x-full hidden"
-        }  left-0 w-60 bg-gray-300 rounded-3xl m-3 p-6 sidebar`}
+        className={`h-full  max-sm:w-full transition-all duration-75 ease-in-out sm:border-r-2 ${
+          isOpen
+            ? "translate-x-0 relative opacity-100"
+            : " -translate-x-full absolute opacity-0"
+        } w-60 bg-white sm:bg-gradient-to-b from-gray-200 to-white  sm:p-6 sm:pt-16 pt-10 sidebar`}
       >
-        <ul className="font-semibold sidebaritems">
+        <ul className="font-semibold sm:text-[15px]  max-sm:items-start  sticky top-28  flex flex-col gap-4 sidebaritems">
           <li>
             <Link href="/admin">
               {" "}
@@ -177,7 +178,7 @@ const Sidebar = ({ isOpen, toggleSidebar }: SideBarProps) => {
             </Link>
           </li>
 
-          <li className="logout bottom-3">
+          <li className="logout bottom-3 ">
             <Link href="#">
               <Image
                 src="/images/Logout icon.png"
@@ -191,8 +192,13 @@ const Sidebar = ({ isOpen, toggleSidebar }: SideBarProps) => {
           </li>
         </ul>
       </div>
-    </>
-  );
+    );
+  };
+  
+
+  return <>
+  {!isSmBreakpoint?smallScreenSidebar():renderSidebar()}
+  </>
 };
 
 export default Sidebar;

@@ -26,7 +26,7 @@ export default function RootLayout({
           <header className="sticky top-0 z-10 bg-white shadow-lg">
             <NavBar toggleSideBar={toggleSideBar} />
           </header>
-
+ 
           <section className="flex flex-col justify-between h-dvh">
             <section className="flex flex-col flex-1  sm:flex-row sm:items-start">
               {/* Sticky SideBar */}

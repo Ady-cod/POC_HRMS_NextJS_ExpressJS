@@ -13,7 +13,7 @@ export default function RootLayout({
 }: {
   children: React.ReactNode;
 }) {
-  const [isSideBarOpen, setIsSideBarOpen] = useState(true);
+  const [isSideBarOpen, setIsSideBarOpen] = useState<boolean>(true);
 
   const toggleSideBar = () => {
     setIsSideBarOpen(!isSideBarOpen);

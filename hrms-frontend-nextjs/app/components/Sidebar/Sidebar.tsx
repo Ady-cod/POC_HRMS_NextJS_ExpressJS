@@ -12,7 +12,6 @@ import {
   SheetTitle,
   SheetTrigger,
 } from "@/components/ui/sheet";
-import { boolean } from "zod";
 
 interface SideBarProps {
   isOpen: boolean;
@@ -67,7 +66,7 @@ const Sidebar = ({ isOpen, toggleSidebar }: SideBarProps) => {
     return (
       <Sheet open={isSheetOpen} onOpenChange={handleSheetOpenChange}>
         <SheetTrigger ></SheetTrigger>
-        <SheetContent className="w-[50%] max-[400px]:w-[65%] p-0 max-[525px]:pl-4 pl-8 pt-12" side="left">
+        <SheetContent className="w-[50%] max-[450px]:w-[65%] p-0 max-[525px]:pl-6 pl-8 pt-12" side="left">
           <SheetHeader>
             <SheetTitle>
               {renderSidebar()}

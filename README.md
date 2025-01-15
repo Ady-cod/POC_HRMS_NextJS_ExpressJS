@@ -12,6 +12,7 @@
   - [Running the Project](#running-the-project)
   - [Folder Structure](#folder-structure)
   - [Environment Setup](#environment-setup)
+  - [Deployment](#deployment)
   - [Current State \& Progress](#current-state--progress)
     - [Backend:](#backend)
     - [Frontend:](#frontend)
@@ -138,25 +139,63 @@ Other available frontend scripts:
 ## Folder Structure
 
 ```
-├── hrms-backend-expressjs
-│   ├── prisma
-│   │   ├── client.ts
-│   │   └── schema.prisma
-│   ├── src
-│   │   └── server.ts
-│   ├── node_modules
+├── POC_HRMS_NEXTJS_EXPRESSJS
+│   ├── hrms-backend-expressjs
+│   │   ├── dist
+│   │   ├── prisma
+│   │   │   └── schema.prisma
+│   │   ├── src
+│   │   │   ├── controllers
+│   │   │   │   ├── employee.ts
+│   │   │   │   └── learningPath.ts
+│   │   │   ├── lib
+│   │   │   │   └── client.ts
+│   │   │   ├── routes
+│   │   │   │   ├── employee.ts
+│   │   │   │   └── learningPath.ts
+│   │   │   ├── schemas
+│   │   │   │   └── employeeSchema.ts
+│   │   │   ├── types
+│   │   │   │   └── types.ts
+│   │   │   └── server.ts
+│   │   ├── node_modules
+│   │   ├── package.json
+│   │   ├── pnpm-lock.yaml
+│   │   ├── tsconfig.json
+│   │   ├── .env
+│   │   ├── .env.example
+│   │   ├── .gitignore
+│   │   └── README.md
+│   ├── hrms-frontend-nextjs
+│   │   ├── app
+│   │   │   ├── actions
+│   │   │   ├── admin
+│   │   │   ├── components
+│   │   │   ├── fonts
+│   │   │   ├── schemas
+│   │   │   │   └── employeeSchema.ts
+│   │   │   ├── types
+│   │   │   │   └── types.ts
+│   │   │   ├── utils
+│   │   │   │   ├── formatZodErrors.ts
+│   │   │   │   └── toastHelper.tsx
+│   │   │   ├── layout.tsx
+│   │   │   ├── favicon.ico
+│   │   │   ├── globals.css
+│   │   │   └── page.tsx
+│   │   ├── node_modules
+│   │   ├── public
+│   │   ├── .env.example
+│   │   ├── .env.local
+│   │   ├── package.json
+│   │   ├── pnpm-lock.yaml
+│   │   ├── tailwind.config.js
+│   │   ├── tsconfig.json
+│   │   ├── ... (other files for the Next.js setup)
+│   ├── .gitignore
 │   ├── package.json
 │   ├── pnpm-lock.yaml
-│   └── .env.example
-│   └── ... (other files for the Express.js setup)
-└── hrms-frontend-nextjs
-    ├── app
-    ├── node_modules
-    ├── .env.example
-    ├── package.json
-    ├── pnpm-lock.yaml
-    ├── tsconfig.json
-    └── ... (other files for the Next.js setup)
+│   └── README.md
 ```
 
 ## Environment Setup
@@ -185,6 +224,17 @@ Other available frontend scripts:
 ⚠️ **Important**: It is essential to use a `.env` (and not a `.env.local` ) file for the backend, as Prisma expects the environment variables to be set in this type of file.
 
 You need to place your own `.env` files in the backend and frontend project root folders, following the `.env.example` template.
+
+## Deployment
+
+The project is currently fully deployed on **Vercel** (frontend) and **Render** (backend). 
+
+- **Full Deployment**: The frontend is hosted on Vercel and connected to the deployed backend for seamless integration. Access it here:  
+  [HRMS Full Deployment](https://poc-hrms-next-js-express-js.vercel.app/)
+
+- **Core Feature**: The Employee Management section, which includes all CRUD operations, can be accessed directly:  
+  [Admin Employee Management](https://poc-hrms-next-js-express-js.vercel.app/admin/employee)  
+  Alternatively, navigate to it by clicking on the `Employee` link in the sidebar after visiting the main deployment link.
 
 ## Current State & Progress
 

@@ -105,6 +105,15 @@ export const createEmployeeSchema = z.object({
     .refine(isSafeString, {
       message: 'Employee name contains unsafe characters like <, >, ", `, or &',
     })
+    .refine((name) => !name.includes("  "), {
+      message: "Employee name must not contain consecutive spaces",
+    })
+    .refine((name) => !name.includes("--"), {
+      message: "Employee name must not contain consecutive hyphens",
+    })
+    .refine((name) => !name.includes("''"), {
+      message: "Employee name must not contain consecutive apostrophes",
+    })
     .transform(capitalizeEachWord),
   email: z
     .string()
@@ -206,6 +215,15 @@ export const updateEmployeeSchema = z.object({
     })
     .refine(isSafeString, {
       message: 'Employee name contains unsafe characters like <, >, ", `, or &',
+    })
+    .refine((name) => !name.includes("  "), {
+      message: "Employee name must not contain consecutive spaces",
+    })
+    .refine((name) => !name.includes("--"), {
+      message: "Employee name must not contain consecutive hyphens",
+    })
+    .refine((name) => !name.includes("''"), {
+      message: "Employee name must not contain consecutive apostrophes",
     })
     .optional()
     .transform((value) => (!value ? null : capitalizeEachWord(value))),

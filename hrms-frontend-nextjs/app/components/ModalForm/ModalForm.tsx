@@ -144,6 +144,27 @@ const ModalForm: React.FC<ModalFormProps> = ({
       return;
     }
 
+    // Additional validation for age difference between birth date and joining date
+    const birthDate = new Date(employeeInputData.birthDate as string);
+    const joinDate = new Date(employeeInputData.dateOfJoining as string);
+    const ageAtJoining =
+      (joinDate.getTime() - birthDate.getTime()) /
+      (365.25 * 24 * 60 * 60 * 1000);
+
+    if (ageAtJoining < 18) {
+      setErrors({
+        birthDate:
+          "Birth date must be at least 18 years before the joining date.",
+        dateOfJoining:
+          "Joining date must be at least 18 years after the birth date.",
+      });
+      showToast("error", "Date validation error:", [
+        "Joining age must be at least 18 years.",
+      ]);
+
+      return;
+    }
+
     try {
       let response;
       // Check if the employeeData is present, to determine if the form is for creating or updating an employee

@@ -280,6 +280,7 @@ const ModalForm: React.FC<ModalFormProps> = ({
   const maxBirthDate = eighteenYearsAgo.toISOString().split("T")[0];
   const minBirthDate = hundredYearsAgo.toISOString().split("T")[0];
 
+  // Calendar setting requires UTC to display min date consistently, becase it interprets the date as UTC
   const minJoinDate = new Date(Date.UTC(foundingYear, 0, 1))
     .toISOString()
     .split("T")[0];

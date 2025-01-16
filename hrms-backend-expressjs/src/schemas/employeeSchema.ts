@@ -28,7 +28,9 @@ const isAtLeast18YearsAgo = (dateString: string): boolean => {
 // Helper function to check if a joining date is not before the company founding year
 const isAfterFoundingYear = (dateString: string): boolean => {
   const foundingYear = 2021; // The founding year of the company
-  const minJoinDate = new Date(Date.UTC(foundingYear, 0, 1));
+  
+  // Validation uses local time because user input from <input type="date"> is local
+  const minJoinDate = new Date(foundingYear, 0, 1); // January 1st of the founding year
   const date = parseISO(dateString);
   return isValid(date) && date >= minJoinDate;
 };

@@ -126,7 +126,15 @@ export const createEmployeeSchema = z.object({
     .refine(async (email) => await isDomainValid(email), {
       message:
         "This email domain doesn't exist, use a valid domain format like example.com",
-    }),
+    })
+    .refine(
+      (email) =>
+        !email.split("@")[0].startsWith("-") &&
+        !email.split("@")[0].endsWith("-"),
+      {
+        message: "Email username cannot start or end with a hyphen",
+      }
+    ),
   password: z
     .string()
     .min(6, "Password must be at least 6 characters")
@@ -239,6 +247,14 @@ export const updateEmployeeSchema = z.object({
       message:
         "This email domain doesn't exist, use a valid domain format like example.com",
     })
+    .refine(
+      (email) =>
+        !email.split("@")[0].startsWith("-") &&
+        !email.split("@")[0].endsWith("-"),
+      {
+        message: "Email username cannot start or end with a hyphen",
+      }
+    )
     .optional()
     .transform((value) => (!value ? null : value)),
   password: z

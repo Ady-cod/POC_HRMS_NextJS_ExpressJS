@@ -12,7 +12,7 @@ import {
   SheetTitle,
   SheetTrigger,
   SheetDescription,
-} from "@/components/ui/sheet";
+} from "@/components/shadCN/shadCNDialog";
 
 interface SideBarProps {
   isOpen: boolean;

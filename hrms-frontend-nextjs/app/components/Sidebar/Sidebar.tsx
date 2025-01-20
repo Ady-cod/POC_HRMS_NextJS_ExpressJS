@@ -21,7 +21,6 @@ interface SideBarProps {
 
 const Sidebar = ({ isOpen, toggleSidebar }: SideBarProps) => {
   const [isSmBreakpoint, setIsSmBreakpoint] = useState(true);
-  const [isSheetOpen, setIsSheetOpen] = useState(false);
 
   useEffect(() => {
     // Media query for 'sm' breakpoint
@@ -44,24 +43,15 @@ const Sidebar = ({ isOpen, toggleSidebar }: SideBarProps) => {
     };
   }, []);
 
-  const handleSheetOpenChange = (open: boolean) => {
-    setIsSheetOpen(open);
-    if (!open) {
-      toggleSidebar(false); // Set isOpen to false when the sheet is closed
+  const handleSidebarItemClick = () => { 
+    if (!isSmBreakpoint) {
+      toggleSidebar(false);
     }
   };
 
-  useEffect(() => {
-    if (isOpen) {
-      setIsSheetOpen(true);
-    } else if (!isOpen) {
-      setIsSheetOpen(false);
-    }
-  }, [isOpen, isSheetOpen]);
-
   const smallScreenSidebar = () => {
     return (
-      <Sheet open={isSheetOpen} onOpenChange={handleSheetOpenChange}>
+      <Sheet open={isOpen} onOpenChange={(open) => toggleSidebar(open)}>
         <SheetTrigger></SheetTrigger>
         <SheetContent
           className="w-[50%] max-[450px]:w-[65%] p-0 max-[525px]:pl-6 pl-8 pt-12"
@@ -71,11 +61,9 @@ const Sidebar = ({ isOpen, toggleSidebar }: SideBarProps) => {
             <SheetTitle>{renderSidebar()}</SheetTitle>
           </SheetHeader>
           {/* Use Radix's SheetDescription to provide a description */}
-            <SheetDescription
-              className="sr-only"
-            >
-              Navigation menu for the admin panel.
-            </SheetDescription>
+          <SheetDescription className="sr-only">
+            Navigation menu for the admin panel.
+          </SheetDescription>
         </SheetContent>
       </Sheet>
     );
@@ -92,7 +80,7 @@ const Sidebar = ({ isOpen, toggleSidebar }: SideBarProps) => {
       >
         <ul className="font-semibold sm:text-[15px]  max-sm:items-start  sticky top-28  flex flex-col gap-4 sidebaritems">
           <li>
-            <Link href="/admin">
+            <Link href="/admin" onClick={handleSidebarItemClick}>
               {" "}
               <Image
                 src="/images/home.png"
@@ -105,7 +93,7 @@ const Sidebar = ({ isOpen, toggleSidebar }: SideBarProps) => {
             </Link>
           </li>
           <li>
-            <Link href="/admin/profile">
+            <Link href="/admin/profile" onClick={handleSidebarItemClick}>
               {" "}
               <Image
                 src="/images/My profile icon.png"
@@ -118,7 +106,7 @@ const Sidebar = ({ isOpen, toggleSidebar }: SideBarProps) => {
             </Link>
           </li>
           <li>
-            <Link href="/admin/employee">
+            <Link href="/admin/employee" onClick={handleSidebarItemClick}>
               <Image
                 src="/images/My learning path icon.png"
                 alt="Learning Path icon"
@@ -130,7 +118,7 @@ const Sidebar = ({ isOpen, toggleSidebar }: SideBarProps) => {
             </Link>
           </li>
           <li>
-            <Link href="/admin/applicants">
+            <Link href="/admin/applicants" onClick={handleSidebarItemClick}>
               {" "}
               <Image
                 src="/images/Applicants.png"
@@ -143,7 +131,7 @@ const Sidebar = ({ isOpen, toggleSidebar }: SideBarProps) => {
             </Link>
           </li>
           <li>
-            <Link href="/admin/workflow">
+            <Link href="/admin/workflow" onClick={handleSidebarItemClick}>
               <Image
                 src="/images/My workflow icon.png"
                 alt="Workflow icon"
@@ -155,7 +143,7 @@ const Sidebar = ({ isOpen, toggleSidebar }: SideBarProps) => {
             </Link>
           </li>
           <li>
-            <Link href="/admin/masters">
+            <Link href="/admin/masters" onClick={handleSidebarItemClick}>
               <Image
                 src="/images/Master.png"
                 alt="Master icon"
@@ -167,7 +155,7 @@ const Sidebar = ({ isOpen, toggleSidebar }: SideBarProps) => {
             </Link>
           </li>
           <li>
-            <Link href="/admin/hr">
+            <Link href="/admin/hr" onClick={handleSidebarItemClick}>
               <Image
                 src="/images/HR.png"
                 alt="HR icon"
@@ -180,7 +168,7 @@ const Sidebar = ({ isOpen, toggleSidebar }: SideBarProps) => {
           </li>
 
           <li className="logout bottom-3 ">
-            <Link href="#">
+            <Link href="#" onClick={handleSidebarItemClick}>
               <Image
                 src="/images/Logout icon.png"
                 alt="Logout icon"

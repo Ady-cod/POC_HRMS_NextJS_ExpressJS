@@ -3,7 +3,7 @@ import React from "react";
 import Link from "next/link";
 import Image from "next/image";
 import "./Sidebar.css";
-import { useEffect, useState} from "react";
+import { useEffect, useState } from "react";
 
 import {
   Sheet,
@@ -11,6 +11,7 @@ import {
   SheetHeader,
   SheetTitle,
   SheetTrigger,
+  SheetDescription,
 } from "@/components/ui/sheet";
 
 interface SideBarProps {
@@ -23,7 +24,6 @@ const Sidebar = ({ isOpen, toggleSidebar }: SideBarProps) => {
   const [isSheetOpen, setIsSheetOpen] = useState(false);
 
   useEffect(() => {
-
     // Media query for 'sm' breakpoint
     const mediaQuery = window.matchMedia("(min-width: 640px)");
 
@@ -51,29 +51,31 @@ const Sidebar = ({ isOpen, toggleSidebar }: SideBarProps) => {
     }
   };
 
-
   useEffect(() => {
-    if(isOpen){
-      setIsSheetOpen(true)
-    }
-    else if (!isOpen) {
+    if (isOpen) {
+      setIsSheetOpen(true);
+    } else if (!isOpen) {
       setIsSheetOpen(false);
     }
-  }, [isOpen,isSheetOpen])
-  
+  }, [isOpen, isSheetOpen]);
 
   const smallScreenSidebar = () => {
     return (
       <Sheet open={isSheetOpen} onOpenChange={handleSheetOpenChange}>
-        <SheetTrigger ></SheetTrigger>
-        <SheetContent className="w-[50%] max-[450px]:w-[65%] p-0 max-[525px]:pl-6 pl-8 pt-12" side="left">
+        <SheetTrigger></SheetTrigger>
+        <SheetContent
+          className="w-[50%] max-[450px]:w-[65%] p-0 max-[525px]:pl-6 pl-8 pt-12"
+          side="left"
+        >
           <SheetHeader>
-            <SheetTitle>
-              {renderSidebar()}
-             
-            </SheetTitle>
-           
+            <SheetTitle>{renderSidebar()}</SheetTitle>
           </SheetHeader>
+          {/* Use Radix's SheetDescription to provide a description */}
+            <SheetDescription
+              className="sr-only"
+            >
+              Navigation menu for the admin panel.
+            </SheetDescription>
         </SheetContent>
       </Sheet>
     );
@@ -193,11 +195,8 @@ const Sidebar = ({ isOpen, toggleSidebar }: SideBarProps) => {
       </div>
     );
   };
-  
 
-  return <>
-  {!isSmBreakpoint?smallScreenSidebar():renderSidebar()}
-  </>
+  return <>{!isSmBreakpoint ? smallScreenSidebar() : renderSidebar()}</>;
 };
 
 export default Sidebar;

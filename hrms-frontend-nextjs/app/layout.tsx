@@ -13,7 +13,7 @@ export default function RootLayout({
 }: {
   children: React.ReactNode;
 }) {
-  const [isSideBarOpen, setIsSideBarOpen] = useState(true);
+  const [isSideBarOpen, setIsSideBarOpen] = useState<boolean>(true);
 
   const toggleSideBar = () => {
     setIsSideBarOpen(!isSideBarOpen);
@@ -26,16 +26,16 @@ export default function RootLayout({
           <header className="sticky top-0 z-10 bg-white shadow-lg">
             <NavBar toggleSideBar={toggleSideBar} />
           </header>
-
+ 
           <section className="flex flex-col justify-between h-dvh">
-            <section className="flex flex-col sm:flex-row sm:items-start">
+            <section className="flex flex-col flex-1  sm:flex-row sm:items-start">
               {/* Sticky SideBar */}
-              <div className="sm:sticky sm:top-24 sm:mt-24 mx-auto">
-                <SideBar isOpen={isSideBarOpen} />
+              <div className=" sm:h-full">
+                <SideBar isOpen={isSideBarOpen} toggleSidebar={setIsSideBarOpen} />
               </div>
 
               {/* Main Content */}
-              <main className="sm:flex-grow sm:overflow-auto my-8">{children}</main>
+              <main className="sm:flex-grow  h-full sm:overflow-auto ">{children}</main>
             </section>
             <footer>
               <Footer />

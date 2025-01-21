@@ -1,9 +1,5 @@
-.sidebar{
-    transition: transform 0.6s ease-in-out;
-}
 .sidebaritems li{
     padding: 10px;
-    font-size: 15px;
     font-family: cursive;
 }
 
@@ -11,7 +7,7 @@
     padding-right: 18px;
 }
 .logout{
-    width: 80%;
+    /* width: 80%; */
     font-size: 18px;
     font-family: cursive;
     list-style: none;

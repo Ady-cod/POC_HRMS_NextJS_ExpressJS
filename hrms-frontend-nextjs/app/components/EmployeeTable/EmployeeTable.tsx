@@ -26,6 +26,10 @@ const EmployeeTable: React.FC<EmployeeTableProps> = ({
   const [isSmallScreen, setIsSmallScreen] = useState(false); // Track screen size
 
   useEffect(() => {
+
+    // Set the initial state for the  screen size based on the window width
+    setIsSmallScreen(window.innerWidth < 640);
+
     const handleResize = () => {
       setIsSmallScreen(window.innerWidth < 640);
     };

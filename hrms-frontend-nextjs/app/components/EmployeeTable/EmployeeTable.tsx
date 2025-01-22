@@ -11,6 +11,16 @@ import {
   faAngleRight,
 } from "@fortawesome/free-solid-svg-icons";
 
+import dynamic from "next/dynamic";
+
+// Dynamically import the ConfirmationModal component to keep the initial bundle size small
+const ConfirmationModal = dynamic(
+  () => import("@/components/ConfirmationModal/ConfirmationModal"),
+  {
+    ssr: false,
+  }
+);
+
 interface EmployeeTableProps {
   refreshFlag: boolean;
   handleEdit: (employeeData: EmployeeListItem) => void;
@@ -24,6 +34,8 @@ const EmployeeTable: React.FC<EmployeeTableProps> = ({
   const [activeSectionIndex, setActiveSectionIndex] = useState(0);
   const [activeColumnIndex, setActiveColumnIndex] = useState(0);
   const [isSmallScreen, setIsSmallScreen] = useState(false); // Track screen size
+  const [showDialog, setShowDialog] = useState(false);
+  const [selectedEmployee, setSelectedEmployee] = useState<EmployeeListItem | null>(null);
 
   useEffect(() => {
 
@@ -46,18 +58,34 @@ const EmployeeTable: React.FC<EmployeeTableProps> = ({
     fetchEmployees();
   }, [refreshFlag]);
 
-  const handleDelete = async (employee: EmployeeListItem) => {
+  const handleDeleteClick = (employee: EmployeeListItem) => {
+    setSelectedEmployee(employee);
+    setShowDialog(true);
+  };
+
+  const confirmDelete = async () => {
+    if (!selectedEmployee) {
+
+      console.error("No employee selected for deletion");
+      setShowDialog(false);
+
+      showToast("error", "Failed to delete employee!", [
+        "No employee selected for deletion",
+      ]);
+      return;
+    }
+
     try {
-      await deleteEmployee(employee.id);
+      await deleteEmployee(selectedEmployee.id);
       // console.log("Delete successful:", response.message);
 
       // Show a success toast message
       showToast("success", "Success!", [
-        `Employee "${employee?.fullName}" deleted successfully!`,
+        `Employee "${selectedEmployee?.fullName}" deleted successfully!`,
       ]);
 
       // Update the UI on successful deletion
-      setEmployees(employees.filter((emp) => emp.id !== employee.id));
+      setEmployees(employees.filter((emp) => emp.id !== selectedEmployee.id));
     } catch (err) {
       if (err instanceof Error) {
         // console.error("Error deleting employee:", err.message);
@@ -89,6 +117,9 @@ const EmployeeTable: React.FC<EmployeeTableProps> = ({
           "An unknown error occurred",
         ]);
       }
+    } finally {
+      setShowDialog(false);
+      setSelectedEmployee(null);
     }
   };
 
@@ -116,7 +147,7 @@ const EmployeeTable: React.FC<EmployeeTableProps> = ({
           Edit
         </button>
         <button
-          onClick={() => handleDelete(employee)}
+          onClick={() => handleDeleteClick(employee)}
           className="bg-red-500  rounded-lg p-2 ms-2 whitespace-nowrap"
         >
           Delete
@@ -296,6 +327,13 @@ const EmployeeTable: React.FC<EmployeeTableProps> = ({
         pagination
         responsive
         fixedHeader
+      />
+      <ConfirmationModal
+        isOpen={showDialog}
+        onClose={() => setShowDialog(false)}
+        onConfirm={confirmDelete}
+        title="Confirm Deletion"
+        description={`Are you sure you want to delete "${selectedEmployee?.fullName}"? This action cannot be undone.`}
       />
     </div>
   );

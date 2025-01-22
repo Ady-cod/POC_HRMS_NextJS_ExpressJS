@@ -1,9 +1,17 @@
 "use client";
 import React, { useState } from "react";
-import AddNewDataButton from "../../components/AddNewDataButton/AddNewDataButton";
-import ModalForm from "../../components/ModalForm/ModalForm";
-import EmployeeTable from "../../components/EmployeeTable/EmployeeTable";
+import AddNewDataButton from "@/components/AddNewDataButton/AddNewDataButton";
+// import ModalForm from "@/components/ModalForm/ModalForm";
+import EmployeeTable from "@/components/EmployeeTable/EmployeeTable";
 import { EmployeeListItem } from "@/types/types";
+
+import dynamic from "next/dynamic";
+
+// Dynamically import the ModalForm component to reduce the initial bundle size
+const ModalForm = dynamic(() => import("@/components/ModalForm/ModalForm"),{
+  ssr: false,
+  }
+);
 
 const EmployeePage = () => {
   const [isModalOpen, setIsModalOpen] = useState(false);

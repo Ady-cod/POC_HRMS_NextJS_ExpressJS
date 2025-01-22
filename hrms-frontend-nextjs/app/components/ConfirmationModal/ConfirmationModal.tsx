@@ -34,7 +34,7 @@ const ConfirmationModal: React.FC<ConfirmationModalProps> = ({
           side="top"
         >
           <SheetHeader>
-            <SheetTitle className="text-xl font-bold">{title}</SheetTitle>
+            <SheetTitle className="text-xl font-bold mt-4">{title}</SheetTitle>
           </SheetHeader>
           <SheetDescription className="text-gray-600 mt-4">
             {description}

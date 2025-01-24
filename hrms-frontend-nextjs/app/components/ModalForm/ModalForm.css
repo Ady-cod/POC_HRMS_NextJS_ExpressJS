@@ -17,7 +17,7 @@
   background: #b1b1b1;
   padding: 30px;
   border-radius: 8px;
-  width:auto;
+  width: auto;
   /* max-width: 450px; */
   margin: 0 35px;
   max-height: 90dvh;
@@ -75,12 +75,12 @@
 }
 
 .confirm-password-field {
-  width: 49%; /* Set width to half of the standard input field */
+  width: 49.173%; /* Set width to half of the standard input field */
   padding: 10px;
   font-size: 14px;
   border: 1px solid #d1d5db;
   border-radius: 4px;
-  background: #fff; /* Half of the size of other input fields */
+  background: #fff; 
 }
 
 @media (max-width: 639px) {
@@ -149,6 +149,6 @@
 .error-message {
   color: red;
   font-size: 0.9rem;
-  font-weight:700;
-  margin-top: 0.50rem;
+  font-weight: 700;
+  margin-top: 0.5rem;
 }

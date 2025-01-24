@@ -328,10 +328,12 @@ const ModalForm: React.FC<ModalFormProps> = ({
               placeholder={`Email${!employeeData ? "*" : ""}`}
               required={!employeeData}
               defaultValue={employeeData?.email}
-              className={`input-field ${errors?.email ? "error" : ""}`}
+              className={`input-field sm:w-[49.173%] ${
+                errors?.email ? "error" : ""
+              }`}
             />
             {errors?.email && <p className="error-message">{errors.email}</p>}
-            <div className="relative w-[100%] sm:w-[49%]">
+            <div className="relative w-[100%] sm:max-w-[49.173%]">
               <input
                 name="password"
                 type={showPassword ? "text" : "password"}

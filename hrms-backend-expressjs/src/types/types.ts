@@ -26,40 +26,40 @@ export enum
 
 // Interface for creating a new employee. Define the structure of a request body for creating a new employee
 export interface CreateEmployeeInput {
-  fullName?: string;
-  email?: string;
-  password?: string | null;
-  country?: string | null;
-  city?: string | null;
+  fullName: string;
+  email: string;
+  password: string;
+  country: string;
+  city: string;
   streetAddress?: string | null;
-  phoneNumber?: string | null;
-  birthDate?: string  | null;
-  dateOfJoining?: string | null;
-  gender?: EmployeeGender | null;
+  phoneNumber: string;
+  birthDate: string;
+  dateOfJoining: string;
+  gender: EmployeeGender;
   inductionCompleted?: boolean | null;
   profilePhotoUrl?: string | null;
   timezone?: string | null;
-  role?: EmployeeRole | null;
-  status?: EmployeeStatus | null;
-  departmentName: string | null;
+  role: EmployeeRole;
+  status: EmployeeStatus;
+  departmentName: string;
 }
 
 // Interface for the data object to be passed to Prisma for creating a new employee
 export interface CreateEmployeePrismaData {
-  fullName?: string;
-  email?: string;
-  password?: string | null;
-  country?: string | null;
-  city?: string | null;
+  fullName: string;
+  email: string;
+  password: string;
+  country: string;
+  city: string;
   streetAddress?: string | null;
-  phoneNumber?: string | null;
-  birthDate?: string | null;
-  dateOfJoining?: string | null;
-  gender?: EmployeeGender | null;
+  phoneNumber: string;
+  birthDate: string;
+  dateOfJoining: string;
+  gender: EmployeeGender;
   inductionCompleted?: boolean;
   profilePhotoUrl?: string | null;
   timezone?: string | null;
-  role?: EmployeeRole;
-  status?: EmployeeStatus;
+  role: EmployeeRole;
+  status: EmployeeStatus;
   departmentId?: string | null;
 }

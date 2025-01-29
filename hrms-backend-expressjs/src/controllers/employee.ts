@@ -228,7 +228,7 @@ export const updateEmployee = async (
       ...filteredEmployeeData,
     };
 
-    if (password) {
+    if (password && hashedPassword) {
       updatedEmployeeData.password = hashedPassword;
     }
 

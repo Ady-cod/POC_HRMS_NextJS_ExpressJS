@@ -11,7 +11,7 @@ export default function SubmitButton({ className, children }: SubmitButtonProps)
   const { pending } = useFormStatus();
   return (
     <button type="submit" disabled={pending} className={className}>
-      {pending ? "Loading..." : children}
+      {pending ? "Processing..." : children}
     </button>
   );
 }

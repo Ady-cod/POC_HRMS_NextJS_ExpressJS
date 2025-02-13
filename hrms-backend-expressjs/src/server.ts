@@ -3,6 +3,7 @@ import dotenv from "dotenv";
 import cors from "cors";
 import employeeRouter from "./routes/employee";
 import learningPathRouter from "./routes/learningPath";
+import authenticateRouter from "./routes/authentication";
 
 // Load environment variables from .env file
 dotenv.config();
@@ -24,7 +25,9 @@ app.get("/", (req: Request, res: Response) => {
 });
 
 app.use("/api/v1/employee" , employeeRouter);
-app.use("/api/v1/learningPath" , learningPathRouter);
+app.use("/api/v1/learningPath", learningPathRouter);
+app.use("/api/v1/auth", authenticateRouter);
+
 
 app.listen(PORT, () => {
   console.log(`Server is working in the ${process.env.NODE_ENV} mode`);

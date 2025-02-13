@@ -5,13 +5,17 @@ import { z } from "zod";
 
 const loginSchema = z.object({
   email: z.string().email(),
-  password: z.string().min(6, "Password must be at least 6 characters"),
+  password: z.string(),
 });
     
 const BACKEND_BASE_URL = process.env.NEXT_PUBLIC_BACKEND_BASE_URL;
 const LOGIN_ENDPOINT = process.env.NEXT_PUBLIC_LOGIN_ENDPOINT;
 
-export async function login(prevState: unknown, formData: FormData) {
+interface LoginErrorResponse {
+  errors: Record<string, string[]>;
+}
+
+export async function login(prevState: unknown, formData: FormData): Promise<void | LoginErrorResponse> {
   const result = loginSchema.safeParse(Object.fromEntries(formData));
 
   if (!result.success) {
@@ -33,13 +37,15 @@ export async function login(prevState: unknown, formData: FormData) {
   if (!response.ok) {
     return {
       errors: {
-        email: "Invalid email or password",
+        email: ["Invalid email or password"],
       },
     };
   }
     const { token } = await response.json();
     
   // Store JWT in cookies
-    cookies().set("token", token, { httpOnly: true, secure: true });
+  cookies().set("token", token, { httpOnly: true, secure: true });
+
+  // Redirect to admin page, later on we will add a check for the user role and redirect to the appropriate page
     redirect("/admin");
 }

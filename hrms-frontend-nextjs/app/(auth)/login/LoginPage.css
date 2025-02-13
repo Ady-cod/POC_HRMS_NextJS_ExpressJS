@@ -1,0 +1,6 @@
+@media(max-width : 440px) {
+    #letter-design-overlay {
+        top: 10%;
+        left: 5%;
+    }
+}

@@ -53,10 +53,7 @@ const Sidebar = ({ isOpen, toggleSidebar }: SideBarProps) => {
     return (
       <Sheet open={isOpen} onOpenChange={(open) => toggleSidebar(open)}>
         <SheetTrigger></SheetTrigger>
-        <SheetContent
-          className="w-[50%] max-[450px]:w-[65%] p-0 max-[525px]:pl-6 pl-8 pt-12"
-          side="left"
-        >
+        <SheetContent className="w-fit pt-12" side="left">
           <SheetHeader>
             <SheetTitle>{renderSidebar()}</SheetTitle>
           </SheetHeader>
@@ -72,13 +69,13 @@ const Sidebar = ({ isOpen, toggleSidebar }: SideBarProps) => {
   const renderSidebar = () => {
     return (
       <div
-        className={`h-full  max-sm:w-full transition-all duration-75 ease-in-out sm:border-r-2 ${
+        className={`w-fit min-w-52 h-full transition-all duration-75 ease-in-out sm:border-r-2 ${
           isOpen
             ? "translate-x-0 relative opacity-100"
             : " -translate-x-full absolute opacity-0"
-        } w-60 bg-white sm:bg-gradient-to-b from-gray-200 to-white  sm:p-6 sm:pt-16 pt-10 sidebar`}
+        } bg-white sm:bg-gradient-to-b from-gray-200 to-white  sm:p-6  pt-10 sidebar`}
       >
-        <ul className="font-semibold sm:text-[15px]  max-sm:items-start  sticky top-28  flex flex-col gap-4 sidebaritems">
+        <ul className="whitespace-nowrap font-semibold sm:text-[15px]  max-sm:items-start  sticky top-28  flex flex-col gap-4 sidebaritems">
           <li>
             <Link href="/admin" onClick={handleSidebarItemClick}>
               {" "}
@@ -168,7 +165,7 @@ const Sidebar = ({ isOpen, toggleSidebar }: SideBarProps) => {
           </li>
 
           <li className="logout bottom-3 ">
-            <Link href="#" onClick={handleSidebarItemClick}>
+            <Link href="/" onClick={handleSidebarItemClick}>
               <Image
                 src="/images/Logout icon.png"
                 alt="Logout icon"

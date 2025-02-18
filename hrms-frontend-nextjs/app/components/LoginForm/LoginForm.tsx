@@ -69,7 +69,7 @@ const LoginForm = () => {
           placeholder="Password*"
           required
           className={`w-full p-1 pr-12 shadow-md shadow-gray-500 border rounded-md focus:outline-none focus:ring-1 focus:ring-gray-400 ${
-            state?.errors && "password" in state.errors
+            state?.invalidCredentials || state?.errors && "password" in state.errors
               ? "border-2 border-red-500"
               : ""
           }`}

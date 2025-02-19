@@ -1,30 +1,26 @@
 "use server";
 import { redirect } from "next/navigation";
 import { cookies } from "next/headers";
-import { z } from "zod";
-
-const loginSchema = z.object({
-  email: z.string().email(),
-  password: z.string(),
-});
+import { loginSchema } from "@/schemas/loginSchema";
     
 const BACKEND_BASE_URL = process.env.NEXT_PUBLIC_BACKEND_BASE_URL;
 const LOGIN_ENDPOINT = process.env.NEXT_PUBLIC_LOGIN_ENDPOINT;
 
 interface LoginErrorResponse {
   errors: Record<string, string[]>;
+  invalidCredentials?: boolean;
 }
 
 export async function login(prevState: unknown, formData: FormData): Promise<void | LoginErrorResponse> {
-  const result = loginSchema.safeParse(Object.fromEntries(formData));
+  const validationResult = loginSchema.safeParse(Object.fromEntries(formData));
 
-  if (!result.success) {
+  if (!validationResult.success) {
     return {
-      errors: result.error.flatten().fieldErrors,
+      errors: validationResult.error.flatten().fieldErrors,
     };
   }
 
-  const { email, password } = result.data;
+  const { email, password } = validationResult.data;
 
   const response = await fetch(`${BACKEND_BASE_URL}${LOGIN_ENDPOINT}`, {
     method: "POST",
@@ -39,6 +35,7 @@ export async function login(prevState: unknown, formData: FormData): Promise<voi
       errors: {
         email: ["Invalid email or password"],
       },
+      invalidCredentials: true,
     };
   }
     const { token } = await response.json();

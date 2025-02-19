@@ -22,7 +22,8 @@ export async function login(prevState: unknown, formData: FormData): Promise<voi
 
   const { email, password } = validationResult.data;
 
-  const response = await fetch(`${BACKEND_BASE_URL}${LOGIN_ENDPOINT}`, {
+  try {
+    const response = await fetch(`${BACKEND_BASE_URL}${LOGIN_ENDPOINT}`, {
     method: "POST",
     headers: {
       "Content-Type": "application/json",
@@ -31,12 +32,20 @@ export async function login(prevState: unknown, formData: FormData): Promise<voi
   });
 
   if (!response.ok) {
-    return {
-      errors: {
-        email: ["Invalid email or password"],
-      },
-      invalidCredentials: true,
-    };
+    return response.status === 401
+      ? {
+          errors: {
+            email: ["Invalid email or password"],
+          },
+          invalidCredentials: true,
+        }
+      : {
+          errors: {
+            serverError: [
+              "An unexpected error occurred while logging in. Please try again later or contact support if the issue persists.",
+            ],
+          },
+        };
   }
     const { token } = await response.json();
     
@@ -45,4 +54,14 @@ export async function login(prevState: unknown, formData: FormData): Promise<voi
 
   // Redirect to admin page, later on we will add a check for the user role and redirect to the appropriate page
     redirect("/admin");
+  } catch (error) {
+    console.error(error);
+    return {
+      errors: {
+        networkError: [
+          "Unable to connect to the server. Please check your internet connection or try again later.",
+        ],
+      },
+    };
+  }
 }

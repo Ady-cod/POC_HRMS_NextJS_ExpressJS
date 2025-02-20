@@ -2,7 +2,7 @@
 import { redirect } from "next/navigation";
 import { cookies } from "next/headers";
 import { loginSchema } from "@/schemas/loginSchema";
-    
+
 const BACKEND_BASE_URL = process.env.NEXT_PUBLIC_BACKEND_BASE_URL;
 const LOGIN_ENDPOINT = process.env.NEXT_PUBLIC_LOGIN_ENDPOINT;
 
@@ -11,7 +11,10 @@ interface LoginErrorResponse {
   invalidCredentials?: boolean;
 }
 
-export async function login(prevState: unknown, formData: FormData): Promise<void | LoginErrorResponse> {
+export async function login(
+  prevState: unknown,
+  formData: FormData
+): Promise<void | LoginErrorResponse> {
   const validationResult = loginSchema.safeParse(Object.fromEntries(formData));
 
   if (!validationResult.success) {
@@ -24,36 +27,33 @@ export async function login(prevState: unknown, formData: FormData): Promise<voi
 
   try {
     const response = await fetch(`${BACKEND_BASE_URL}${LOGIN_ENDPOINT}`, {
-    method: "POST",
-    headers: {
-      "Content-Type": "application/json",
-    },
-    body: JSON.stringify({ email, password }),
-  });
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({ email, password }),
+    });
 
-  if (!response.ok) {
-    return response.status === 401
-      ? {
-          errors: {
-            email: ["Invalid email or password"],
-          },
-          invalidCredentials: true,
-        }
-      : {
-          errors: {
-            serverError: [
-              "An unexpected error occurred while logging in. Please try again later or contact support if the issue persists.",
-            ],
-          },
-        };
-  }
+    if (!response.ok) {
+      return response.status === 401
+        ? {
+            errors: {
+              email: ["Invalid email or password"],
+            },
+            invalidCredentials: true,
+          }
+        : {
+            errors: {
+              serverError: [
+                "An unexpected error occurred while logging in. Please try again later or contact support if the issue persists.",
+              ],
+            },
+          };
+    }
     const { token } = await response.json();
-    
-  // Store JWT in cookies
-  cookies().set("token", token, { httpOnly: true, secure: true });
 
-  // Redirect to admin page, later on we will add a check for the user role and redirect to the appropriate page
-    redirect("/admin");
+    // Store JWT in cookies
+    cookies().set("token", token, { httpOnly: true, secure: true });
   } catch (error) {
     console.error(error);
     return {
@@ -64,4 +64,7 @@ export async function login(prevState: unknown, formData: FormData): Promise<voi
       },
     };
   }
+
+  // Redirect to admin page, later on we will add a check for the user role and redirect to the appropriate page
+  redirect("/admin");
 }

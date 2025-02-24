@@ -37,6 +37,7 @@ export interface EmployeeListItem {
   password: string;
   phoneNumber: string;
   country: string;
+  state?: string | null;
   city: string;
   streetAddress?: string | null;
   birthDate: string;

@@ -21,6 +21,7 @@ model Employee {
   phoneNumber         String
   country             String
   city                String
+  state               String?
   streetAddress       String?
   birthDate           DateTime
   dateOfJoining       DateTime            // Date when the employee joined the company

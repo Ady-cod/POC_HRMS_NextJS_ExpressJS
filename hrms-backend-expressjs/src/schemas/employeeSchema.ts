@@ -161,6 +161,18 @@ export const createEmployeeSchema = z.object({
       message: 'Country contains unsafe characters like <, >, ", ` or &',
     })
     .transform(capitalizeEachWord),
+  state: z
+    .string()
+    .min(2, "State is required with a minimum of 2 characters")
+    .refine(isValidUnicodeName, {
+      message:
+        "State must only contain letters (2 minimum), spaces, apostrophes, hyphens and start/end with a letter",
+    })
+    .refine(isSafeString, {
+      message: 'State contains unsafe characters like <, >, ", ` or &',
+    })
+    .optional()
+    .transform((value) => (!value ? null : capitalizeEachWord(value))),
   city: z
     .string()
     .min(3, "City is required with a minimum of 3 characters")
@@ -287,6 +299,18 @@ export const updateEmployeeSchema = z.object({
     })
     .refine(isSafeString, {
       message: 'Country contains unsafe characters like <, >, ", ` or &',
+    })
+    .optional()
+    .transform((value) => (!value ? null : capitalizeEachWord(value))),
+  state: z
+    .string()
+    .min(2, "State is required with a minimum of 2 characters")
+    .refine(isValidUnicodeName, {
+      message:
+        "State must only contain letters (2 minimum), spaces, apostrophes, hyphens and start/end with a letter",
+    })
+    .refine(isSafeString, {
+      message: 'State contains unsafe characters like <, >, ", ` or &',
     })
     .optional()
     .transform((value) => (!value ? null : capitalizeEachWord(value))),

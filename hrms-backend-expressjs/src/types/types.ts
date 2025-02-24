@@ -30,6 +30,7 @@ export interface CreateEmployeeInput {
   email: string;
   password: string;
   country: string;
+  state?: string | null;
   city: string;
   streetAddress?: string | null;
   phoneNumber: string;

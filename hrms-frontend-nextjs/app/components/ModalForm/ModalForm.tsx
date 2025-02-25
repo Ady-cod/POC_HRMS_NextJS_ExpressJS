@@ -14,6 +14,7 @@ import { showToast } from "@/utils/toastHelper";
 import { EmployeeListItem } from "@/types/types";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faEye, faEyeSlash } from "@fortawesome/free-solid-svg-icons";
+import CountryStateCity from "../CountryStateCitySelect/CountryStateCity";
 
 interface ModalFormProps {
   isOpen: boolean;
@@ -435,7 +436,7 @@ const ModalForm: React.FC<ModalFormProps> = ({
             )}
           </div>
           <div className="input-group">
-            <input
+            {/* <input
               name="city"
               type="text"
               placeholder={`City${!employeeData ? "*" : ""}`}
@@ -443,7 +444,7 @@ const ModalForm: React.FC<ModalFormProps> = ({
               defaultValue={employeeData?.city}
               className={`input-field ${errors?.city ? "error" : ""}`}
             />
-            {errors?.city && <p className="error-message">{errors.city}</p>}
+            {errors?.city && <p className="error-message">{errors.city}</p>} */}
 
             <select
               name="departmentName"
@@ -462,19 +463,7 @@ const ModalForm: React.FC<ModalFormProps> = ({
             {errors?.departmentName && (
               <p className="error-message">{errors.departmentName}</p>
             )}
-          </div>
-          <div className="input-group">
-            <input
-              name="country"
-              type="text"
-              placeholder={`Country${!employeeData ? "*" : ""}`}
-              required={!employeeData}
-              defaultValue={employeeData?.country}
-              className={`input-field ${errors?.country ? "error" : ""}`}
-            />
-            {errors?.country && (
-              <p className="error-message">{errors.country}</p>
-            )}
+
             <input
               name="dateOfJoining"
               ref={inputRefs.joinDate}
@@ -495,6 +484,11 @@ const ModalForm: React.FC<ModalFormProps> = ({
             {errors?.dateOfJoining && (
               <p className="error-message">{errors.dateOfJoining}</p>
             )}
+
+          </div>
+          {/* CountryStateCity Component  */}
+          <div className=" w-full">
+           <CountryStateCity/>
           </div>
 
           <div className="input-group gender-selection">

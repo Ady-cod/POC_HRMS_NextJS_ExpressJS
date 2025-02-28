@@ -7,12 +7,16 @@ import dns from "dns/promises";
 
 // Helper function to capitalize the first letter of each word in a name
 const capitalizeEachWord = (name: string): string =>
-  name.replace(/\b[\p{L}]/ug, (char) => char.toUpperCase());
+  name.replace(/\b[\p{L}]/gu, (char) => char.toUpperCase());
 
 // Helper function to ensure the birth date is no older than 100 years ago
 const isNotMoreThan100YearsAgo = (dateString: string): boolean => {
   const today = new Date();
-  const hundredYearsAgo = new Date(today.getFullYear() - 100, today.getMonth(), today.getDate());
+  const hundredYearsAgo = new Date(
+    today.getFullYear() - 100,
+    today.getMonth(),
+    today.getDate()
+  );
   const date = parseISO(dateString);
   return isValid(date) && date >= hundredYearsAgo;
 };
@@ -20,7 +24,11 @@ const isNotMoreThan100YearsAgo = (dateString: string): boolean => {
 // Helper function to check if a birth date is at least 18 years in the past
 const isAtLeast18YearsAgo = (dateString: string): boolean => {
   const today = new Date();
-  const eighteenYearsAgo = new Date(today.getFullYear() - 18, today.getMonth(), today.getDate());
+  const eighteenYearsAgo = new Date(
+    today.getFullYear() - 18,
+    today.getMonth(),
+    today.getDate()
+  );
   const date = parseISO(dateString);
   return isValid(date) && date <= eighteenYearsAgo;
 };
@@ -28,7 +36,7 @@ const isAtLeast18YearsAgo = (dateString: string): boolean => {
 // Helper function to check if a joining date is not before the company founding year
 const isAfterFoundingYear = (dateString: string): boolean => {
   const foundingYear = 2021; // The founding year of the company
-  
+
   // Validation uses local time because user input from <input type="date"> is local
   const minJoinDate = new Date(foundingYear, 0, 1); // January 1st of the founding year
   const date = parseISO(dateString);
@@ -50,7 +58,7 @@ const isEmailUnique = async (email: string): Promise<boolean> => {
     },
   });
   return !existingEmployee;
-}
+};
 
 // Helper function to check if a string is a valid email address, using a valid domain
 interface DomainValidationResult {
@@ -150,40 +158,9 @@ export const createEmployeeSchema = z.object({
     message:
       "Invalid phone number format. Use international format (e.g., +123456789)",
   }), // Validate as a phone number
-  country: z
-    .string()
-    .min(2, "Country is required with a minimum of 2 characters")
-    .refine(isValidUnicodeName, {
-      message:
-        "Country must only contain letters (2 minimum), spaces, apostrophes, hyphens and start/end with a letter",
-    })
-    .refine(isSafeString, {
-      message: 'Country contains unsafe characters like <, >, ", ` or &',
-    })
-    .transform(capitalizeEachWord),
-  state: z
-    .string()
-    .min(2, "State is required with a minimum of 2 characters")
-    .refine(isValidUnicodeName, {
-      message:
-        "State must only contain letters (2 minimum), spaces, apostrophes, hyphens and start/end with a letter",
-    })
-    .refine(isSafeString, {
-      message: 'State contains unsafe characters like <, >, ", ` or &',
-    })
-    .optional()
-    .transform((value) => (!value ? null : capitalizeEachWord(value))),
-  city: z
-    .string()
-    .min(3, "City is required with a minimum of 3 characters")
-    .refine(isValidUnicodeName, {
-      message:
-        "City must only contain letters (3 minimum), spaces, apostrophes, hyphens and start/end with a letter",
-    })
-    .refine(isSafeString, {
-      message: 'City contains unsafe characters like <, >, " , `, or &',
-    })
-    .transform(capitalizeEachWord),
+  country: z.string().min(1, "Select a country").transform(capitalizeEachWord),
+  state: z.string().min(1, "Select a state").transform(capitalizeEachWord),
+  city: z.string().min(1, "Select a city").transform(capitalizeEachWord),
   streetAddress: z
     .string()
     .refine(isSafeString, {
@@ -290,42 +267,9 @@ export const updateEmployeeSchema = z.object({
     })
     .optional()
     .transform((value) => (!value ? null : value)),
-  country: z
-    .string()
-    .min(2, "Country is required with a minimum of 2 characters")
-    .refine(isValidUnicodeName, {
-      message:
-        "Country must only contain letters (2 minimum), spaces, apostrophes, hyphens and start/end with a letter",
-    })
-    .refine(isSafeString, {
-      message: 'Country contains unsafe characters like <, >, ", ` or &',
-    })
-    .optional()
-    .transform((value) => (!value ? null : capitalizeEachWord(value))),
-  state: z
-    .string()
-    .min(2, "State is required with a minimum of 2 characters")
-    .refine(isValidUnicodeName, {
-      message:
-        "State must only contain letters (2 minimum), spaces, apostrophes, hyphens and start/end with a letter",
-    })
-    .refine(isSafeString, {
-      message: 'State contains unsafe characters like <, >, ", ` or &',
-    })
-    .optional()
-    .transform((value) => (!value ? null : capitalizeEachWord(value))),
-  city: z
-    .string()
-    .min(3, "City is required with a minimum of 3 characters")
-    .refine(isValidUnicodeName, {
-      message:
-        "City must only contain letters (3 minimum), spaces, apostrophes, hyphens and start/end with a letter",
-    })
-    .refine(isSafeString, {
-      message: 'City contains unsafe characters like <, >, " , `, or &',
-    })
-    .optional()
-    .transform((value) => (!value ? null : capitalizeEachWord(value))),
+    country: z.string().min(1, "Select a country").transform(capitalizeEachWord),
+    state: z.string().min(1, "Select a state").transform(capitalizeEachWord),
+    city: z.string().min(1, "Select a city").transform(capitalizeEachWord),
   streetAddress: z
     .string()
     .refine(isSafeString, {

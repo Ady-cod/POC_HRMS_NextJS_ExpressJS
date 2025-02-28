@@ -19,14 +19,27 @@ type Option = {
   label: string;
 };
 
-const CountryStateCity = () => {
+interface Props {
+  country: string;
+  setCountry: React.Dispatch<React.SetStateAction<string>>;
+  state: string;
+  setState: React.Dispatch<React.SetStateAction<string>>;
+  city: string;
+  setCity: React.Dispatch<React.SetStateAction<string>>;
+}
+const CountryStateCity: React.FC<Props> = ({
+  country,
+  setCountry,
+  state,
+  setState,
+  city,
+  setCity,
+})=> {
   const [countries, setCountries] = useState<Option[]>([]);
   const [selectedCountryCode, setSelectedCountryCode] = useState<string>("");
   const [statesList, setStatesList] = useState<Option[]>([]);
   const [citiesList, setCitiesList] = useState<Option[]>([]);
-  const [country, setCountry] = useState<string>("");
-  const [state, setState] = useState<string>("");
-  const [city, setCity] = useState<string>("");
+
   const [isLoading, setIsLoading] = useState<boolean>(false);
   const [isStatesLoading, setIsStatesLoading] = useState<boolean>(false);
   const [isCitiesLoading, setIsCitiesLoading] = useState<boolean>(false);
@@ -159,11 +172,7 @@ const CountryStateCity = () => {
       setCitiesList([]);
       return;
     }
-    if (country && state && city) {
-      console.log("Country is:", country);
-      console.log("State is:", state);
-      console.log("City is:", city);
-    }
+   
   }, [country, state, city]);
 
   const customStyles: StylesConfig<Option, false, GroupBase<Option>> = {
@@ -276,6 +285,7 @@ const CountryStateCity = () => {
           className="max-[500px]:w-full w-1/2"
           options={countries}
           styles={customStyles}
+          value={country ? { value: country, label: country } : null}
           onChange={handleCountryChange}
           placeholder="Select a country"
           isLoading={isLoading} // Show loading state for countries

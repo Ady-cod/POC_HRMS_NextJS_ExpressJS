@@ -65,6 +65,18 @@ const ModalForm: React.FC<ModalFormProps> = ({
     joinDate: useRef(null),
   };
 
+  const [country, setCountry] = useState<string>("");
+  const [state, setState] = useState<string>("");
+  const [city, setCity] = useState<string>("");
+
+  useEffect(() => {
+    if (country && state && city) {
+      console.log("Country is:", country);
+      console.log("State is:", state);
+      console.log("City is:", city);
+    }
+  }, [country, state, city]);
+
   useEffect(() => {
     const handleCalendarInteraction = (event: MouseEvent) => {
       // Loop through each input to detect if interaction is within one of the calendar popups
@@ -131,6 +143,10 @@ const ModalForm: React.FC<ModalFormProps> = ({
     const form = e.currentTarget; // Get the form element
     const formData = new FormData(form);
     const employeeInputData = Object.fromEntries(formData.entries());
+    employeeInputData.country = country;
+    employeeInputData.state = state;
+    employeeInputData.city = city;
+    console.log("Employee Data is", employeeInputData);
 
     // Access the Confirm Password value using the ref
     const confirmPassword = confirmPasswordRef.current?.value;
@@ -244,6 +260,9 @@ const ModalForm: React.FC<ModalFormProps> = ({
 
       // Reset the form after successful submission
       form.reset();
+      setCountry("");
+      setState("");
+      setCity("");
     } catch (error) {
       // Check all validation errors
       if (error instanceof ZodError) {
@@ -278,12 +297,17 @@ const ModalForm: React.FC<ModalFormProps> = ({
         // );
       }
     }
+
+    
   };
 
   const handleClose = () => {
     setErrors({}); // Reset errors when the modal is closed
     setShowPassword(false); // Reset password visibility
     onClose();
+    setCountry("");
+    setState("");
+    setCity("");
   };
 
   const today = new Date();
@@ -443,8 +467,8 @@ const ModalForm: React.FC<ModalFormProps> = ({
               required={!employeeData}
               defaultValue={employeeData?.city}
               className={`input-field ${errors?.city ? "error" : ""}`}
-            />
-            {errors?.city && <p className="error-message">{errors.city}</p>} */}
+            /> */}
+            {/* {errors?.city && <p className="error-message">{errors.city}</p>} */}
 
             <select
               name="departmentName"
@@ -484,11 +508,17 @@ const ModalForm: React.FC<ModalFormProps> = ({
             {errors?.dateOfJoining && (
               <p className="error-message">{errors.dateOfJoining}</p>
             )}
-
           </div>
           {/* CountryStateCity Component  */}
           <div className=" w-full">
-           <CountryStateCity/>
+            <CountryStateCity
+              country={country}
+              setCountry={setCountry}
+              state={state}
+              setState={setState}
+              city={city}
+              setCity={setCity}
+            />
           </div>
 
           <div className="input-group gender-selection">

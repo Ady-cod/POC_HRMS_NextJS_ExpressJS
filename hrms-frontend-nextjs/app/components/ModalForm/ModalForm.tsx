@@ -21,6 +21,7 @@ interface ModalFormProps {
   onClose: () => void;
   refreshEmployees: () => void;
   employeeData: EmployeeListItem | null;
+
 }
 
 interface CalendarInputState {
@@ -68,14 +69,7 @@ const ModalForm: React.FC<ModalFormProps> = ({
   const [country, setCountry] = useState<string>("");
   const [state, setState] = useState<string>("");
   const [city, setCity] = useState<string>("");
-
-  useEffect(() => {
-    if (country && state && city) {
-      console.log("Country is:", country);
-      console.log("State is:", state);
-      console.log("City is:", city);
-    }
-  }, [country, state, city]);
+  const [hasFetched, setHasFetched] = useState<boolean>(true);
 
   useEffect(() => {
     const handleCalendarInteraction = (event: MouseEvent) => {
@@ -138,16 +132,28 @@ const ModalForm: React.FC<ModalFormProps> = ({
     }));
   };
 
+  useEffect(() => {
+    
+    if(employeeData){
+      setCountry(employeeData.country);
+      setState(employeeData.state);
+      setCity(employeeData.city);
+    }
+  }, [employeeData])
+
+
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     const form = e.currentTarget; // Get the form element
     const formData = new FormData(form);
     const employeeInputData = Object.fromEntries(formData.entries());
+    
     employeeInputData.country = country;
     employeeInputData.state = state;
     employeeInputData.city = city;
-    console.log("Employee Data is", employeeInputData);
 
+    // console.log("employeeInputData", employeeInputData);
+    // console.log("employeeData", employeeData);
     // Access the Confirm Password value using the ref
     const confirmPassword = confirmPasswordRef.current?.value;
 
@@ -221,14 +227,15 @@ const ModalForm: React.FC<ModalFormProps> = ({
           return;
         }
         // Validate the form data for updating an employee
-        const validatedData = updateEmployeeSchema.parse(filteredData);
+        const schema = updateEmployeeSchema(hasFetched);
+        const validatedData = schema.parse(filteredData);
 
         // Send the data to the server action and get the response
         response = await updateEmployee(employeeData.id, validatedData);
       } else {
         // Validate the form data for creating an employee
-        const validatedData = createEmployeeSchema.parse(employeeInputData);
-
+        const schema = createEmployeeSchema(hasFetched);
+        const validatedData = schema.parse(employeeInputData);
         // Send the data to the server action and get the response
         response = await createEmployee(validatedData);
       }
@@ -297,8 +304,6 @@ const ModalForm: React.FC<ModalFormProps> = ({
         // );
       }
     }
-
-    
   };
 
   const handleClose = () => {
@@ -460,16 +465,6 @@ const ModalForm: React.FC<ModalFormProps> = ({
             )}
           </div>
           <div className="input-group">
-            {/* <input
-              name="city"
-              type="text"
-              placeholder={`City${!employeeData ? "*" : ""}`}
-              required={!employeeData}
-              defaultValue={employeeData?.city}
-              className={`input-field ${errors?.city ? "error" : ""}`}
-            /> */}
-            {/* {errors?.city && <p className="error-message">{errors.city}</p>} */}
-
             <select
               name="departmentName"
               required={!employeeData}
@@ -518,6 +513,9 @@ const ModalForm: React.FC<ModalFormProps> = ({
               setState={setState}
               city={city}
               setCity={setCity}
+              hasFetched = {hasFetched}
+              sethasFetched={setHasFetched}
+              employeeData = {employeeData}
             />
           </div>
 

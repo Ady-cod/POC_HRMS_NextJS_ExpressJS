@@ -16,8 +16,8 @@ export const getCountries = async () => {
     const response = await apiClient.get("/countries");
     return response.data; // Returns the list of countries
   } catch (error) {
-    console.error("Error fetching countries:", error);
-    return [];
+    console.error("Error fetching countries:",error);
+    throw error;
   }
 };
 

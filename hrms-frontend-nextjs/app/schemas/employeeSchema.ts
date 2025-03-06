@@ -1,12 +1,16 @@
 import { z } from "zod";
 import { isValid, parseISO } from "date-fns";
 import { parsePhoneNumberFromString } from "libphonenumber-js";
-import { parse } from "tldts"
+import { parse } from "tldts";
 
 // Helper function to ensure the birth date is no older than 100 years ago
 const isNotMoreThan100YearsAgo = (dateString: string): boolean => {
   const today = new Date();
-  const hundredYearsAgo = new Date(today.getFullYear() - 100, today.getMonth(), today.getDate());
+  const hundredYearsAgo = new Date(
+    today.getFullYear() - 100,
+    today.getMonth(),
+    today.getDate()
+  );
   const date = parseISO(dateString);
   return isValid(date) && date >= hundredYearsAgo;
 };
@@ -14,7 +18,11 @@ const isNotMoreThan100YearsAgo = (dateString: string): boolean => {
 // Helper function to check if a birth date is at least 18 years in the past
 const isAtLeast18YearsAgo = (dateString: string): boolean => {
   const today = new Date();
-  const eighteenYearsAgo = new Date(today.getFullYear() - 18, today.getMonth(), today.getDate());
+  const eighteenYearsAgo = new Date(
+    today.getFullYear() - 18,
+    today.getMonth(),
+    today.getDate()
+  );
   const date = parseISO(dateString);
   return isValid(date) && date <= eighteenYearsAgo;
 };
@@ -22,7 +30,7 @@ const isAtLeast18YearsAgo = (dateString: string): boolean => {
 // Helper function to check if a joining date is not before the company founding year
 const isAfterFoundingYear = (dateString: string): boolean => {
   const foundingYear = 2021; // The founding year of the company
-  
+
   // Validation uses local time because user input from <input type="date"> is local
   const minJoinDate = new Date(foundingYear, 0, 1); // January 1st of the founding year
   const date = parseISO(dateString);
@@ -71,218 +79,235 @@ const isValidUnicodeName = (input: string): boolean =>
   /^[\p{L}][\p{L}\s'\-]*[\p{L}]$/u.test(input);
 
 // Zod schema for employee creation
-export const createEmployeeSchema = z.object({
-  fullName: z
-    .string()
-    .min(3, "Employee name is required, with a minimum of 3 characters")
-    .refine(isValidUnicodeName, {
+export const createEmployeeSchema = (hasFetched: boolean) =>
+  z
+    .object({
+      fullName: z
+        .string()
+        .min(3, "Employee name is required, with a minimum of 3 characters")
+        .refine(isValidUnicodeName, {
+          message:
+            "Employee name must only contain letters (3 minimum), spaces, apostrophes, hyphens and start/end with a letter",
+        })
+        .refine(isSafeString, {
+          message:
+            'Employee name contains unsafe characters like <, >, ", `, or &',
+        })
+        .refine((name) => !name.includes("  "), {
+          message: "Employee name must not contain consecutive spaces",
+        })
+        .refine((name) => !name.includes("--"), {
+          message: "Employee name must not contain consecutive hyphens",
+        })
+        .refine((name) => !name.includes("''"), {
+          message: "Employee name must not contain consecutive apostrophes",
+        }),
+      email: z
+        .string()
+        .email("Invalid email address, use the format email@example.com")
+        .refine((email) => isValidEmailDomain(email), {
+          message: "Invalid email domain, use a valid format like example.com",
+        })
+        .refine(
+          (email) =>
+            !email.split("@")[0].startsWith("-") &&
+            !email.split("@")[0].endsWith("-"),
+          {
+            message: "Email username cannot start or end with a hyphen",
+          }
+        ),
+      password: z
+        .string()
+        .min(6, "Password must be at least 6 characters")
+        .max(16, "Password must not exceed 16 characters")
+        .regex(/\p{Ll}/u, "Password must include at least one lowercase letter")
+        .regex(/\p{Lu}/u, "Password must include at least one uppercase letter")
+        .regex(/\d/u, "Password must include at least one digit")
+        .regex(
+          /[^\p{L}\d]/u,
+          "Password must include at least one special character"
+        ),
+      phoneNumber: z.string().refine(isValidPhoneNumber, {
+        // Validate as a phone number
+        message:
+          "Invalid phone number format. Use international format (e.g., +123456789)",
+      }),
+      country: hasFetched
+        ? z.string().min(1, "Select a country") // Only validate when hasFetched is true
+        : z.string(),
+      state: hasFetched
+        ? z.string().min(1, "Select a state") // Only validate when hasFetched is true
+        : z.string(),
+      city: hasFetched
+        ? z.string().min(1, "Select a city") // Only validate when hasFetched is true
+        : z.string(),
+
+      streetAddress: z
+        .string()
+        .refine(isSafeString, {
+          message: 'Street contains unsafe characters like <, >, ", `, or &',
+        })
+        .optional(),
+      birthDate: z
+        .string()
+        .refine(isValidDate, {
+          message: "Invalid birth date format, expected a valid YYYY-MM-DD",
+        })
+        .refine(isAtLeast18YearsAgo, {
+          message: "Birth date must be at least 18 years ago.",
+        })
+        .refine(isNotMoreThan100YearsAgo, {
+          message:
+            "Birth date goes too far in the past. Please check your typed year",
+        }),
+      dateOfJoining: z
+        .string()
+        .refine(isValidDate, {
+          message:
+            "Invalid date of joining format, expected a valid YYYY-MM-DD",
+        })
+        .refine(isNotFutureDate, {
+          message: "Joining date cannot be in the future.",
+        })
+        .refine(isAfterFoundingYear, {
+          message: "Joining date cannot be less than 2021.",
+        }),
+      departmentName: z
+        .string()
+        .min(2, "Department name is required, select from the list"),
+      gender: z.enum(["MALE", "FEMALE", "OTHER"]).optional(), // Based on radio buttons
+    })
+    .refine(() => hasFetched, {
       message:
-        "Employee name must only contain letters (3 minimum), spaces, apostrophes, hyphens and start/end with a letter",
-    })
-    .refine(isSafeString, {
-      message: 'Employee name contains unsafe characters like <, >, ", `, or &',
-    })
-    .refine((name) => !name.includes("  "), {
-      message: "Employee name must not contain consecutive spaces",
-    })
-    .refine((name) => !name.includes("--"), {
-      message: "Employee name must not contain consecutive hyphens",
-    })
-    .refine((name) => !name.includes("''"), {
-      message: "Employee name must not contain consecutive apostrophes",
-    }),
-  email: z
-    .string()
-    .email("Invalid email address, use the format email@example.com")
-    .refine((email) => isValidEmailDomain(email), {
-      message: "Invalid email domain, use a valid format like example.com",
-    })
-    .refine(
-      (email) =>
-        !email.split("@")[0].startsWith("-") &&
-        !email.split("@")[0].endsWith("-"),
-      {
-        message: "Email username cannot start or end with a hyphen",
-      }
-    ),
-  password: z
-    .string()
-    .min(6, "Password must be at least 6 characters")
-    .max(16, "Password must not exceed 16 characters")
-    .regex(/\p{Ll}/u, "Password must include at least one lowercase letter")
-    .regex(/\p{Lu}/u, "Password must include at least one uppercase letter")
-    .regex(/\d/u, "Password must include at least one digit")
-    .regex(
-      /[^\p{L}\d]/u,
-      "Password must include at least one special character"
-    ),
-  phoneNumber: z.string().refine(isValidPhoneNumber, {
-    // Validate as a phone number
-    message:
-      "Invalid phone number format. Use international format (e.g., +123456789)",
-  }),
-   country: z.string().min(1, "Select a country"),
-  state: z.string().min(1, "Select a state"),
-  city: z.string().min(1, "Select a city"),
-  streetAddress: z
-    .string()
-    .refine(isSafeString, {
-      message: 'Street contains unsafe characters like <, >, ", `, or &',
-    })
-    .optional(),
-  birthDate: z
-    .string()
-    .refine(isValidDate, {
-      message: "Invalid birth date format, expected a valid YYYY-MM-DD",
-    })
-    .refine(isAtLeast18YearsAgo, {
-      message: "Birth date must be at least 18 years ago.",
-    })
-    .refine(isNotMoreThan100YearsAgo, {
-      message:
-        "Birth date goes too far in the past. Please check your typed year",
-    }),
-  dateOfJoining: z
-    .string()
-    .refine(isValidDate, {
-      message: "Invalid date of joining format, expected a valid YYYY-MM-DD",
-    })
-    .refine(isNotFutureDate, {
-      message: "Joining date cannot be in the future.",
-    })
-    .refine(isAfterFoundingYear, {
-      message: "Joining date cannot be less than 2021.",
-    }),
-  departmentName: z
-    .string()
-    .min(2, "Department name is required, select from the list"),
-  gender: z.enum(["MALE", "FEMALE", "OTHER"]).optional(), // Based on radio buttons
-});
+        "Unable to submit the form due to error in fetching countries/states/cities. Please try again later or inform the technical team.",
+    });
 
 // Zod schema for employee update
-export const updateEmployeeSchema = z.object({
-  fullName: z
-    .string()
-    .min(3, "Employee name is required, with a minimum of 3 characters")
-    .refine(isValidUnicodeName, {
-      message:
-        "Employee name must only contain letters (3 minimum), spaces, apostrophes, hyphens and start/end with a letter",
+export const updateEmployeeSchema = (hasFetched: boolean) =>
+  z
+    .object({
+      fullName: z
+        .string()
+        .min(3, "Employee name is required, with a minimum of 3 characters")
+        .refine(isValidUnicodeName, {
+          message:
+            "Employee name must only contain letters (3 minimum), spaces, apostrophes, hyphens and start/end with a letter",
+        })
+        .refine(isSafeString, {
+          message:
+            'Employee name contains unsafe characters like <, >, ", `, or &',
+        })
+        .refine((name) => !name.includes("  "), {
+          message: "Employee name must not contain consecutive spaces",
+        })
+        .refine((name) => !name.includes("--"), {
+          message: "Employee name must not contain consecutive hyphens",
+        })
+        .refine((name) => !name.includes("''"), {
+          message: "Employee name must not contain consecutive apostrophes",
+        })
+        .optional(),
+      email: z
+        .string()
+        .email("Invalid email address, use the format email@example.com")
+        .refine((email) => isValidEmailDomain(email), {
+          message: "Invalid email domain, use a valid format like example.com",
+        })
+        .refine(
+          (email) =>
+            !email.split("@")[0].startsWith("-") &&
+            !email.split("@")[0].endsWith("-"),
+          {
+            message: "Email username cannot start or end with a hyphen",
+          }
+        )
+        .optional(),
+      password: z
+        .string()
+        .min(6, "Password must be at least 6 characters")
+        .max(16, "Password must not exceed 16 characters")
+        .regex(/\p{Ll}/u, "Password must include at least one lowercase letter")
+        .regex(/\p{Lu}/u, "Password must include at least one uppercase letter")
+        .regex(/\d/u, "Password must include at least one digit")
+        .regex(
+          /[^\p{L}\d]/u,
+          "Password must include at least one special character"
+        )
+        .optional(),
+      phoneNumber: z
+        .string()
+        .refine(isValidPhoneNumber, {
+          // Validate as a phone number
+          message:
+            "Invalid phone number format. Use international format (e.g., +123456789)",
+        })
+        .optional(),
+      country: hasFetched
+        ? z
+            .string()
+            .min(1, "Select a country")
+            .refine((c) => c !== "", {
+              message: "Country selection is required",
+            })
+        : z.string().optional(), // Make it optional when hasFetched is false
+
+      state: hasFetched
+        ? z
+            .string()
+            .min(1, "Select a state")
+            .refine((s) => s !== "", { message: "State selection is required" })
+        : z.string().optional(), // Make it optional when hasFetched is false
+
+      city: hasFetched
+        ? z
+            .string()
+            .min(1, "Select a city")
+            .refine((c) => c !== "", { message: "City selection is required" })
+        : z.string().optional(), // Make it optional when hasFetched is false
+      streetAddress: z
+        .string()
+        .refine(isSafeString, {
+          message: 'Street contains unsafe characters like <, >, ", `, or &',
+        })
+        .optional(),
+      birthDate: z
+        .string()
+        .refine(isValidDate, {
+          message: "Invalid birth date format, expected a valid YYYY-MM-DD",
+        })
+        .refine(isAtLeast18YearsAgo, {
+          message: "Birth date must be at least 18 years ago.",
+        })
+        .refine(isNotMoreThan100YearsAgo, {
+          message:
+            "Birth date goes too far in the past. Please check your typed year",
+        })
+        .optional(),
+      dateOfJoining: z
+        .string()
+        .refine(isValidDate, {
+          message:
+            "Invalid date of joining format, expected a valid YYYY-MM-DD",
+        })
+        .refine(isNotFutureDate, {
+          message: "Joining date cannot be in the future.",
+        })
+        .refine(isAfterFoundingYear, {
+          message: "Joining date cannot be less than 2021.",
+        })
+        .optional(),
+      departmentName: z
+        .string()
+        .min(2, "Department name is required, select from the list")
+        .optional(),
+      gender: z.enum(["MALE", "FEMALE", "OTHER"]).optional(), // Based on radio buttons
     })
-    .refine(isSafeString, {
-      message: 'Employee name contains unsafe characters like <, >, ", `, or &',
-    })
-    .refine((name) => !name.includes("  "), {
-      message: "Employee name must not contain consecutive spaces",
-    })
-    .refine((name) => !name.includes("--"), {
-      message: "Employee name must not contain consecutive hyphens",
-    })
-    .refine((name) => !name.includes("''"), {
-      message: "Employee name must not contain consecutive apostrophes",
-    })
-    .optional(),
-  email: z
-    .string()
-    .email("Invalid email address, use the format email@example.com")
-    .refine((email) => isValidEmailDomain(email), {
-      message: "Invalid email domain, use a valid format like example.com",
-    })
-    .refine(
-      (email) =>
-        !email.split("@")[0].startsWith("-") &&
-        !email.split("@")[0].endsWith("-"),
-      {
-        message: "Email username cannot start or end with a hyphen",
+    .superRefine((_, ctx) => {
+      if (!hasFetched) {
+        ctx.addIssue({
+          code: z.ZodIssueCode.custom,
+          message:
+            "Unable to submit the form due to error in fetching countries/states/cities. Please try again later or inform the technical team.",
+        });
       }
-    )
-    .optional(),
-  password: z
-    .string()
-    .min(6, "Password must be at least 6 characters")
-    .max(16, "Password must not exceed 16 characters")
-    .regex(/\p{Ll}/u, "Password must include at least one lowercase letter")
-    .regex(/\p{Lu}/u, "Password must include at least one uppercase letter")
-    .regex(/\d/u, "Password must include at least one digit")
-    .regex(
-      /[^\p{L}\d]/u,
-      "Password must include at least one special character"
-    )
-    .optional(),
-  phoneNumber: z
-    .string()
-    .refine(isValidPhoneNumber, {
-      // Validate as a phone number
-      message:
-        "Invalid phone number format. Use international format (e.g., +123456789)",
-    })
-    .optional(),
-  country: z
-    .string()
-    .min(2, "Country is required with a minimum of 2 characters")
-    .refine(isValidUnicodeName, {
-      message:
-        "Country must only contain letters (2 minimum), spaces, apostrophes, hyphens and start/end with a letter",
-    })
-    .refine(isSafeString, {
-      message: 'Country contains unsafe characters like <, >, ", ` or &',
-    })
-    .optional(),
-  state: z
-    .string()
-    .min(2, "State is required with a minimum of 2 characters")
-    .refine(isValidUnicodeName, {
-      message:
-        "State must only contain letters (2 minimum), spaces, apostrophes, hyphens and start/end with a letter",
-    })
-    .refine(isSafeString, {
-      message: 'State contains unsafe characters like <, >, ", ` or &',
-    })
-    .optional(),
-  city: z
-    .string()
-    .min(3, "City is required with a minimum of 3 characters")
-    .refine(isValidUnicodeName, {
-      message:
-        "City must only contain letters (3 minimum), spaces, apostrophes, hyphens and start/end with a letter",
-    })
-    .refine(isSafeString, {
-      message: 'City contains unsafe characters like <, >, " , `, or &',
-    })
-    .optional(),
-  streetAddress: z
-    .string()
-    .refine(isSafeString, {
-      message: 'Street contains unsafe characters like <, >, ", `, or &',
-    })
-    .optional(),
-  birthDate: z
-    .string()
-    .refine(isValidDate, {
-      message: "Invalid birth date format, expected a valid YYYY-MM-DD",
-    })
-    .refine(isAtLeast18YearsAgo, {
-      message: "Birth date must be at least 18 years ago.",
-    })
-    .refine(isNotMoreThan100YearsAgo, {
-      message:
-        "Birth date goes too far in the past. Please check your typed year",
-    })
-    .optional(),
-  dateOfJoining: z
-    .string()
-    .refine(isValidDate, {
-      message: "Invalid date of joining format, expected a valid YYYY-MM-DD",
-    })
-    .refine(isNotFutureDate, {
-      message: "Joining date cannot be in the future.",
-    })
-    .refine(isAfterFoundingYear, {
-      message: "Joining date cannot be less than 2021.",
-    })
-    .optional(),
-  departmentName: z
-    .string()
-    .min(2, "Department name is required, select from the list")
-    .optional(),
-  gender: z.enum(["MALE", "FEMALE", "OTHER"]).optional(), // Based on radio buttons
-});
+    });

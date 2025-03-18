@@ -30,7 +30,9 @@ export interface CreateEmployeeInput {
   email: string;
   password: string;
   country: string;
+  countryCode?: string | null;
   state?: string | null;
+  stateCode?: string | null;
   city: string;
   streetAddress?: string | null;
   phoneNumber: string;
@@ -51,6 +53,9 @@ export interface CreateEmployeePrismaData {
   email: string;
   password: string;
   country: string;
+  countryCode?: string | null;
+  state?: string | null;
+  stateCode?: string | null;
   city: string;
   streetAddress?: string | null;
   phoneNumber: string;

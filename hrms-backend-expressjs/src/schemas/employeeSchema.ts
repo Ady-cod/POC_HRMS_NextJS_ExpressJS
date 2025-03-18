@@ -158,9 +158,17 @@ export const createEmployeeSchema = z.object({
     message:
       "Invalid phone number format. Use international format (e.g., +123456789)",
   }), // Validate as a phone number
-  country: z.string().min(1, "Select a country").transform(capitalizeEachWord),
-  state: z.string().min(1, "Select a state").transform(capitalizeEachWord),
-  city: z.string().min(1, "Select a city").transform(capitalizeEachWord),
+  country: z
+    .string()
+    .min(2, "Country name must be at least 2 characters long."),
+  countryCode: z.string().optional(), 
+  state: z
+    .string()
+    .min(2, "State name must be at least 2 characters long."),
+  stateCode: z.string().optional(),
+  city: z
+    .string()
+    .min(2, "City name must be at least 2 characters long."),
   streetAddress: z
     .string()
     .refine(isSafeString, {
@@ -267,9 +275,23 @@ export const updateEmployeeSchema = z.object({
     })
     .optional()
     .transform((value) => (!value ? null : value)),
-    country: z.string().min(1, "Select a country").transform(capitalizeEachWord),
-    state: z.string().min(1, "Select a state").transform(capitalizeEachWord),
-    city: z.string().min(1, "Select a city").transform(capitalizeEachWord),
+  country: z
+    .string()
+    .min(2, "Country name must be at least 2 characters long if provided.")
+    // .transform(capitalizeEachWord)
+    .optional(),
+  countryCode: z.string().optional(),
+  state: z
+    .string()
+    .min(2, "State name must be at least 2 characters long if provided.")
+    // .transform(capitalizeEachWord)
+    .optional(),
+  stateCode: z.string().optional(),
+  city: z
+    .string()
+    .min(2, "City name must be at least 2 characters long if provided.")
+    // .transform(capitalizeEachWord)
+    .optional(),
   streetAddress: z
     .string()
     .refine(isSafeString, {

@@ -25,21 +25,22 @@ const EmployeePage = () => {
   };
   const handleCloseModal = () => {
     setIsModalOpen(false);
-    setEmployeeData(null);
+    if (employeeData) {
+      setEmployeeData(null);
+    }
   };
 
   const refreshEmployees = () => {
     setRefreshFlag(!refreshFlag);
+    setIsModalOpen(false);
     if (employeeData) {
       setEmployeeData(null);
-      setIsModalOpen(false);
     }
   };
 
   const handleEdit = (employeeData: EmployeeListItem) => {
     setEmployeeData(employeeData);
     setIsModalOpen(true);
-    // console.log("employeeData", employeeData);
   };
 
   // eslint-disable-next-line @typescript-eslint/no-unused-vars

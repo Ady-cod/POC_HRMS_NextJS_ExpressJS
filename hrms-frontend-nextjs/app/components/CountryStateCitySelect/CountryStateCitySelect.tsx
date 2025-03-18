@@ -4,39 +4,51 @@ import {
   getCountries,
   getStatesByCountry,
   getCitiesByState,
-} from "@/lib/cscApi";
-import { useEffect, useState, useRef } from "react";
+} from "@/lib/countryStateCityApi";
+import { useEffect, useState } from "react";
 import { showToast } from "@/utils/toastHelper";
 import { EmployeeListItem } from "@/types/types";
 
 import Select, {
   StylesConfig,
   GroupBase,
-  OptionProps,
-  SingleValueProps,
-  MultiValueProps,
 } from "react-select";
+
+type LoadingState = {
+  countries: boolean;
+  states: boolean;
+  cities: boolean;
+};
+
 type Option = {
-  value: string;
   label: string;
+  value: string;
 };
 
 interface Props {
   country: string;
   setCountry: React.Dispatch<React.SetStateAction<string>>;
+  countryCode: string;
+  setCountryCode: React.Dispatch<React.SetStateAction<string>>;
   state: string;
   setState: React.Dispatch<React.SetStateAction<string>>;
+  stateCode: string;
+  setStateCode: React.Dispatch<React.SetStateAction<string>>;
   city: string;
   setCity: React.Dispatch<React.SetStateAction<string>>;
   hasFetched: boolean;
   sethasFetched: React.Dispatch<React.SetStateAction<boolean>>;
   employeeData: EmployeeListItem | null;
 }
-const CountryStateCity: React.FC<Props> = ({
+const CountryStateCitySelect: React.FC<Props> = ({
   country,
   setCountry,
+  countryCode,
+  setCountryCode,
   state,
   setState,
+  stateCode,
+  setStateCode,
   city,
   setCity,
   hasFetched,
@@ -44,35 +56,25 @@ const CountryStateCity: React.FC<Props> = ({
   employeeData,
 }) => {
   const [countries, setCountries] = useState<Option[]>([]);
-  const [selectedCountryCode, setSelectedCountryCode] = useState<string>("");
   const [statesList, setStatesList] = useState<Option[]>([]);
-  const [selectedStateCode, setSelectedStateCode] = useState<string>("");
   const [citiesList, setCitiesList] = useState<Option[]>([]);
-  const [isLoading, setIsLoading] = useState<boolean>(false);
-  const [isStatesLoading, setIsStatesLoading] = useState<boolean>(false);
-  const [isCitiesLoading, setIsCitiesLoading] = useState<boolean>(false);
+  const [isLoading, setIsLoading] = useState<LoadingState>({
+    countries: false, 
+    states: false,
+    cities: false,
+  });
 
+  // Fetch countries only once when component mounts
   useEffect(() => {
-    if (employeeData && countries.length > 0) {
-      const currentIsoCode = countries.filter((c) => c.label === country);
-      setSelectedCountryCode(currentIsoCode[0]?.value);
-    }
-    if (employeeData && statesList.length > 0) {
-      const currentStateCode = statesList.filter((s) => s.label == state);
-      setSelectedStateCode(currentStateCode[0]?.value);
-    }
-  }, [employeeData, countries, statesList]);
-
-  useEffect(() => {
-    // Fetch countries only once
     const fetchCountries = async () => {
+      // console.log("Fetching initial countries");
       try {
-        setIsLoading(true);
-        const data = await getCountries();
-        const formattedCountries = data.map(
+        setIsLoading((prev) => ({ ...prev, countries: true }));
+        const fetchedCountries = await getCountries();
+        const formattedCountries = fetchedCountries.map(
           (country: { iso2: string; name: string }) => ({
-            value: country.iso2,
             label: country.name,
+            value: country.iso2,
           })
         );
         setCountries(formattedCountries);
@@ -81,173 +83,180 @@ const CountryStateCity: React.FC<Props> = ({
         console.error("Failed to fetch countries", error);
         sethasFetched(false);
       } finally {
-        setIsLoading(false);
+        setIsLoading((prev) => ({ ...prev, countries: false }));
       }
     };
 
     fetchCountries();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
-  // Handle country change and fetch states
+  // Fetch states when component mounts in case of predefined country (via employeeData)
+  useEffect(() => {
+    const fetchStates = async () => {
+      if (!employeeData || !employeeData.countryCode) return; // Ensure we are only fetching initial states when we have preexisting data passed in
+      
+      setIsLoading((prev) => ({ ...prev, states: true }));
+      // console.log("Fetching initial states");
+      try {
+        const fetchedStates = await getStatesByCountry(
+          employeeData.countryCode // Use preexisting country code
+        );
+
+        if (fetchedStates.length === 0) {
+          // Fallback if no states exist, use country as state
+          setStatesList([
+            { label: employeeData.country, value: employeeData.countryCode },
+          ]);
+          return;
+        }
+        const formattedStates = fetchedStates
+          .map((state: { iso2: string; name: string }) => ({
+            label: state.name,
+            value: state.iso2,
+          }))
+          .sort((a: Option, b: Option) => a.label.localeCompare(b.label));
+
+        setStatesList(formattedStates);
+      } catch (error) {
+        console.error("Error fetching states:", error);
+      } finally {
+        setIsLoading((prev) => ({ ...prev, states: false }));
+      }
+    };
+    fetchStates();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
+  // Fetch cities when component mounts in case of predefined state (via employeeData) with a state code defined
+  useEffect(() => {
+    const fetchCities = async () => {
+      if (!employeeData || !employeeData.countryCode || !employeeData.state || !employeeData.stateCode) return; // Ensure we are only fetching cities for the initial state (if the case)
+      
+      setIsLoading((prev) => ({ ...prev, cities: true }));
+      // console.log("Fetching initial cities");
+      try {
+        const fetchedCities = await getCitiesByState(
+          employeeData.countryCode, 
+          employeeData.stateCode // Use preexisting state code 
+        );
+
+        //If no city for the selected state then, the state is displayed as city.
+        if (fetchedCities.length === 0) {
+          setCitiesList([{ label: employeeData.state, value: employeeData.stateCode }]);
+          return;
+        }
+        const formattedCities = fetchedCities.map((city: { name: string }) => ({
+          label: city.name,
+          value: city.name,
+        }));
+        setCitiesList(formattedCities);
+      } catch (error) {
+        console.error("Error fetching cities:", error);
+      } finally {
+        setIsLoading((prev) => ({ ...prev, cities: false }));
+      }
+    };
+
+    fetchCities();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
+  // Handle country change and adjust states list accordingly
   const handleCountryChange = async (selectedCountry: Option | null) => {
     if (!selectedCountry) {
-      setSelectedCountryCode("");
       setCountry("");
+      setCountryCode("");
       setState("");
+      setStateCode("");
       setCity("");
       setStatesList([]);
       setCitiesList([]);
       return;
     }
-    setSelectedCountryCode(selectedCountry.value);
     setCountry(selectedCountry.label);
+    setCountryCode(selectedCountry.value);
+    // Clear previous states and cities
     setState("");
+    setStateCode("");
     setCity("");
-    setStatesList([]); // Clear previous states and cities
+    setStatesList([]);
     setCitiesList([]);
-    setIsStatesLoading(true);
+    setIsLoading((prev) => ({ ...prev, states: true }));
 
     try {
-      const data = await getStatesByCountry(selectedCountry.value);
+      const fetchedStates = await getStatesByCountry(selectedCountry.value);
 
       //If no state for the selected country, then the country is displayed as state.
-      if (data.length === 0) {
+      if (fetchedStates.length === 0) {
         setStatesList([
-          { value: selectedStateCode, label: selectedCountry.label },
+          { label: selectedCountry.label, value: selectedCountry.value },
         ]);
         return;
       }
 
-      // Sort the states alphabetically by name before setting the state list
-      const stateData = data
-        .map((state: { iso2: string; name: string }) => ({
-          value: state.iso2,
+      // Format and sort the states alphabetically by name before setting the state list
+      const formattedStates = fetchedStates.map(
+        (state: { iso2: string; name: string }) => ({
           label: state.name,
-        }))
-        .sort((a: Option, b: Option) => a.label.localeCompare(b.label));
+          value: state.iso2,
+        })
+      )
+      .sort((a: Option, b: Option) => a.label.localeCompare(b.label));
 
-      setStatesList(stateData);
+      setStatesList(formattedStates);
     } catch (error) {
       console.error("Error fetching states:", error);
       showToast("error", "Failed to fetch states.", [
         "Please try again later or inform the technical team.",
       ]);
     } finally {
-      setIsStatesLoading(false);
+      setIsLoading((prev) => ({ ...prev, states: false }));
     }
   };
 
-  useEffect(() => {
-    const fetchStates = async () => {
-      if (!selectedCountryCode) return; // Ensure a country is selected before fetching states
-
-      if (employeeData) {
-        setIsStatesLoading(true);
-        try {
-          const data = await getStatesByCountry(selectedCountryCode); // Use selectedCountryCode
-
-          if (data.length === 0) {
-            setStatesList([{ value: selectedCountryCode, label: country }]); // Fallback if no states exist
-            return;
-          }
-
-          const stateData = data
-            .map((state: { iso2: string; name: string }) => ({
-              value: state.iso2,
-              label: state.name,
-            }))
-            .sort((a: Option, b: Option) => a.label.localeCompare(b.label));
-
-          setStatesList(stateData);
-        } catch (error) {
-          console.error("Error fetching states:", error);
-          showToast("error", "Failed to fetch states.", [
-            "Please try again later or inform the technical team.",
-          ]);
-        } finally {
-          setIsStatesLoading(false);
-        }
-      }
-    };
-    fetchStates();
-  }, [selectedCountryCode]);
-
-  // Handle state change and fetch cities
+  // Handle state change and adjust cities accordingly
   const handleStateChange = async (selectedState: Option | null) => {
     if (!selectedState) {
-      setSelectedStateCode("");
+      setState("");
+      setStateCode("");
       setCitiesList([]);
       setCity("");
       return;
     }
-    setCity("");
-    setSelectedStateCode(selectedState.value);
     setState(selectedState.label);
-    setIsCitiesLoading(true);
+    setStateCode(selectedState.value);
+    setCity("");
     setCitiesList([]); // Clear previous cities
+    setIsLoading((prev) => ({ ...prev, cities: true }));
 
     try {
-      const data = await getCitiesByState(
-        selectedCountryCode,
+      const fetchedCities = await getCitiesByState(
+        countryCode,
         selectedState.value
       );
 
       //If no city for the selected state then, the state is displayed as city.
-      if (data.length === 0) {
+      if (fetchedCities.length === 0) {
         setCitiesList([
-          { value: selectedStateCode, label: selectedState.label },
+          { label: selectedState.label, value: selectedState.value },
         ]);
         return;
       }
-      const cityData = data.map((city: { name: string }) => ({
-        value: city.name,
+      const formattedCities = fetchedCities.map((city: { name: string }) => ({
         label: city.name,
+        value: city.name,
       }));
-      setCitiesList(cityData);
+      setCitiesList(formattedCities);
     } catch (error) {
       console.error("Error fetching cities:", error);
       showToast("error", "Failed to fetch cities.", [
         "Please try again later or inform the technical team.",
       ]);
     } finally {
-      setIsCitiesLoading(false);
+      setIsLoading((prev) => ({ ...prev, cities: false }));
     }
   };
-
-  useEffect(() => {
-    if (!selectedStateCode) return;
-    const fetchCities = async () => {
-      if (employeeData) {
-        setIsCitiesLoading(true);
-        try {
-          const data = await getCitiesByState(
-            selectedCountryCode,
-            selectedStateCode
-          );
-
-          //If no city for the selected state then, the state is displayed as city.
-          if (data.length === 0) {
-            setCitiesList([{ value: selectedStateCode, label: state }]);
-            return;
-          }
-          const cityData = data.map((city: { name: string }) => ({
-            value: city.name,
-            label: city.name,
-          }));
-          setCitiesList(cityData);
-        } catch (error) {
-          console.error("Error fetching cities:", error);
-          showToast("error", "Failed to fetch cities.", [
-            "Please try again later or inform the technical team.",
-          ]);
-        } finally {
-          setIsCitiesLoading(false);
-        }
-      }
-    };
-
-    fetchCities();
-  }, [selectedStateCode]);
 
   const handleCityChange = (selectedCity: Option | null) => {
     if (!selectedCity) {
@@ -256,19 +265,6 @@ const CountryStateCity: React.FC<Props> = ({
     }
     setCity(selectedCity.label);
   };
-
-  useEffect(() => {
-    if (!country || !state) {
-      setStatesList([]);
-      setCitiesList([]);
-      return;
-    }
-
-    if (!state) {
-      setCitiesList([]);
-      return;
-    }
-  }, [country, state, city]);
 
   const handleCountryError = () => {
     if (!hasFetched) {
@@ -283,9 +279,10 @@ const CountryStateCity: React.FC<Props> = ({
       showToast("error", "Failed to fetch countries, states and cities.", [
         "Please try again later or inform the technical team.",
       ]);
+      return;
     }
 
-    if (statesList.length == 0) {
+    if (statesList.length === 0) {
       showToast("info", "", ["Select country first."]);
     }
   };
@@ -295,11 +292,12 @@ const CountryStateCity: React.FC<Props> = ({
       showToast("error", "Failed to fetch countries, states and cities.", [
         "Please try again later or inform the technical team.",
       ]);
+      return;
     }
 
-    if (country == "") {
+    if (!country) {
       showToast("info", "", ["Select country and state first."]);
-    } else if (citiesList.length == 0) {
+    } else if (citiesList.length === 0) {
       showToast("info", "", ["Select state first."]);
     }
   };
@@ -382,7 +380,7 @@ const CountryStateCity: React.FC<Props> = ({
       color: "black", // text-gray-400
       fontSize: "14.5px", // text-sm
     }),
-    dropdownIndicator: (provided, state) => ({
+    dropdownIndicator: (provided) => ({
       ...provided,
       width: "20px",
       color: "black",
@@ -409,11 +407,18 @@ const CountryStateCity: React.FC<Props> = ({
             className=""
             options={countries}
             styles={customStyles}
-            value={country ? { value: country, label: country } : null}
+            value={
+              country
+                ?  {
+                  label: country,
+                  value: countryCode,
+                  } 
+                : null // Ensure placeholder is shown when country is empty
+            }
             onChange={handleCountryChange}
-            placeholder="Select a country"
-            isDisabled={!hasFetched}
-            isLoading={isLoading} // Show loading state for countries
+            placeholder="Select a country*"
+            isLoading={isLoading.countries} // Show loading state for countries
+            isDisabled={isLoading.countries || !hasFetched}
           />
         </div>
 
@@ -423,10 +428,17 @@ const CountryStateCity: React.FC<Props> = ({
             options={statesList}
             styles={customStyles}
             onChange={handleStateChange}
-            value={state ? { value: state, label: state } : null}
-            placeholder="Select a state"
-            isLoading={isStatesLoading} // Show loading state for states
-            isDisabled={isStatesLoading || statesList.length === 0}
+            value={
+              state
+                ? {
+                    label: state,
+                    value: stateCode,
+                  } 
+                : null // Ensure placeholder is shown when state is empty
+            }
+            placeholder="Select a state*"
+            isLoading={isLoading.states} // Show loading state for states
+            isDisabled={isLoading.states || statesList.length === 0}
           />
         </div>
       </div>
@@ -440,10 +452,17 @@ const CountryStateCity: React.FC<Props> = ({
             options={citiesList}
             styles={customStyles}
             onChange={handleCityChange}
-            placeholder="Select a city"
-            value={city ? { value: city, label: city } : null}
-            isLoading={isCitiesLoading} // Show loading state for cities
-            isDisabled={isCitiesLoading || citiesList.length === 0}
+            placeholder="Select a city*"
+            value={
+              city
+                ? {
+                    label: city,
+                    value: city,
+                  } // Use fallback for missing predefined value
+                : null // Ensure placeholder is shown when city is empty
+            }
+            isLoading={isLoading.cities} // Show loading state for cities
+            isDisabled={isLoading.cities || citiesList.length === 0}
           />
         </div>
       </div>
@@ -451,4 +470,4 @@ const CountryStateCity: React.FC<Props> = ({
   );
 };
 
-export default CountryStateCity;
+export default CountryStateCitySelect;

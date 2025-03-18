@@ -20,8 +20,10 @@ model Employee {
   password            String               // Storing hashed passwords for security
   phoneNumber         String
   country             String
+  countryCode         String?
   city                String
   state               String?
+  stateCode           String?
   streetAddress       String?
   birthDate           DateTime
   dateOfJoining       DateTime            // Date when the employee joined the company

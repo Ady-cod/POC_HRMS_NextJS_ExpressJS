@@ -133,15 +133,20 @@ export const createEmployeeSchema = (hasFetched: boolean) =>
           "Invalid phone number format. Use international format (e.g., +123456789)",
       }),
       country: hasFetched
-        ? z.string().min(1, "Select a country") // Only validate when hasFetched is true
-        : z.string(),
+        ? z.string().min(2, "Select a country") // Adjust the validation message based on the fetch status
+        : z
+            .string()
+            .min(2, "Country is required with at least 2 characters long"), // Default message when fetch is not done
+      countryCode: z.string().optional(),
       state: hasFetched
-        ? z.string().min(1, "Select a state") // Only validate when hasFetched is true
-        : z.string(),
+        ? z.string().min(2, "Select a state") // Adjust the validation message based on the fetch status
+        : z
+            .string()
+            .min(2, "State is required with at least 2 characters long"), // Default message when fetch is not done
+      stateCode: z.string().optional(),
       city: hasFetched
-        ? z.string().min(1, "Select a city") // Only validate when hasFetched is true
-        : z.string(),
-
+        ? z.string().min(2, "Select a city") // Only validate when hasFetched is true
+        : z.string().min(2, "City is required with at least 2 characters long"), // Default message when fetch is not done
       streetAddress: z
         .string()
         .refine(isSafeString, {
@@ -183,9 +188,7 @@ export const createEmployeeSchema = (hasFetched: boolean) =>
     });
 
 // Zod schema for employee update
-export const updateEmployeeSchema = (hasFetched: boolean) =>
-  z
-    .object({
+export const updateEmployeeSchema = z.object({
       fullName: z
         .string()
         .min(3, "Employee name is required, with a minimum of 3 characters")
@@ -242,28 +245,26 @@ export const updateEmployeeSchema = (hasFetched: boolean) =>
             "Invalid phone number format. Use international format (e.g., +123456789)",
         })
         .optional(),
-      country: hasFetched
-        ? z
-            .string()
-            .min(1, "Select a country")
-            .refine((c) => c !== "", {
-              message: "Country selection is required",
-            })
-        : z.string().optional(), // Make it optional when hasFetched is false
-
-      state: hasFetched
-        ? z
-            .string()
-            .min(1, "Select a state")
-            .refine((s) => s !== "", { message: "State selection is required" })
-        : z.string().optional(), // Make it optional when hasFetched is false
-
-      city: hasFetched
-        ? z
-            .string()
-            .min(1, "Select a city")
-            .refine((c) => c !== "", { message: "City selection is required" })
-        : z.string().optional(), // Make it optional when hasFetched is false
+      country: z
+        .string()
+        .min(2, "Country name must be at least 2 characters long if provided.")
+        .optional(),
+      countryCode: z
+        .string()
+        .min(2, "Country code must be at least 2 characters long if provided.")
+        .optional(),
+      state: z
+        .string()
+        .min(2, "State name must be at least 2 characters long if provided.")
+        .optional(),
+      stateCode: z
+        .string()
+        .min(2, "State code must be at least 2 characters long if provided.")
+        .optional(),
+      city: z
+        .string()
+        .min(2, "City name must be at least 2 characters long if provided.")
+        .optional(),
       streetAddress: z
         .string()
         .refine(isSafeString, {
@@ -301,13 +302,4 @@ export const updateEmployeeSchema = (hasFetched: boolean) =>
         .min(2, "Department name is required, select from the list")
         .optional(),
       gender: z.enum(["MALE", "FEMALE", "OTHER"]).optional(), // Based on radio buttons
-    })
-    .superRefine((_, ctx) => {
-      if (!hasFetched) {
-        ctx.addIssue({
-          code: z.ZodIssueCode.custom,
-          message:
-            "Unable to submit the form due to error in fetching countries/states/cities. Please try again later or inform the technical team.",
-        });
-      }
     });

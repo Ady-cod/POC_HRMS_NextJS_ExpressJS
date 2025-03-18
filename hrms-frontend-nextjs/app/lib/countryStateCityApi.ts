@@ -1,7 +1,7 @@
 import axios from "axios";
 
-const API_URL = "https://api.countrystatecity.in/v1";
-const API_KEY = process.env.NEXT_PUBLIC_CSCAPI_KEY; // Securely store API key
+const API_URL = process.env.NEXT_PUBLIC_COUNTRY_STATE_CITY_API_URL; // Securely store API URL in .env file
+const API_KEY = process.env.NEXT_PUBLIC_COUNTRY_STATE_CITY_API_KEY; // Securely store API key in .env file
 
 const apiClient = axios.create({
   baseURL: API_URL,
@@ -28,7 +28,7 @@ export const getStatesByCountry = async (countryCode: string) => {
     return response.data;
   } catch (error) {
     console.error(`Error fetching states for ${countryCode}:`, error);
-    return [];
+    throw error;
   }
 };
 
@@ -39,6 +39,6 @@ export const getCitiesByState = async (countryCode: string, stateCode: string) =
     return response.data;
   } catch (error) {
     console.error(`Error fetching cities for ${stateCode}, ${countryCode}:`, error);
-    return [];
+    throw error;
   }
 };

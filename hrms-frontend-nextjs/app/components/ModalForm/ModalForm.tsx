@@ -14,7 +14,7 @@ import { showToast } from "@/utils/toastHelper";
 import { EmployeeListItem } from "@/types/types";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faEye, faEyeSlash } from "@fortawesome/free-solid-svg-icons";
-import CountryStateCity from "../CountryStateCitySelect/CountryStateCity";
+import CountryStateCitySelect from "@/components/CountryStateCitySelect/CountryStateCitySelect";
 
 interface ModalFormProps {
   isOpen: boolean;
@@ -67,9 +67,21 @@ const ModalForm: React.FC<ModalFormProps> = ({
   };
 
   const [country, setCountry] = useState<string>("");
+  const [countryCode, setCountryCode] = useState<string>("");
   const [state, setState] = useState<string>("");
+  const [stateCode, setStateCode] = useState<string>("");
   const [city, setCity] = useState<string>("");
-  const [hasFetched, setHasFetched] = useState<boolean>(true);
+  const [hasFetched, setHasFetched] = useState<boolean>(false);
+
+  useEffect(() => {
+    if (employeeData) {
+      setCountry(employeeData.country);
+      setCountryCode(employeeData.countryCode ?? "");
+      setState(employeeData.state ?? "");
+      setStateCode(employeeData.stateCode ?? "");
+      setCity(employeeData.city);
+    }
+  }, [employeeData]);
 
   useEffect(() => {
     const handleCalendarInteraction = (event: MouseEvent) => {
@@ -132,16 +144,6 @@ const ModalForm: React.FC<ModalFormProps> = ({
     }));
   };
 
-  useEffect(() => {
-    
-    if(employeeData){
-      setCountry(employeeData.country);
-      setState(employeeData.state);
-      setCity(employeeData.city);
-    }
-  }, [employeeData])
-
-
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     const form = e.currentTarget; // Get the form element
@@ -149,11 +151,11 @@ const ModalForm: React.FC<ModalFormProps> = ({
     const employeeInputData = Object.fromEntries(formData.entries());
     
     employeeInputData.country = country;
+    employeeInputData.countryCode = countryCode;
     employeeInputData.state = state;
+    employeeInputData.stateCode = stateCode;
     employeeInputData.city = city;
 
-    // console.log("employeeInputData", employeeInputData);
-    // console.log("employeeData", employeeData);
     // Access the Confirm Password value using the ref
     const confirmPassword = confirmPasswordRef.current?.value;
 
@@ -210,9 +212,6 @@ const ModalForm: React.FC<ModalFormProps> = ({
             );
           })
         );
-        // console.log("filteredData", filteredData);
-        // console.log("employeeData", employeeData);
-
         // If no data has been updated, return early
         if (Object.entries(filteredData).length === 0) {
           // Reset previous errors if any
@@ -227,8 +226,7 @@ const ModalForm: React.FC<ModalFormProps> = ({
           return;
         }
         // Validate the form data for updating an employee
-        const schema = updateEmployeeSchema(hasFetched);
-        const validatedData = schema.parse(filteredData);
+        const validatedData = updateEmployeeSchema.parse(filteredData);
 
         // Send the data to the server action and get the response
         response = await updateEmployee(employeeData.id, validatedData);
@@ -268,8 +266,11 @@ const ModalForm: React.FC<ModalFormProps> = ({
       // Reset the form after successful submission
       form.reset();
       setCountry("");
+      setCountryCode("");
       setState("");
+      setStateCode("");
       setCity("");
+      setHasFetched(false);
     } catch (error) {
       // Check all validation errors
       if (error instanceof ZodError) {
@@ -298,10 +299,10 @@ const ModalForm: React.FC<ModalFormProps> = ({
           "An unknown error occurred. Please check your connection or try again later.",
         ]);
 
-        // console.error(
-        //   `Unexpected non-standard error in ${errorAction} employee:`,
-        //   error
-        // );
+        console.error(
+          `Unexpected non-standard error in ${errorAction} employee:`,
+          error
+        );
       }
     }
   };
@@ -310,9 +311,13 @@ const ModalForm: React.FC<ModalFormProps> = ({
     setErrors({}); // Reset errors when the modal is closed
     setShowPassword(false); // Reset password visibility
     onClose();
+    // Reset CountryStateCity Component states
     setCountry("");
+    setCountryCode("");
     setState("");
+    setStateCode("");
     setCity("");
+    setHasFetched(false);
   };
 
   const today = new Date();
@@ -506,16 +511,20 @@ const ModalForm: React.FC<ModalFormProps> = ({
           </div>
           {/* CountryStateCity Component  */}
           <div className=" w-full">
-            <CountryStateCity
+            <CountryStateCitySelect
               country={country}
               setCountry={setCountry}
+              countryCode={countryCode}
+              setCountryCode={setCountryCode}
               state={state}
               setState={setState}
+              stateCode={stateCode}
+              setStateCode={setStateCode}
               city={city}
               setCity={setCity}
-              hasFetched = {hasFetched}
+              hasFetched={hasFetched}
               sethasFetched={setHasFetched}
-              employeeData = {employeeData}
+              employeeData={employeeData}
             />
           </div>
 

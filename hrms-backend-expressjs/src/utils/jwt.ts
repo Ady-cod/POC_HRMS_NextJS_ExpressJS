@@ -24,13 +24,13 @@ export const generateToken = (
   payload: JwtPayload,
   expiresIn: string = "1h"
 ): string => {
-  return jwt.sign(payload, SECRET_KEY, { expiresIn });
+  return jwt.sign(payload, SECRET_KEY as string, { expiresIn });
 };
 
 // Verify the validity of a JWT and extract the payload
 export const decodeToken = (token: string): JwtPayload => {
   try {
-    return jwt.verify(token, SECRET_KEY) as JwtPayload;
+    return jwt.verify(token, SECRET_KEY as string) as JwtPayload;
   } catch (error) {
     throw new Error("Invalid or expired token");
   }

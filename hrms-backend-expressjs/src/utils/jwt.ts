@@ -1,12 +1,17 @@
 import jwt from "jsonwebtoken";
 import { Employee, Role } from "@prisma/client";
 
-const SECRET_KEY = process.env.JWT_SECRET || "dev-secret-key"; // Use an environment variable for the secret
+const SECRET_KEY =
+  process.env.JWT_SECRET && process.env.JWT_SECRET.trim() !== ""
+    ? process.env.JWT_SECRET
+    : "dev-secret-key"; // Fallback for development
+
 if (!process.env.JWT_SECRET) {
   console.warn(
     "Warning: Using default JWT secret. This should never happen in production."
   );
 }
+
 
 // Type for payload (customize this according to your app)
 interface JwtPayload {

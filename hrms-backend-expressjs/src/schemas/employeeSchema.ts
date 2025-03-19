@@ -161,14 +161,16 @@ export const createEmployeeSchema = z.object({
   country: z
     .string()
     .min(2, "Country name must be at least 2 characters long."),
-  countryCode: z.string().optional(), 
-  state: z
+  countryCode: z
     .string()
-    .min(2, "State name must be at least 2 characters long."),
-  stateCode: z.string().optional(),
-  city: z
+    .optional()
+    .transform((value) => value ?? null), // Ensure countryCode is null if undefined in order to match Prisma's expected input
+  state: z.string().min(2, "State name must be at least 2 characters long."),
+  stateCode: z
     .string()
-    .min(2, "City name must be at least 2 characters long."),
+    .optional()
+    .transform((value) => value ?? null), // Ensure stateCode is null if undefined in order to match Prisma's expected input
+  city: z.string().min(2, "City name must be at least 2 characters long."),
   streetAddress: z
     .string()
     .refine(isSafeString, {

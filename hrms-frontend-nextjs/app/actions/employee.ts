@@ -140,7 +140,7 @@ export async function createEmployee(
 };
 export async function updateEmployee(
   id: string,
-  validatedData: z.infer<ReturnType<typeof updateEmployeeSchema>>
+  validatedData: z.infer<typeof updateEmployeeSchema>
 ): Promise<{
   success: boolean;
   message: string;

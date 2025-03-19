@@ -1,4 +1,4 @@
-import jwt from "jsonwebtoken";
+import jwt, { SignOptions } from "jsonwebtoken";
 import { Employee, Role } from "@prisma/client";
 
 const SECRET_KEY =
@@ -24,7 +24,8 @@ export const generateToken = (
   payload: JwtPayload,
   expiresIn: string = "1h"
 ): string => {
-  return jwt.sign(payload, SECRET_KEY as string, { expiresIn });
+  const options: SignOptions = { expiresIn };
+  return jwt.sign(payload, SECRET_KEY as string, options);
 };
 
 // Verify the validity of a JWT and extract the payload

@@ -1,4 +1,4 @@
-import jwt, { SignOptions } from "jsonwebtoken";
+import jwt, { SignOptions, StringValue } from "jsonwebtoken";
 import { Employee, Role } from "@prisma/client";
 
 const SECRET_KEY =
@@ -22,7 +22,7 @@ interface JwtPayload {
 // Generate a new JWT
 export const generateToken = (
   payload: JwtPayload,
-  expiresIn: string = "1h"
+  expiresIn: number | StringValue = "1h"
 ): string => {
   const options: SignOptions = { expiresIn };
   return jwt.sign(payload, SECRET_KEY as string, options);

@@ -50,5 +50,14 @@
     "ts-add-js-extension": "^1.6.5",
     "tsx": "^4.19.1",
     "typescript": "^5.7.2"
+  },
+  "pnpm": {
+    "onlyBuiltDependencies": [
+      "@prisma/client",
+      "@prisma/engines",
+      "bcrypt",
+      "esbuild",
+      "prisma"
+    ]
   }
 }

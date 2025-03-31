@@ -53,13 +53,6 @@ const isValidEmailDomain = (email: string): boolean => {
   return result.domain !== null && result.isIcann === true;
 };
 
-// Helper function to normalize phone number to E.164 format
-const normalizePhoneNumber = (phoneNumber: string): string => {
-  const parsedPhoneNumber = parsePhoneNumberFromString(phoneNumber);
-  if (!parsedPhoneNumber) return phoneNumber;
-  return parsedPhoneNumber.format("E.164");
-};
-
 // Helper function to check if a string is a valid phone number
 const isValidPhoneNumber = (phoneNumber: string): boolean => {
   if (!phoneNumber) return false; // Phone number is required
@@ -139,8 +132,7 @@ export const createEmployeeSchema = (hasFetched: boolean) =>
         .refine(isValidPhoneNumber, {
           message:
             "Invalid phone number format. Use international format (e.g., +123456789)",
-        })
-        .transform(normalizePhoneNumber),
+        }),
       country: hasFetched
         ? z.string().min(2, "Select a country") // Adjust the validation message based on the fetch status
         : z
@@ -253,7 +245,6 @@ export const updateEmployeeSchema = z
         message:
           "Invalid phone number format. Use international format (e.g., +123456789)",
       })
-      .transform(normalizePhoneNumber)
       .optional(),
     country: z
       .string()

@@ -4,16 +4,17 @@
 import "./ModalForm.css";
 import { useState, useEffect, useRef } from "react";
 import { createEmployee, updateEmployee } from "@/actions/employee";
+import { ZodError } from "zod";
+import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
+import { faEye, faEyeSlash } from "@fortawesome/free-solid-svg-icons";
+import { AsYouType } from "libphonenumber-js";
 import {
   createEmployeeSchema,
   updateEmployeeSchema,
 } from "@/schemas/employeeSchema";
 import { formatZodErrors } from "@/utils/formatZodErrors";
-import { ZodError } from "zod";
 import { showToast } from "@/utils/toastHelper";
 import { EmployeeListItem } from "@/types/types";
-import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import { faEye, faEyeSlash } from "@fortawesome/free-solid-svg-icons";
 import CountryStateCitySelect from "@/components/CountryStateCitySelect/CountryStateCitySelect";
 
 interface ModalFormProps {
@@ -21,7 +22,6 @@ interface ModalFormProps {
   onClose: () => void;
   refreshEmployees: () => void;
   employeeData: EmployeeListItem | null;
-
 }
 
 interface CalendarInputState {
@@ -54,6 +54,8 @@ const ModalForm: React.FC<ModalFormProps> = ({
 
   const [errors, setErrors] = useState<Record<string, string> | null>(null); // State to store form validation errors
 
+  const [phoneNumber, setPhoneNumber] = useState(""); // State to store phone number input in order to format it while typing
+
   // State object to track open/interaction status for each date input
   const [calendarState, setCalendarState] = useState<CalendarState>({
     birthDate: { isOpen: false, isInteracting: false },
@@ -75,11 +77,19 @@ const ModalForm: React.FC<ModalFormProps> = ({
 
   useEffect(() => {
     if (employeeData) {
+      setPhoneNumber(employeeData.phoneNumber ?? "");
       setCountry(employeeData.country);
       setCountryCode(employeeData.countryCode ?? "");
       setState(employeeData.state ?? "");
       setStateCode(employeeData.stateCode ?? "");
       setCity(employeeData.city);
+    } else {
+      setPhoneNumber("");
+      setCountry("");
+      setCountryCode("");
+      setState("");
+      setStateCode("");
+      setCity("");
     }
   }, [employeeData]);
 
@@ -149,7 +159,7 @@ const ModalForm: React.FC<ModalFormProps> = ({
     const form = e.currentTarget; // Get the form element
     const formData = new FormData(form);
     const employeeInputData = Object.fromEntries(formData.entries());
-    
+
     employeeInputData.country = country;
     employeeInputData.countryCode = countryCode;
     employeeInputData.state = state;
@@ -265,6 +275,7 @@ const ModalForm: React.FC<ModalFormProps> = ({
 
       // Reset the form after successful submission
       form.reset();
+      setPhoneNumber("");
       setCountry("");
       setCountryCode("");
       setState("");
@@ -308,9 +319,10 @@ const ModalForm: React.FC<ModalFormProps> = ({
   };
 
   const handleClose = () => {
+    onClose();
     setErrors({}); // Reset errors when the modal is closed
     setShowPassword(false); // Reset password visibility
-    onClose();
+    setPhoneNumber(""); // Reset phone number state
     // Reset CountryStateCity Component states
     setCountry("");
     setCountryCode("");
@@ -423,6 +435,7 @@ const ModalForm: React.FC<ModalFormProps> = ({
             {errors?.fullName && (
               <p className="error-message">{errors.fullName}</p>
             )}
+            {/* Real-time formatting for phone number input */}
             <input
               name="phoneNumber"
               type="text"
@@ -430,7 +443,11 @@ const ModalForm: React.FC<ModalFormProps> = ({
                 !employeeData ? "*" : ""
               } (e.g., +40715632783)`}
               required={!employeeData}
-              defaultValue={employeeData?.phoneNumber}
+              value={phoneNumber}
+              onChange={(e) => {
+                const formattedNumber = new AsYouType().input(e.target.value);
+                setPhoneNumber(formattedNumber);
+              }}
               className={`input-field ${errors?.phoneNumber ? "error" : ""}`}
             />
             {errors?.phoneNumber && (

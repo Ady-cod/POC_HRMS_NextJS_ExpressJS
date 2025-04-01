@@ -127,11 +127,12 @@ export const createEmployeeSchema = (hasFetched: boolean) =>
           /[^\p{L}\d]/u,
           "Password must include at least one special character"
         ),
-      phoneNumber: z.string().refine(isValidPhoneNumber, {
-        // Validate as a phone number
-        message:
-          "Invalid phone number format. Use international format (e.g., +123456789)",
-      }),
+      phoneNumber: z
+        .string()
+        .refine(isValidPhoneNumber, {
+          message:
+            "Invalid phone number format. Use international format (e.g., +123456789)",
+        }),
       country: hasFetched
         ? z.string().min(2, "Select a country") // Adjust the validation message based on the fetch status
         : z
@@ -241,7 +242,6 @@ export const updateEmployeeSchema = z
     phoneNumber: z
       .string()
       .refine(isValidPhoneNumber, {
-        // Validate as a phone number
         message:
           "Invalid phone number format. Use international format (e.g., +123456789)",
       })

@@ -4,6 +4,7 @@ import Link from "next/link";
 import Image from "next/image";
 import "./Sidebar.css";
 import { useEffect, useState } from "react";
+import { usePathname } from "next/navigation";
 
 import {
   Sheet,
@@ -21,6 +22,7 @@ interface SideBarProps {
 
 const Sidebar = ({ isOpen, toggleSidebar }: SideBarProps) => {
   const [isSmBreakpoint, setIsSmBreakpoint] = useState(true);
+  const pathname = usePathname();
 
   useEffect(() => {
     // Media query for 'sm' breakpoint
@@ -43,7 +45,7 @@ const Sidebar = ({ isOpen, toggleSidebar }: SideBarProps) => {
     };
   }, []);
 
-  const handleSidebarItemClick = () => { 
+  const handleSidebarItemClick = () => {
     if (!isSmBreakpoint) {
       toggleSidebar(false);
     }
@@ -77,8 +79,15 @@ const Sidebar = ({ isOpen, toggleSidebar }: SideBarProps) => {
       >
         <ul className="whitespace-nowrap font-semibold sm:text-[15px]  max-sm:items-start  sticky top-28  flex flex-col gap-4 sidebaritems">
           <li>
-            <Link href="/admin" onClick={handleSidebarItemClick}>
-              {" "}
+            <Link
+              href="/admin"
+              onClick={handleSidebarItemClick}
+              className={`flex items-center gap-3 px-4 py-2 rounded-lg transition-all duration-200 ${
+                pathname === "/admin"
+                  ? "bg-blue-200 border-r-4 border-blue-500 text-blue-700 scale-110"
+                  : "hover:bg-gray-300 hover:border-r-2 hover:border-gray-500 hover:scale-110"
+              }`}
+            >
               <Image
                 src="/images/home.png"
                 alt="Home icon"
@@ -90,8 +99,15 @@ const Sidebar = ({ isOpen, toggleSidebar }: SideBarProps) => {
             </Link>
           </li>
           <li>
-            <Link href="/admin/profile" onClick={handleSidebarItemClick}>
-              {" "}
+            <Link
+              href="/admin/profile"
+              onClick={handleSidebarItemClick}
+              className={`flex items-center gap-3 px-4 py-2 rounded-lg transition-all duration-200 ${
+                pathname === "/admin/profile"
+                  ? "bg-blue-200 border-r-4 border-blue-500 text-blue-700 scale-110"
+                  : "hover:bg-gray-300 hover:border-r-2 hover:border-gray-500 hover:scale-110"
+              }`}
+            >
               <Image
                 src="/images/My profile icon.png"
                 alt="Profile icon"
@@ -103,7 +119,15 @@ const Sidebar = ({ isOpen, toggleSidebar }: SideBarProps) => {
             </Link>
           </li>
           <li>
-            <Link href="/admin/employee" onClick={handleSidebarItemClick}>
+            <Link
+              href="/admin/employee"
+              onClick={handleSidebarItemClick}
+              className={`flex items-center gap-3 px-4 py-2 rounded-lg transition-all duration-200 ${
+                pathname === "/admin/employee"
+                  ? "bg-blue-200 border-r-4 border-blue-500 text-blue-700 scale-110"
+                  : "hover:bg-gray-300 hover:border-r-2 hover:border-gray-500 hover:scale-110"
+              }`}
+            >
               <Image
                 src="/images/My learning path icon.png"
                 alt="Learning Path icon"
@@ -115,8 +139,15 @@ const Sidebar = ({ isOpen, toggleSidebar }: SideBarProps) => {
             </Link>
           </li>
           <li>
-            <Link href="/admin/applicants" onClick={handleSidebarItemClick}>
-              {" "}
+            <Link
+              href="/admin/applicants"
+              onClick={handleSidebarItemClick}
+              className={`flex items-center gap-3 px-4 py-2 rounded-lg transition-all duration-200 ${
+                pathname === "/admin/applicants"
+                  ? "bg-blue-200 border-r-4 border-blue-500 text-blue-700 scale-110"
+                  : "hover:bg-gray-300 hover:border-r-2 hover:border-gray-500 hover:scale-110"
+              }`}
+            >
               <Image
                 src="/images/Applicants.png"
                 alt="Applicant icon"
@@ -128,7 +159,15 @@ const Sidebar = ({ isOpen, toggleSidebar }: SideBarProps) => {
             </Link>
           </li>
           <li>
-            <Link href="/admin/workflow" onClick={handleSidebarItemClick}>
+            <Link
+              href="/admin/workflow"
+              onClick={handleSidebarItemClick}
+              className={`flex items-center gap-3 px-4 py-2 rounded-lg transition-all duration-200 ${
+                pathname === "/admin/workflow"
+                  ? "bg-blue-200 border-r-4 border-blue-500 text-blue-700 scale-110"
+                  : "hover:bg-gray-300 hover:border-r-2 hover:border-gray-500 hover:scale-110"
+              }`}
+            >
               <Image
                 src="/images/My workflow icon.png"
                 alt="Workflow icon"
@@ -140,7 +179,15 @@ const Sidebar = ({ isOpen, toggleSidebar }: SideBarProps) => {
             </Link>
           </li>
           <li>
-            <Link href="/admin/masters" onClick={handleSidebarItemClick}>
+            <Link
+              href="/admin/masters"
+              onClick={handleSidebarItemClick}
+              className={`flex items-center gap-3 px-4 py-2 rounded-lg transition-all duration-200 ${
+                pathname === "/admin/masters"
+                  ? "bg-blue-200 border-r-4 border-blue-500 text-blue-700 scale-110"
+                  : "hover:bg-gray-300 hover:border-r-2 hover:border-gray-500 hover:scale-110"
+              }`}
+            >
               <Image
                 src="/images/Master.png"
                 alt="Master icon"
@@ -152,7 +199,15 @@ const Sidebar = ({ isOpen, toggleSidebar }: SideBarProps) => {
             </Link>
           </li>
           <li>
-            <Link href="/admin/hr" onClick={handleSidebarItemClick}>
+            <Link
+              href="/admin/hr"
+              onClick={handleSidebarItemClick}
+              className={`flex items-center gap-3 px-4 py-2 rounded-lg transition-all duration-200 ${
+                pathname === "/admin/hr"
+                  ? "bg-blue-200 border-r-4 border-blue-500 text-blue-700 scale-110"
+                  : "hover:bg-gray-300 hover:border-r-2 hover:border-gray-500 hover:scale-110"
+              }`}
+            >
               <Image
                 src="/images/HR.png"
                 alt="HR icon"
@@ -164,8 +219,12 @@ const Sidebar = ({ isOpen, toggleSidebar }: SideBarProps) => {
             </Link>
           </li>
 
-          <li className="logout bottom-3 ">
-            <Link href="/" onClick={handleSidebarItemClick}>
+          <li className="logout bottom-3">
+            <Link
+              href="/"
+              onClick={handleSidebarItemClick}
+              className="flex items-center gap-3 px-4 py-2 rounded-lg hover:bg-gray-300 hover:border-r-2 hover:border-gray-500 hover:scale-110 transition-all duration-200"
+            >
               <Image
                 src="/images/Logout icon.png"
                 alt="Logout icon"

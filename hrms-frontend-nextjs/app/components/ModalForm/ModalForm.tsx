@@ -446,6 +446,9 @@ const ModalForm: React.FC<ModalFormProps> = ({
               value={phoneNumber}
               onChange={(e) => {
                 const formattedNumber = new AsYouType().input(e.target.value);
+                if (formattedNumber.length > 15) {
+                  return;
+                }
                 setPhoneNumber(formattedNumber);
               }}
               className={`input-field ${errors?.phoneNumber ? "error" : ""}`}

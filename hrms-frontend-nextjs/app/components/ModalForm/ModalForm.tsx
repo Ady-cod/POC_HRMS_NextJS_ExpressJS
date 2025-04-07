@@ -154,6 +154,26 @@ const ModalForm: React.FC<ModalFormProps> = ({
     }));
   };
 
+  const handlePhoneNumberChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    let newValue = e.target.value;
+
+    // Replace first character with '+' if it's not already
+    if (!newValue.startsWith("+") && newValue.length > 0) {
+      newValue = "+" + newValue.slice(1);
+    }
+
+    const formattedNumber = new AsYouType().input(newValue);
+
+    // If the formatted number is too long, don't update
+    const digitCount = formattedNumber.replace(/\D/g, "").length;
+
+    if (digitCount > 15) {
+      return;
+    }
+
+    setPhoneNumber(formattedNumber);
+  };
+
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     const form = e.currentTarget; // Get the form element
@@ -444,13 +464,7 @@ const ModalForm: React.FC<ModalFormProps> = ({
               } (e.g., +40715632783)`}
               required={!employeeData}
               value={phoneNumber}
-              onChange={(e) => {
-                const formattedNumber = new AsYouType().input(e.target.value);
-                if (formattedNumber.length > 15) {
-                  return;
-                }
-                setPhoneNumber(formattedNumber);
-              }}
+              onChange={handlePhoneNumberChange}
               className={`input-field ${errors?.phoneNumber ? "error" : ""}`}
             />
             {errors?.phoneNumber && (

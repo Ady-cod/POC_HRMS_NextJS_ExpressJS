@@ -35,10 +35,12 @@ const EmployeeTable: React.FC<EmployeeTableProps> = ({
   const [activeColumnIndex, setActiveColumnIndex] = useState(0);
   const [isSmallScreen, setIsSmallScreen] = useState(false); // Track screen size
   const [showDialog, setShowDialog] = useState(false);
-  const [selectedEmployee, setSelectedEmployee] = useState<EmployeeListItem | null>(null);
+  const [selectedEmployee, setSelectedEmployee] =
+    useState<EmployeeListItem | null>(null);
+  const [currentPage, setCurrentPage] = useState(1);
+  const [rowsPerPage, setRowsPerPage] = useState(10);
 
   useEffect(() => {
-
     // Set the initial state for the  screen size based on the window width
     setIsSmallScreen(window.innerWidth < 640);
 
@@ -65,7 +67,6 @@ const EmployeeTable: React.FC<EmployeeTableProps> = ({
 
   const confirmDelete = async () => {
     if (!selectedEmployee) {
-
       console.error("No employee selected for deletion");
       setShowDialog(false);
 
@@ -123,11 +124,24 @@ const EmployeeTable: React.FC<EmployeeTableProps> = ({
     }
   };
 
+  const handlePageChange = (page: number) => {
+    setCurrentPage(page);
+  };
+
+  const handleRowsPerPageChange = (currentRowsPerPage: number) => {
+    setRowsPerPage(currentRowsPerPage);
+    setCurrentPage(1); // Reset to first page when changing rows per page
+  };
+
   const firstColumns: TableColumn<EmployeeListItem>[] = [
     {
       name: "SNo.",
-      cell: (_, rowIndex) => rowIndex + 1,
-      width: "100px",
+      cell: (row: EmployeeListItem, index: number) => {
+        const previousPages = currentPage - 1;
+        // Calculate the correct row number by adding to the current position the previous pages raws if any
+        return previousPages * rowsPerPage + index + 1;
+      },
+      width: "80px",
     },
     {
       name: "Full Name",
@@ -325,6 +339,10 @@ const EmployeeTable: React.FC<EmployeeTableProps> = ({
         columns={columns}
         data={employees}
         pagination
+        paginationPerPage={rowsPerPage}
+        paginationRowsPerPageOptions={[10, 25, 50, 100]}
+        onChangePage={handlePageChange}
+        onChangeRowsPerPage={handleRowsPerPageChange}
         responsive
         fixedHeader
       />

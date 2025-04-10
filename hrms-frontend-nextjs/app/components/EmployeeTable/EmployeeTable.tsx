@@ -335,17 +335,20 @@ const EmployeeTable: React.FC<EmployeeTableProps> = ({
 
   return (
     <div>
-      <DataTable
-        columns={columns}
-        data={employees}
-        pagination
-        paginationPerPage={rowsPerPage}
-        paginationRowsPerPageOptions={[10, 25, 50, 100]}
-        onChangePage={handlePageChange}
-        onChangeRowsPerPage={handleRowsPerPageChange}
-        responsive
-        fixedHeader
-      />
+      <div>
+        <DataTable
+          fixedHeaderScrollHeight="calc(100vh - 130px)" // Set table's scrollable height accounting for navbar (80px) and 50px offset for including pagination buttons in the viewport
+          columns={columns}
+          data={employees}
+          pagination
+          paginationPerPage={rowsPerPage}
+          paginationRowsPerPageOptions={[10, 25, 50, 100]}
+          onChangePage={handlePageChange}
+          onChangeRowsPerPage={handleRowsPerPageChange}
+          responsive
+          fixedHeader
+        />
+      </div>
       <ConfirmationModal
         isOpen={showDialog}
         onClose={() => setShowDialog(false)}

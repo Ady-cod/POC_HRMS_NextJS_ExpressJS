@@ -9,10 +9,7 @@ import { useEffect, useState } from "react";
 import { showToast } from "@/utils/toastHelper";
 import { EmployeeListItem } from "@/types/types";
 
-import Select, {
-  StylesConfig,
-  GroupBase,
-} from "react-select";
+import Select, { StylesConfig, GroupBase } from "react-select";
 
 type LoadingState = {
   countries: boolean;
@@ -39,6 +36,12 @@ interface Props {
   hasFetched: boolean;
   sethasFetched: React.Dispatch<React.SetStateAction<boolean>>;
   employeeData: EmployeeListItem | null;
+  errors?: {
+    country?: string;
+    state?: string;
+    city?: string;
+  };
+  handleTooltipPosition: (e: React.MouseEvent<HTMLParagraphElement>) => void;
 }
 const CountryStateCitySelect: React.FC<Props> = ({
   country,
@@ -54,12 +57,14 @@ const CountryStateCitySelect: React.FC<Props> = ({
   hasFetched,
   sethasFetched,
   employeeData,
+  errors,
+  handleTooltipPosition,
 }) => {
   const [countries, setCountries] = useState<Option[]>([]);
   const [statesList, setStatesList] = useState<Option[]>([]);
   const [citiesList, setCitiesList] = useState<Option[]>([]);
   const [isLoading, setIsLoading] = useState<LoadingState>({
-    countries: false, 
+    countries: false,
     states: false,
     cities: false,
   });
@@ -95,7 +100,7 @@ const CountryStateCitySelect: React.FC<Props> = ({
   useEffect(() => {
     const fetchStates = async () => {
       if (!employeeData || !employeeData.countryCode) return; // Ensure we are only fetching initial states when we have preexisting data passed in
-      
+
       setIsLoading((prev) => ({ ...prev, states: true }));
       // console.log("Fetching initial states");
       try {
@@ -131,19 +136,27 @@ const CountryStateCitySelect: React.FC<Props> = ({
   // Fetch cities when component mounts in case of predefined state (via employeeData) with a state code defined
   useEffect(() => {
     const fetchCities = async () => {
-      if (!employeeData || !employeeData.countryCode || !employeeData.state || !employeeData.stateCode) return; // Ensure we are only fetching cities for the initial state (if the case)
-      
+      if (
+        !employeeData ||
+        !employeeData.countryCode ||
+        !employeeData.state ||
+        !employeeData.stateCode
+      )
+        return; // Ensure we are only fetching cities for the initial state (if the case)
+
       setIsLoading((prev) => ({ ...prev, cities: true }));
       // console.log("Fetching initial cities");
       try {
         const fetchedCities = await getCitiesByState(
-          employeeData.countryCode, 
-          employeeData.stateCode // Use preexisting state code 
+          employeeData.countryCode,
+          employeeData.stateCode // Use preexisting state code
         );
 
         //If no city for the selected state then, the state is displayed as city.
         if (fetchedCities.length === 0) {
-          setCitiesList([{ label: employeeData.state, value: employeeData.stateCode }]);
+          setCitiesList([
+            { label: employeeData.state, value: employeeData.stateCode },
+          ]);
           return;
         }
         const formattedCities = fetchedCities.map((city: { name: string }) => ({
@@ -196,13 +209,12 @@ const CountryStateCitySelect: React.FC<Props> = ({
       }
 
       // Format and sort the states alphabetically by name before setting the state list
-      const formattedStates = fetchedStates.map(
-        (state: { iso2: string; name: string }) => ({
+      const formattedStates = fetchedStates
+        .map((state: { iso2: string; name: string }) => ({
           label: state.name,
           value: state.iso2,
-        })
-      )
-      .sort((a: Option, b: Option) => a.label.localeCompare(b.label));
+        }))
+        .sort((a: Option, b: Option) => a.label.localeCompare(b.label));
 
       setStatesList(formattedStates);
     } catch (error) {
@@ -313,6 +325,8 @@ const CountryStateCitySelect: React.FC<Props> = ({
       fontSize: "14.5px",
       backdropFilter: "none", // Explicitly remove any blur
       WebkitBackdropFilter: "none", // For Safari
+      height: "100%",
+      alignContent: "center",
     }),
 
     menu: (provided) => ({
@@ -399,72 +413,110 @@ const CountryStateCitySelect: React.FC<Props> = ({
   };
 
   return (
-    <div className="flex flex-col gap-[20px]">
-      <div className="flex max-[500px]:gap-[20px] gap-[10px] max-[500px]:flex-col flex-row w-[100%]">
+    <div
+      className={`flex flex-col ${
+        errors?.country ? "max-[405px]:gap-[10px] gap-[40px]" : "gap-[10px]"
+      }`}
+    >
+      <div className={`flex gap-[10px] max-[405px]:flex-col flex-row w-full`}>
         {/* Country Select */}
-        <div className="max-[500px]:w-full w-1/2" onClick={handleCountryError}>
+        <div
+          className={`input-wrapper ${errors?.country ? "error" : ""}`}
+          onClick={handleCountryError}
+        >
           <Select
-            className=""
             options={countries}
             styles={customStyles}
+            className="h-full"
             value={
               country
-                ?  {
-                  label: country,
-                  value: countryCode,
-                  } 
-                : null // Ensure placeholder is shown when country is empty
+                ? {
+                    label: country,
+                    value: countryCode,
+                  }
+                : null
             }
             onChange={handleCountryChange}
             placeholder="Select a country*"
-            isLoading={isLoading.countries} // Show loading state for countries
+            isLoading={isLoading.countries}
             isDisabled={isLoading.countries || !hasFetched}
           />
+          {errors?.country && (
+            <p
+              className="error-message"
+              data-tooltip={errors.country}
+              onMouseEnter={handleTooltipPosition}
+            >
+              {errors.country}
+            </p>
+          )}
         </div>
 
         {/* State Select */}
-        <div className="max-[500px]:w-full w-1/2" onClick={handleStateError}>
+        <div
+          className={`input-wrapper ${errors?.state ? "error" : ""}`}
+          onClick={handleStateError}
+        >
           <Select
             options={statesList}
             styles={customStyles}
+            className="h-full"
             onChange={handleStateChange}
             value={
               state
                 ? {
                     label: state,
                     value: stateCode,
-                  } 
-                : null // Ensure placeholder is shown when state is empty
+                  }
+                : null
             }
             placeholder="Select a state*"
-            isLoading={isLoading.states} // Show loading state for states
+            isLoading={isLoading.states}
             isDisabled={isLoading.states || statesList.length === 0}
           />
+          {errors?.state && (
+            <p
+              className="error-message"
+              data-tooltip={errors.state}
+              onMouseEnter={handleTooltipPosition}
+            >
+              {errors.state}
+            </p>
+          )}
         </div>
       </div>
-      <div className="flex gap-[10px]">
-        {/* City Select */}
-        <div
-          className="max-[500px]:w-full w-1/2 max-[500px]:pr-0 pr-[5px]"
-          onClick={handleCityError}
-        >
-          <Select
-            options={citiesList}
-            styles={customStyles}
-            onChange={handleCityChange}
-            placeholder="Select a city*"
-            value={
-              city
-                ? {
-                    label: city,
-                    value: city,
-                  } // Use fallback for missing predefined value
-                : null // Ensure placeholder is shown when city is empty
-            }
-            isLoading={isLoading.cities} // Show loading state for cities
-            isDisabled={isLoading.cities || citiesList.length === 0}
-          />
-        </div>
+
+      {/* City Select */}
+      <div
+        className={`input-wrapper ${errors?.city ? "error mb-[20px]" : ""}`}
+        onClick={handleCityError}
+      >
+        <Select
+          options={citiesList}
+          styles={customStyles}
+          className="h-full"
+          onChange={handleCityChange}
+          placeholder="Select a city*"
+          value={
+            city
+              ? {
+                  label: city,
+                  value: city,
+                }
+              : null
+          }
+          isLoading={isLoading.cities}
+          isDisabled={isLoading.cities || citiesList.length === 0}
+        />
+        {errors?.city && (
+          <p
+            className="error-message"
+            data-tooltip={errors.city}
+            onMouseEnter={handleTooltipPosition}
+          >
+            {errors.city}
+          </p>
+        )}
       </div>
     </div>
   );

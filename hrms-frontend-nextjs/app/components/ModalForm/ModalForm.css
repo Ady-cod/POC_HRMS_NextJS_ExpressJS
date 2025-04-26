@@ -18,7 +18,6 @@
   padding: 30px;
   border-radius: 8px;
   width: auto;
-  /* max-width: 450px; */
   margin: 0 35px;
   max-height: 90dvh;
   overflow-y: auto;
@@ -59,10 +58,41 @@
   display: flex;
   gap: 10px;
   flex-wrap: wrap;
+  width: 100%;
+}
+
+.input-group.hasErrors {
+  row-gap: 35px;
+  margin-bottom: 20px;
+}
+
+.input-wrapper {
+  position: relative;
+  width: 100%;
+}
+
+.input-wrapper.error {
+  border: 2px solid red;
+}
+
+@media (max-width: 405px) {
+  .input-group.hasErrors {
+    row-gap: 10px;
+    margin-bottom: 0;
+  }
+  .input-wrapper.error {
+    margin-bottom: 25px;
+  }
+}
+
+@media (min-width: 406px) {
+  .input-wrapper {
+    width: calc(50% - 5px);
+  }
 }
 
 .input-field {
-  flex: 1;
+  width: 100%;
   padding: 10px;
   font-size: 14px;
   border: 1px solid #d1d5db;
@@ -72,21 +102,6 @@
 
 .input-field.password {
   padding-right: 50px;
-}
-
-.confirm-password-field {
-  width: 49.173%; /* Set width to half of the standard input field */
-  padding: 10px;
-  font-size: 14px;
-  border: 1px solid #d1d5db;
-  border-radius: 4px;
-  background: #fff; 
-}
-
-@media (max-width: 639px) {
-  .confirm-password-field {
-    width: 100%; /* Set width to full width on smaller screens */
-  }
 }
 
 .input-field::placeholder {
@@ -141,14 +156,45 @@
   background-color: #1e40af;
 }
 
-.input-field.error,
-.confirm-password-field.error {
-  border: solid 3px red;
-}
-
 .error-message {
+  position: absolute;
+  bottom: -25px;
+  width: 100%;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  cursor: help;
   color: red;
   font-size: 0.9rem;
-  font-weight: 700;
-  margin-top: 0.5rem;
+  font-weight: 600;
+}
+
+/* Tooltip container */
+.error-message::after {
+  content: attr(data-tooltip);
+  position: fixed;
+  top: var(--tooltip-y, 0);
+  left: var(--tooltip-x, 0);
+  background-color: #fff;
+  color: red;
+  border: 1px solid red;
+  border-radius: 4px;
+  padding: 8px 12px;
+  font-size: 0.875rem;
+  white-space: normal;
+  word-break: break-word;
+  width: var(--tooltip-width, 300px);
+  z-index: 9999;
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.2s ease;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.15);
+}
+
+/* Show tooltip instantly on hover */
+.error-message:hover::after,
+.error-message:focus::after,
+.error-message:active::after {
+  opacity: 1;
+  pointer-events: auto;
 }

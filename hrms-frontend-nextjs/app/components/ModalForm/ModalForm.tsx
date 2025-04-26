@@ -374,6 +374,18 @@ const ModalForm: React.FC<ModalFormProps> = ({
     .split("T")[0];
   const maxJoinDate = today.toISOString().split("T")[0];
 
+  const handleTooltipPosition = (e: React.MouseEvent<HTMLParagraphElement>) => {
+    const errorMessage = e.currentTarget;
+    const rect = errorMessage.getBoundingClientRect();
+
+    // Position the tooltip slightly below the error message
+    errorMessage.style.setProperty("--tooltip-y", `${rect.bottom + 5}px`);
+    errorMessage.style.setProperty("--tooltip-x", `${rect.left}px`);
+
+    // Calculate the tooltip width based on the error message width
+    errorMessage.style.setProperty("--tooltip-width", `${rect.width}px`);
+  };
+
   // Ensure all hooks run consistently before conditionally returning null.
   if (!isOpen) return null;
 
@@ -388,19 +400,35 @@ const ModalForm: React.FC<ModalFormProps> = ({
           {employeeData && "Edit"} Account Details
         </h3>
         <form onSubmit={handleSubmit} method="post" className="modal-form">
-          <div className="input-group">
-            <input
-              name="email"
-              type="email"
-              placeholder={`Email${!employeeData ? "*" : ""}`}
-              required={!employeeData}
-              defaultValue={employeeData?.email}
-              className={`input-field sm:w-[49.173%] ${
-                errors?.email ? "error" : ""
-              }`}
-            />
-            {errors?.email && <p className="error-message">{errors.email}</p>}
-            <div className="relative w-[100%] sm:max-w-[49.173%]">
+          <div
+            className={`input-group ${
+              errors?.email
+                ? "hasErrors"
+                : errors?.confirmPassword
+                  ? "mb-5"
+                  : ""
+            }`}
+          >
+            <div className={`input-wrapper ${errors?.email ? "error" : ""}`}>
+              <input
+                name="email"
+                type="email"
+                placeholder={`Email${!employeeData ? "*" : ""}`}
+                required={!employeeData}
+                defaultValue={employeeData?.email}
+                className="input-field"
+              />
+              {errors?.email && (
+                <p
+                  className="error-message"
+                  data-tooltip={errors.email}
+                  onMouseEnter={handleTooltipPosition}
+                >
+                  {errors.email}
+                </p>
+              )}
+            </div>
+            <div className={`input-wrapper ${errors?.password ? "error" : ""}`}>
               <input
                 name="password"
                 type={showPassword ? "text" : "password"}
@@ -408,9 +436,7 @@ const ModalForm: React.FC<ModalFormProps> = ({
                   !employeeData ? "*" : ""
                 }`}
                 required={!employeeData}
-                className={`input-field w-full password ${
-                  errors?.password ? "error" : ""
-                }`}
+                className="input-field password"
               />
               <button
                 type="button"
@@ -424,127 +450,209 @@ const ModalForm: React.FC<ModalFormProps> = ({
                   className="text-gray-600 hover:text-gray-800 hover:text-2xl"
                 />
               </button>
+              {errors?.password && (
+                <p
+                  className="error-message"
+                  data-tooltip={errors.password}
+                  onMouseEnter={handleTooltipPosition}
+                >
+                  {errors.password}
+                </p>
+              )}
             </div>
-            {errors?.password && (
-              <p className="error-message">{errors.password}</p>
-            )}
-            <input
-              ref={confirmPasswordRef}
-              type="password"
-              placeholder={`Confirm Password${!employeeData ? "*" : ""}`}
-              required={!employeeData}
-              className={`confirm-password-field ${
-                errors?.confirmPassword ? "error" : ""
-              }`}
-            />
-            {errors?.confirmPassword && (
-              <p className="error-message">{errors.confirmPassword}</p>
-            )}
+            <div
+              className={`input-wrapper ${errors?.confirmPassword ? "error" : ""}`}
+            >
+              <input
+                ref={confirmPasswordRef}
+                type="password"
+                placeholder={`Confirm Password${!employeeData ? "*" : ""}`}
+                required={!employeeData}
+                className="input-field confirm-password"
+              />
+              {errors?.confirmPassword && (
+                <p
+                  className="error-message"
+                  data-tooltip={errors.confirmPassword}
+                  onMouseEnter={handleTooltipPosition}
+                >
+                  {errors.confirmPassword}
+                </p>
+              )}
+            </div>
           </div>
 
           <h3 className="section-title">Personal Information</h3>
-          <div className="input-group">
-            <input
-              name="fullName"
-              type="text"
-              placeholder={`Employee Name${!employeeData ? "*" : ""}`}
-              required={!employeeData}
-              defaultValue={employeeData?.fullName}
-              className={`input-field ${errors?.fullName ? "error" : ""}`}
-            />
-            {errors?.fullName && (
-              <p className="error-message">{errors.fullName}</p>
-            )}
-            {/* Real-time formatting for phone number input */}
-            <input
-              name="phoneNumber"
-              type="text"
-              placeholder={`Phone number${
-                !employeeData ? "*" : ""
-              } (e.g., +40715632783)`}
-              required={!employeeData}
-              value={phoneNumber}
-              onChange={handlePhoneNumberChange}
-              className={`input-field ${errors?.phoneNumber ? "error" : ""}`}
-            />
-            {errors?.phoneNumber && (
-              <p className="error-message">{errors.phoneNumber}</p>
-            )}
-          </div>
-          <div className="input-group">
-            <input
-              name="streetAddress"
-              type="text"
-              placeholder="Street"
-              defaultValue={employeeData?.streetAddress ?? ""}
-              className={`input-field ${errors?.streetAddress ? "error" : ""}`}
-            />
-            {errors?.streetAddress && (
-              <p className="error-message">{errors.streetAddress}</p>
-            )}
-            <input
-              name="birthDate"
-              ref={inputRefs.birthDate}
-              type={calendarState.birthDate.isOpen ? "date" : "text"}
-              placeholder={`Birth Date${!employeeData ? "*" : ""}`}
-              min={minBirthDate}
-              max={maxBirthDate}
-              required={!employeeData}
-              defaultValue={employeeData?.birthDate.split("T")[0]}
-              onFocus={() => handleFocus("birthDate")}
-              onBlur={() => handleBlur("birthDate")}
-              // onMouseEnter={() => handleHover("birthDate", true)}
-              // onMouseLeave={() => handleHover("birthDate", false)}
-              className={`input-field date-field ${
-                errors?.birthDate ? "error" : ""
-              }`}
-            />
-            {errors?.birthDate && (
-              <p className="error-message">{errors.birthDate}</p>
-            )}
-          </div>
-          <div className="input-group">
-            <select
-              name="departmentName"
-              required={!employeeData}
-              defaultValue={employeeData?.department?.name}
-              className={`input-field ${errors?.departmentName ? "error" : ""}`}
+          <div
+            className={`input-group ${
+              errors?.fullName || errors?.phoneNumber ? "hasErrors" : ""
+            }`}
+          >
+            <div
+              className={`input-wrapper ${errors?.fullName ? "error" : ""}`}
             >
-              <option value="">Select Department{!employeeData && "*"}</option>
-              <option value="HR">HR</option>
-              <option value="Web Development">Web Dev</option>
-              <option value="UI/UX">UI/UX</option>
-              <option value="QA">QA</option>
-              <option value="BA">BA</option>
-              <option value="SM">SM</option>
-            </select>
-            {errors?.departmentName && (
-              <p className="error-message">{errors.departmentName}</p>
-            )}
-
-            <input
-              name="dateOfJoining"
-              ref={inputRefs.joinDate}
-              type={calendarState.joinDate.isOpen ? "date" : "text"}
-              placeholder={`Date of Joining${!employeeData ? "*" : ""}`}
-              min={minJoinDate}
-              max={maxJoinDate}
-              required={!employeeData}
-              defaultValue={employeeData?.dateOfJoining.split("T")[0]}
-              onFocus={() => handleFocus("joinDate")}
-              onBlur={() => handleBlur("joinDate")}
-              // onMouseEnter={() => handleHover("joinDate", true)}
-              // onMouseLeave={() => handleHover("joinDate", false)}
-              className={`input-field date-field ${
-                errors?.dateOfJoining ? "error" : ""
-              }`}
-            />
-            {errors?.dateOfJoining && (
-              <p className="error-message">{errors.dateOfJoining}</p>
-            )}
+              <input
+                name="fullName"
+                type="text"
+                placeholder={`Employee Name${!employeeData ? "*" : ""}`}
+                required={!employeeData}
+                defaultValue={employeeData?.fullName}
+                className="input-field"
+              />
+              {errors?.fullName && (
+                <p
+                  className="error-message"
+                  data-tooltip={errors.fullName}
+                  onMouseEnter={handleTooltipPosition}
+                >
+                  {errors.fullName}
+                </p>
+              )}
+            </div>
+            <div
+              className={`input-wrapper ${errors?.phoneNumber ? "error" : ""}`}
+            >
+              <input
+                name="phoneNumber"
+                type="text"
+                placeholder={`Phone number${
+                  !employeeData ? "*" : ""
+                } (e.g., +40715632783)`}
+                required={!employeeData}
+                value={phoneNumber}
+                onChange={handlePhoneNumberChange}
+                className="input-field"
+              />
+              {errors?.phoneNumber && (
+                <p
+                  className="error-message"
+                  data-tooltip={errors.phoneNumber}
+                  onMouseEnter={handleTooltipPosition}
+                >
+                  {errors.phoneNumber}
+                </p>
+              )}
+            </div>
+          </div>
+          <div
+            className={`input-group ${
+              errors?.streetAddress || errors?.birthDate ? "hasErrors" : ""
+            }`}
+          >
+            <div
+              className={`input-wrapper ${errors?.streetAddress ? "error" : ""}`}
+            >
+              <input
+                name="streetAddress"
+                type="text"
+                placeholder="Street"
+                defaultValue={employeeData?.streetAddress ?? ""}
+                className="input-field"
+              />
+              {errors?.streetAddress && (
+                <p
+                  className="error-message"
+                  data-tooltip={errors.streetAddress}
+                  onMouseEnter={handleTooltipPosition}
+                >
+                  {errors.streetAddress}
+                </p>
+              )}
+            </div>
+            <div
+              className={`input-wrapper ${errors?.birthDate ? "error" : ""}`}
+            >
+              <input
+                name="birthDate"
+                ref={inputRefs.birthDate}
+                type={calendarState.birthDate.isOpen ? "date" : "text"}
+                placeholder={`Birth Date${!employeeData ? "*" : ""}`}
+                min={minBirthDate}
+                max={maxBirthDate}
+                required={!employeeData}
+                defaultValue={employeeData?.birthDate.split("T")[0]}
+                onFocus={() => handleFocus("birthDate")}
+                onBlur={() => handleBlur("birthDate")}
+                // onMouseEnter={() => handleHover("birthDate", true)}
+                // onMouseLeave={() => handleHover("birthDate", false)}
+                className="input-field date-field"
+              />
+              {errors?.birthDate && (
+                <p
+                  className="error-message"
+                  data-tooltip={errors.birthDate}
+                  onMouseEnter={handleTooltipPosition}
+                >
+                  {errors.birthDate}
+                </p>
+              )}
+            </div>
+          </div>
+          <div
+            className={`input-group ${
+              errors?.departmentName || errors?.dateOfJoining ? "hasErrors" : ""
+            }`}
+          >
+            <div
+              className={`input-wrapper ${errors?.departmentName ? "error" : ""}`}
+            >
+              <select
+                name="departmentName"
+                required={!employeeData}
+                defaultValue={employeeData?.department?.name}
+                className="input-field"
+              >
+                <option value="">
+                  Select Department{!employeeData && "*"}
+                </option>
+                <option value="HR">HR</option>
+                <option value="Web Development">Web Dev</option>
+                <option value="UI/UX">UI/UX</option>
+                <option value="QA">QA</option>
+                <option value="BA">BA</option>
+                <option value="SM">SM</option>
+              </select>
+              {errors?.departmentName && (
+                <p
+                  className="error-message"
+                  data-tooltip={errors.departmentName}
+                  onMouseEnter={handleTooltipPosition}
+                >
+                  {errors.departmentName}
+                </p>
+              )}
+            </div>
+            <div
+              className={`input-wrapper ${errors?.dateOfJoining ? "error" : ""}`}
+            >
+              <input
+                name="dateOfJoining"
+                ref={inputRefs.joinDate}
+                type={calendarState.joinDate.isOpen ? "date" : "text"}
+                placeholder={`Date of Joining${!employeeData ? "*" : ""}`}
+                min={minJoinDate}
+                max={maxJoinDate}
+                required={!employeeData}
+                defaultValue={employeeData?.dateOfJoining.split("T")[0]}
+                onFocus={() => handleFocus("joinDate")}
+                onBlur={() => handleBlur("joinDate")}
+                // onMouseEnter={() => handleHover("joinDate", true)}
+                // onMouseLeave={() => handleHover("joinDate", false)}
+                className="input-field date-field"
+              />
+              {errors?.dateOfJoining && (
+                <p
+                  className="error-message"
+                  data-tooltip={errors.dateOfJoining}
+                  onMouseEnter={handleTooltipPosition}
+                >
+                  {errors.dateOfJoining}
+                </p>
+              )}
+            </div>
           </div>
           {/* CountryStateCity Component  */}
-          <div className=" w-full">
+          <div className="w-full">
             <CountryStateCitySelect
               country={country}
               setCountry={setCountry}
@@ -559,6 +667,12 @@ const ModalForm: React.FC<ModalFormProps> = ({
               hasFetched={hasFetched}
               sethasFetched={setHasFetched}
               employeeData={employeeData}
+              errors={{
+                country: errors?.country,
+                state: errors?.state,
+                city: errors?.city,
+              }}
+              handleTooltipPosition={handleTooltipPosition}
             />
           </div>
 

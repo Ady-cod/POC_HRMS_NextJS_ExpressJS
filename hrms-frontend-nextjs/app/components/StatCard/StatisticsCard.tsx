@@ -7,6 +7,8 @@ import { FaArrowDown, FaArrowUp } from "react-icons/fa";
 import { IBM_Plex_Sans } from "next/font/google";
 import { getAllEmployees } from "@/actions/employee";
 import { showToast } from "@/utils/toastHelper";
+import { fetchDailyQuote } from "@/lib/quotes";
+
 
 const ibmPlexSans = IBM_Plex_Sans({
   subsets: ["latin"],
@@ -57,29 +59,7 @@ const defaultStats = [
   },
 ];
 
-type QuoteType = {
-  quote: string;
-  name: string;
-};
 
-const fetchQuotes = async () => {
-  try {
-    const response = await fetch("/quotes.json");
-    const data = await response.json();
-    return data;
-  } catch (error) {
-    showToast("error","Error!",[`Unable to fetch quotes: ${error}`]);
-    console.error("Error fetching quotes:", error);
-    return [];
-  }
-};
-
-const getDailyQuote = (quotes: QuoteType[]) => {
-  const today = new Date();
-  const dayOfYear = today.getDate() + today.getMonth() * 30;
-  const randomIndex = dayOfYear % quotes.length;
-  return quotes[randomIndex];
-};
 export default function DashboardStats() {
   const [stats, setStats] = useState(defaultStats);
   const [loading, setLoading] = useState(true);
@@ -133,10 +113,13 @@ export default function DashboardStats() {
 
   useEffect(() => {
     async function loadQuote() {
-      const quotes = await fetchQuotes();
-      if (quotes.length > 0) {
-        const dailyQuote = getDailyQuote(quotes);
-        setQuote(dailyQuote);
+      try {
+        const dailyQuote = await fetchDailyQuote();
+        if (dailyQuote) {
+          setQuote(dailyQuote);
+        }
+      } catch (err) {
+        console.error("Error fetching daily quote", err);
       }
     }
 

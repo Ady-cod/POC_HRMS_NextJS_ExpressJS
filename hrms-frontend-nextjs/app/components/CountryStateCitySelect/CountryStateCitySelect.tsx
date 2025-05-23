@@ -391,8 +391,8 @@ const CountryStateCitySelect: React.FC<Props> = ({
 
     placeholder: (provided) => ({
       ...provided,
-      color: "black", // text-gray-400
-      fontSize: "14.5px", // text-sm
+      color: "#6b7280",
+      fontSize: "14.5px",
     }),
     dropdownIndicator: (provided) => ({
       ...provided,

@@ -9,7 +9,6 @@ import { getAllEmployees } from "@/actions/employee";
 import { showToast } from "@/utils/toastHelper";
 import { fetchDailyQuote } from "@/lib/quotes";
 
-
 const ibmPlexSans = IBM_Plex_Sans({
   subsets: ["latin"],
   weight: ["400", "700"],
@@ -59,7 +58,6 @@ const defaultStats = [
   },
 ];
 
-
 export default function DashboardStats() {
   const [stats, setStats] = useState(defaultStats);
   const [loading, setLoading] = useState(true);
@@ -100,7 +98,9 @@ export default function DashboardStats() {
           )
         );
       } catch (err) {
-        showToast("error","Error!",[`Unable to fetch employee stats: ${err}`]);
+        showToast("error", "Error!", [
+          `Unable to fetch employee stats: ${err}`,
+        ]);
         console.error("Error fetching employee stats", err);
       } finally {
         setLoading(false);
@@ -127,16 +127,20 @@ export default function DashboardStats() {
   }, []);
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-6 min-h-full flex flex-col">
       {quote && (
-        <Card className={`p-6 text-center bg-black/10 ${ibmPlexSans.variable} text-xl md:text-2xl lg:text-3xl xl:text-4xl`}>
+        <Card
+          className={`p-6 text-center bg-black/10 ${ibmPlexSans.variable} text-xl md:text-2xl lg:text-3xl xl:text-4xl`}
+        >
           <h2 className="font-bold ">Today&apos;s Quote</h2>
           <p className="text-gray-700 mt-4">“{quote.quote}”</p>
-          <p className="text-gray-500 mt-2 text-lg md:text-xl lg:text-2xl xl:text-3xl text-end">– {quote.name}</p>
+          <p className="text-gray-500 mt-2 text-lg md:text-xl lg:text-2xl xl:text-3xl text-end">
+            – {quote.name}
+          </p>
         </Card>
       )}
 
-      <Card className="grid grid-cols-1 md:grid-cols-3 gap-4 border p-6 shadow-none bg-black/10">
+      <Card className="grid grid-cols-1 md:grid-cols-3 gap-4 border p-6 shadow-none bg-black/10 flex-1">
         {stats.map((stat, index) => (
           <Card key={index} className="p-2 h-36 shadow-none">
             <CardContent className="-p-2">

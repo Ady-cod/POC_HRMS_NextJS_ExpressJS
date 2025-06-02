@@ -22,7 +22,7 @@ import { getAllEmployees } from "@/actions/employee";
 import { EmployeeListItem } from "@/types/types";
 import { showToast } from "@/utils/toastHelper";
 
-export default function DepartmentEmployeeChart() {
+export default function EnrollmentChart() {
   const [employees, setEmployees] = useState<EmployeeListItem[]>([]);
   const [departments, setDepartments] = useState<string[]>([]);
   const [selectedDept, setSelectedDept] = useState<string>("all");

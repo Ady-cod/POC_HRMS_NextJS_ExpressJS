@@ -4,7 +4,7 @@ import Image from "next/image";
 import ScheduleCard from "@/components/ScheduleCard/ScheduleCard";
 import StatsCard from "@/components/StatCard/StatisticsCard";
 import EmployeeOverview from "@/components/EmployeeOverviewCard/EmployeeOverview";
-import EnrollmentChart from "@/components/EnrollmentStatistics/EnrollmentChart";
+import EnrollmentChart from "@/components/EnrollmentChart/EnrollmentChart";
 
 const getTimeBasedGreeting = () => {
   const hour = new Date().getHours();

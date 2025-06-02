@@ -94,7 +94,7 @@ export default function DepartmentEmployeeChart() {
   return (
     <div className="rounded-2xl shadow-sm p-4 bg-black/10 border border-black-50 min-h-full flex flex-col">
       <div className="flex justify-between items-center mb-4">
-        <h2 className="font-semibold text-lg">Employees Per Department</h2>
+        <h2 className="font-semibold text-lg">Employee Enrollment Trends</h2>
         <span className="text-sm text-gray-500">Joined Stats</span>
       </div>
 

@@ -11,7 +11,7 @@ type TransformedEmployeeData = {
   value: number;
 };
 
-const EmployeeOverview = () => {
+const EmployeeDistributionChart = () => {
   const [employeeData, setEmployeeData] = useState<TransformedEmployeeData[]>(
     []
   );
@@ -94,4 +94,4 @@ const EmployeeOverview = () => {
   );
 };
 
-export default EmployeeOverview;
+export default EmployeeDistributionChart;

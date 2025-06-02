@@ -3,7 +3,7 @@ import Link from "next/link";
 import Image from "next/image";
 import ScheduleCard from "@/components/ScheduleCard/ScheduleCard";
 import StatsCard from "@/components/StatCard/StatisticsCard";
-import EmployeeOverview from "@/components/EmployeeOverviewCard/EmployeeOverview";
+import EmployeeDistributionChart from "@/components/EmployeeDistributionChart/EmployeeDistributionChart";
 import EnrollmentChart from "@/components/EnrollmentChart/EnrollmentChart";
 
 const getTimeBasedGreeting = () => {
@@ -55,7 +55,7 @@ const AdminHomePage = () => {
 
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-4 min-h-[480px] mb-8">
         <div className="lg:col-span-1 min-h-full">
-          <EmployeeOverview />
+          <EmployeeDistributionChart />
         </div>
         <div className="lg:col-span-2 min-h-full">
           <EnrollmentChart />

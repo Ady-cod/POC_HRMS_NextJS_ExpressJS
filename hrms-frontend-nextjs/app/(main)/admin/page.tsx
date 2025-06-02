@@ -18,7 +18,7 @@ const AdminHomePage = () => {
   const name = "Sabrina White";
 
   return (
-    <div className="p-2 space-y-8 max-w-7xl">
+    <div className="p-2 space-y-8 w-full">
       <div className="flex flex-col gap-6 md:flex-row md:justify-between p-6 border border-red-500">
         <div className="font-bold text-2xl md:text-4xl lg:text-5xl sm:text-3xl">
           {greeting}, {name}!

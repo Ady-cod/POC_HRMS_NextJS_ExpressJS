@@ -2,7 +2,8 @@ import React from "react";
 import Link from "next/link";
 import Image from "next/image";
 import ScheduleCard from "@/components/ScheduleCard/ScheduleCard";
-import StatsCard from "@/components/StatCard/StatisticsCard";
+import DailyQuote from "@/components/DailyQuote/DailyQuote";
+import MetricsCards from "@/components/MetricsCards/MetricsCards";
 import EmployeeDistributionChart from "@/components/EmployeeDistributionChart/EmployeeDistributionChart";
 import EnrollmentChart from "@/components/EnrollmentChart/EnrollmentChart";
 
@@ -49,7 +50,10 @@ const AdminHomePage = () => {
           <ScheduleCard />
         </div>
         <div className="lg:col-span-3 min-h-full">
-          <StatsCard />
+          <div className="space-y-6 min-h-full flex flex-col">
+            <DailyQuote />
+            <MetricsCards />
+          </div>
         </div>
       </div>
 

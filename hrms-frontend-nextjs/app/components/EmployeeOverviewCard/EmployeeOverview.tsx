@@ -69,7 +69,7 @@ const EmployeeOverview = () => {
   );
 
   return (
-    <Card className="p-6 bg-black/10 shadow-none min-h-[430px]">
+    <Card className="p-6 bg-black/10 shadow-none min-h-full">
       <CardContent className="p-0 space-y-4">
         <div className="text-2xl font-bold">
           {totalEmployees}{" "}

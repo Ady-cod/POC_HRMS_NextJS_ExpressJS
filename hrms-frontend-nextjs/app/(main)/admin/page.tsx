@@ -53,11 +53,11 @@ const AdminHomePage = () => {
         </div>
       </div>
 
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-4">
-        <div className="lg:col-span-1">
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-4 min-h-[480px] mb-8">
+        <div className="lg:col-span-1 min-h-full">
           <EmployeeOverview />
         </div>
-        <div className="lg:col-span-2">
+        <div className="lg:col-span-2 min-h-full">
           <EnrollmentChart />
         </div>
       </div>

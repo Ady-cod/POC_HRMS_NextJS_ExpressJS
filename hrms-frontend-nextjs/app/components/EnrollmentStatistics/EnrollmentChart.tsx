@@ -92,7 +92,7 @@ export default function DepartmentEmployeeChart() {
   const chartData = getChartData();
 
   return (
-    <div className="rounded-2xl shadow-sm p-4 bg-black/10 border border-black-50 min-h-[400px]">
+    <div className="rounded-2xl shadow-sm p-4 bg-black/10 border border-black-50 min-h-full flex flex-col">
       <div className="flex justify-between items-center mb-4">
         <h2 className="font-semibold text-lg">Employees Per Department</h2>
         <span className="text-sm text-gray-500">Joined Stats</span>
@@ -118,13 +118,13 @@ export default function DepartmentEmployeeChart() {
       </div>
 
       {loading ? (
-        <div className="w-full h-[280px] flex items-center justify-center text-gray-600">
+        <div className="w-full flex-1 flex items-center justify-center text-gray-600">
           Loading...
         </div>
       ) : (
-        <div className="w-full overflow-x-auto">
+        <div className="w-full overflow-x-auto flex-1">
           <div
-            className="min-w-full"
+            className="min-w-full h-full"
             style={{
               width:
                 selectedDept !== "all"
@@ -132,7 +132,7 @@ export default function DepartmentEmployeeChart() {
                   : "100%",
             }}
           >
-            <ResponsiveContainer width="100%" height={350}>
+            <ResponsiveContainer width="100%" height={320}>
               <BarChart data={chartData}>
                 <CartesianGrid strokeDasharray="3 3" />
                 <XAxis

@@ -17,7 +17,7 @@ import {
   Tooltip,
   ResponsiveContainer,
 } from "recharts";
-import { format, parseISO } from "date-fns";
+import { format, parseISO, parse } from "date-fns";
 import { getAllEmployees } from "@/actions/employee";
 import { EmployeeListItem } from "@/types/types";
 import { showToast } from "@/utils/toastHelper";
@@ -74,10 +74,18 @@ export default function DepartmentEmployeeChart() {
           monthMap[month] = (monthMap[month] || 0) + 1;
         });
 
-      return Object.entries(monthMap).map(([month, employees]) => ({
-        month,
-        employees,
-      }));
+      // Sort entries chronologically
+      return Object.entries(monthMap)
+        .map(([month, employees]) => ({
+          month,
+          employees,
+          sortDate: parse(month, "MMM yyyy", new Date()), // Convert "MMM yyyy" to Date for sorting
+        }))
+        .sort((a, b) => a.sortDate.getTime() - b.sortDate.getTime())
+        .map(({ month, employees }) => ({
+          month,
+          employees,
+        }));
     }
   };
 
@@ -114,23 +122,37 @@ export default function DepartmentEmployeeChart() {
           Loading...
         </div>
       ) : (
-        <div className="w-full sm:w-[500px] md:w-[700px] lg:w-full mx-auto">
-          <ResponsiveContainer width="100%" height={300}>
-            <BarChart data={chartData}>
-              <CartesianGrid strokeDasharray="3 3" />
-              <XAxis
-                dataKey={selectedDept === "all" ? "department" : "month"}
-              />
-              <YAxis allowDecimals={false} />
-              <Tooltip />
-              <Bar
-                dataKey="employees"
-                fill="#6b767f"
-                radius={[6, 6, 0, 0]}
-                barSize={40}
-              />
-            </BarChart>
-          </ResponsiveContainer>
+        <div className="w-full overflow-x-auto">
+          <div
+            className="min-w-full"
+            style={{
+              width:
+                selectedDept !== "all"
+                  ? Math.max(600, chartData.length * 60) + "px"
+                  : "100%",
+            }}
+          >
+            <ResponsiveContainer width="100%" height={350}>
+              <BarChart data={chartData}>
+                <CartesianGrid strokeDasharray="3 3" />
+                <XAxis
+                  dataKey={selectedDept === "all" ? "department" : "month"}
+                  interval={0}
+                  angle={selectedDept !== "all" ? -45 : 0}
+                  textAnchor={selectedDept !== "all" ? "end" : "middle"}
+                  height={selectedDept !== "all" ? 100 : 60}
+                />
+                <YAxis allowDecimals={false} />
+                <Tooltip />
+                <Bar
+                  dataKey="employees"
+                  fill="#6b767f"
+                  radius={[6, 6, 0, 0]}
+                  barSize={selectedDept !== "all" ? 35 : 40}
+                />
+              </BarChart>
+            </ResponsiveContainer>
+          </div>
         </div>
       )}
     </div>

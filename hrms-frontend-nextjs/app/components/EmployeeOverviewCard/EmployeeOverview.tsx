@@ -84,7 +84,7 @@ const EmployeeOverview = () => {
               </div>
               <Progress
                 value={(item.value / totalEmployees) * 100}
-                className="h-2 bg-black/15"
+                className="h-2 bg-black/15 [&>div]:bg-[#6b767f]"
               />
             </div>
           ))}

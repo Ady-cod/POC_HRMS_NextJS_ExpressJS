@@ -325,7 +325,7 @@ const CountryStateCitySelect: React.FC<Props> = ({
       fontSize: "14.5px",
       backdropFilter: "none", // Explicitly remove any blur
       WebkitBackdropFilter: "none", // For Safari
-      height: "100%",
+      height: "44px",
       alignContent: "center",
     }),
 
@@ -413,29 +413,20 @@ const CountryStateCitySelect: React.FC<Props> = ({
   };
 
   return (
-    <div
-      className={`flex flex-col ${
-        errors?.country ? "max-[405px]:gap-[10px] gap-[40px]" : "gap-[10px]"
-      }`}
-    >
-      <div className={`flex gap-[10px] max-[405px]:flex-col flex-row w-full`}>
-        {/* Country Select */}
+    <div className="w-full flex flex-col gap-[20px]">
+      {/* Country Select */}
+      <div className="flex w-full">
         <div
-          className={`input-wrapper ${errors?.country ? "error" : ""}`}
+          className={`input-wrapper ${
+            errors?.country ? "error" : ""
+          } flex-1 min-w-[200px]`}
           onClick={handleCountryError}
         >
           <Select
             options={countries}
             styles={customStyles}
             className="h-full"
-            value={
-              country
-                ? {
-                    label: country,
-                    value: countryCode,
-                  }
-                : null
-            }
+            value={country ? { label: country, value: countryCode } : null}
             onChange={handleCountryChange}
             placeholder="Select a country*"
             isLoading={isLoading.countries}
@@ -451,72 +442,74 @@ const CountryStateCitySelect: React.FC<Props> = ({
             </p>
           )}
         </div>
-
-        {/* State Select */}
-        <div
-          className={`input-wrapper ${errors?.state ? "error" : ""}`}
-          onClick={handleStateError}
-        >
-          <Select
-            options={statesList}
-            styles={customStyles}
-            className="h-full"
-            onChange={handleStateChange}
-            value={
-              state
-                ? {
-                    label: state,
-                    value: stateCode,
-                  }
-                : null
-            }
-            placeholder="Select a state*"
-            isLoading={isLoading.states}
-            isDisabled={isLoading.states || statesList.length === 0}
-          />
-          {errors?.state && (
-            <p
-              className="error-message"
-              data-tooltip={errors.state}
-              onMouseEnter={handleTooltipPosition}
-            >
-              {errors.state}
-            </p>
-          )}
-        </div>
       </div>
 
-      {/* City Select */}
-      <div
-        className={`input-wrapper ${errors?.city ? "error mb-[20px]" : ""}`}
-        onClick={handleCityError}
-      >
-        <Select
-          options={citiesList}
-          styles={customStyles}
-          className="h-full"
-          onChange={handleCityChange}
-          placeholder="Select a city*"
-          value={
-            city
-              ? {
-                  label: city,
-                  value: city,
-                }
-              : null
-          }
-          isLoading={isLoading.cities}
-          isDisabled={isLoading.cities || citiesList.length === 0}
-        />
-        {errors?.city && (
-          <p
-            className="error-message"
-            data-tooltip={errors.city}
-            onMouseEnter={handleTooltipPosition}
+      {/* State & City Select */}
+      <div className="w-full flex justify-start px-0">
+        <div
+          className="
+          flex gap-[10px] flex-wrap
+          w-full
+          lg:w-[calc(100%+300px)] 
+          lg:-ml-[305px]
+        "
+        >
+          {/* State Select */}
+          <div
+            className={`input-wrapper ${
+              errors?.state ? "error" : ""
+            } flex-1 basis-[0px] min-w-[184px]`}
+            onClick={handleStateError}
           >
-            {errors.city}
-          </p>
-        )}
+            <Select
+              options={statesList}
+              styles={customStyles}
+              className="h-full"
+              onChange={handleStateChange}
+              value={state ? { label: state, value: stateCode } : null}
+              placeholder="Select a state*"
+              isLoading={isLoading.states}
+              isDisabled={isLoading.states || statesList.length === 0}
+            />
+            {errors?.state && (
+              <p
+                className="error-message"
+                data-tooltip={errors.state}
+                onMouseEnter={handleTooltipPosition}
+              >
+                {errors.state}
+              </p>
+            )}
+          </div>
+
+          {/* City Select */}
+          <div
+            className={`input-wrapper ${
+              errors?.city ? "error" : ""
+            } flex-1 min-w-[184px] md:min-w-[247px]`}
+            onClick={handleCityError}
+          >
+            <Select
+              options={citiesList}
+              styles={customStyles}
+              className="h-full"
+              onChange={handleCityChange}
+              placeholder="Select a city*"
+              value={city ? { label: city, value: city } : null}
+              isLoading={isLoading.cities}
+              isDisabled={isLoading.cities || citiesList.length === 0}
+            />
+            {errors?.city && (
+              <p
+                className="error-message"
+                data-tooltip={errors.city}
+                onMouseEnter={handleTooltipPosition}
+              >
+                {errors.city}
+              </p>
+            )}
+          </div>
+        </div>
       </div>
     </div>
   );

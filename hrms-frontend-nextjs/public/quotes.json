@@ -1,0 +1,1982 @@
+[
+  {
+    "id": 1,
+    "name": "Peter Drucker",
+    "quote": "The best way to predict the future is to create it."
+  },
+  {
+    "id": 2,
+    "name": "Sheryl Sandberg",
+    "quote": "Leadership is about making others better as a result of your presence."
+  },
+  {
+    "id": 3,
+    "name": "Jim Rohn",
+    "quote": "Either you run the day or the day runs you."
+  },
+  {
+    "id": 4,
+    "name": "Warren Buffett",
+    "quote": "The best investment you can make is in yourself."
+  },
+  {
+    "id": 5,
+    "name": "Steve Jobs",
+    "quote": "Great things in business are never done by one person. They’re done by a team of people."
+  },
+  {
+    "id": 6,
+    "name": "Vince Lombardi",
+    "quote": "Individual commitment to a group effort—that is what makes a team work."
+  },
+  {
+    "id": 7,
+    "name": "Tony Robbins",
+    "quote": "The path to success is to take massive, determined action."
+  },
+  {
+    "id": 8,
+    "name": "John Wooden",
+    "quote": "Things work out best for those who make the best of how things work out."
+  },
+  {
+    "id": 9,
+    "name": "Simon Sinek",
+    "quote": "Leadership is not about being in charge. It's about taking care of those in your charge."
+  },
+  {
+    "id": 10,
+    "name": "Brian Tracy",
+    "quote": "The key to success is to focus our conscious mind on things we desire, not things we fear."
+  },
+  {
+    "id": 11,
+    "name": "Angela Duckworth",
+    "quote": "Grit is passion and perseverance for very long-term goals."
+  },
+  {
+    "id": 12,
+    "name": "Zig Ziglar",
+    "quote": "You don't have to be great to start, but you have to start to be great."
+  },
+  {
+    "id": 13,
+    "name": "Thomas Edison",
+    "quote": "Genius is 1% inspiration, 99% perspiration."
+  },
+  {
+    "id": 14,
+    "name": "Elon Musk",
+    "quote": "When something is important enough, you do it even if the odds are not in your favor."
+  },
+  {
+    "id": 15,
+    "name": "Jeff Bezos",
+    "quote": "Life’s too short to hang out with people who aren’t resourceful."
+  },
+  {
+    "id": 16,
+    "name": "Richard Branson",
+    "quote": "Business opportunities are like buses, there’s always another one coming."
+  },
+  {
+    "id": 17,
+    "name": "Michael Jordan",
+    "quote": "Talent wins games, but teamwork and intelligence win championships."
+  },
+  {
+    "id": 18,
+    "name": "Napoleon Hill",
+    "quote": "Strength and growth come only through continuous effort and struggle."
+  },
+  {
+    "id": 19,
+    "name": "Mark Zuckerberg",
+    "quote": "The biggest risk is not taking any risk."
+  },
+  {
+    "id": 20,
+    "name": "Satya Nadella",
+    "quote": "Our industry does not respect tradition. It only respects innovation."
+  },
+  {
+    "id": 21,
+    "name": "Jack Welch",
+    "quote": "Change before you have to."
+  },
+  {
+    "id": 22,
+    "name": "Indra Nooyi",
+    "quote": "Leadership is hard to define, and good leadership even harder."
+  },
+  {
+    "id": 23,
+    "name": "Stephen Covey",
+    "quote": "The key is not to prioritize what’s on your schedule, but to schedule your priorities."
+  },
+  {
+    "id": 24,
+    "name": "Howard Schultz",
+    "quote": "Risk more than others think is safe. Dream more than others think is practical."
+  },
+  {
+    "id": 25,
+    "name": "Tim Cook",
+    "quote": "Let your joy be in your journey—not in some distant goal."
+  },
+  {
+    "id": 26,
+    "name": "Oprah Winfrey",
+    "quote": "Doing the best at this moment puts you in the best place for the next moment."
+  },
+  {
+    "id": 27,
+    "name": "Bill Gates",
+    "quote": "It's fine to celebrate success, but it is more important to heed the lessons of failure."
+  },
+  {
+    "id": 28,
+    "name": "Larry Page",
+    "quote": "Always deliver more than expected."
+  },
+  {
+    "id": 29,
+    "name": "Sergey Brin",
+    "quote": "Solving big problems is easier than solving little problems."
+  },
+  {
+    "id": 30,
+    "name": "Reed Hastings",
+    "quote": "Do not tolerate brilliant jerks. The cost to teamwork is too high."
+  },
+  {
+    "id": 31,
+    "name": "Dale Carnegie",
+    "quote": "People rarely succeed unless they have fun in what they are doing."
+  },
+  {
+    "id": 32,
+    "name": "Brene Brown",
+    "quote": "Vulnerability is the birthplace of innovation, creativity and change."
+  },
+  {
+    "id": 33,
+    "name": "Sundar Pichai",
+    "quote": "Wear your failures as a badge of honor."
+  },
+  {
+    "id": 34,
+    "name": "Melinda Gates",
+    "quote": "A woman with a voice is, by definition, a strong woman."
+  },
+  {
+    "id": 35,
+    "name": "James Clear",
+    "quote": "You do not rise to the level of your goals. You fall to the level of your systems."
+  },
+  {
+    "id": 36,
+    "name": "Patrick Lencioni",
+    "quote": "Teamwork begins by building trust."
+  },
+  {
+    "id": 37,
+    "name": "Colin Powell",
+    "quote": "There are no secrets to success. It is the result of preparation, hard work, and learning from failure."
+  },
+  {
+    "id": 38,
+    "name": "Ken Blanchard",
+    "quote": "None of us is as smart as all of us."
+  },
+  {
+    "id": 39,
+    "name": "Ann Handley",
+    "quote": "Make the customer the hero of your story."
+  },
+  {
+    "id": 40,
+    "name": "Gary Vaynerchuk",
+    "quote": "Skills are cheap. Passion is priceless."
+  },
+  {
+    "id": 41,
+    "name": "Marie Forleo",
+    "quote": "Success doesn't come from what you do occasionally, it comes from what you do consistently."
+  },
+  {
+    "id": 42,
+    "name": "Seth Godin",
+    "quote": "Don’t find customers for your products, find products for your customers."
+  },
+  {
+    "id": 43,
+    "name": "Adam Grant",
+    "quote": "Procrastination gives you time to consider divergent ideas, to think in nonlinear ways, to make unexpected leaps."
+  },
+  {
+    "id": 44,
+    "name": "Amy Cuddy",
+    "quote": "Tiny tweaks can lead to big changes."
+  },
+  {
+    "id": 45,
+    "name": "Eric Ries",
+    "quote": "The only way to win is to learn faster than anyone else."
+  },
+  {
+    "id": 46,
+    "name": "Andy Grove",
+    "quote": "Only the paranoid survive."
+  },
+  {
+    "id": 47,
+    "name": "Marc Andreessen",
+    "quote": "The product that wins is the one that bridges customers to the future, not the one that requires a giant leap."
+  },
+  {
+    "id": 48,
+    "name": "Ben Horowitz",
+    "quote": "Every time you make the hard, correct decision you become a bit more courageous."
+  },
+  {
+    "id": 49,
+    "name": "Barbara Corcoran",
+    "quote": "Don’t you dare underestimate the power of your own instinct."
+  },
+  {
+    "id": 50,
+    "name": "Sophia Amoruso",
+    "quote": "Abandon anything about your life and habits that might be holding you back. Learn to create your own luck. Step into your own power."
+  },
+  {
+    "id": 51,
+    "name": "Estée Lauder",
+    "quote": "I never dreamed about success. I worked for it."
+  },
+  {
+    "id": 52,
+    "name": "Debbie Millman",
+    "quote": "If you imagine less, less will be what you undoubtedly deserve."
+  },
+  {
+    "id": 53,
+    "name": "Howard Thurman",
+    "quote": "Don’t ask what the world needs. Ask what makes you come alive, and go do it."
+  },
+  {
+    "id": 54,
+    "name": "J.K. Rowling",
+    "quote": "It is our choices that show what we truly are, far more than our abilities."
+  },
+  {
+    "id": 55,
+    "name": "Stephen King",
+    "quote": "Amateurs sit and wait for inspiration, the rest of us just get up and go to work."
+  },
+  {
+    "id": 56,
+    "name": "Malcolm Gladwell",
+    "quote": "Success is not a random act. It arises out of a predictable and powerful set of circumstances and opportunities."
+  },
+  {
+    "id": 57,
+    "name": "Tom Peters",
+    "quote": "Leaders don't create followers, they create more leaders."
+  },
+  {
+    "id": 58,
+    "name": "Susan Cain",
+    "quote": "There's zero correlation between being the best talker and having the best ideas."
+  },
+  {
+    "id": 59,
+    "name": "Daniel Pink",
+    "quote": "Control leads to compliance; autonomy leads to engagement."
+  },
+  {
+    "id": 60,
+    "name": "Simon Sinek",
+    "quote": "Working hard for something we don't care about is called stress; working hard for something we love is called passion."
+  },
+  {
+    "id": 61,
+    "name": "Harvey Mackay",
+    "quote": "Find something you love to do and you’ll never have to work a day in your life."
+  },
+  {
+    "id": 62,
+    "name": "Albert Einstein",
+    "quote": "Strive not to be a success, but rather to be of value."
+  },
+  {
+    "id": 63,
+    "name": "Eleanor Roosevelt",
+    "quote": "The future belongs to those who believe in the beauty of their dreams."
+  },
+  {
+    "id": 64,
+    "name": "Helen Keller",
+    "quote": "Alone we can do so little; together we can do so much."
+  },
+  {
+    "id": 65,
+    "name": "Theodore Roosevelt",
+    "quote": "Believe you can and you're halfway there."
+  },
+  {
+    "id": 66,
+    "name": "Franklin D. Roosevelt",
+    "quote": "The only thing we have to fear is fear itself."
+  },
+  {
+    "id": 67,
+    "name": "John F. Kennedy",
+    "quote": "Change is the law of life. And those who look only to the past or present are certain to miss the future."
+  },
+  {
+    "id": 68,
+    "name": "Barack Obama",
+    "quote": "The future rewards those who press on."
+  },
+  {
+    "id": 69,
+    "name": "Michelle Obama",
+    "quote": "Success isn’t about how much money you make; it’s about the difference you make in people’s lives."
+  },
+  {
+    "id": 70,
+    "name": "Margaret Thatcher",
+    "quote": "Watch your thoughts, for they will become actions. Watch your actions, for they will become... destiny."
+  },
+  {
+    "id": 71,
+    "name": "Abraham Lincoln",
+    "quote": "The best way to predict your future is to create it."
+  },
+  {
+    "id": 72,
+    "name": "Confucius",
+    "quote": "It does not matter how slowly you go as long as you do not stop."
+  },
+  {
+    "id": 73,
+    "name": "Aristotle",
+    "quote": "Pleasure in the job puts perfection in the work."
+  },
+  {
+    "id": 74,
+    "name": "Leonardo da Vinci",
+    "quote": "Learning never exhausts the mind."
+  },
+  {
+    "id": 75,
+    "name": "Maya Angelou",
+    "quote": "Nothing will work unless you do."
+  },
+  {
+    "id": 76,
+    "name": "Buddha",
+    "quote": "Your work is to discover your work and then with all your heart to give yourself to it."
+  },
+  {
+    "id": 77,
+    "name": "Ralph Waldo Emerson",
+    "quote": "Do not go where the path may lead, go instead where there is no path and leave a trail."
+  },
+  {
+    "id": 78,
+    "name": "Henry Ford",
+    "quote": "Whether you think you can or think you can't, you're right."
+  },
+  {
+    "id": 79,
+    "name": "Dolly Parton",
+    "quote": "If you want the rainbow, you gotta put up with the rain."
+  },
+  {
+    "id": 80,
+    "name": "Walt Disney",
+    "quote": "The way to get started is to quit talking and begin doing."
+  },
+  {
+    "id": 81,
+    "name": "Fred Rogers",
+    "quote": "Often when you think you're at the end of something, you're at the beginning of something else."
+  },
+  {
+    "id": 82,
+    "name": "Charles Darwin",
+    "quote": "It is not the strongest of the species that survive, but the one most responsive to change."
+  },
+  {
+    "id": 83,
+    "name": "Albert Schweitzer",
+    "quote": "Success is not the key to happiness. Happiness is the key to success."
+  },
+  {
+    "id": 84,
+    "name": "Bruce Lee",
+    "quote": "Knowing is not enough, we must apply. Willing is not enough, we must do."
+  },
+  {
+    "id": 85,
+    "name": "Mark Twain",
+    "quote": "The secret of getting ahead is getting started."
+  },
+  {
+    "id": 86,
+    "name": "George Eliot",
+    "quote": "It is never too late to be what you might have been."
+  },
+  {
+    "id": 87,
+    "name": "C.S. Lewis",
+    "quote": "You are never too old to set another goal or to dream a new dream."
+  },
+  {
+    "id": 88,
+    "name": "J.R.R. Tolkien",
+    "quote": "Little by little, one travels far."
+  },
+  {
+    "id": 89,
+    "name": "Harriet Tubman",
+    "quote": "Every great dream begins with a dreamer."
+  },
+  {
+    "id": 90,
+    "name": "Rosa Parks",
+    "quote": "Each person must live their life as a model for others."
+  },
+  {
+    "id": 91,
+    "name": "Booker T. Washington",
+    "quote": "Success is to be measured not so much by the position that one has reached in life as by the obstacles which he has overcome."
+  },
+  {
+    "id": 92,
+    "name": "Nelson Mandela",
+    "quote": "It always seems impossible until it’s done."
+  },
+  {
+    "id": 93,
+    "name": "Mother Teresa",
+    "quote": "Be faithful in small things because it is in them that your strength lies."
+  },
+  {
+    "id": 94,
+    "name": "Desmond Tutu",
+    "quote": "Do your little bit of good where you are; it’s those little bits of good put together that overwhelm the world."
+  },
+  {
+    "id": 95,
+    "name": "Dalai Lama",
+    "quote": "Be kind whenever possible. It is always possible."
+  },
+  {
+    "id": 96,
+    "name": "Audre Lorde",
+    "quote": "When I dare to be powerful, to use my strength in the service of my vision, then it becomes less and less important whether I am afraid."
+  },
+  {
+    "id": 97,
+    "name": "James Baldwin",
+    "quote": "Not everything that is faced can be changed, but nothing can be changed until it is faced."
+  },
+  {
+    "id": 98,
+    "name": "Mahatma Gandhi",
+    "quote": "Be the change that you wish to see in the world."
+  },
+  {
+    "id": 99,
+    "name": "Lao Tzu",
+    "quote": "A journey of a thousand miles begins with a single step."
+  },
+  {
+    "id": 100,
+    "name": "Sun Tzu",
+    "quote": "In the midst of chaos, there is also opportunity."
+  },
+  {
+    "id": 101,
+    "name": "Rumi",
+    "quote": "Don’t grieve. Anything you lose comes round in another form."
+  },
+  {
+    "id": 102,
+    "name": "Khalil Gibran",
+    "quote": "Work is love made visible."
+  },
+  {
+    "id": 103,
+    "name": "Seneca",
+    "quote": "Luck is what happens when preparation meets opportunity."
+  },
+  {
+    "id": 104,
+    "name": "Epictetus",
+    "quote": "It’s not what happens to you, but how you react to it that matters."
+  },
+  {
+    "id": 105,
+    "name": "Marcus Aurelius",
+    "quote": "You have power over your mind – not outside events. Realize this, and you will find strength."
+  },
+  {
+    "id": 106,
+    "name": "Plato",
+    "quote": "The beginning is the most important part of the work."
+  },
+  {
+    "id": 107,
+    "name": "Socrates",
+    "quote": "The only true wisdom is in knowing you know nothing."
+  },
+  {
+    "id": 108,
+    "name": "Niccolò Machiavelli",
+    "quote": "The wise man does at once what the fool does finally."
+  },
+  {
+    "id": 109,
+    "name": "Benjamin Franklin",
+    "quote": "By failing to prepare, you are preparing to fail."
+  },
+  {
+    "id": 110,
+    "name": "Thomas Jefferson",
+    "quote": "I’m a greater believer in luck, and I find the harder I work the more I have of it."
+  },
+  {
+    "id": 111,
+    "name": "Theodore Roosevelt",
+    "quote": "Far better it is to dare mighty things than to rank with those timid spirits who neither enjoy much nor suffer much."
+  },
+  {
+    "id": 112,
+    "name": "Alexander Graham Bell",
+    "quote": "Before anything else, preparation is the key to success."
+  },
+  {
+    "id": 113,
+    "name": "Andrew Carnegie",
+    "quote": "The first man gets the oyster, the second man gets the shell."
+  },
+  {
+    "id": 114,
+    "name": "Henry David Thoreau",
+    "quote": "Success usually comes to those who are too busy to be looking for it."
+  },
+  {
+    "id": 115,
+    "name": "George Bernard Shaw",
+    "quote": "Life isn’t about finding yourself. Life is about creating yourself."
+  },
+  {
+    "id": 116,
+    "name": "Oscar Wilde",
+    "quote": "Be yourself; everyone else is already taken."
+  },
+  {
+    "id": 117,
+    "name": "Ernest Hemingway",
+    "quote": "Courage is grace under pressure."
+  },
+  {
+    "id": 118,
+    "name": "F. Scott Fitzgerald",
+    "quote": "Never confuse a single defeat with a final defeat."
+  },
+  {
+    "id": 119,
+    "name": "Charles Dickens",
+    "quote": "No one is useless in this world who lightens the burden of it for anyone else."
+  },
+  {
+    "id": 120,
+    "name": "Victor Hugo",
+    "quote": "Even the darkest night will end and the sun will rise."
+  },
+  {
+    "id": 121,
+    "name": "Anne Frank",
+    "quote": "How wonderful it is that nobody need wait a single moment before starting to improve the world."
+  },
+  {
+    "id": 122,
+    "name": "Winston Churchill",
+    "quote": "Success is not final, failure is not fatal: it is the courage to continue that counts."
+  },
+  {
+    "id": 123,
+    "name": "Stephen Covey",
+    "quote": "The key is not to prioritize what's on your schedule, but to schedule your priorities."
+  },
+  {
+    "id": 124,
+    "name": "Tony Robbins",
+    "quote": "The only limit to your impact is your imagination and commitment."
+  },
+  {
+    "id": 125,
+    "name": "Brian Tracy",
+    "quote": "The key to success is to focus our conscious mind on things we desire, not things we fear."
+  },
+  {
+    "id": 126,
+    "name": "Zig Ziglar",
+    "quote": "People often say that motivation doesn't last. Well, neither does bathing – that's why we recommend it daily."
+  },
+  {
+    "id": 127,
+    "name": "Les Brown",
+    "quote": "Shoot for the moon. Even if you miss, you'll land among the stars."
+  },
+  {
+    "id": 128,
+    "name": "Jim Rohn",
+    "quote": "Discipline is the bridge between goals and accomplishment."
+  },
+  {
+    "id": 129,
+    "name": "John Wooden",
+    "quote": "Do not let what you cannot do interfere with what you can do."
+  },
+  {
+    "id": 130,
+    "name": "Jack Canfield",
+    "quote": "Don't worry about failures, worry about the chances you miss when you don't even try."
+  },
+  {
+    "id": 131,
+    "name": "Robin Sharma",
+    "quote": "Small daily improvements over time lead to stunning results."
+  },
+  {
+    "id": 132,
+    "name": "Mel Robbins",
+    "quote": "You are one decision away from a completely different life."
+  },
+  {
+    "id": 133,
+    "name": "Simon Sinek",
+    "quote": "Working hard for something we don't care about is called stress; working hard for something we love is called passion."
+  },
+  {
+    "id": 134,
+    "name": "Gary Vaynerchuk",
+    "quote": "Skills are cheap. Passion is priceless."
+  },
+  {
+    "id": 135,
+    "name": "Brene Brown",
+    "quote": "Vulnerability is the birthplace of innovation, creativity and change."
+  },
+  {
+    "id": 136,
+    "name": "Seth Godin",
+    "quote": "The only thing worse than starting something and failing is not starting something."
+  },
+  {
+    "id": 137,
+    "name": "Tim Ferriss",
+    "quote": "Conditions are never perfect. 'Someday' is a disease that will take your dreams to the grave with you."
+  },
+  {
+    "id": 138,
+    "name": "Marie Forleo",
+    "quote": "Success doesn't come from what you do occasionally, it comes from what you do consistently."
+  },
+  {
+    "id": 139,
+    "name": "James Clear",
+    "quote": "You do not rise to the level of your goals. You fall to the level of your systems."
+  },
+  {
+    "id": 140,
+    "name": "Cal Newport",
+    "quote": "Clarity about what matters provides clarity about what does not."
+  },
+  {
+    "id": 141,
+    "name": "Angela Duckworth",
+    "quote": "Our potential is one thing. What we do with it is quite another."
+  },
+  {
+    "id": 142,
+    "name": "Carol Dweck",
+    "quote": "Becoming is better than being."
+  },
+  {
+    "id": 143,
+    "name": "Daniel Pink",
+    "quote": "Control leads to compliance; autonomy leads to engagement."
+  },
+  {
+    "id": 144,
+    "name": "Adam Grant",
+    "quote": "Procrastination may be the enemy of productivity but it can be a resource for creativity."
+  },
+  {
+    "id": 145,
+    "name": "Susan Cain",
+    "quote": "There's zero correlation between being the best talker and having the best ideas."
+  },
+  {
+    "id": 146,
+    "name": "Sheryl Sandberg",
+    "quote": "Done is better than perfect."
+  },
+  {
+    "id": 147,
+    "name": "Indra Nooyi",
+    "quote": "Leadership is hard to define and good leadership even harder. But if you can get people to follow you to the ends of the earth, you are a great leader."
+  },
+  {
+    "id": 148,
+    "name": "Satya Nadella",
+    "quote": "Our industry does not respect tradition – it only respects innovation."
+  },
+  {
+    "id": 149,
+    "name": "Sundar Pichai",
+    "quote": "Wear your failures as a badge of honor."
+  },
+  {
+    "id": 150,
+    "name": "Elon Musk",
+    "quote": "When something is important enough, you do it even if the odds are not in your favor."
+  },
+  {
+    "id": 151,
+    "name": "Jeff Bezos",
+    "quote": "If you double the number of experiments you do per year you’re going to double your inventiveness."
+  },
+  {
+    "id": 152,
+    "name": "Mark Zuckerberg",
+    "quote": "The biggest risk is not taking any risk."
+  },
+  {
+    "id": 153,
+    "name": "Steve Jobs",
+    "quote": "Innovation distinguishes between a leader and a follower."
+  },
+  {
+    "id": 154,
+    "name": "Bill Gates",
+    "quote": "It's fine to celebrate success but it is more important to heed the lessons of failure."
+  },
+  {
+    "id": 155,
+    "name": "Larry Page",
+    "quote": "Always deliver more than expected."
+  },
+  {
+    "id": 156,
+    "name": "Sergey Brin",
+    "quote": "Solving big problems is easier than solving little problems."
+  },
+  {
+    "id": 157,
+    "name": "Warren Buffett",
+    "quote": "Someone’s sitting in the shade today because someone planted a tree a long time ago."
+  },
+  {
+    "id": 158,
+    "name": "Charlie Munger",
+    "quote": "Spend each day trying to be a little wiser than you were when you woke up."
+  },
+  {
+    "id": 159,
+    "name": "Oprah Winfrey",
+    "quote": "The biggest adventure you can take is to live the life of your dreams."
+  },
+  {
+    "id": 160,
+    "name": "Eckhart Tolle",
+    "quote": "Realize deeply that the present moment is all you ever have."
+  },
+  {
+    "id": 161,
+    "name": "Deepak Chopra",
+    "quote": "The most creative act you will ever undertake is the act of creating yourself."
+  },
+  {
+    "id": 162,
+    "name": "Wayne Dyer",
+    "quote": "Go for it now. The future is promised to no one."
+  },
+  {
+    "id": 163,
+    "name": "Paulo Coelho",
+    "quote": "When you want something, all the universe conspires in helping you to achieve it."
+  },
+  {
+    "id": 164,
+    "name": "Robin Williams",
+    "quote": "No matter what people tell you, words and ideas can change the world."
+  },
+  {
+    "id": 165,
+    "name": "Alan Watts",
+    "quote": "The only way to make sense out of change is to plunge into it, move with it, and join the dance."
+  },
+  {
+    "id": 166,
+    "name": "Joseph Campbell",
+    "quote": "Follow your bliss and the universe will open doors where there were only walls."
+  },
+  {
+    "id": 167,
+    "name": "Clarissa Pinkola Estes",
+    "quote": "Do not lose heart. We were made for these times."
+  },
+  {
+    "id": 168,
+    "name": "Ralph Waldo Emerson",
+    "quote": "The only person you are destined to become is the person you decide to be."
+  },
+  {
+    "id": 169,
+    "name": "Louisa May Alcott",
+    "quote": "I am not afraid of storms, for I am learning how to sail my ship."
+  },
+  {
+    "id": 170,
+    "name": "Florence Nightingale",
+    "quote": "I attribute my success to this: I never gave or took any excuse."
+  },
+  {
+    "id": 171,
+    "name": "Amelia Earhart",
+    "quote": "The most effective way to do it, is to do it."
+  },
+  {
+    "id": 172,
+    "name": "Marie Curie",
+    "quote": "Nothing in life is to be feared, it is only to be understood."
+  },
+  {
+    "id": 173,
+    "name": "Jane Goodall",
+    "quote": "What you do makes a difference, and you have to decide what kind of difference you want to make."
+  },
+  {
+    "id": 174,
+    "name": "Rosalind Franklin",
+    "quote": "Science and everyday life cannot and should not be separated."
+  },
+  {
+    "id": 175,
+    "name": "Ada Lovelace",
+    "quote": "That brain of mine is something more than merely mortal, as time will show."
+  },
+  {
+    "id": 176,
+    "name": "Katherine Johnson",
+    "quote": "Girls are capable of doing everything men are capable of doing."
+  },
+  {
+    "id": 177,
+    "name": "Malala Yousafzai",
+    "quote": "One child, one teacher, one book, one pen can change the world."
+  },
+  {
+    "id": 178,
+    "name": "Serena Williams",
+    "quote": "I really think a champion is defined not by their wins but by how they can recover when they fall."
+  },
+  {
+    "id": 179,
+    "name": "Simone Biles",
+    "quote": "I'd rather regret the risks that didn't work out than the chances I didn't take at all."
+  },
+  {
+    "id": 180,
+    "name": "Michael Jordan",
+    "quote": "I've failed over and over and over again in my life and that is why I succeed."
+  },
+  {
+    "id": 181,
+    "name": "Usain Bolt",
+    "quote": "I don’t think limits."
+  },
+  {
+    "id": 182,
+    "name": "Tom Brady",
+    "quote": "You don’t have to be great to start, but you have to start to be great."
+  },
+  {
+    "id": 183,
+    "name": "Kobe Bryant",
+    "quote": "The moment you give up is the moment you let someone else win."
+  },
+  {
+    "id": 184,
+    "name": "Babe Ruth",
+    "quote": "Never let the fear of striking out keep you from playing the game."
+  },
+  {
+    "id": 185,
+    "name": "Muhammad Ali",
+    "quote": "Don’t count the days, make the days count."
+  },
+  {
+    "id": 186,
+    "name": "Ronda Rousey",
+    "quote": "Do nothing for the approval of others. You will never be fully appreciated."
+  },
+  {
+    "id": 187,
+    "name": "Serena Williams",
+    "quote": "Tennis just a game, family is forever."
+  },
+  {
+    "id": 188,
+    "name": "Venus Williams",
+    "quote": "You can be whatever you want to be."
+  },
+  {
+    "id": 189,
+    "name": "LeBron James",
+    "quote": "I think, team first. It allows me to succeed, it allows my team to succeed."
+  },
+  {
+    "id": 190,
+    "name": "Michael Phelps",
+    "quote": "You can’t put a limit on anything. The more you dream, the farther you get."
+  },
+  {
+    "id": 191,
+    "name": "Tiger Woods",
+    "quote": "The more I practice, the luckier I get."
+  },
+  {
+    "id": 192,
+    "name": "Shaquille O'Neal",
+    "quote": "I’m not the smartest, but I can sure shoot the basketball."
+  },
+  {
+    "id": 193,
+    "name": "Maya Angelou",
+    "quote": "We may encounter many defeats, but we must not be defeated."
+  },
+  {
+    "id": 194,
+    "name": "Audre Lorde",
+    "quote": "Caring for myself is not self-indulgence, it is self-preservation, and that is an act of political warfare."
+  },
+  {
+    "id": 195,
+    "name": "Alice Walker",
+    "quote": "The most common way people give up their power is by thinking they don’t have any."
+  },
+  {
+    "id": 196,
+    "name": "Toni Morrison",
+    "quote": "If you want to fly, you have to give up the things that weigh you down."
+  },
+  {
+    "id": 197,
+    "name": "Ellen DeGeneres",
+    "quote": "Follow your passion. Stay true to yourself. Never follow someone else’s path unless you’re in the woods and you’re lost and you see a path. By all means, you should follow that."
+  },
+  {
+    "id": 198,
+    "name": "Michelle Obama",
+    "quote": "Success is only meaningful and enjoyable if it feels like your own."
+  },
+  {
+    "id": 199,
+    "name": "Barack Obama",
+    "quote": "The best way to not feel hopeless is to get up and do something."
+  },
+  {
+    "id": 200,
+    "name": "John F. Kennedy",
+    "quote": "Ask not what your country can do for you – ask what you can do for your country."
+  },
+  {
+    "id": 201,
+    "name": "Nelson Mandela",
+    "quote": "It always seems impossible until it’s done."
+  },
+  {
+    "id": 202,
+    "name": "Abraham Lincoln",
+    "quote": "The best way to predict your future is to create it."
+  },
+  {
+    "id": 203,
+    "name": "Franklin D. Roosevelt",
+    "quote": "The only thing we have to fear is fear itself."
+  },
+  {
+    "id": 204,
+    "name": "Thomas Jefferson",
+    "quote": "I find that the harder I work, the more luck I seem to have."
+  },
+  {
+    "id": 205,
+    "name": "Benjamin Franklin",
+    "quote": "Well done is better than well said."
+  },
+  {
+    "id": 206,
+    "name": "George Washington",
+    "quote": "It is better to offer no excuse than a bad one."
+  },
+  {
+    "id": 207,
+    "name": "Theodore Roosevelt",
+    "quote": "Do what you can, with what you have, where you are."
+  },
+  {
+    "id": 208,
+    "name": "James Madison",
+    "quote": "The advancement and diffusion of knowledge is the only guardian of true liberty."
+  },
+  {
+    "id": 209,
+    "name": "Thomas Paine",
+    "quote": "The harder the conflict, the greater the triumph."
+  },
+  {
+    "id": 210,
+    "name": "Henry Ford",
+    "quote": "Whether you think you can or you think you can’t, you’re right."
+  },
+  {
+    "id": 211,
+    "name": "Harriet Tubman",
+    "quote": "Every great dream begins with a dreamer."
+  },
+  {
+    "id": 212,
+    "name": "Rosa Parks",
+    "quote": "I have learned over the years that when one’s mind is made up, this diminishes fear."
+  },
+  {
+    "id": 213,
+    "name": "Susan B. Anthony",
+    "quote": "The best protection any woman can have... is courage."
+  },
+  {
+    "id": 214,
+    "name": "Mahatma Gandhi",
+    "quote": "You must be the change you wish to see in the world."
+  },
+  {
+    "id": 215,
+    "name": "Mother Teresa",
+    "quote": "Not all of us can do great things. But we can do small things with great love."
+  },
+  {
+    "id": 216,
+    "name": "Dalai Lama",
+    "quote": "Be kind whenever possible. It is always possible."
+  },
+  {
+    "id": 217,
+    "name": "Desmond Tutu",
+    "quote": "Do your little bit of good where you are; it's those little bits of good put together that overwhelm the world."
+  },
+  {
+    "id": 218,
+    "name": "Martin Luther King Jr.",
+    "quote": "The time is always right to do what is right."
+  },
+  {
+    "id": 219,
+    "name": "Elie Wiesel",
+    "quote": "The opposite of love is not hate, it's indifference."
+  },
+  {
+    "id": 220,
+    "name": "Maya Angelou",
+    "quote": "Try to be a rainbow in someone’s cloud."
+  },
+  {
+    "id": 221,
+    "name": "Mahatma Gandhi",
+    "quote": "Live as if you were to die tomorrow. Learn as if you were to live forever."
+  },
+  {
+    "id": 222,
+    "name": "Albert Einstein",
+    "quote": "Imagination is more important than knowledge."
+  },
+  {
+    "id": 223,
+    "name": "Isaac Newton",
+    "quote": "If I have seen further, it is by standing on the shoulders of giants."
+  },
+  {
+    "id": 224,
+    "name": "Marie Curie",
+    "quote": "Nothing in life is to be feared, it is only to be understood."
+  },
+  {
+    "id": 225,
+    "name": "Charles Darwin",
+    "quote": "It is not the strongest of the species that survive, nor the most intelligent, but the one most responsive to change."
+  },
+  {
+    "id": 226,
+    "name": "Nikola Tesla",
+    "quote": "The present is theirs; the future, for which I really worked, is mine."
+  },
+  {
+    "id": 227,
+    "name": "Leonardo Da Vinci",
+    "quote": "Simplicity is the ultimate sophistication."
+  },
+  {
+    "id": 228,
+    "name": "Galileo Galilei",
+    "quote": "Wine is sunlight, held together by water."
+  },
+  {
+    "id": 229,
+    "name": "Ada Lovelace",
+    "quote": "That brain of mine is something more than merely mortal, as time will show."
+  },
+  {
+    "id": 230,
+    "name": "Alan Turing",
+    "quote": "We can only see a short distance ahead, but we can see plenty there that needs to be done."
+  },
+  {
+    "id": 231,
+    "name": "Carl Sagan",
+    "quote": "Somewhere, something incredible is waiting to be known."
+  },
+  {
+    "id": 232,
+    "name": "Stephen Hawking",
+    "quote": "Intelligence is the ability to adapt to change."
+  },
+  {
+    "id": 233,
+    "name": "Richard Feynman",
+    "quote": "What I cannot create, I do not understand."
+  },
+  {
+    "id": 234,
+    "name": "Niels Bohr",
+    "quote": "Prediction is very difficult, especially if it’s about the future."
+  },
+  {
+    "id": 235,
+    "name": "Hedy Lamarr",
+    "quote": "The world speeds up and technology takes over our lives, but the human mind and spirit continue to be boundless."
+  },
+  {
+    "id": 236,
+    "name": "Grace Hopper",
+    "quote": "The most dangerous phrase in the language is, 'We've always done it this way.'"
+  },
+  {
+    "id": 237,
+    "name": "Tim Berners-Lee",
+    "quote": "The web does not just connect machines, it connects people."
+  },
+  {
+    "id": 238,
+    "name": "Mark Zuckerberg",
+    "quote": "The biggest risk is not taking any risk."
+  },
+  {
+    "id": 239,
+    "name": "Larry Page",
+    "quote": "Always deliver more than expected."
+  },
+  {
+    "id": 240,
+    "name": "Sergey Brin",
+    "quote": "Solving big problems is easier than solving little problems."
+  },
+  {
+    "id": 241,
+    "name": "Elon Musk",
+    "quote": "When something is important enough, you do it even if the odds are not in your favor."
+  },
+  {
+    "id": 242,
+    "name": "Jeff Bezos",
+    "quote": "If you double the number of experiments you do per year, you’re going to double your inventiveness."
+  },
+  {
+    "id": 243,
+    "name": "Bill Gates",
+    "quote": "We always overestimate the change that will occur in the next two years and underestimate the change that will occur in the next ten."
+  },
+  {
+    "id": 244,
+    "name": "Warren Buffett",
+    "quote": "The stock market is filled with individuals who know the price of everything, but the value of nothing."
+  },
+  {
+    "id": 245,
+    "name": "Mark Zuckerberg",
+    "quote": "The biggest risk is not taking any risk."
+  },
+  {
+    "id": 246,
+    "name": "Jack Ma",
+    "quote": "If you don't give up, you still have a chance. Giving up is the greatest failure."
+  },
+  {
+    "id": 247,
+    "name": "Richard Branson",
+    "quote": "Business opportunities are like buses, there’s always another one coming."
+  },
+  {
+    "id": 248,
+    "name": "Oprah Winfrey",
+    "quote": "You become what you believe."
+  },
+  {
+    "id": 249,
+    "name": "Steve Jobs",
+    "quote": "Your work is going to fill a large part of your life, and the only way to be truly satisfied is to do what you believe is great work."
+  },
+  {
+    "id": 250,
+    "name": "Indra Nooyi",
+    "quote": "The most important thing is to find your purpose, and once you do, just go for it."
+  },
+  {
+    "id": 251,
+    "name": "Larry Page",
+    "quote": "You don’t need to have a 100-person company to develop that idea."
+  },
+  {
+    "id": 252,
+    "name": "Tim Cook",
+    "quote": "The people who are crazy enough to think they can change the world are the ones who do."
+  },
+  {
+    "id": 253,
+    "name": "Sheryl Sandberg",
+    "quote": "Leadership is not about being in charge. It’s about taking care of those in your charge."
+  },
+  {
+    "id": 254,
+    "name": "Arianna Huffington",
+    "quote": "Failure is not the opposite of success. It’s part of success."
+  },
+  {
+    "id": 255,
+    "name": "Richard Branson",
+    "quote": "You don’t learn to walk by following rules. You learn by doing, and by falling over."
+  },
+  {
+    "id": 256,
+    "name": "Angela Merkel",
+    "quote": "The question is not whether we are going to change. The question is how we are going to manage change."
+  },
+  {
+    "id": 257,
+    "name": "Michelle Obama",
+    "quote": "Success is only meaningful and enjoyable if it feels like your own."
+  },
+  {
+    "id": 258,
+    "name": "Bernard Arnault",
+    "quote": "You can’t just keep doing what you’ve always done. It’s always better to make changes and try new things."
+  },
+  {
+    "id": 259,
+    "name": "Michael Bloomberg",
+    "quote": "The best way to get something done is to begin."
+  },
+  {
+    "id": 260,
+    "name": "Howard Schultz",
+    "quote": "When you're surrounded by people who share the same set of values, you can accomplish amazing things."
+  },
+  {
+    "id": 261,
+    "name": "Melinda Gates",
+    "quote": "A strong woman is one who is able to smile this morning like she wasn’t crying last night."
+  },
+  {
+    "id": 262,
+    "name": "Tony Robbins",
+    "quote": "The only limit to your impact is your imagination and commitment."
+  },
+  {
+    "id": 263,
+    "name": "Gary Vaynerchuk",
+    "quote": "Skills are cheap. Passion is priceless."
+  },
+  {
+    "id": 264,
+    "name": "Marie Forleo",
+    "quote": "Success doesn’t come from what you do occasionally, it comes from what you do consistently."
+  },
+  {
+    "id": 265,
+    "name": "Seth Godin",
+    "quote": "Don't find customers for your products, find products for your customers."
+  },
+  {
+    "id": 266,
+    "name": "James Clear",
+    "quote": "Success is the product of daily habits—not once-in-a-lifetime transformations."
+  },
+  {
+    "id": 267,
+    "name": "David Ogilvy",
+    "quote": "The consumer isn’t a moron, she’s your wife."
+  },
+  {
+    "id": 268,
+    "name": "Dwayne 'The Rock' Johnson",
+    "quote": "Success at anything will always come down to this: focus and effort, and we control both."
+  },
+  {
+    "id": 269,
+    "name": "Oprah Winfrey",
+    "quote": "The more you praise and celebrate your life, the more there is in life to celebrate."
+  },
+  {
+    "id": 270,
+    "name": "Albert Einstein",
+    "quote": "The only source of knowledge is experience."
+  },
+  {
+    "id": 271,
+    "name": "Maya Angelou",
+    "quote": "You can’t use up creativity. The more you use, the more you have."
+  },
+  {
+    "id": 272,
+    "name": "Steve Jobs",
+    "quote": "Innovation is the ability to see change as an opportunity – not a threat."
+  },
+  {
+    "id": 273,
+    "name": "Bill Gates",
+    "quote": "Your most unhappy customers are your greatest source of learning."
+  },
+  {
+    "id": 274,
+    "name": "Warren Buffett",
+    "quote": "Price is what you pay. Value is what you get."
+  },
+  {
+    "id": 275,
+    "name": "Beyoncé",
+    "quote": "Power is not given to you. You have to take it."
+  },
+  {
+    "id": 276,
+    "name": "Barack Obama",
+    "quote": "Change is the law of life. And those who look only to the past or present are certain to miss the future."
+  },
+  {
+    "id": 277,
+    "name": "Nelson Mandela",
+    "quote": "There is nothing like returning to a place that remains unchanged to find the ways in which you yourself have altered."
+  },
+  {
+    "id": 278,
+    "name": "Elon Musk",
+    "quote": "Failure is an option here. If things are not failing, you are not innovating enough."
+  },
+  {
+    "id": 279,
+    "name": "Michael Jordan",
+    "quote": "I can accept failure, everyone fails at something. But I can’t accept not trying."
+  },
+  {
+    "id": 280,
+    "name": "Coco Chanel",
+    "quote": "The most courageous act is still to think for yourself. Aloud."
+  },
+  {
+    "id": 281,
+    "name": "Walt Disney",
+    "quote": "The way to get started is to quit talking and begin doing."
+  },
+  {
+    "id": 282,
+    "name": "Vince Lombardi",
+    "quote": "It’s not whether you get knocked down, it’s whether you get up."
+  },
+  {
+    "id": 283,
+    "name": "Steve Jobs",
+    "quote": "Don’t let the noise of others’ opinions drown out your own inner voice."
+  },
+  {
+    "id": 284,
+    "name": "Warren Buffett",
+    "quote": "The difference between successful people and really successful people is that really successful people say no to almost everything."
+  },
+  {
+    "id": 285,
+    "name": "Ralph Waldo Emerson",
+    "quote": "What lies behind us and what lies before us are tiny matters compared to what lies within us."
+  },
+  {
+    "id": 286,
+    "name": "Tim Cook",
+    "quote": "You can focus on things that are barriers or you can focus on scaling the wall or redefining the problem."
+  },
+  {
+    "id": 287,
+    "name": "Sundar Pichai",
+    "quote": "Wear your failure as a badge of honor!"
+  },
+  {
+    "id": 288,
+    "name": "Satya Nadella",
+    "quote": "Our industry does not respect tradition — it only respects innovation."
+  },
+  {
+    "id": 289,
+    "name": "Jack Dorsey",
+    "quote": "Make every detail perfect, and limit the number of details to perfect."
+  },
+  {
+    "id": 290,
+    "name": "Reed Hastings",
+    "quote": "Do not tolerate brilliant jerks. The cost to teamwork is too high."
+  },
+  {
+    "id": 291,
+    "name": "Jeff Weiner",
+    "quote": "Don’t just get it done. Get it done and then make it better."
+  },
+  {
+    "id": 292,
+    "name": "Evan Spiegel",
+    "quote": "The hardest thing is not being able to rely on what you know; the hardest thing is knowing what you don't know."
+  },
+  {
+    "id": 293,
+    "name": "Brian Chesky",
+    "quote": "The most important thing is to be passionate about what you do."
+  },
+  {
+    "id": 294,
+    "name": "Daniel Ek",
+    "quote": "What matters is not what you achieve, but how you achieve it."
+  },
+  {
+    "id": 295,
+    "name": "Reed Hastings",
+    "quote": "The greatest barrier to success is the fear of failure."
+  },
+  {
+    "id": 296,
+    "name": "Sheryl Sandberg",
+    "quote": "I want every little girl who’s told she’s bossy to be told instead that she has leadership skills."
+  },
+  {
+    "id": 297,
+    "name": "Sara Blakely",
+    "quote": "Don’t ever be afraid to fail."
+  },
+  {
+    "id": 298,
+    "name": "Evan Williams",
+    "quote": "The best way to predict the future is to create it."
+  },
+  {
+    "id": 299,
+    "name": "Richard Branson",
+    "quote": "Business is all about people. It’s about relationships."
+  },
+  {
+    "id": 300,
+    "name": "Jack Ma",
+    "quote": "Your attitude is more important than your capabilities. Similarly, your decision is more important than your capabilities!"
+  },
+  {
+    "id": 301,
+    "name": "Tony Robbins",
+    "quote": "The only limit to your impact is your imagination and commitment."
+  },
+  {
+    "id": 302,
+    "name": "Jeff Bezos",
+    "quote": "If you want to be inventive, you have to be willing to fail."
+  },
+  {
+    "id": 303,
+    "name": "Steve Jobs",
+    "quote": "Don’t be trapped by dogma — which is living with the results of other people’s thinking."
+  },
+  {
+    "id": 304,
+    "name": "Warren Buffett",
+    "quote": "Wealth is the transfer of money from the impatient to the patient."
+  },
+  {
+    "id": 305,
+    "name": "Richard Branson",
+    "quote": "My biggest motivation is to never stop learning."
+  },
+  {
+    "id": 306,
+    "name": "Elon Musk",
+    "quote": "When something is important enough, you do it even if the odds are not in your favor."
+  },
+  {
+    "id": 307,
+    "name": "Indra Nooyi",
+    "quote": "Leadership is not about being in charge. It’s about taking care of those in your charge."
+  },
+  {
+    "id": 308,
+    "name": "Bill Gates",
+    "quote": "Your most unhappy customers are your greatest source of learning."
+  },
+  {
+    "id": 309,
+    "name": "Richard Branson",
+    "quote": "Business opportunities are like buses, there’s always another one coming."
+  },
+  {
+    "id": 310,
+    "name": "Mark Zuckerberg",
+    "quote": "The biggest risk is not taking any risk."
+  },
+  {
+    "id": 311,
+    "name": "Warren Buffett",
+    "quote": "The stock market is a device for transferring money from the impatient to the patient."
+  },
+  {
+    "id": 312,
+    "name": "Oprah Winfrey",
+    "quote": "The more you praise and celebrate your life, the more there is in life to celebrate."
+  },
+  {
+    "id": 313,
+    "name": "Elon Musk",
+    "quote": "The first step is to establish that something is possible; then probability will occur."
+  },
+  {
+    "id": 314,
+    "name": "Howard Schultz",
+    "quote": "When you’re surrounded by people who share the same set of values, you can accomplish amazing things."
+  },
+  {
+    "id": 315,
+    "name": "Jack Dorsey",
+    "quote": "Make every detail perfect, and limit the number of details to perfect."
+  },
+  {
+    "id": 316,
+    "name": "Sheryl Sandberg",
+    "quote": "In the future, there will be no female leaders. There will just be leaders."
+  },
+  {
+    "id": 317,
+    "name": "Jeff Bezos",
+    "quote": "Your brand is what people say about you when you’re not in the room."
+  },
+  {
+    "id": 318,
+    "name": "Beyoncé",
+    "quote": "Power is not given to you. You have to take it."
+  },
+  {
+    "id": 319,
+    "name": "Steve Jobs",
+    "quote": "Innovation distinguishes between a leader and a follower."
+  },
+  {
+    "id": 320,
+    "name": "Richard Branson",
+    "quote": "You don’t learn to walk by following rules. You learn by doing, and by falling over."
+  },
+  {
+    "id": 321,
+    "name": "Tony Robbins",
+    "quote": "It is in your moments of decision that your destiny is shaped."
+  },
+  {
+    "id": 322,
+    "name": "Gary Vaynerchuk",
+    "quote": "Skills are cheap. Passion is priceless."
+  },
+  {
+    "id": 323,
+    "name": "Brian Chesky",
+    "quote": "The most important thing is to be passionate about what you do."
+  },
+  {
+    "id": 324,
+    "name": "Oprah Winfrey",
+    "quote": "You become what you believe."
+  },
+  {
+    "id": 325,
+    "name": "Jack Ma",
+    "quote": "If you don’t give up, you still have a chance. Giving up is the greatest failure."
+  },
+  {
+    "id": 326,
+    "name": "Arianna Huffington",
+    "quote": "Failure is not the opposite of success. It’s part of success."
+  },
+  {
+    "id": 327,
+    "name": "Warren Buffett",
+    "quote": "Price is what you pay. Value is what you get."
+  },
+  {
+    "id": 328,
+    "name": "Oprah Winfrey",
+    "quote": "The more you praise and celebrate your life, the more there is in life to celebrate."
+  },
+  {
+    "id": 329,
+    "name": "Maya Angelou",
+    "quote": "You can’t use up creativity. The more you use, the more you have."
+  },
+  {
+    "id": 330,
+    "name": "Michael Jordan",
+    "quote": "I can accept failure, everyone fails at something. But I can’t accept not trying."
+  },
+  {
+    "id": 331,
+    "name": "Barack Obama",
+    "quote": "The best way to predict your future is to create it."
+  },
+  {
+    "id": 332,
+    "name": "Mark Zuckerberg",
+    "quote": "The biggest risk is not taking any risk."
+  },
+  {
+    "id": 333,
+    "name": "Richard Branson",
+    "quote": "Business is all about people. It’s about relationships."
+  },
+  {
+    "id": 334,
+    "name": "Elon Musk",
+    "quote": "When something is important enough, you do it even if the odds are not in your favor."
+  },
+  {
+    "id": 335,
+    "name": "Sheryl Sandberg",
+    "quote": "Leadership is not about being in charge. It’s about taking care of those in your charge."
+  },
+  {
+    "id": 336,
+    "name": "Sara Blakely",
+    "quote": "Don’t ever be afraid to fail."
+  },
+  {
+    "id": 337,
+    "name": "Gary Vaynerchuk",
+    "quote": "Skills are cheap. Passion is priceless."
+  },
+  {
+    "id": 338,
+    "name": "James Clear",
+    "quote": "Success is the product of daily habits—not once-in-a-lifetime transformations."
+  },
+  {
+    "id": 339,
+    "name": "Jeff Bezos",
+    "quote": "If you double the number of experiments you do per year, you’re going to double your inventiveness."
+  },
+  {
+    "id": 340,
+    "name": "Elon Musk",
+    "quote": "The first step is to establish that something is possible; then probability will occur."
+  },
+  {
+    "id": 341,
+    "name": "Tony Robbins",
+    "quote": "The only limit to your impact is your imagination and commitment."
+  },
+  {
+    "id": 342,
+    "name": "Richard Branson",
+    "quote": "Business opportunities are like buses, there’s always another one coming."
+  },
+  {
+    "id": 343,
+    "name": "Arianna Huffington",
+    "quote": "Failure is not the opposite of success. It’s part of success."
+  },
+  {
+    "id": 344,
+    "name": "Howard Schultz",
+    "quote": "When you’re surrounded by people who share the same set of values, you can accomplish amazing things."
+  },
+  {
+    "id": 345,
+    "name": "Tim Cook",
+    "quote": "You can focus on things that are barriers or you can focus on scaling the wall or redefining the problem."
+  },
+  {
+    "id": 346,
+    "name": "Brian Chesky",
+    "quote": "The most important thing is to be passionate about what you do."
+  },
+  {
+    "id": 347,
+    "name": "Jack Ma",
+    "quote": "Your attitude is more important than your capabilities. Similarly, your decision is more important than your capabilities!"
+  },
+  {
+    "id": 348,
+    "name": "Sundar Pichai",
+    "quote": "Wear your failure as a badge of honor!"
+  },
+  {
+    "id": 349,
+    "name": "Oprah Winfrey",
+    "quote": "Success is only meaningful and enjoyable if it feels like your own."
+  },
+  {
+    "id": 350,
+    "name": "Michael Bloomberg",
+    "quote": "The best way to get something done is to begin."
+  },
+  {
+    "id": 351,
+    "name": "Steve Jobs",
+    "quote": "Don’t let the noise of others’ opinions drown out your own inner voice."
+  },
+  {
+    "id": 352,
+    "name": "Vince Lombardi",
+    "quote": "It’s not whether you get knocked down, it’s whether you get up."
+  },
+  {
+    "id": 353,
+    "name": "Warren Buffett",
+    "quote": "The difference between successful people and really successful people is that really successful people say no to almost everything."
+  },
+  {
+    "id": 354,
+    "name": "Sara Blakely",
+    "quote": "Don’t ever be afraid to fail."
+  },
+  {
+    "id": 355,
+    "name": "Barack Obama",
+    "quote": "Change is the law of life. And those who look only to the past or present are certain to miss the future."
+  },
+  {
+    "id": 356,
+    "name": "Sheryl Sandberg",
+    "quote": "Don’t just get it done. Get it done and then make it better."
+  },
+  {
+    "id": 361,
+    "name": "Elon Musk",
+    "quote": "You should take the approach that you’re wrong. Your goal is to be less wrong."
+  },
+  {
+    "id": 362,
+    "name": "Steve Jobs",
+    "quote": "The people who are crazy enough to think they can change the world are the ones who do."
+  },
+  {
+    "id": 363,
+    "name": "Oprah Winfrey",
+    "quote": "The more you praise and celebrate your life, the more there is in life to celebrate."
+  },
+  {
+    "id": 364,
+    "name": "Jeff Bezos",
+    "quote": "If you double the number of experiments you do per year, you’re going to double your inventiveness."
+  },
+  {
+    "id": 365,
+    "name": "Richard Branson",
+    "quote": "Business opportunities are like buses, there’s always another one coming."
+  },
+  {
+    "id": 366,
+    "name": "Indra Nooyi",
+    "quote": "Leadership is not about being in charge. It’s about taking care of those in your charge."
+  },
+  {
+    "id": 367,
+    "name": "Jack Dorsey",
+    "quote": "Make every detail perfect, and limit the number of details to perfect."
+  },
+  {
+    "id": 368,
+    "name": "Howard Schultz",
+    "quote": "When you’re surrounded by people who share the same set of values, you can accomplish amazing things."
+  },
+  {
+    "id": 369,
+    "name": "Brian Chesky",
+    "quote": "The most important thing is to be passionate about what you do."
+  },
+  {
+    "id": 370,
+    "name": "Elon Musk",
+    "quote": "The first step is to establish that something is possible; then probability will occur."
+  },
+  {
+    "id": 371,
+    "name": "Gary Vaynerchuk",
+    "quote": "Skills are cheap. Passion is priceless."
+  },
+  {
+    "id": 372,
+    "name": "Warren Buffett",
+    "quote": "Price is what you pay. Value is what you get."
+  },
+  {
+    "id": 373,
+    "name": "Sheryl Sandberg",
+    "quote": "In the future, there will be no female leaders. There will just be leaders."
+  },
+  {
+    "id": 374,
+    "name": "Richard Branson",
+    "quote": "You don’t learn to walk by following rules. You learn by doing, and by falling over."
+  },
+  {
+    "id": 375,
+    "name": "Tony Robbins",
+    "quote": "It is in your moments of decision that your destiny is shaped."
+  },
+  {
+    "id": 376,
+    "name": "Jeff Bezos",
+    "quote": "Your brand is what people say about you when you’re not in the room."
+  },
+  {
+    "id": 377,
+    "name": "Arianna Huffington",
+    "quote": "Failure is not the opposite of success. It’s part of success."
+  },
+  {
+    "id": 378,
+    "name": "Oprah Winfrey",
+    "quote": "The more you praise and celebrate your life, the more there is in life to celebrate."
+  },
+  {
+    "id": 379,
+    "name": "Jack Ma",
+    "quote": "If you don’t give up, you still have a chance. Giving up is the greatest failure."
+  },
+  {
+    "id": 380,
+    "name": "Tony Robbins",
+    "quote": "The only limit to your impact is your imagination and commitment."
+  },
+  {
+    "id": 381,
+    "name": "Michael Jordan",
+    "quote": "I can accept failure, everyone fails at something. But I can’t accept not trying."
+  },
+  {
+    "id": 382,
+    "name": "Warren Buffett",
+    "quote": "The stock market is a device for transferring money from the impatient to the patient."
+  },
+  {
+    "id": 383,
+    "name": "Sheryl Sandberg",
+    "quote": "Don’t just get it done. Get it done and then make it better."
+  },
+  {
+    "id": 384,
+    "name": "Gary Vaynerchuk",
+    "quote": "Skills are cheap. Passion is priceless."
+  },
+  {
+    "id": 385,
+    "name": "Elon Musk",
+    "quote": "When something is important enough, you do it even if the odds are not in your favor."
+  },
+  {
+    "id": 386,
+    "name": "Mark Zuckerberg",
+    "quote": "The biggest risk is not taking any risk."
+  },
+  {
+    "id": 387,
+    "name": "Barack Obama",
+    "quote": "The best way to predict your future is to create it."
+  },
+  {
+    "id": 388,
+    "name": "Jack Dorsey",
+    "quote": "Make every detail perfect, and limit the number of details to perfect."
+  },
+  {
+    "id": 389,
+    "name": "Indra Nooyi",
+    "quote": "Leadership is not about being in charge. It’s about taking care of those in your charge."
+  },
+  {
+    "id": 390,
+    "name": "Richard Branson",
+    "quote": "Business opportunities are like buses, there’s always another one coming."
+  },
+  {
+    "id": 391,
+    "name": "Mark Zuckerberg",
+    "quote": "The biggest risk is not taking any risk."
+  },
+  {
+    "id": 392,
+    "name": "Elon Musk",
+    "quote": "When something is important enough, you do it even if the odds are not in your favor."
+  },
+  {
+    "id": 393,
+    "name": "Sundar Pichai",
+    "quote": "Wear your failure as a badge of honor!"
+  },
+  {
+    "id": 394,
+    "name": "Howard Schultz",
+    "quote": "When you’re surrounded by people who share the same set of values, you can accomplish amazing things."
+  },
+  {
+    "id": 395,
+    "name": "Oprah Winfrey",
+    "quote": "Success is only meaningful and enjoyable if it feels like your own."
+  },
+  {
+    "id": 396,
+    "name": "Jack Ma",
+    "quote": "Your attitude is more important than your capabilities. Similarly, your decision is more important than your capabilities!"
+  },
+  {
+    "id": 397,
+    "name": "Brian Chesky",
+    "quote": "The most important thing is to be passionate about what you do."
+  },
+  {
+    "id": 398,
+    "name": "Sara Blakely",
+    "quote": "Don’t ever be afraid to fail."
+  },
+  {
+    "id": 399,
+    "name": "Jeff Bezos",
+    "quote": "If you want to be inventive, you have to be willing to fail."
+  },
+  {
+    "id": 400,
+    "name": "Vince Lombardi",
+    "quote": "It’s not whether you get knocked down, it’s whether you get up."
+  }
+]

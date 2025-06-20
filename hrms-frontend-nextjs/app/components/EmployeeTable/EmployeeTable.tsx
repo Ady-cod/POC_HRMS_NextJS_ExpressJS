@@ -4,11 +4,14 @@ import { getAllEmployees, deleteEmployee } from "@/actions/employee";
 import { EmployeeListItem } from "@/types/types";
 import { showToast } from "@/utils/toastHelper";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
+import { EmployeeRole } from "@/types/types";
+import { faArrowsRotate } from "@fortawesome/free-solid-svg-icons";
 import {
   faBackwardStep,
   faForwardStep,
   faAngleLeft,
   faAngleRight,
+  faSearch,
 } from "@fortawesome/free-solid-svg-icons";
 
 import dynamic from "next/dynamic";
@@ -39,6 +42,12 @@ const EmployeeTable: React.FC<EmployeeTableProps> = ({
     useState<EmployeeListItem | null>(null);
   const [currentPage, setCurrentPage] = useState(1);
   const [rowsPerPage, setRowsPerPage] = useState(10);
+  const [searchText, setSearchText] = useState(""); // NEW: State for search term
+  const [searchCategory, setSearchCategory] = useState("");
+  const [selectedRole, setSelectedRole] = useState("");
+  const [selectedDepartment, setSelectedDepartment] = useState("");
+  const [selectedStartDate, setSelectedStartDate] = useState("");
+  const [selectedEndDate, setSelectedEndDate] = useState("");
 
   useEffect(() => {
     // Set the initial state for the  screen size based on the window width
@@ -132,6 +141,94 @@ const EmployeeTable: React.FC<EmployeeTableProps> = ({
     setRowsPerPage(currentRowsPerPage);
     setCurrentPage(1); // Reset to first page when changing rows per page
   };
+
+  const filteredEmployees = useMemo(() => {
+    // If "All Categories" is selected, return all employees
+    if (searchCategory === "all" || searchCategory === "") {
+      return employees;
+    }
+
+    // If no search input or selected value for the current category, return all employees
+    if (
+      (searchCategory === "name" || searchCategory === "email") &&
+      !searchText
+    ) {
+      return employees;
+    }
+    if (searchCategory === "role" && !selectedRole) {
+      return employees;
+    }
+    if (searchCategory === "department" && !selectedDepartment) {
+      return employees;
+    }
+
+    const lowercasedSearchText = searchText.toLowerCase();
+
+    return employees.filter((employee) => {
+      let valueToSearch = "";
+
+      switch (searchCategory) {
+        case "name":
+          valueToSearch = employee.fullName || "";
+          break;
+
+        case "email":
+          valueToSearch = employee.email || "";
+          break;
+
+        case "dateOfJoining":
+          if (employee.dateOfJoining) {
+            try {
+              const employeeDate = new Date(employee.dateOfJoining)
+                .toISOString()
+                .split("T")[0];
+
+              // Apply filtering based on selected date(s)
+              if (selectedStartDate && selectedEndDate) {
+                return (
+                  employeeDate >= selectedStartDate &&
+                  employeeDate <= selectedEndDate
+                );
+              } else if (selectedStartDate) {
+                return employeeDate >= selectedStartDate;
+              } else if (selectedEndDate) {
+                return employeeDate <= selectedEndDate;
+              } else {
+                return true;
+              }
+            } catch (error) {
+              console.error(
+                "Error parsing dateOfJoining for employee:",
+                employee,
+                error
+              );
+              return false;
+            }
+          }
+          return false;
+
+        case "role":
+          return employee.role === selectedRole;
+
+        case "department":
+          return employee.department?.name === selectedDepartment;
+
+        default:
+          return true;
+      }
+
+      // For name and email categories — perform case-insensitive match
+      return valueToSearch.toLowerCase().includes(lowercasedSearchText);
+    });
+  }, [
+    employees,
+    searchText,
+    searchCategory,
+    selectedRole,
+    selectedDepartment,
+    selectedStartDate,
+    selectedEndDate,
+  ]);
 
   const firstColumns: TableColumn<EmployeeListItem>[] = [
     {
@@ -335,11 +432,124 @@ const EmployeeTable: React.FC<EmployeeTableProps> = ({
 
   return (
     <div>
+      {/* Search Bar container with dropdown */}
+      <div className="flex flex-wrap items-center gap-3 mb-4 p-3 bg-gray-100 rounded-md shadow-sm">
+        <div className="flex flex-wrap items-center gap-3">
+          {/* Search Category Dropdown */}
+          <select
+            value={searchCategory}
+            onChange={(e) => setSearchCategory(e.target.value)}
+            className="w-48 p-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 bg-white text-gray-700"
+          >
+            <option value="" disabled>
+              Search By Category
+            </option>
+            <option value="name">Name</option>
+            <option value="email">Email</option>
+            <option value="dateOfJoining">Date of Joining</option>
+            <option value="role">Role</option>
+            <option value="department">Department</option>
+          </select>
+
+          {/* Conditional Inputs */}
+          {searchCategory === "name" || searchCategory === "email" ? (
+            <div className="relative w-60">
+              <FontAwesomeIcon
+                icon={faSearch}
+                className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400"
+              />
+              <input
+                type="text"
+                placeholder={`Search by ${searchCategory
+                  .replace(/([A-Z])/g, " $1")
+                  .toLowerCase()
+                  .replace(/^./, (str) => str.toUpperCase())}...`}
+                value={searchText}
+                onChange={(e) => setSearchText(e.target.value)}
+                className="w-full pl-10 p-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+              />
+            </div>
+          ) : searchCategory === "role" ? (
+            <select
+              value={selectedRole}
+              onChange={(e) => setSelectedRole(e.target.value)}
+              className="w-60 p-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 bg-white"
+            >
+              <option value="">All Roles</option>
+              {Object.values(EmployeeRole).map((role) => (
+                <option key={role} value={role}>
+                  {role}
+                </option>
+              ))}
+            </select>
+          ) : searchCategory === "department" ? (
+            <select
+              value={selectedDepartment}
+              onChange={(e) => setSelectedDepartment(e.target.value)}
+              className="w-60 p-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 bg-white"
+            >
+              <option value="">All Departments</option>
+              {Array.from(
+                new Set(
+                  employees
+                    .map((emp) => emp.department?.name)
+                    .filter((name): name is string => Boolean(name))
+                )
+              ).map((dept) => (
+                <option key={dept} value={dept}>
+                  {dept}
+                </option>
+              ))}
+            </select>
+          ) : searchCategory === "dateOfJoining" ? (
+            <div className="flex items-center gap-2">
+              <input
+                type="date"
+                value={selectedStartDate}
+                onChange={(e) => setSelectedStartDate(e.target.value)}
+                className="w-40 p-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+              />
+              <span className="text-gray-600 text-sm font-medium">to</span>
+              <input
+                type="date"
+                value={selectedEndDate}
+                onChange={(e) => setSelectedEndDate(e.target.value)}
+                className="w-40 p-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+              />
+            </div>
+          ) : null}
+
+          {/* Conditionally Render Remove Filter Button */}
+          {(searchCategory ||
+            searchText ||
+            selectedRole ||
+            selectedDepartment ||
+            selectedStartDate ||
+            selectedEndDate) && (
+            <button
+              onClick={() => {
+                setSearchCategory("");
+                setSearchText("");
+                setSelectedRole("");
+                setSelectedDepartment("");
+                setSelectedStartDate("");
+                setSelectedEndDate("");
+              }}
+              className="flex items-center gap-2 bg-blue-500 hover:bg-blue-600 text-white px-4 py-2 rounded-md text-sm"
+            >
+              <FontAwesomeIcon icon={faArrowsRotate} />
+              Remove Filters
+            </button>
+          )}
+        </div>
+      </div>
+
+      {/* Data Table */}
       <div>
         <DataTable
-          fixedHeaderScrollHeight="calc(100vh - 130px)" // Set table's scrollable height accounting for navbar (80px) and 50px offset for including pagination buttons in the viewport
+          fixedHeaderScrollHeight="calc(100vh - 130px - 60px)"
           columns={columns}
-          data={employees}
+          data={filteredEmployees}
           pagination
           paginationPerPage={rowsPerPage}
           paginationRowsPerPageOptions={[10, 25, 50, 100]}
@@ -349,6 +559,8 @@ const EmployeeTable: React.FC<EmployeeTableProps> = ({
           fixedHeader
         />
       </div>
+
+      {/* Confirmation Modal */}
       <ConfirmationModal
         isOpen={showDialog}
         onClose={() => setShowDialog(false)}

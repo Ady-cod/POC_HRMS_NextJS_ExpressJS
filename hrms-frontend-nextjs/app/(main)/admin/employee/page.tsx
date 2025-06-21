@@ -7,10 +7,9 @@ import { EmployeeListItem } from "@/types/types";
 import dynamic from "next/dynamic";
 
 // Dynamically import the ModalForm component to reduce the initial bundle size
-const ModalForm = dynamic(() => import("@/components/ModalForm/ModalForm"),{
+const ModalForm = dynamic(() => import("@/components/ModalForm/ModalForm"), {
   ssr: false,
-  }
-);
+});
 
 const EmployeePage = () => {
   const [isModalOpen, setIsModalOpen] = useState(false);
@@ -18,6 +17,7 @@ const EmployeePage = () => {
   const [employeeData, setEmployeeData] = useState<EmployeeListItem | null>(
     null
   );
+  const [employeeCount, setEmployeeCount] = useState(0);
 
   // Open and close handlers for the modal
   const handleAddNewDataClick = () => {
@@ -46,9 +46,19 @@ const EmployeePage = () => {
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
   return (
     <div>
-      {/* Header section with Add New Data button */}
-      <div className="flex justify-between items-center p-4">
-        <AddNewDataButton onClick={handleAddNewDataClick} />
+      <div className="flex justify-between items-center mt-6 mb-4 px-4">
+        <h2 className="text-3xl font-bold text-gray-900">List</h2>
+        <div className="flex items-center gap-4">
+          <button
+            disabled
+            className="bg-transparent text-gray-800 px-4 py-2 rounded-md text-sm cursor-default border border-gray-300 hover:bg-gray-100 hover:shadow-sm transition duration-200"
+          >
+            Total Count: {employeeCount}
+          </button>
+
+          {/* Add Button */}
+          <AddNewDataButton onClick={handleAddNewDataClick} />
+        </div>
       </div>
 
       {/* Modal Form for adding new data */}
@@ -60,7 +70,11 @@ const EmployeePage = () => {
       />
 
       {/* Table section */}
-        <EmployeeTable refreshFlag={refreshFlag} handleEdit={handleEdit} />
+      <EmployeeTable
+        refreshFlag={refreshFlag}
+        handleEdit={handleEdit}
+        setEmployeeCount={setEmployeeCount}
+      />
     </div>
   );
 };

@@ -27,11 +27,13 @@ const ConfirmationModal = dynamic(
 interface EmployeeTableProps {
   refreshFlag: boolean;
   handleEdit: (employeeData: EmployeeListItem) => void;
+  setEmployeeCount: (count: number) => void;
 }
 
 const EmployeeTable: React.FC<EmployeeTableProps> = ({
   refreshFlag,
   handleEdit,
+  setEmployeeCount,
 }) => {
   const [employees, setEmployees] = useState<EmployeeListItem[]>([]);
   const [activeSectionIndex, setActiveSectionIndex] = useState(0);
@@ -65,9 +67,14 @@ const EmployeeTable: React.FC<EmployeeTableProps> = ({
     async function fetchEmployees() {
       const employees = await getAllEmployees();
       setEmployees(employees);
+      setEmployeeCount(employees.length);
     }
     fetchEmployees();
   }, [refreshFlag]);
+
+  useEffect(() => {
+    setEmployeeCount(employees.length);
+  }, [employees]);
 
   const handleDeleteClick = (employee: EmployeeListItem) => {
     setSelectedEmployee(employee);

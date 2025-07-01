@@ -46,18 +46,27 @@ const EmployeePage = () => {
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
   return (
     <div>
-      <div className="flex justify-between items-center mt-6 mb-4 px-4">
-        <h2 className="text-3xl font-bold text-gray-900">List</h2>
-        <div className="flex items-center gap-4">
+      <div className="flex flex-row flex-wrap justify-between items-center mt-6 mb-4 px-4 gap-2 sm:gap-4">
+        {/* Heading */}
+        <h2 className="text-2xl sm:text-3xl font-bold text-gray-900 whitespace-nowrap">
+          List
+        </h2>
+
+        {/* Button Section */}
+        <div className="flex flex-row flex-wrap items-center gap-2 sm:gap-3">
+          {/* Total Count Button */}
           <button
             disabled
-            className="bg-transparent text-gray-800 px-4 py-2 rounded-md text-sm cursor-default border border-gray-300 hover:bg-gray-100 hover:shadow-sm transition duration-200"
+            style={{ color: "#a7aeb4" }}
+            className="box-border border-2 border-gray-300 px-3 sm:px-4 py-1 sm:py-1.5 rounded-md text-xs sm:text-sm cursor-default hover:bg-gray-100 hover:shadow-sm transition duration-200 font-semibold"
           >
             Total Count: {employeeCount}
           </button>
 
-          {/* Add Button */}
-          <AddNewDataButton onClick={handleAddNewDataClick} />
+          {/* Add New Data Button (wrapped to apply consistent responsive sizing) */}
+          <div className="text-xs sm:text-sm px-0 sm:px-0 py-0 sm:py-0">
+            <AddNewDataButton onClick={handleAddNewDataClick} />
+          </div>
         </div>
       </div>
 

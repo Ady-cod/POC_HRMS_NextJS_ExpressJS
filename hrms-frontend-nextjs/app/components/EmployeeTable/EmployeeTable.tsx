@@ -15,6 +15,9 @@ import {
 } from "@fortawesome/free-solid-svg-icons";
 
 import dynamic from "next/dynamic";
+import { Trash2 } from "lucide-react";
+import { Pencil } from "lucide-react";
+import { faDownload } from "@fortawesome/free-solid-svg-icons";
 
 // Dynamically import the ConfirmationModal component to keep the initial bundle size small
 const ConfirmationModal = dynamic(
@@ -237,6 +240,75 @@ const EmployeeTable: React.FC<EmployeeTableProps> = ({
     selectedEndDate,
   ]);
 
+  const handleExportToCSV = () => {
+    const headers = [
+      "Name",
+      "Email",
+      "Phone",
+      "Country",
+      "State",
+      "City",
+      "Address",
+      "Birth Date",
+      "Joining Date",
+      "Department",
+      "Role",
+      "Status",
+      "Gender",
+    ];
+
+    // Helper function to format null/undefined and date values
+    const formatValue = (value: any, isDate = false): string => {
+      if (!value) return "N/A";
+      if (isDate) {
+        try {
+          const date = new Date(value);
+          const day = String(date.getDate()).padStart(2, "0");
+          const month = String(date.getMonth() + 1).padStart(2, "0");
+          const year = date.getFullYear();
+          return `'${day}-${month}-${year}`; // Excel-safe date
+        } catch {
+          return "N/A";
+        }
+      }
+      return value;
+    };
+
+    // Build CSV rows from employees
+    const rows = filteredEmployees.map((emp) => [
+      formatValue(emp.fullName),
+      formatValue(emp.email),
+      formatValue(emp.phoneNumber),
+      formatValue(emp.country),
+      formatValue(emp.state),
+      formatValue(emp.city),
+      formatValue(emp.streetAddress),
+      formatValue(emp.birthDate, true),
+      formatValue(emp.dateOfJoining, true),
+      formatValue(emp.department?.name),
+      formatValue(emp.role),
+      formatValue(emp.status),
+      formatValue(emp.gender),
+    ]);
+
+    // Combine headers and rows into CSV string
+    const csvContent = [
+      headers.join(","), // first row: headers
+      ...rows.map((row) => row.map((cell) => `"${cell}"`).join(",")), // data rows
+    ].join("\n");
+
+    // Create Blob and trigger download
+    const blob = new Blob([csvContent], { type: "text/csv;charset=utf-8;" });
+    const url = URL.createObjectURL(blob);
+
+    const link = document.createElement("a");
+    link.href = url;
+    link.setAttribute("download", "employees.csv");
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+  };
+
   const firstColumns: TableColumn<EmployeeListItem>[] = [
     {
       name: "SNo.",
@@ -260,14 +332,17 @@ const EmployeeTable: React.FC<EmployeeTableProps> = ({
       <>
         <button
           onClick={() => handleEdit(employee)}
-          className="bg-green-500 rounded-lg p-2 whitespace-nowrap"
+          className="flex items-center gap-2 text-black rounded-lg px-3 py-2 text-sm transition duration-200"
         >
+          <Pencil size={16} />
           Edit
         </button>
+
         <button
           onClick={() => handleDeleteClick(employee)}
-          className="bg-red-500  rounded-lg p-2 ms-2 whitespace-nowrap"
+          className="flex items-center gap-2 text-black rounded-lg px-3 py-2 text-sm transition duration-200 ms-2"
         >
+          <Trash2 size={16} />
           Delete
         </button>
       </>
@@ -549,6 +624,17 @@ const EmployeeTable: React.FC<EmployeeTableProps> = ({
             </button>
           )}
         </div>
+      </div>
+      {/* Export Button */}
+      <div className="flex justify-start mb-4 px-3">
+        <button
+          onClick={handleExportToCSV}
+          style={{ backgroundColor: "#a7aeb4" }}
+          className="flex items-center gap-2 text-white px-4 py-2 rounded-md text-sm font-medium hover:opacity-90 transition duration-200"
+        >
+          Export It into CSV file
+          <FontAwesomeIcon icon={faDownload} />
+        </button>
       </div>
 
       {/* Data Table */}

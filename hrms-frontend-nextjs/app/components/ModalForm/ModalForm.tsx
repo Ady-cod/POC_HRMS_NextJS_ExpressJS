@@ -74,7 +74,6 @@ const ModalForm: React.FC<ModalFormProps> = ({
   const [stateCode, setStateCode] = useState<string>("");
   const [city, setCity] = useState<string>("");
   const [hasFetched, setHasFetched] = useState<boolean>(false);
-  const [role, setRole] = useState("");
 
   useEffect(() => {
     if (employeeData) {
@@ -84,7 +83,6 @@ const ModalForm: React.FC<ModalFormProps> = ({
       setState(employeeData.state ?? "");
       setStateCode(employeeData.stateCode ?? "");
       setCity(employeeData.city);
-      setRole(employeeData?.role || "");
     } else {
       setPhoneNumber("");
       setCountry("");
@@ -92,7 +90,6 @@ const ModalForm: React.FC<ModalFormProps> = ({
       setState("");
       setStateCode("");
       setCity("");
-      setRole("");
     }
   }, [employeeData]);
 
@@ -199,11 +196,6 @@ const ModalForm: React.FC<ModalFormProps> = ({
       // Display a toast message with the error and return early
       showToast("error", "Password check fail:", ["Passwords do not match!"]);
 
-      return;
-    }
-    if (!employeeInputData.role && !employeeData) {
-      setErrors((prev) => ({ ...prev, role: "Role is required" }));
-      showToast("error", "Validation Error:", ["Role is required"]);
       return;
     }
 
@@ -440,9 +432,9 @@ const ModalForm: React.FC<ModalFormProps> = ({
               <input
                 name="password"
                 type={showPassword ? "text" : "password"}
-                placeholder={`Password (6-16 characters)${
+                placeholder={`Password${
                   !employeeData ? "*" : ""
-                }`}
+                } (6-16 characters)`}
                 required={!employeeData}
                 className="input-field password"
               />
@@ -545,8 +537,21 @@ const ModalForm: React.FC<ModalFormProps> = ({
               )}
             </div>
           </div>
-          <div className="input-group">
-            <div className="input-wrapper">
+          {/* Row 3: Address fields using single CountryStateCitySelect */}
+          <div
+            className={`input-group address ${
+              errors?.streetAddress || errors?.country
+                ? "hasErrors"
+                : errors?.state || errors?.city
+                ? "mb-4"
+                : ""
+            }`}
+          >
+            <div
+              className={`input-wrapper ${
+                errors?.streetAddress ? "error" : ""
+              }`}
+            >
               <input
                 name="streetAddress"
                 type="text"
@@ -554,28 +559,37 @@ const ModalForm: React.FC<ModalFormProps> = ({
                 defaultValue={employeeData?.streetAddress ?? ""}
                 className="input-field"
               />
+              {errors?.streetAddress && (
+                <p
+                  className="error-message"
+                  data-tooltip={errors.streetAddress}
+                  onMouseEnter={handleTooltipPosition}
+                >
+                  {errors.streetAddress}
+                </p>
+              )}
             </div>
-            <div className="input-wrapper">
-              <CountryStateCitySelect
-                country={country}
-                setCountry={setCountry}
-                countryCode={countryCode}
-                setCountryCode={setCountryCode}
-                state={state}
-                setState={setState}
-                stateCode={stateCode}
-                setStateCode={setStateCode}
-                city={city}
-                setCity={setCity}
-                hasFetched={hasFetched}
-                sethasFetched={setHasFetched}
-                employeeData={employeeData}
-                errors={{
-                  country: errors?.country,
-                }}
-                handleTooltipPosition={handleTooltipPosition}
-              />
-            </div>
+            <CountryStateCitySelect
+              country={country}
+              setCountry={setCountry}
+              countryCode={countryCode}
+              setCountryCode={setCountryCode}
+              state={state}
+              setState={setState}
+              stateCode={stateCode}
+              setStateCode={setStateCode}
+              city={city}
+              setCity={setCity}
+              hasFetched={hasFetched}
+              sethasFetched={setHasFetched}
+              employeeData={employeeData}
+              errors={{
+                country: errors?.country,
+                state: errors?.state,
+                city: errors?.city,
+              }}
+              handleTooltipPosition={handleTooltipPosition}
+            />
           </div>
 
           {/* Row 4: Birth Date and Date of Joining */}
@@ -660,9 +674,7 @@ const ModalForm: React.FC<ModalFormProps> = ({
                 defaultValue={employeeData?.department?.name}
                 className="input-field"
               >
-                <option value="">
-                  Select Department{!employeeData && "*"}
-                </option>
+                <option value="">Department{!employeeData && "*"}</option>
                 <option value="HR">HR</option>
                 <option value="Web Development">Web Dev</option>
                 <option value="UI/UX">UI/UX</option>
@@ -685,10 +697,10 @@ const ModalForm: React.FC<ModalFormProps> = ({
               <select
                 name="role"
                 required={!employeeData}
-                defaultValue={employeeData?.role || ""}
+                defaultValue={employeeData?.role}
                 className="input-field"
               >
-                <option value="">Select Role{!employeeData && "*"}</option>
+                <option value="">Role{!employeeData && "*"}</option>
                 <option value="EMPLOYEE">EMPLOYEE</option>
                 <option value="INTERN">INTERN</option>
                 <option value="HR_INTERN">HR INTERN</option>

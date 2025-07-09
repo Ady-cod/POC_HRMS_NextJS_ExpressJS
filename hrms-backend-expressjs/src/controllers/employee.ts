@@ -75,7 +75,7 @@ export const createEmployee = async (
     const validatedData: CreateEmployeeInput =
       await createEmployeeSchema.parseAsync(req.body);
 
-    const { departmentName, password, role, ...employeeData } = validatedData;
+    const { departmentName, password, ...employeeData } = validatedData;
 
     // Hash the password
     const hashedPassword = await hashPassword(password);
@@ -100,7 +100,6 @@ export const createEmployee = async (
     const newEmployeeData: Prisma.EmployeeCreateInput = {
       ...employeeData,
       password: hashedPassword,
-      role, // Include the role here
       department: { connect: { id: department.id } },
     };
 

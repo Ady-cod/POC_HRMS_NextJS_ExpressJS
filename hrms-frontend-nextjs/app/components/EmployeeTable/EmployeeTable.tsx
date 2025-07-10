@@ -356,30 +356,30 @@ const EmployeeTable: React.FC<EmployeeTableProps> = ({
       sortable: true,
     },
   ];
-
   const lastColumn: TableColumn<EmployeeListItem> = {
     name: "Action",
     cell: (employee) => (
-      <>
+      <div className="flex items-center gap-2 whitespace-nowrap">
+        {/* Edit Button */}
         <button
           onClick={() => handleEdit(employee)}
-          className="flex items-center gap-2 text-black rounded-lg px-3 py-2 text-sm transition duration-200"
+          className="flex items-center gap-1 text-sm text-gray-700 hover:text-black transition"
         >
-          <Pencil size={16} />
-          Edit
+          <Pencil size={18} />
+          <span>Edit</span>
         </button>
 
+        {/* Delete Button */}
         <button
           onClick={() => handleDeleteClick(employee)}
-          className="flex items-center gap-2 text-black rounded-lg px-3 py-2 text-sm transition duration-200 ms-2"
+          className="flex items-center gap-1 text-sm text-gray-700 hover:text-black transition"
         >
-          <Trash2 size={16} />
-          Delete
+          <Trash2 size={18} />
+          <span>Delete</span>
         </button>
-      </>
+      </div>
     ),
   };
-
   const columnSections: TableColumn<EmployeeListItem>[][] = useMemo(
     () => [
       [

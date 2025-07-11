@@ -3,25 +3,35 @@
 import { useEffect, useState } from "react";
 import { Card, CardContent } from "@/components/ui/card";
 import { Progress } from "@/components/ui/progress";
-import { getAllEmployees } from "@/actions/employee";
-import { showToast } from "@/utils/toastHelper";
+import { EmployeeListItem } from "@/types/types";
 
 type TransformedEmployeeData = {
   name: string;
   value: number;
 };
 
-const EmployeeDistributionChart = () => {
+interface EmployeeDistributionChartProps {
+  employees: EmployeeListItem[];
+  hasError?: boolean;
+}
+
+const EmployeeDistributionChart = ({ employees, hasError }: EmployeeDistributionChartProps) => {
   const [employeeData, setEmployeeData] = useState<TransformedEmployeeData[]>(
     []
   );
   const [loading, setLoading] = useState<boolean>(true);
-  const [error, setError] = useState<string>("");
+  const [displayError, setDisplayError] = useState<string>("");
 
   useEffect(() => {
-    const fetchEmployeeData = async () => {
+    const processEmployeeData = async () => {
       try {
-        const employees = await getAllEmployees();
+        if (hasError) {
+          // Don't show toast - parent handles error display
+          setDisplayError("Unable to load data");
+          setLoading(false);
+          return;
+        }
+
         const departmentCounts: { [key: string]: number } = {};
         employees.forEach((emp) => {
           const deptName = emp.department?.name || "Unknown";
@@ -38,28 +48,35 @@ const EmployeeDistributionChart = () => {
         setLoading(false);
       } catch (err) {
         console.error(err);
-        setError("Error fetching employee data");
-        showToast("error", "Error!", [`Error fetching employee data: ${err}`]);
+        setDisplayError("Error processing employee data");
+        // Don't show toast - parent handles error display
         setLoading(false);
       }
     };
 
-    fetchEmployeeData();
-  }, []);
+    processEmployeeData();
+  }, [employees, hasError]);
 
   if (loading) {
     return (
-      <div className="text-center">
-        <p>Loading...</p>
-      </div>
+      <Card className="p-6 bg-black/10 shadow-none min-h-full">
+        <CardContent className="p-0 flex items-center justify-center min-h-full">
+          <p>Loading...</p>
+        </CardContent>
+      </Card>
     );
   }
 
-  if (error) {
+  if (displayError) {
     return (
-      <div className="text-center text-red-500">
-        <p>{error}</p>
-      </div>
+      <Card className="p-6 bg-black/10 shadow-none min-h-full">
+        <CardContent className="p-0 flex items-center justify-center min-h-full text-gray-500">
+          <div className="text-center">
+            <div className="text-4xl mb-2">👥</div>
+            <p className="text-sm">Employee distribution temporarily unavailable</p>
+          </div>
+        </CardContent>
+      </Card>
     );
   }
 

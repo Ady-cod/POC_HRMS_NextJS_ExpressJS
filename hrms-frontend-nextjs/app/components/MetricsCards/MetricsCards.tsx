@@ -4,8 +4,12 @@ import { useEffect, useState } from "react";
 import { Card, CardContent } from "@/components/ui/card";
 import { ResponsiveContainer, AreaChart, Area, XAxis, YAxis } from "recharts";
 import { FaArrowDown, FaArrowUp } from "react-icons/fa";
-import { getAllEmployees } from "@/actions/employee";
-import { showToast } from "@/utils/toastHelper";
+import { EmployeeListItem } from "@/types/types";
+
+interface MetricsCardsProps {
+  employees: EmployeeListItem[];
+  hasError?: boolean;
+}
 
 const defaultStats = [
   {
@@ -50,14 +54,19 @@ const defaultStats = [
   },
 ];
 
-const MetricsCards = () => {
+const MetricsCards = ({ employees, hasError }: MetricsCardsProps) => {
   const [stats, setStats] = useState(defaultStats);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    async function fetchEmployeeStats() {
+    async function processEmployeeStats() {
       try {
-        const employees = await getAllEmployees();
+        if (hasError) {
+          // Don't show toast - parent handles error display
+          // Set loading to false to show placeholder state
+          setLoading(false);
+          return;
+        }
 
         const chartData = employees
           .filter((emp) => emp.dateOfJoining)
@@ -85,80 +94,89 @@ const MetricsCards = () => {
           )
         );
       } catch (err) {
-        showToast("error", "Error!", [
-          `Unable to fetch employee stats: ${err}`,
-        ]);
-        console.error("Error fetching employee stats", err);
+        console.error("Error processing employee stats", err);
+        // Don't show toast - parent handles error display
       } finally {
         setLoading(false);
       }
     }
-    fetchEmployeeStats();
-  }, []);
+
+    processEmployeeStats();
+  }, [employees, hasError]);
 
   return (
     <Card className="grid grid-cols-1 md:grid-cols-3 gap-4 border p-6 shadow-none bg-black/10 flex-1">
-      {stats.map((stat, index) => (
-        <Card key={index} className="p-2 h-36 shadow-none">
-          <CardContent className="-p-2">
-            <div className="flex items-center justify-between mb-1">
-              <div className="text-xs text-gray-500">
+      {hasError ? (
+        // Error placeholder state
+        <div className="col-span-3 flex items-center justify-center py-8 text-gray-500">
+          <div className="text-center">
+            <div className="text-4xl mb-2">📊</div>
+            <p className="text-sm">Employee metrics temporarily unavailable</p>
+          </div>
+        </div>
+      ) : (
+        stats.map((stat, index) => (
+          <Card key={index} className="p-2 h-36 shadow-none">
+            <CardContent className="-p-2">
+              <div className="flex items-center justify-between mb-1">
+                <div className="text-xs text-gray-500">
+                  {loading && stat.label === "Employees"
+                    ? "Loading..."
+                    : stat.change}
+                </div>
+                <div
+                  className={`text-xs ${
+                    stat.direction === "up" ? "text-green-500" : "text-red-500"
+                  }`}
+                >
+                  {stat.direction === "up" ? <FaArrowUp /> : <FaArrowDown />}
+                </div>
+              </div>
+              <div className="text-sm text-gray-500">{stat.label}</div>
+              <div className="text-xl font-bold">
                 {loading && stat.label === "Employees"
                   ? "Loading..."
-                  : stat.change}
+                  : stat.value}
               </div>
-              <div
-                className={`text-xs ${
-                  stat.direction === "up" ? "text-green-500" : "text-red-500"
-                }`}
-              >
-                {stat.direction === "up" ? <FaArrowUp /> : <FaArrowDown />}
+              <div className="h-16">
+                <ResponsiveContainer width="100%" height="100%">
+                  <AreaChart data={stat.chartData}>
+                    <defs>
+                      <linearGradient
+                        id={`colorUv-${index}`}
+                        x1="0"
+                        y1="0"
+                        x2="0"
+                        y2="1"
+                      >
+                        <stop
+                          offset="5%"
+                          stopColor={stat.chartColor}
+                          stopOpacity={0.8}
+                        />
+                        <stop
+                          offset="95%"
+                          stopColor={stat.chartColor}
+                          stopOpacity={0}
+                        />
+                      </linearGradient>
+                    </defs>
+                    <XAxis dataKey="name" hide />
+                    <YAxis hide />
+                    <Area
+                      type="monotone"
+                      dataKey="value"
+                      stroke={stat.chartColor}
+                      fillOpacity={1}
+                      fill={`url(#colorUv-${index})`}
+                    />
+                  </AreaChart>
+                </ResponsiveContainer>
               </div>
-            </div>
-            <div className="text-sm text-gray-500">{stat.label}</div>
-            <div className="text-xl font-bold">
-              {loading && stat.label === "Employees"
-                ? "Loading..."
-                : stat.value}
-            </div>
-            <div className="h-16">
-              <ResponsiveContainer width="100%" height="100%">
-                <AreaChart data={stat.chartData}>
-                  <defs>
-                    <linearGradient
-                      id={`colorUv-${index}`}
-                      x1="0"
-                      y1="0"
-                      x2="0"
-                      y2="1"
-                    >
-                      <stop
-                        offset="5%"
-                        stopColor={stat.chartColor}
-                        stopOpacity={0.8}
-                      />
-                      <stop
-                        offset="95%"
-                        stopColor={stat.chartColor}
-                        stopOpacity={0}
-                      />
-                    </linearGradient>
-                  </defs>
-                  <XAxis dataKey="name" hide />
-                  <YAxis hide />
-                  <Area
-                    type="monotone"
-                    dataKey="value"
-                    stroke={stat.chartColor}
-                    fillOpacity={1}
-                    fill={`url(#colorUv-${index})`}
-                  />
-                </AreaChart>
-              </ResponsiveContainer>
-            </div>
-          </CardContent>
-        </Card>
-      ))}
+            </CardContent>
+          </Card>
+        ))
+      )}
     </Card>
   );
 };

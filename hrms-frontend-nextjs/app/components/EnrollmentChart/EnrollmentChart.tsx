@@ -19,6 +19,7 @@ import {
 } from "recharts";
 import { format, parseISO, parse } from "date-fns";
 import { EmployeeListItem } from "@/types/types";
+import { showToast } from "@/utils/toastHelper";
 
 interface EnrollmentChartProps {
   employees: EmployeeListItem[];
@@ -29,12 +30,14 @@ export default function EnrollmentChart({ employees, hasError }: EnrollmentChart
   const [departments, setDepartments] = useState<string[]>([]);
   const [selectedDept, setSelectedDept] = useState<string>("all");
   const [loading, setLoading] = useState<boolean>(true);
+  const [displayError, setDisplayError] = useState<string>("");
 
   useEffect(() => {
     async function processData() {
       try {
         if (hasError) {
           // Don't show toast - parent handles error display
+          setDisplayError("Unable to load employee data");
           setLoading(false);
           return;
         }
@@ -46,7 +49,11 @@ export default function EnrollmentChart({ employees, hasError }: EnrollmentChart
         setLoading(false);
       } catch (processError) {
         console.error("Error processing data:", processError);
-        // Don't show toast - parent handles error display
+        setDisplayError("Error processing employee data");
+        // Show toast for component-specific processing errors (not employee fetch errors)
+        showToast("error", "Enrollment Chart Error", [
+          `Unable to process enrollment data: ${processError}`,
+        ]);
         setLoading(false);
       }
     }
@@ -55,39 +62,48 @@ export default function EnrollmentChart({ employees, hasError }: EnrollmentChart
   }, [employees, hasError]);
 
   const getChartData = () => {
-    if (selectedDept === "all") {
-      const deptMap: Record<string, number> = {};
-      employees.forEach((emp) => {
-        const dept = emp.department?.name || "Unknown";
-        deptMap[dept] = (deptMap[dept] || 0) + 1;
-      });
-
-      return Object.entries(deptMap).map(([department, employees]) => ({
-        department,
-        employees,
-      }));
-    } else {
-      const monthMap: Record<string, number> = {};
-      employees
-        .filter((emp) => emp.department?.name === selectedDept)
-        .forEach((emp) => {
-          const date = parseISO(emp.dateOfJoining);
-          const month = format(date, "MMM yyyy");
-          monthMap[month] = (monthMap[month] || 0) + 1;
+    try {
+      if (selectedDept === "all") {
+        const deptMap: Record<string, number> = {};
+        employees.forEach((emp) => {
+          const dept = emp.department?.name || "Unknown";
+          deptMap[dept] = (deptMap[dept] || 0) + 1;
         });
 
-      // Sort entries chronologically
-      return Object.entries(monthMap)
-        .map(([month, employees]) => ({
-          month,
-          employees,
-          sortDate: parse(month, "MMM yyyy", new Date()), // Convert "MMM yyyy" to Date for sorting
-        }))
-        .sort((a, b) => a.sortDate.getTime() - b.sortDate.getTime())
-        .map(({ month, employees }) => ({
-          month,
+        return Object.entries(deptMap).map(([department, employees]) => ({
+          department,
           employees,
         }));
+      } else {
+        const monthMap: Record<string, number> = {};
+        employees
+          .filter((emp) => emp.department?.name === selectedDept)
+          .forEach((emp) => {
+            const date = parseISO(emp.dateOfJoining);
+            const month = format(date, "MMM yyyy");
+            monthMap[month] = (monthMap[month] || 0) + 1;
+          });
+
+        // Sort entries chronologically
+        return Object.entries(monthMap)
+          .map(([month, employees]) => ({
+            month,
+            employees,
+            sortDate: parse(month, "MMM yyyy", new Date()), // Convert "MMM yyyy" to Date for sorting
+          }))
+          .sort((a, b) => a.sortDate.getTime() - b.sortDate.getTime())
+          .map(({ month, employees }) => ({
+            month,
+            employees,
+          }));
+      }
+    } catch (error) {
+      console.error("Error generating chart data:", error);
+      setDisplayError("Error generating chart data");
+      showToast("error", "Enrollment Chart Data Error", [
+        `Unable to generate chart data: ${error}`,
+      ]);
+      return []; // Return empty array as fallback
     }
   };
 
@@ -100,11 +116,14 @@ export default function EnrollmentChart({ employees, hasError }: EnrollmentChart
         <span className="text-sm text-gray-500">Joined Stats</span>
       </div>
 
-      {hasError ? (
+      {displayError ? (
         <div className="w-full flex-1 flex items-center justify-center text-gray-500">
           <div className="text-center">
-            <div className="text-4xl mb-2">📈</div>
-            <p className="text-sm">Enrollment trends temporarily unavailable</p>
+            <div className="text-4xl mb-3">📈</div>
+            <p className="text-sm text-red-800 bg-red-50 border border-red-200 rounded-lg p-4 mb-6">
+              Enrollment trends temporarily unavailable: <br />
+              <span className="font-semibold">{displayError}</span>
+            </p>
           </div>
         </div>
       ) : (

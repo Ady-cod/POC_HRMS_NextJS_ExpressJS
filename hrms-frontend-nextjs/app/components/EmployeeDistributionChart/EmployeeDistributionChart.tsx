@@ -4,6 +4,7 @@ import { useEffect, useState } from "react";
 import { Card, CardContent } from "@/components/ui/card";
 import { Progress } from "@/components/ui/progress";
 import { EmployeeListItem } from "@/types/types";
+import { showToast } from "@/utils/toastHelper";
 
 type TransformedEmployeeData = {
   name: string;
@@ -27,7 +28,7 @@ const EmployeeDistributionChart = ({ employees, hasError }: EmployeeDistribution
       try {
         if (hasError) {
           // Don't show toast - parent handles error display
-          setDisplayError("Unable to load data");
+          setDisplayError("Unable to load employee data");
           setLoading(false);
           return;
         }
@@ -49,7 +50,10 @@ const EmployeeDistributionChart = ({ employees, hasError }: EmployeeDistribution
       } catch (err) {
         console.error(err);
         setDisplayError("Error processing employee data");
-        // Don't show toast - parent handles error display
+        // Show toast for component-specific processing errors (not employee fetch errors)
+        showToast("error", "Distribution Chart Error", [
+          `Unable to process employee distribution data: ${err}`,
+        ]);
         setLoading(false);
       }
     };
@@ -72,8 +76,11 @@ const EmployeeDistributionChart = ({ employees, hasError }: EmployeeDistribution
       <Card className="p-6 bg-black/10 shadow-none min-h-full">
         <CardContent className="p-0 flex items-center justify-center min-h-full text-gray-500">
           <div className="text-center">
-            <div className="text-4xl mb-2">👥</div>
-            <p className="text-sm">Employee distribution temporarily unavailable</p>
+            <div className="text-4xl mb-3">👥</div>
+            <p className="text-sm text-red-800 bg-red-50 border border-red-200 rounded-lg p-4 mb-6">
+              Employee distribution temporarily unavailable: <br />
+              <span className="font-semibold">{displayError}</span>
+            </p>
           </div>
         </CardContent>
       </Card>

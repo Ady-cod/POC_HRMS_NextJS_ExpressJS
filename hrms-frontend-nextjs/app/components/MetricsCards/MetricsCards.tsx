@@ -5,6 +5,7 @@ import { Card, CardContent } from "@/components/ui/card";
 import { ResponsiveContainer, AreaChart, Area, XAxis, YAxis } from "recharts";
 import { FaArrowDown, FaArrowUp } from "react-icons/fa";
 import { EmployeeListItem } from "@/types/types";
+import { showToast } from "@/utils/toastHelper";
 
 interface MetricsCardsProps {
   employees: EmployeeListItem[];
@@ -57,12 +58,15 @@ const defaultStats = [
 const MetricsCards = ({ employees, hasError }: MetricsCardsProps) => {
   const [stats, setStats] = useState(defaultStats);
   const [loading, setLoading] = useState(true);
+  const [displayError, setDisplayError] = useState<string>("");
 
   useEffect(() => {
     async function processEmployeeStats() {
       try {
         if (hasError) {
           // Don't show toast - parent handles error display
+          setDisplayError("Unable to load employee data");
+
           // Set loading to false to show placeholder state
           setLoading(false);
           return;
@@ -95,7 +99,11 @@ const MetricsCards = ({ employees, hasError }: MetricsCardsProps) => {
         );
       } catch (err) {
         console.error("Error processing employee stats", err);
-        // Don't show toast - parent handles error display
+        setDisplayError("Error processing employee data");
+        // Show toast for component-specific processing errors (not employee fetch errors)
+        showToast("error", "Metrics Processing Error", [
+          `Unable to process employee metrics: ${err}`,
+        ]);
       } finally {
         setLoading(false);
       }
@@ -106,12 +114,15 @@ const MetricsCards = ({ employees, hasError }: MetricsCardsProps) => {
 
   return (
     <Card className="grid grid-cols-1 md:grid-cols-3 gap-4 border p-6 shadow-none bg-black/10 flex-1">
-      {hasError ? (
+      {displayError ? (
         // Error placeholder state
         <div className="col-span-3 flex items-center justify-center py-8 text-gray-500">
           <div className="text-center">
-            <div className="text-4xl mb-2">📊</div>
-            <p className="text-sm">Employee metrics temporarily unavailable</p>
+            <div className="text-4xl mb-3">📊</div>
+            <p className="text-sm text-red-800 bg-red-50 border border-red-200 rounded-lg p-4 mb-6">
+              Employee metrics temporarily unavailable: <br/>
+              <span className="font-semibold">{displayError}</span>
+            </p>
           </div>
         </div>
       ) : (

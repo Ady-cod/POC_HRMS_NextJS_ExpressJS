@@ -18,29 +18,37 @@ import {
   ResponsiveContainer,
 } from "recharts";
 import { format, parseISO, parse, getYear } from "date-fns";
-import { getAllEmployees } from "@/actions/employee";
 import { EmployeeListItem } from "@/types/types";
 import { showToast } from "@/utils/toastHelper";
 
-export default function EnrollmentChart() {
-  const [employees, setEmployees] = useState<EmployeeListItem[]>([]);
+interface EnrollmentChartProps {
+  employees: EmployeeListItem[];
+  hasError?: boolean;
+}
+
+export default function EnrollmentChart({ employees, hasError }: EnrollmentChartProps) {
   const [departments, setDepartments] = useState<string[]>([]);
   const [years, setYears] = useState<number[]>([]);
   const [selectedDept, setSelectedDept] = useState<string>("all");
   const [selectedYear, setSelectedYear] = useState<number | "all">("all");
   const [loading, setLoading] = useState<boolean>(true);
+  const [displayError, setDisplayError] = useState<string>("");
 
   useEffect(() => {
-    async function fetchData() {
+    async function processData() {
       try {
-        setLoading(true);
-        const data = await getAllEmployees();
-        setEmployees(data);
+        if (hasError) {
+          // Don't show toast - parent handles error display
+          setDisplayError("Unable to load employee data");
+          setLoading(false);
+          return;
+        }
 
         const deptNames = Array.from(
           new Set(data.map((emp) => emp.department?.name || "Unknown"))
         );
         setDepartments(deptNames);
+        setLoading(false);
 
         // Extract unique years from dateOfJoining
         const yearSet = new Set<number>();
@@ -53,18 +61,19 @@ export default function EnrollmentChart() {
         const sortedYears = Array.from(yearSet).sort((a, b) => b - a);
         setYears(sortedYears);
         setSelectedYear("all");
-      } catch (error) {
-        console.error("Error fetching data:", error);
-        showToast("error", "Error!", [
-          `Unable to fetch employee data: ${error}`,
+      } catch (processError) {
+        console.error("Error processing data:", processError);
+        setDisplayError("Error processing employee data");
+        // Show toast for component-specific processing errors (not employee fetch errors)
+        showToast("error", "Enrollment Chart Error", [
+          `Unable to process enrollment data: ${processError}`,
         ]);
-      } finally {
         setLoading(false);
       }
     }
 
-    fetchData();
-  }, []);
+    processData();
+  }, [employees, hasError]);
 
   const getChartData = () => {
     if (selectedDept === "all") {
@@ -99,14 +108,26 @@ export default function EnrollmentChart() {
           monthMap[month] = (monthMap[month] || 0) + 1;
         });
 
-      return Object.entries(monthMap)
-        .map(([month, employees]) => ({
-          month,
-          employees,
-          sortDate: parse(month, "MMM yyyy", new Date()),
-        }))
-        .sort((a, b) => a.sortDate.getTime() - b.sortDate.getTime())
-        .map(({ month, employees }) => ({ month, employees }));
+        // Sort entries chronologically
+        return Object.entries(monthMap)
+          .map(([month, employees]) => ({
+            month,
+            employees,
+            sortDate: parse(month, "MMM yyyy", new Date()), // Convert "MMM yyyy" to Date for sorting
+          }))
+          .sort((a, b) => a.sortDate.getTime() - b.sortDate.getTime())
+          .map(({ month, employees }) => ({
+            month,
+            employees,
+          }));
+      }
+    } catch (error) {
+      console.error("Error generating chart data:", error);
+      setDisplayError("Error generating chart data");
+      showToast("error", "Enrollment Chart Data Error", [
+        `Unable to generate chart data: ${error}`,
+      ]);
+      return []; // Return empty array as fallback
     }
   };
   
@@ -138,24 +159,36 @@ export default function EnrollmentChart() {
         </Select>
       </div>
 
-      <div className="mb-4">
-        <Select
-          onValueChange={(val) => setSelectedDept(val)}
-          defaultValue="all"
-        >
-          <SelectTrigger className="w-60 border-black">
-            <SelectValue placeholder="Select Department" />
-          </SelectTrigger>
-          <SelectContent>
-            <SelectItem value="all">Show All</SelectItem>
-            {departments.map((dept) => (
-              <SelectItem key={dept} value={dept}>
-                {dept}
-              </SelectItem>
-            ))}
-          </SelectContent>
-        </Select>
-      </div>
+      {displayError ? (
+        <div className="w-full flex-1 flex items-center justify-center text-gray-500">
+          <div className="text-center">
+            <div className="text-4xl mb-3">📈</div>
+            <p className="text-sm text-red-800 bg-red-50 border border-red-200 rounded-lg p-4 mb-6">
+              Enrollment trends temporarily unavailable: <br />
+              <span className="font-semibold">{displayError}</span>
+            </p>
+          </div>
+        </div>
+      ) : (
+        <>
+          <div className="mb-4">
+            <Select
+              onValueChange={(val) => setSelectedDept(val)}
+              defaultValue="all"
+            >
+              <SelectTrigger className="w-60 border-black">
+                <SelectValue placeholder="Select Department" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="all">Show All</SelectItem>
+                {departments.map((dept) => (
+                  <SelectItem key={dept} value={dept}>
+                    {dept}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+          </div>
 
       {loading ? (
         <div className="w-full flex-1 flex items-center justify-center text-gray-600">

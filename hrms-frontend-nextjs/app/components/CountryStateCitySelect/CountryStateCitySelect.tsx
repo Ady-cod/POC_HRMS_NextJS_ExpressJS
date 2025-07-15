@@ -323,8 +323,8 @@ const CountryStateCitySelect: React.FC<Props> = ({
         borderColor: state.isFocused ? "black" : "#9ca3af",
       },
       fontSize: "14.5px",
-      backdropFilter: "none", // Explicitly remove any blur
-      WebkitBackdropFilter: "none", // For Safari
+      backdropFilter: "none",
+      WebkitBackdropFilter: "none",
       height: "100%",
       alignContent: "center",
     }),
@@ -333,14 +333,14 @@ const CountryStateCitySelect: React.FC<Props> = ({
       ...provided,
       zIndex: 9999,
       backgroundColor: "white",
-      borderRadius: ".6rem",
-      fontSize: "14.5px",
-      backdropFilter: "none", // Explicitly remove any blur
-      position: "absolute", // Ensure proper positioning
+      borderRadius: "4px", // Match input-field border-radius
+      fontSize: "14px", // Match input-field font-size
+      backdropFilter: "none",
+      position: "absolute",
       width: "100%",
-      transform: "translate3d(0, 0, 0)", // Force GPU acceleration
+      transform: "translate3d(0, 0, 0)",
       WebkitTransform: "translate3d(0, 0, 0)",
-      isolation: "isolate", // Create new stacking context
+      isolation: "isolate",
     }),
 
     menuList: (provided) => ({
@@ -349,10 +349,10 @@ const CountryStateCitySelect: React.FC<Props> = ({
       fontFamily: "sans-serif",
       fontWeight: "0",
       padding: "0",
-      fontSize: "14.5px",
+      fontSize: "14px", // Match input-field font-size
       maxHeight: "15rem",
       color: "black",
-      borderRadius: ".6rem",
+      borderRadius: "4px", // Match input-field border-radius
       backgorundColor: "white",
       opacity: "100%",
       filter: "none",
@@ -392,7 +392,30 @@ const CountryStateCitySelect: React.FC<Props> = ({
     placeholder: (provided) => ({
       ...provided,
       color: "#6b7280",
-      fontSize: "14.5px",
+      fontSize: "14px", // Match input-field font-size
+    }),
+
+    valueContainer: (provided) => ({
+      ...provided,
+      padding: "10px 10px", // Match input-field padding exactly (top/bottom left/right)
+      margin: "0",
+      lineHeight: "20px", // Match expected line height for 14px font
+    }),
+
+    singleValue: (provided) => ({
+      ...provided,
+      fontSize: "14px",
+      lineHeight: "20px",
+      margin: "0",
+      color: "#000", // Match input text color
+    }),
+
+    input: (provided) => ({
+      ...provided,
+      fontSize: "14px",
+      lineHeight: "20px",
+      margin: "0",
+      padding: "0",
     }),
     dropdownIndicator: (provided) => ({
       ...provided,
@@ -412,46 +435,36 @@ const CountryStateCitySelect: React.FC<Props> = ({
     }),
   };
 
+    // Render all fields with internal layout management
   return (
-    <div
-      className={`flex flex-col ${
-        errors?.country ? "max-[405px]:gap-[10px] gap-[40px]" : "gap-[10px]"
-      }`}
-    >
-      <div className={`flex gap-[10px] max-[405px]:flex-col flex-row w-full`}>
-        {/* Country Select */}
-        <div
-          className={`input-wrapper ${errors?.country ? "error" : ""}`}
-          onClick={handleCountryError}
-        >
-          <Select
-            options={countries}
-            styles={customStyles}
-            className="h-full"
-            value={
-              country
-                ? {
-                    label: country,
-                    value: countryCode,
-                  }
-                : null
-            }
-            onChange={handleCountryChange}
-            placeholder="Select a country*"
-            isLoading={isLoading.countries}
-            isDisabled={isLoading.countries || !hasFetched}
-          />
-          {errors?.country && (
-            <p
-              className="error-message"
-              data-tooltip={errors.country}
-              onMouseEnter={handleTooltipPosition}
-            >
-              {errors.country}
-            </p>
-          )}
-        </div>
+    <div className="country-state-city-layout">
+      {/* Country field - will be positioned alongside street */}
+      <div 
+        className={`input-wrapper ${errors?.country ? "error" : ""}`}
+        onClick={handleCountryError}
+      >
+        <Select
+          options={countries}
+          styles={customStyles}
+          value={country ? { label: country, value: countryCode } : null}
+          onChange={handleCountryChange}
+          placeholder="Country*"
+          isLoading={isLoading.countries}
+          isDisabled={isLoading.countries || !hasFetched}
+        />
+        {errors?.country && (
+          <p
+            className="error-message"
+            data-tooltip={errors.country}
+            onMouseEnter={handleTooltipPosition}
+          >
+            {errors.country}
+          </p>
+        )}
+      </div>
 
+      {/* State and City row */}
+      <div className={`state-city-row ${errors?.state || errors?.city ? "hasErrors" : ""}`}>
         {/* State Select */}
         <div
           className={`input-wrapper ${errors?.state ? "error" : ""}`}
@@ -460,17 +473,9 @@ const CountryStateCitySelect: React.FC<Props> = ({
           <Select
             options={statesList}
             styles={customStyles}
-            className="h-full"
             onChange={handleStateChange}
-            value={
-              state
-                ? {
-                    label: state,
-                    value: stateCode,
-                  }
-                : null
-            }
-            placeholder="Select a state*"
+            value={state ? { label: state, value: stateCode } : null}
+            placeholder="State*"
             isLoading={isLoading.states}
             isDisabled={isLoading.states || statesList.length === 0}
           />
@@ -484,39 +489,31 @@ const CountryStateCitySelect: React.FC<Props> = ({
             </p>
           )}
         </div>
-      </div>
 
-      {/* City Select */}
-      <div
-        className={`input-wrapper ${errors?.city ? "error mb-[20px]" : ""}`}
-        onClick={handleCityError}
-      >
-        <Select
-          options={citiesList}
-          styles={customStyles}
-          className="h-full"
-          onChange={handleCityChange}
-          placeholder="Select a city*"
-          value={
-            city
-              ? {
-                  label: city,
-                  value: city,
-                }
-              : null
-          }
-          isLoading={isLoading.cities}
-          isDisabled={isLoading.cities || citiesList.length === 0}
-        />
-        {errors?.city && (
-          <p
-            className="error-message"
-            data-tooltip={errors.city}
-            onMouseEnter={handleTooltipPosition}
-          >
-            {errors.city}
-          </p>
-        )}
+        {/* City Select */}
+        <div
+          className={`input-wrapper ${errors?.city ? "error" : ""}`}
+          onClick={handleCityError}
+        >
+          <Select
+            options={citiesList}
+            styles={customStyles}
+            onChange={handleCityChange}
+            placeholder="City*"
+            value={city ? { label: city, value: city } : null}
+            isLoading={isLoading.cities}
+            isDisabled={isLoading.cities || citiesList.length === 0}
+          />
+          {errors?.city && (
+            <p
+              className="error-message"
+              data-tooltip={errors.city}
+              onMouseEnter={handleTooltipPosition}
+            >
+              {errors.city}
+            </p>
+          )}
+        </div>
       </div>
     </div>
   );

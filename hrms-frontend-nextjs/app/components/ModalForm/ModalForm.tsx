@@ -405,8 +405,8 @@ const ModalForm: React.FC<ModalFormProps> = ({
               errors?.email
                 ? "hasErrors"
                 : errors?.confirmPassword
-                  ? "mb-5"
-                  : ""
+                ? "mb-5"
+                : ""
             }`}
           >
             <div className={`input-wrapper ${errors?.email ? "error" : ""}`}>
@@ -432,9 +432,9 @@ const ModalForm: React.FC<ModalFormProps> = ({
               <input
                 name="password"
                 type={showPassword ? "text" : "password"}
-                placeholder={`Password (6-16 characters)${
+                placeholder={`Password${
                   !employeeData ? "*" : ""
-                }`}
+                } (6-16 characters)`}
                 required={!employeeData}
                 className="input-field password"
               />
@@ -461,7 +461,9 @@ const ModalForm: React.FC<ModalFormProps> = ({
               )}
             </div>
             <div
-              className={`input-wrapper ${errors?.confirmPassword ? "error" : ""}`}
+              className={`input-wrapper ${
+                errors?.confirmPassword ? "error" : ""
+              }`}
             >
               <input
                 ref={confirmPasswordRef}
@@ -483,14 +485,14 @@ const ModalForm: React.FC<ModalFormProps> = ({
           </div>
 
           <h3 className="section-title">Personal Information</h3>
+
+          {/* Row 1: Full Name and Phone Number */}
           <div
             className={`input-group ${
               errors?.fullName || errors?.phoneNumber ? "hasErrors" : ""
             }`}
           >
-            <div
-              className={`input-wrapper ${errors?.fullName ? "error" : ""}`}
-            >
+            <div className={`input-wrapper ${errors?.fullName ? "error" : ""}`}>
               <input
                 name="fullName"
                 type="text"
@@ -509,6 +511,7 @@ const ModalForm: React.FC<ModalFormProps> = ({
                 </p>
               )}
             </div>
+
             <div
               className={`input-wrapper ${errors?.phoneNumber ? "error" : ""}`}
             >
@@ -534,13 +537,20 @@ const ModalForm: React.FC<ModalFormProps> = ({
               )}
             </div>
           </div>
+          {/* Row 3: Address fields using single CountryStateCitySelect */}
           <div
-            className={`input-group ${
-              errors?.streetAddress || errors?.birthDate ? "hasErrors" : ""
+            className={`input-group address ${
+              errors?.streetAddress || errors?.country
+                ? "hasErrors"
+                : errors?.state || errors?.city
+                ? "mb-4"
+                : ""
             }`}
           >
             <div
-              className={`input-wrapper ${errors?.streetAddress ? "error" : ""}`}
+              className={`input-wrapper ${
+                errors?.streetAddress ? "error" : ""
+              }`}
             >
               <input
                 name="streetAddress"
@@ -559,6 +569,35 @@ const ModalForm: React.FC<ModalFormProps> = ({
                 </p>
               )}
             </div>
+            <CountryStateCitySelect
+              country={country}
+              setCountry={setCountry}
+              countryCode={countryCode}
+              setCountryCode={setCountryCode}
+              state={state}
+              setState={setState}
+              stateCode={stateCode}
+              setStateCode={setStateCode}
+              city={city}
+              setCity={setCity}
+              hasFetched={hasFetched}
+              sethasFetched={setHasFetched}
+              employeeData={employeeData}
+              errors={{
+                country: errors?.country,
+                state: errors?.state,
+                city: errors?.city,
+              }}
+              handleTooltipPosition={handleTooltipPosition}
+            />
+          </div>
+
+          {/* Row 4: Birth Date and Date of Joining */}
+          <div
+            className={`input-group ${
+              errors?.birthDate || errors?.dateOfJoining ? "hasErrors" : ""
+            }`}
+          >
             <div
               className={`input-wrapper ${errors?.birthDate ? "error" : ""}`}
             >
@@ -587,14 +626,47 @@ const ModalForm: React.FC<ModalFormProps> = ({
                 </p>
               )}
             </div>
+
+            <div
+              className={`input-wrapper ${
+                errors?.dateOfJoining ? "error" : ""
+              }`}
+            >
+              <input
+                name="dateOfJoining"
+                ref={inputRefs.joinDate}
+                type={calendarState.joinDate.isOpen ? "date" : "text"}
+                placeholder={`Date of Joining${!employeeData ? "*" : ""}`}
+                min={minJoinDate}
+                max={maxJoinDate}
+                required={!employeeData}
+                defaultValue={employeeData?.dateOfJoining.split("T")[0]}
+                onFocus={() => handleFocus("joinDate")}
+                onBlur={() => handleBlur("joinDate")}
+                className="input-field date-field"
+              />
+              {errors?.dateOfJoining && (
+                <p
+                  className="error-message"
+                  data-tooltip={errors.dateOfJoining}
+                  onMouseEnter={handleTooltipPosition}
+                >
+                  {errors.dateOfJoining}
+                </p>
+              )}
+            </div>
           </div>
+
+          {/* Row 5: Department and Role */}
           <div
             className={`input-group ${
-              errors?.departmentName || errors?.dateOfJoining ? "hasErrors" : ""
+              errors?.departmentName || errors?.role ? "hasErrors" : ""
             }`}
           >
             <div
-              className={`input-wrapper ${errors?.departmentName ? "error" : ""}`}
+              className={`input-wrapper ${
+                errors?.departmentName ? "error" : ""
+              }`}
             >
               <select
                 name="departmentName"
@@ -602,9 +674,7 @@ const ModalForm: React.FC<ModalFormProps> = ({
                 defaultValue={employeeData?.department?.name}
                 className="input-field"
               >
-                <option value="">
-                  Select Department{!employeeData && "*"}
-                </option>
+                <option value="">Department{!employeeData && "*"}</option>
                 <option value="HR">HR</option>
                 <option value="Web Development">Web Dev</option>
                 <option value="UI/UX">UI/UX</option>
@@ -622,58 +692,33 @@ const ModalForm: React.FC<ModalFormProps> = ({
                 </p>
               )}
             </div>
-            <div
-              className={`input-wrapper ${errors?.dateOfJoining ? "error" : ""}`}
-            >
-              <input
-                name="dateOfJoining"
-                ref={inputRefs.joinDate}
-                type={calendarState.joinDate.isOpen ? "date" : "text"}
-                placeholder={`Date of Joining${!employeeData ? "*" : ""}`}
-                min={minJoinDate}
-                max={maxJoinDate}
+
+            <div className={`input-wrapper ${errors?.role ? "error" : ""}`}>
+              <select
+                name="role"
                 required={!employeeData}
-                defaultValue={employeeData?.dateOfJoining.split("T")[0]}
-                onFocus={() => handleFocus("joinDate")}
-                onBlur={() => handleBlur("joinDate")}
-                // onMouseEnter={() => handleHover("joinDate", true)}
-                // onMouseLeave={() => handleHover("joinDate", false)}
-                className="input-field date-field"
-              />
-              {errors?.dateOfJoining && (
+                defaultValue={employeeData?.role}
+                className="input-field"
+              >
+                <option value="">Role{!employeeData && "*"}</option>
+                <option value="EMPLOYEE">EMPLOYEE</option>
+                <option value="INTERN">INTERN</option>
+                <option value="HR_INTERN">HR INTERN</option>
+                <option value="HR_EMPLOYEE">HR EMPLOYEE</option>
+                <option value="HR_MANAGER">HR MANAGER</option>
+                <option value="MANAGER">MANAGER</option>
+                <option value="ADMIN">ADMIN</option>
+              </select>
+              {errors?.role && (
                 <p
                   className="error-message"
-                  data-tooltip={errors.dateOfJoining}
+                  data-tooltip={errors.role}
                   onMouseEnter={handleTooltipPosition}
                 >
-                  {errors.dateOfJoining}
+                  {errors.role}
                 </p>
               )}
             </div>
-          </div>
-          {/* CountryStateCity Component  */}
-          <div className="w-full">
-            <CountryStateCitySelect
-              country={country}
-              setCountry={setCountry}
-              countryCode={countryCode}
-              setCountryCode={setCountryCode}
-              state={state}
-              setState={setState}
-              stateCode={stateCode}
-              setStateCode={setStateCode}
-              city={city}
-              setCity={setCity}
-              hasFetched={hasFetched}
-              sethasFetched={setHasFetched}
-              employeeData={employeeData}
-              errors={{
-                country: errors?.country,
-                state: errors?.state,
-                city: errors?.city,
-              }}
-              handleTooltipPosition={handleTooltipPosition}
-            />
           </div>
 
           <div className="input-group gender-selection">

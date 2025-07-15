@@ -3,7 +3,7 @@
 import { useEffect, useState } from "react";
 import { Card, CardContent } from "@/components/ui/card";
 import { Progress } from "@/components/ui/progress";
-import { getAllEmployees } from "@/actions/employee";
+import { EmployeeListItem } from "@/types/types";
 import { showToast } from "@/utils/toastHelper";
 
 type TransformedEmployeeData = {
@@ -11,17 +11,28 @@ type TransformedEmployeeData = {
   value: number;
 };
 
-const EmployeeDistributionChart = () => {
+interface EmployeeDistributionChartProps {
+  employees: EmployeeListItem[];
+  hasError?: boolean;
+}
+
+const EmployeeDistributionChart = ({ employees, hasError }: EmployeeDistributionChartProps) => {
   const [employeeData, setEmployeeData] = useState<TransformedEmployeeData[]>(
     []
   );
   const [loading, setLoading] = useState<boolean>(true);
-  const [error, setError] = useState<string>("");
+  const [displayError, setDisplayError] = useState<string>("");
 
   useEffect(() => {
-    const fetchEmployeeData = async () => {
+    const processEmployeeData = async () => {
       try {
-        const employees = await getAllEmployees();
+        if (hasError) {
+          // Don't show toast - parent handles error display
+          setDisplayError("Unable to load employee data");
+          setLoading(false);
+          return;
+        }
+
         const departmentCounts: { [key: string]: number } = {};
         employees.forEach((emp) => {
           const deptName = emp.department?.name || "Unknown";
@@ -38,28 +49,41 @@ const EmployeeDistributionChart = () => {
         setLoading(false);
       } catch (err) {
         console.error(err);
-        setError("Error fetching employee data");
-        showToast("error", "Error!", [`Error fetching employee data: ${err}`]);
+        setDisplayError("Error processing employee data");
+        // Show toast for component-specific processing errors (not employee fetch errors)
+        showToast("error", "Distribution Chart Error", [
+          `Unable to process employee distribution data: ${err}`,
+        ]);
         setLoading(false);
       }
     };
 
-    fetchEmployeeData();
-  }, []);
+    processEmployeeData();
+  }, [employees, hasError]);
 
   if (loading) {
     return (
-      <div className="text-center">
-        <p>Loading...</p>
-      </div>
+      <Card className="p-6 bg-black/10 shadow-none min-h-full">
+        <CardContent className="p-0 flex items-center justify-center min-h-full">
+          <p>Loading...</p>
+        </CardContent>
+      </Card>
     );
   }
 
-  if (error) {
+  if (displayError) {
     return (
-      <div className="text-center text-red-500">
-        <p>{error}</p>
-      </div>
+      <Card className="p-6 bg-black/10 shadow-none min-h-full">
+        <CardContent className="p-0 flex items-center justify-center min-h-full text-gray-500">
+          <div className="text-center">
+            <div className="text-4xl mb-3">👥</div>
+            <p className="text-sm text-red-800 bg-red-50 border border-red-200 rounded-lg p-4 mb-6">
+              Employee distribution temporarily unavailable: <br />
+              <span className="font-semibold">{displayError}</span>
+            </p>
+          </div>
+        </CardContent>
+      </Card>
     );
   }
 

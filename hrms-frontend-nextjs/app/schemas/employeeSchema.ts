@@ -182,7 +182,14 @@ export const createEmployeeSchema = (hasFetched: boolean) =>
         .string()
         .min(2, "Department name is required, select from the list"),
       gender: z.enum(["MALE", "FEMALE", "OTHER"]).optional(), // Based on radio buttons
+      role: z.enum(
+  ["EMPLOYEE", "INTERN", "HR_INTERN", "HR_EMPLOYEE", "HR_MANAGER", "MANAGER", "ADMIN"],
+  {
+    required_error: "Role is required",
+  }
+),
     })
+    
     .refine(() => hasFetched, {
       message:
         "Unable to submit the form due to error in fetching countries/states/cities. Please try again later or inform the technical team.",
@@ -302,6 +309,10 @@ export const updateEmployeeSchema = z
       .min(2, "Department name is required, select from the list")
       .optional(),
     gender: z.enum(["MALE", "FEMALE", "OTHER"]).optional(), // Based on radio buttons
+    role: z
+  .enum(["EMPLOYEE", "INTERN", "HR_INTERN", "HR_EMPLOYEE", "HR_MANAGER", "MANAGER", "ADMIN"])
+  .optional(),
+
   })
   .superRefine((data, ctx) => {
     // If new value is provided for country, state should change accordingly

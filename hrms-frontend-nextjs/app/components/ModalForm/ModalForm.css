@@ -65,6 +65,9 @@
   row-gap: 35px;
   margin-bottom: 20px;
 }
+.input-group.hasErrors.address {
+  margin-bottom: 0;
+}
 
 .input-wrapper {
   position: relative;
@@ -75,7 +78,69 @@
   border: 2px solid red;
 }
 
-@media (max-width: 405px) {
+@media (min-width: 406px) {
+  .input-wrapper {
+    width: calc(50% - 5px);
+  }
+}
+
+/* Special layout for address input-group */
+.address {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  grid-template-rows: auto auto;
+}
+
+
+/* Street field positioning */
+.input-group:has(.country-state-city-layout) > .input-wrapper:first-child {
+  grid-column: 1;
+  grid-row: 1;
+  width: 100%;
+}
+
+/* CountryStateCitySelect container positioning */
+ .country-state-city-layout {
+  grid-column: 1 / -1;
+  grid-row: 1 / -1;
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  grid-template-rows: auto auto;
+  gap: 10px;
+}
+
+/* Position country field next to street */
+.input-group .country-state-city-layout > .input-wrapper:first-child {
+  grid-column: 2;
+  grid-row: 1;
+  width: 100% ;
+  position: relative;
+}
+
+/* Position state-city row */
+.input-group .country-state-city-layout > .state-city-row {
+  grid-column: 1 / -1;
+  grid-row: 2;
+}
+
+/* State and City row - side by side layout */
+.state-city-row {
+  display: flex;
+  gap: 10px;
+  align-items: flex-start;
+}
+.address.hasErrors .country-state-city-layout > .input-wrapper:first-child {
+  margin-bottom: 30px;
+}
+.address.hasErrors .state-city-row .input-wrapper.error  {
+  margin-bottom: 20px;
+}
+
+/* Mobile responsive layout for address grid */
+@media (max-width: 406px) {
+  .input-group.hasErrors .country-state-city-layout > .input-wrapper:first-child {
+    margin-bottom: 0;
+  }
   .input-group.hasErrors {
     row-gap: 10px;
     margin-bottom: 0;
@@ -83,11 +148,45 @@
   .input-wrapper.error {
     margin-bottom: 25px;
   }
-}
+  .input-group.address {
+    margin-bottom: -10px;
+  }
+  .input-group.address.hasErrors {
+    margin-bottom: -10px;
+  }
+  .input-group.hasErrors .country-state-city-layout  .input-wrapper.error {
+    margin-bottom: 25px;
+  }
 
-@media (min-width: 406px) {
-  .input-wrapper {
-    width: calc(50% - 5px);
+  /*   Stack the outer address group as 2 rows ................ */
+  .input-group.address {
+    grid-template-columns: 1fr; /* 1 column = full width           */
+    grid-template-rows: auto auto; /* row1 Street | row2 CSC-block    */
+  }
+
+  /*   Place STREET in row-1 / col-1 .......................... */
+  .input-group.address > .input-wrapper:first-child {
+    grid-column: 1;
+    grid-row: 1;
+  }
+
+  /*   Move the Country-State-City wrapper to row-2 / col-1 ... */
+  .input-group.address > .country-state-city-layout {
+    grid-column: 1;
+    grid-row: 2;
+    /*   …and turn *its* inner grid into a single column ...... */
+    grid-template-columns: 1fr ; 
+    grid-template-rows: auto auto auto; /* Country | State | City */
+  }
+
+  /*   Override the desktop “grid-column:2” on the Country box */
+  .input-group .country-state-city-layout > .input-wrapper:first-child {
+    grid-column: 1 / -1 ; /* span the only column           */
+  }
+
+  /*   State-City row becomes vertical on phones .............. */
+  .state-city-row {
+    flex-direction: column;
   }
 }
 
@@ -141,9 +240,6 @@ select.input-field:required:invalid {
 select.input-field option {
   color: #000000; /* Black color for selected options */
 }
-
-/* Ensure the above styles do not interfere with react-select if it were to use .input-field */
-/* However, CountryStateCitySelect does not use .input-field for its main wrapper based on current analysis */
 
 .gender-selection {
   display: flex;

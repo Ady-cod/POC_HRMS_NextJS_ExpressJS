@@ -71,7 +71,7 @@ export const createEmployee = async (
   res: Response
 ): Promise<void> => {
   try {
-    // Validate request body using Zod
+    // Validate request body using Zod (assumes `role` is included in schema)
     const validatedData: CreateEmployeeInput =
       await createEmployeeSchema.parseAsync(req.body);
 
@@ -81,61 +81,53 @@ export const createEmployee = async (
     const hashedPassword = await hashPassword(password);
 
     // Find or create department
-    let department = (await prisma.department.findUnique({
+    let department = await prisma.department.findUnique({
       where: { name: departmentName },
-    })) as Department | null;
+    });
 
     if (!department) {
       if (DEMO_MODE) {
-        // Create department in demo mode
         department = await prisma.department.create({
           data: { name: departmentName },
         });
       } else {
-        // Return error in strict mode
         res.status(400).json({ error: "Department not found." });
         return;
       }
     }
 
-    // Prepare the data for Prisma
+    // Prepare data for Prisma
     const newEmployeeData: Prisma.EmployeeCreateInput = {
       ...employeeData,
       password: hashedPassword,
       department: { connect: { id: department.id } },
     };
 
-    // Create the employee
-    const newEmployee: Employee = await prisma.employee.create({
+    // Create employee
+    const newEmployee = await prisma.employee.create({
       data: newEmployeeData,
     });
 
     res.status(201).json(newEmployee);
   } catch (error) {
     if (error instanceof z.ZodError) {
-      // Handle Zod validation errors and passing them to the frontend
       res.status(400).json({ zodError: error });
     } else if (error instanceof Prisma.PrismaClientKnownRequestError) {
-      // Handle Prisma-specific errors
       if (error.code === "P2002") {
-        // Unique constraint violation
-        const targetField = error.meta?.target || "unique field"; // Field causing the error (e.g., "email")
+        const targetField = error.meta?.target || "unique field";
         const message = `A record with this ${targetField} already exists.`;
         console.error("Prisma Unique Constraint Error:", message);
-        res.status(409).json({ error: message }); // 409 Conflict
+        res.status(409).json({ error: message });
       } else {
-        // General Prisma errors
         console.error("Prisma Error:", error.message);
         res.status(500).json({
           error: "A database error occurred. Please try again later.",
         });
       }
     } else if (error instanceof Error) {
-      // Handle known JavaScript errors
       console.error("Error creating employee:", error.message);
       res.status(500).json({ error: error.message });
     } else {
-      // Fallback for unknown error types
       console.error("Unknown error:", error);
       res
         .status(500)
@@ -143,6 +135,7 @@ export const createEmployee = async (
     }
   }
 };
+
 
 export const deleteEmployee = async (
   req: Request,

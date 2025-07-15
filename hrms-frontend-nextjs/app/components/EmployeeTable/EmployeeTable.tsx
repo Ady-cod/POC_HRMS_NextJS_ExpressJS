@@ -1,24 +1,21 @@
 import React, { useState, useEffect, useMemo } from "react";
 import DataTable, { TableColumn } from "react-data-table-component";
 import { getAllEmployees, deleteEmployee } from "@/actions/employee";
-import { EmployeeListItem } from "@/types/types";
+import { EmployeeListItem, EmployeeRole, EmployeeStatus } from "@/types/types";
 import { showToast } from "@/utils/toastHelper";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import { EmployeeRole, EmployeeStatus } from "@/types/types";
-import { faArrowsRotate } from "@fortawesome/free-solid-svg-icons";
-
 import {
+  faArrowsRotate,
   faBackwardStep,
   faForwardStep,
   faAngleLeft,
   faAngleRight,
   faSearch,
+  faDownload,
 } from "@fortawesome/free-solid-svg-icons";
 
 import dynamic from "next/dynamic";
-import { Trash2 } from "lucide-react";
-import { Pencil } from "lucide-react";
-import { faDownload } from "@fortawesome/free-solid-svg-icons";
+import { Trash2, Pencil } from "lucide-react";
 
 // Dynamically import the ConfirmationModal component to keep the initial bundle size small
 const ConfirmationModal = dynamic(
@@ -48,15 +45,56 @@ const EmployeeTable: React.FC<EmployeeTableProps> = ({
     useState<EmployeeListItem | null>(null);
   const [currentPage, setCurrentPage] = useState(1);
   const [rowsPerPage, setRowsPerPage] = useState(10);
-  const [searchText, setSearchText] = useState(""); // NEW: State for search term
-  const [searchCategory, setSearchCategory] = useState("");
-  const [selectedRole, setSelectedRole] = useState("");
-  const [selectedDepartment, setSelectedDepartment] = useState("");
-  const [selectedStartDate, setSelectedStartDate] = useState("");
-  const [selectedEndDate, setSelectedEndDate] = useState("");
-  const [selectedStartDOB, setSelectedStartDOB] = useState("");
-  const [selectedEndDOB, setSelectedEndDOB] = useState("");
-  const [selectedStatus, setSelectedStatus] = useState("");
+  // Consolidated filter state
+  const [filterState, setFilterState] = useState({
+    searchText: "",
+    searchCategory: "",
+    selectedRole: "",
+    selectedDepartment: "",
+    selectedStartDate: "",
+    selectedEndDate: "",
+    selectedStartDOB: "",
+    selectedEndDOB: "",
+    selectedStatus: "",
+  });
+
+  // Helper function to update filter state
+  const updateFilter = (key: keyof typeof filterState, value: string) => {
+    setFilterState(prev => ({ ...prev, [key]: value }));
+  };
+
+  // Helper function to clear all filters
+  const clearAllFilters = () => {
+    setFilterState({
+      searchText: "",
+      searchCategory: "",
+      selectedRole: "",
+      selectedDepartment: "",
+      selectedStartDate: "",
+      selectedEndDate: "",
+      selectedStartDOB: "",
+      selectedEndDOB: "",
+      selectedStatus: "",
+    });
+  };
+
+  // Utility function for consistent date formatting
+  const formatDate = (dateString: string, format: 'display' | 'csv' = 'display'): string => {
+    if (!dateString) return "N/A";
+    try {
+      const date = new Date(dateString);
+      if (format === 'csv') {
+        const day = String(date.getDate()).padStart(2, "0");
+        const month = String(date.getMonth() + 1).padStart(2, "0");
+        const year = date.getFullYear();
+        return `'${day}-${month}-${year}`;
+      }
+      // Default display format (YYYY-MM-DD for consistency)
+      return date.toISOString().split("T")[0];
+    } catch {
+      return "N/A";
+    }
+  };
 
   useEffect(() => {
     // Set the initial state for the  screen size based on the window width
@@ -77,11 +115,7 @@ const EmployeeTable: React.FC<EmployeeTableProps> = ({
       setEmployeeCount(employees.length);
     }
     fetchEmployees();
-  }, [refreshFlag]);
-
-  useEffect(() => {
-    setEmployeeCount(employees.length);
-  }, [employees]);
+  }, [refreshFlag, setEmployeeCount]);
 
   const handleDeleteClick = (employee: EmployeeListItem) => {
     setSelectedEmployee(employee);
@@ -109,7 +143,9 @@ const EmployeeTable: React.FC<EmployeeTableProps> = ({
       ]);
 
       // Update the UI on successful deletion
-      setEmployees(employees.filter((emp) => emp.id !== selectedEmployee.id));
+      const updatedEmployees = employees.filter((emp) => emp.id !== selectedEmployee.id);
+      setEmployees(updatedEmployees);
+      setEmployeeCount(updatedEmployees.length);
     } catch (err) {
       if (err instanceof Error) {
         // console.error("Error deleting employee:", err.message);
@@ -157,6 +193,18 @@ const EmployeeTable: React.FC<EmployeeTableProps> = ({
   };
 
   const filteredEmployees = useMemo(() => {
+    const { 
+      searchCategory, 
+      searchText, 
+      selectedRole, 
+      selectedDepartment, 
+      selectedStatus,
+      selectedStartDate,
+      selectedEndDate,
+      selectedStartDOB,
+      selectedEndDOB
+    } = filterState;
+    
     if (searchCategory === "all" || searchCategory === "") {
       return employees;
     }
@@ -196,49 +244,37 @@ const EmployeeTable: React.FC<EmployeeTableProps> = ({
 
         case "dateOfJoining":
           if (employee.dateOfJoining) {
-            try {
-              const employeeDate = new Date(employee.dateOfJoining)
-                .toISOString()
-                .split("T")[0];
+            const employeeDate = formatDate(employee.dateOfJoining);
+            if (employeeDate === "N/A") return false;
 
-              if (selectedStartDate && selectedEndDate) {
-                return (
-                  employeeDate >= selectedStartDate &&
-                  employeeDate <= selectedEndDate
-                );
-              } else if (selectedStartDate) {
-                return employeeDate >= selectedStartDate;
-              } else if (selectedEndDate) {
-                return employeeDate <= selectedEndDate;
-              } else {
-                return true;
-              }
-            } catch (error) {
-              console.error("Error parsing dateOfJoining:", error);
-              return false;
+            if (selectedStartDate && selectedEndDate) {
+              return (
+                employeeDate >= selectedStartDate &&
+                employeeDate <= selectedEndDate
+              );
+            } else if (selectedStartDate) {
+              return employeeDate >= selectedStartDate;
+            } else if (selectedEndDate) {
+              return employeeDate <= selectedEndDate;
+            } else {
+              return true;
             }
           }
           return false;
 
         case "dateOfBirth":
           if (employee.birthDate) {
-            try {
-              const dob = new Date(employee.birthDate)
-                .toISOString()
-                .split("T")[0];
+            const dob = formatDate(employee.birthDate);
+            if (dob === "N/A") return false;
 
-              if (selectedStartDOB && selectedEndDOB) {
-                return dob >= selectedStartDOB && dob <= selectedEndDOB;
-              } else if (selectedStartDOB) {
-                return dob >= selectedStartDOB;
-              } else if (selectedEndDOB) {
-                return dob <= selectedEndDOB;
-              } else {
-                return true;
-              }
-            } catch (error) {
-              console.error("Error parsing dateOfBirth:", error);
-              return false;
+            if (selectedStartDOB && selectedEndDOB) {
+              return dob >= selectedStartDOB && dob <= selectedEndDOB;
+            } else if (selectedStartDOB) {
+              return dob >= selectedStartDOB;
+            } else if (selectedEndDOB) {
+              return dob <= selectedEndDOB;
+            } else {
+              return true;
             }
           }
           return false;
@@ -258,18 +294,7 @@ const EmployeeTable: React.FC<EmployeeTableProps> = ({
 
       return valueToSearch.toLowerCase().includes(lowercasedSearchText);
     });
-  }, [
-    employees,
-    searchText,
-    searchCategory,
-    selectedRole,
-    selectedDepartment,
-    selectedStartDate,
-    selectedEndDate,
-    selectedStartDOB,
-    selectedEndDOB,
-    selectedStatus,
-  ]);
+  }, [employees, filterState]);
 
   const handleExportToCSV = () => {
     const headers = [
@@ -288,20 +313,9 @@ const EmployeeTable: React.FC<EmployeeTableProps> = ({
       "Gender",
     ];
 
-    // Helper function to format null/undefined and date values
-    const formatValue = (value: any, isDate = false): string => {
+    // Helper function to format null/undefined values
+    const formatValue = (value: string | null | undefined): string => {
       if (!value) return "N/A";
-      if (isDate) {
-        try {
-          const date = new Date(value);
-          const day = String(date.getDate()).padStart(2, "0");
-          const month = String(date.getMonth() + 1).padStart(2, "0");
-          const year = date.getFullYear();
-          return `'${day}-${month}-${year}`;
-        } catch {
-          return "N/A";
-        }
-      }
       return value;
     };
 
@@ -314,8 +328,8 @@ const EmployeeTable: React.FC<EmployeeTableProps> = ({
       formatValue(emp.state),
       formatValue(emp.city),
       formatValue(emp.streetAddress),
-      formatValue(emp.birthDate, true),
-      formatValue(emp.dateOfJoining, true),
+      formatDate(emp.birthDate, 'csv'),
+      formatDate(emp.dateOfJoining, 'csv'),
       formatValue(emp.department?.name),
       formatValue(emp.role),
       formatValue(emp.status),
@@ -407,7 +421,7 @@ const EmployeeTable: React.FC<EmployeeTableProps> = ({
         },
         {
           name: "Joining Date",
-          selector: (employee) => employee.dateOfJoining.split("T")[0] || "N/A",
+          selector: (employee) => formatDate(employee.dateOfJoining),
           sortable: true,
         },
         {
@@ -436,7 +450,7 @@ const EmployeeTable: React.FC<EmployeeTableProps> = ({
       [
         {
           name: "Birthday",
-          selector: (employee) => employee.birthDate.split("T")[0] || "N/A",
+          selector: (employee) => formatDate(employee.birthDate),
           sortable: true,
         },
         {
@@ -550,8 +564,8 @@ const EmployeeTable: React.FC<EmployeeTableProps> = ({
         <div className="flex flex-wrap items-center gap-3">
           {/* Search Category Dropdown */}
           <select
-            value={searchCategory}
-            onChange={(e) => setSearchCategory(e.target.value)}
+            value={filterState.searchCategory}
+            onChange={(e) => updateFilter('searchCategory', e.target.value)}
             className="w-48 p-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 bg-white text-gray-700"
           >
             <option value="" disabled>
@@ -567,7 +581,7 @@ const EmployeeTable: React.FC<EmployeeTableProps> = ({
           </select>
 
           {/* Conditional Inputs */}
-          {searchCategory === "name" || searchCategory === "email" ? (
+          {filterState.searchCategory === "name" || filterState.searchCategory === "email" ? (
             <div className="relative w-60">
               <FontAwesomeIcon
                 icon={faSearch}
@@ -575,19 +589,19 @@ const EmployeeTable: React.FC<EmployeeTableProps> = ({
               />
               <input
                 type="text"
-                placeholder={`Search by ${searchCategory
+                placeholder={`Search by ${filterState.searchCategory
                   .replace(/([A-Z])/g, " $1")
                   .toLowerCase()
-                  .replace(/^./, (str) => str.toUpperCase())}...`}
-                value={searchText}
-                onChange={(e) => setSearchText(e.target.value)}
+                  .replace(/^./, (str: string) => str.toUpperCase())}...`}
+                value={filterState.searchText}
+                onChange={(e) => updateFilter('searchText', e.target.value)}
                 className="w-full pl-10 p-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
               />
             </div>
-          ) : searchCategory === "role" ? (
+          ) : filterState.searchCategory === "role" ? (
             <select
-              value={selectedRole}
-              onChange={(e) => setSelectedRole(e.target.value)}
+              value={filterState.selectedRole}
+              onChange={(e) => updateFilter('selectedRole', e.target.value)}
               className="w-60 p-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 bg-white"
             >
               <option value="">All Roles</option>
@@ -597,10 +611,10 @@ const EmployeeTable: React.FC<EmployeeTableProps> = ({
                 </option>
               ))}
             </select>
-          ) : searchCategory === "department" ? (
+          ) : filterState.searchCategory === "department" ? (
             <select
-              value={selectedDepartment}
-              onChange={(e) => setSelectedDepartment(e.target.value)}
+              value={filterState.selectedDepartment}
+              onChange={(e) => updateFilter('selectedDepartment', e.target.value)}
               className="w-60 p-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 bg-white"
             >
               <option value="">All Departments</option>
@@ -616,44 +630,42 @@ const EmployeeTable: React.FC<EmployeeTableProps> = ({
                 </option>
               ))}
             </select>
-          ) : searchCategory === "dateOfJoining" ? (
+          ) : filterState.searchCategory === "dateOfJoining" ? (
             <div className="flex items-center gap-2">
               <input
                 type="date"
-                value={selectedStartDate}
-                onChange={(e) => setSelectedStartDate(e.target.value)}
+                value={filterState.selectedStartDate}
+                onChange={(e) => updateFilter('selectedStartDate', e.target.value)}
                 className="w-40 p-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
               />
               <span className="text-gray-600 text-sm font-medium">to</span>
               <input
                 type="date"
-                value={selectedEndDate}
-                onChange={(e) => setSelectedEndDate(e.target.value)}
+                value={filterState.selectedEndDate}
+                onChange={(e) => updateFilter('selectedEndDate', e.target.value)}
                 className="w-40 p-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
               />
             </div>
-          ) : searchCategory === "dateOfBirth" ? (
+          ) : filterState.searchCategory === "dateOfBirth" ? (
             <div className="flex items-center gap-2">
               <input
                 type="date"
-                value={selectedStartDOB}
-                onChange={(e) => setSelectedStartDOB(e.target.value)}
+                value={filterState.selectedStartDOB}
+                onChange={(e) => updateFilter('selectedStartDOB', e.target.value)}
                 className="w-40 p-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
               />
               <span className="text-gray-600 text-sm font-medium">to</span>
               <input
                 type="date"
-                value={selectedEndDOB}
-                onChange={(e) => setSelectedEndDOB(e.target.value)}
+                value={filterState.selectedEndDOB}
+                onChange={(e) => updateFilter('selectedEndDOB', e.target.value)}
                 className="w-40 p-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
               />
             </div>
-          ) : searchCategory === "status" ? (
+          ) : filterState.searchCategory === "status" ? (
             <select
-              value={selectedStatus}
-              onChange={(e) =>
-                setSelectedStatus(e.target.value as EmployeeStatus)
-              }
+              value={filterState.selectedStatus}
+              onChange={(e) => updateFilter('selectedStatus', e.target.value as EmployeeStatus)}
               className="w-60 p-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 bg-white"
             >
               <option value="">All Statuses</option>
@@ -666,27 +678,17 @@ const EmployeeTable: React.FC<EmployeeTableProps> = ({
           ) : null}
 
           {/* Remove Filters Button */}
-          {(searchCategory ||
-            searchText ||
-            selectedRole ||
-            selectedDepartment ||
-            selectedStartDate ||
-            selectedEndDate ||
-            selectedStartDOB ||
-            selectedEndDOB ||
-            selectedStatus) && (
+          {(filterState.searchCategory ||
+            filterState.searchText ||
+            filterState.selectedRole ||
+            filterState.selectedDepartment ||
+            filterState.selectedStartDate ||
+            filterState.selectedEndDate ||
+            filterState.selectedStartDOB ||
+            filterState.selectedEndDOB ||
+            filterState.selectedStatus) && (
             <button
-              onClick={() => {
-                setSearchCategory("");
-                setSearchText("");
-                setSelectedRole("");
-                setSelectedDepartment("");
-                setSelectedStartDate("");
-                setSelectedEndDate("");
-                setSelectedStartDOB("");
-                setSelectedEndDOB("");
-                setSelectedStatus("");
-              }}
+              onClick={clearAllFilters}
               className="flex items-center gap-2 bg-blue-500 hover:bg-blue-600 text-white px-4 py-2 rounded-md text-sm"
             >
               <FontAwesomeIcon icon={faArrowsRotate} />

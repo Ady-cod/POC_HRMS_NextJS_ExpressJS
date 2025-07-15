@@ -1,9 +1,6 @@
-"use client";
-
-import { useEffect, useState } from "react";
 import { Card } from "@/components/ui/card";
 import { IBM_Plex_Sans } from "next/font/google";
-import { fetchDailyQuote } from "@/lib/quotes";
+import { fetchDailyQuoteServer } from "@/lib/quotesApi";
 
 const ibmPlexSans = IBM_Plex_Sans({
   subsets: ["latin"],
@@ -11,26 +8,9 @@ const ibmPlexSans = IBM_Plex_Sans({
   variable: "--font-ibm-plex-sans",
 });
 
-const DailyQuote = () => {
-  const [quote, setQuote] = useState<{ quote: string; name: string }>({
-    quote: "Wear your failure as a badge of honor!",
-    name: "Sundar Pichai",
-  });
-
-  useEffect(() => {
-    async function loadQuote() {
-      try {
-        const dailyQuote = await fetchDailyQuote();
-        if (dailyQuote) {
-          setQuote(dailyQuote);
-        }
-      } catch (err) {
-        console.error("Error fetching daily quote", err);
-      }
-    }
-
-    loadQuote();
-  }, []);
+const DailyQuote = async () => {
+  // Fetch quote on the server side
+  const quote = await fetchDailyQuoteServer();
 
   return (
     <Card

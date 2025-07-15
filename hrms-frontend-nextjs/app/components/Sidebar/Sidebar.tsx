@@ -71,7 +71,7 @@ const Sidebar = ({ isOpen, toggleSidebar }: SideBarProps) => {
   const renderSidebar = () => {
     return (
       <div
-        className={`w-fit min-w-52 h-full transition-all duration-75 ease-in-out sm:border-r-2 ${
+        className={`w-fit min-w-60 h-full transition-all duration-75 ease-in-out sm:border-r-2 ${
           isOpen
             ? "translate-x-0 relative opacity-100"
             : " -translate-x-full absolute opacity-0"

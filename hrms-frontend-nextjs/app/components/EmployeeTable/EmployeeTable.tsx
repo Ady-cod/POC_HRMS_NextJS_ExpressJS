@@ -2,6 +2,7 @@ import React, { useState, useEffect, useMemo } from "react";
 import DataTable from "react-data-table-component";
 import { EmployeeListItem } from "@/types/types";
 import { formatDate } from "@/utils/dateUtils";
+import { ColumnConfig } from "@/types/columnConfig";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faDownload } from "@fortawesome/free-solid-svg-icons";
 
@@ -23,12 +24,14 @@ interface EmployeeTableProps {
   refreshFlag: boolean;
   handleEdit: (employeeData: EmployeeListItem) => void;
   setEmployeeCount: (count: number) => void;
+  columnConfig?: ColumnConfig;
 }
 
 const EmployeeTable: React.FC<EmployeeTableProps> = ({
   refreshFlag,
   handleEdit,
   setEmployeeCount,
+  columnConfig,
 }) => {
   // Employee data management
   const {
@@ -106,6 +109,7 @@ const EmployeeTable: React.FC<EmployeeTableProps> = ({
     activeColumnIndex,
     setActiveSectionIndex,
     setActiveColumnIndex,
+    columnConfig,
   });
 
   const handlePageChange = (page: number) => {

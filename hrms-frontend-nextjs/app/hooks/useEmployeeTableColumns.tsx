@@ -7,9 +7,9 @@ import {
   faAngleLeft,
   faAngleRight,
 } from '@fortawesome/free-solid-svg-icons';
-import { Trash2, Pencil } from 'lucide-react';
 import { EmployeeListItem } from '@/types/types';
-import { formatDate } from '@/utils/dateUtils';
+import { ColumnConfig, DEFAULT_COLUMN_CONFIG } from '@/types/columnConfig';
+import { ColumnBuilder, getDefaultColumnSections, getWeekWiseColumns, getDepartmentViewColumns } from '@/utils/columnBuilders';
 
 interface UseEmployeeTableColumnsProps {
   currentPage: number;
@@ -21,6 +21,7 @@ interface UseEmployeeTableColumnsProps {
   activeColumnIndex: number;
   setActiveSectionIndex: React.Dispatch<React.SetStateAction<number>>;
   setActiveColumnIndex: React.Dispatch<React.SetStateAction<number>>;
+  columnConfig?: ColumnConfig;
 }
 
 export const useEmployeeTableColumns = ({
@@ -33,225 +34,185 @@ export const useEmployeeTableColumns = ({
   activeColumnIndex,
   setActiveSectionIndex,
   setActiveColumnIndex,
+  columnConfig = DEFAULT_COLUMN_CONFIG,
 }: UseEmployeeTableColumnsProps) => {
   
-  const firstColumns: TableColumn<EmployeeListItem>[] = useMemo(() => [
-    {
-      name: "SNo.",
-      cell: (row: EmployeeListItem, index: number) => {
-        const previousPages = currentPage - 1;
-        // Calculate the correct row number by adding to the current position the previous pages rows if any
-        return previousPages * rowsPerPage + index + 1;
-      },
-      width: "80px",
-    },
-    {
-      name: "Full Name",
-      selector: (employee) => employee.fullName || "N/A",
-      sortable: true,
-    },
-  ], [currentPage, rowsPerPage]);
+  const columnBuilder = useMemo(() => new ColumnBuilder({
+    currentPage,
+    rowsPerPage,
+    handleEdit,
+    handleDeleteClick,
+  }), [currentPage, rowsPerPage, handleEdit, handleDeleteClick]);
 
-  const lastColumn: TableColumn<EmployeeListItem> = useMemo(() => ({
-    name: "Action",
-    cell: (employee) => (
-      <div className="flex items-center gap-2 whitespace-nowrap">
-        {/* Edit Button */}
-        <button
-          onClick={() => handleEdit(employee)}
-          className="flex items-center gap-1 text-sm text-gray-700 hover:text-black transition"
-        >
-          <Pencil size={18} />
-          <span>Edit</span>
-        </button>
+  const { firstColumns, lastColumn, columnSections } = useMemo(() => {
+    const first: TableColumn<EmployeeListItem>[] = [];
+    let sections: TableColumn<EmployeeListItem>[][] = [];
+    const last: TableColumn<EmployeeListItem>[] = [];
 
-        {/* Delete Button */}
-        <button
-          onClick={() => handleDeleteClick(employee)}
-          className="flex items-center gap-1 text-sm text-gray-700 hover:text-black transition"
-        >
-          <Trash2 size={18} />
-          <span>Delete</span>
-        </button>
-      </div>
-    ),
-  }), [handleEdit, handleDeleteClick]);
+    // Add serial number if configured
+    if (columnConfig.showSerialNumber) {
+      first.push(columnBuilder.buildSerialNumberColumn());
+    }
 
-  const columnSections: TableColumn<EmployeeListItem>[][] = useMemo(() => [
-    [
-      {
-        name: "Email",
-        selector: (employee) => employee.email || "N/A",
-        sortable: true,
-      },
-      {
-        name: "Phone",
-        selector: (employee) => employee.phoneNumber || "N/A",
-        sortable: true,
-      },
-      {
-        name: "Department",
-        selector: (employee) => employee.department?.name || "N/A",
-        sortable: true,
-      },
-    ],
-    [
-      {
-        name: "Role",
-        selector: (employee) => employee.role || "N/A",
-        sortable: true,
-      },
-      {
-        name: "Joining Date",
-        selector: (employee) => formatDate(employee.dateOfJoining),
-        sortable: true,
-      },
-      {
-        name: "Status",
-        selector: (employee) => employee.status || "N/A",
-        sortable: true,
-      },
-    ],
-    [
-      {
-        name: "Country",
-        selector: (employee) => employee.country || "N/A",
-        sortable: true,
-      },
-      {
-        name: "City",
-        selector: (employee) => employee.city || "N/A",
-        sortable: true,
-      },
-      {
-        name: "Address",
-        selector: (employee) => employee.streetAddress || "N/A",
-        sortable: true,
-      },
-    ],
-    [
-      {
-        name: "Birthday",
-        selector: (employee) => formatDate(employee.birthDate),
-        sortable: true,
-      },
-      {
-        name: "Gender",
-        selector: (employee) => employee.gender || "N/A",
-        sortable: true,
-      },
-      {
-        name: "Full Onboarding",
-        selector: (employee) => (employee.inductionCompleted ? "Yes" : "No"),
-        sortable: true,
-      },
-    ],
-  ], []);
+    // Add full name for default view
+    if (columnConfig.type === 'default') {
+      first.push(columnBuilder.buildFullNameColumn());
+      sections = getDefaultColumnSections(columnBuilder);
+    } else if (columnConfig.type === 'week-wise') {
+      // For week-wise view, no first columns, use custom layout
+      sections = [getWeekWiseColumns(columnBuilder)];
+    } else if (columnConfig.type === 'department-view') {
+      sections = [getDepartmentViewColumns(columnBuilder)];
+    } else if (columnConfig.customColumns) {
+      // Custom configuration
+      sections = [columnConfig.customColumns];
+    }
+
+    // Add action column if configured
+    if (columnConfig.showActions) {
+      last.push(columnBuilder.buildActionColumn());
+    }
+
+    return {
+      firstColumns: first,
+      lastColumn: last[0],
+      columnSections: sections,
+    };
+  }, [columnBuilder, columnConfig]);
 
   const columnSectionsExpanded = useMemo(
     () => columnSections.flat(),
     [columnSections]
   );
 
-  const toggleColumn: TableColumn<EmployeeListItem> = useMemo(() => ({
-    name: "More columns ...",
-    cell: () => (
-      <div className="flex justify-center items-center gap-4 my-1 text-gray-500">
-        <button
-          onClick={() =>
-            isSmallScreen ? setActiveColumnIndex(0) : setActiveSectionIndex(0)
-          }
-          disabled={
-            isSmallScreen ? activeColumnIndex === 0 : activeSectionIndex === 0
-          }
-          className="disabled:opacity-50"
-          aria-label="First"
-        >
-          <FontAwesomeIcon icon={faBackwardStep} size="lg" />
-        </button>
-        <button
-          onClick={() =>
-            isSmallScreen
-              ? setActiveColumnIndex((prev) => Math.max(prev - 1, 0))
-              : setActiveSectionIndex((prev) => Math.max(prev - 1, 0))
-          }
-          disabled={
-            isSmallScreen ? activeColumnIndex === 0 : activeSectionIndex === 0
-          }
-          className="disabled:opacity-50"
-          aria-label="Previous"
-        >
-          <FontAwesomeIcon icon={faAngleLeft} size="lg" />
-        </button>
-        <button
-          onClick={() =>
-            isSmallScreen
-              ? setActiveColumnIndex((prev) =>
-                  Math.min(prev + 1, columnSectionsExpanded.length - 1)
-                )
-              : setActiveSectionIndex((prev) =>
-                  Math.min(prev + 1, columnSections.length - 1)
-                )
-          }
-          disabled={
-            isSmallScreen
-              ? activeColumnIndex === columnSectionsExpanded.length - 1
-              : activeSectionIndex === columnSections.length - 1
-          }
-          className="disabled:opacity-50"
-          aria-label="Next"
-        >
-          <FontAwesomeIcon icon={faAngleRight} size="lg" />
-        </button>
-        <button
-          onClick={() =>
-            isSmallScreen
-              ? setActiveColumnIndex(columnSectionsExpanded.length - 1)
-              : setActiveSectionIndex(columnSections.length - 1)
-          }
-          disabled={
-            isSmallScreen
-              ? activeColumnIndex === columnSectionsExpanded.length - 1
-              : activeSectionIndex === columnSections.length - 1
-          }
-          className="disabled:opacity-50"
-          aria-label="Last"
-        >
-          <FontAwesomeIcon icon={faForwardStep} size="lg" />
-        </button>
-      </div>
-    ),
-  }), [
+  const toggleColumn: TableColumn<EmployeeListItem> | null = useMemo(() => {
+    // Only show toggle column for default view with multiple sections
+    if (!columnConfig.showMoreColumnsNavigation || columnSections.length <= 1) {
+      return null;
+    }
+
+    return {
+      name: "More columns ...",
+      cell: () => (
+        <div className="flex justify-center items-center gap-4 my-1 text-gray-500">
+          <button
+            onClick={() =>
+              isSmallScreen ? setActiveColumnIndex(0) : setActiveSectionIndex(0)
+            }
+            disabled={
+              isSmallScreen ? activeColumnIndex === 0 : activeSectionIndex === 0
+            }
+            className="disabled:opacity-50"
+            aria-label="First"
+          >
+            <FontAwesomeIcon icon={faBackwardStep} size="lg" />
+          </button>
+          <button
+            onClick={() =>
+              isSmallScreen
+                ? setActiveColumnIndex((prev) => Math.max(prev - 1, 0))
+                : setActiveSectionIndex((prev) => Math.max(prev - 1, 0))
+            }
+            disabled={
+              isSmallScreen ? activeColumnIndex === 0 : activeSectionIndex === 0
+            }
+            className="disabled:opacity-50"
+            aria-label="Previous"
+          >
+            <FontAwesomeIcon icon={faAngleLeft} size="lg" />
+          </button>
+          <button
+            onClick={() =>
+              isSmallScreen
+                ? setActiveColumnIndex((prev) =>
+                    Math.min(prev + 1, columnSectionsExpanded.length - 1)
+                  )
+                : setActiveSectionIndex((prev) =>
+                    Math.min(prev + 1, columnSections.length - 1)
+                  )
+            }
+            disabled={
+              isSmallScreen
+                ? activeColumnIndex === columnSectionsExpanded.length - 1
+                : activeSectionIndex === columnSections.length - 1
+            }
+            className="disabled:opacity-50"
+            aria-label="Next"
+          >
+            <FontAwesomeIcon icon={faAngleRight} size="lg" />
+          </button>
+          <button
+            onClick={() =>
+              isSmallScreen
+                ? setActiveColumnIndex(columnSectionsExpanded.length - 1)
+                : setActiveSectionIndex(columnSections.length - 1)
+            }
+            disabled={
+              isSmallScreen
+                ? activeColumnIndex === columnSectionsExpanded.length - 1
+                : activeSectionIndex === columnSections.length - 1
+            }
+            className="disabled:opacity-50"
+            aria-label="Last"
+          >
+            <FontAwesomeIcon icon={faForwardStep} size="lg" />
+          </button>
+        </div>
+      ),
+    };
+  }, [
+    columnConfig.showMoreColumnsNavigation,
+    columnSections.length,
     isSmallScreen,
     activeColumnIndex,
     activeSectionIndex,
     columnSectionsExpanded.length,
-    columnSections.length,
     setActiveColumnIndex,
     setActiveSectionIndex,
   ]);
 
   const columns = useMemo(() => {
-    return isSmallScreen
-      ? [
-          ...firstColumns,
-          columnSectionsExpanded[activeColumnIndex],
-          toggleColumn,
-          lastColumn,
-        ]
-      : [
-          ...firstColumns,
-          ...columnSections[activeSectionIndex],
-          toggleColumn,
-          lastColumn,
-        ];
+    const cols: TableColumn<EmployeeListItem>[] = [];
+
+    // Add first columns
+    cols.push(...firstColumns);
+
+    // Add section columns based on view type
+    if (columnConfig.showMoreColumnsNavigation && columnSections.length > 1) {
+      // Default responsive behavior
+      if (isSmallScreen) {
+        if (columnSectionsExpanded[activeColumnIndex]) {
+          cols.push(columnSectionsExpanded[activeColumnIndex]);
+        }
+      } else {
+        if (columnSections[activeSectionIndex]) {
+          cols.push(...columnSections[activeSectionIndex]);
+        }
+      }
+    } else if (columnSections.length > 0) {
+      // Show all columns from first section for non-responsive views
+      cols.push(...columnSections[0]);
+    }
+
+    // Add toggle column if needed
+    if (toggleColumn) {
+      cols.push(toggleColumn);
+    }
+
+    // Add last column (action)
+    if (lastColumn) {
+      cols.push(lastColumn);
+    }
+
+    return cols;
   }, [
-    isSmallScreen,
     firstColumns,
-    columnSectionsExpanded,
-    activeColumnIndex,
+    columnConfig.showMoreColumnsNavigation,
     columnSections,
+    isSmallScreen,
+    activeColumnIndex,
     activeSectionIndex,
+    columnSectionsExpanded,
     toggleColumn,
     lastColumn,
   ]);

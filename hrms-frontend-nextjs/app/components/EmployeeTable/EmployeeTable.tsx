@@ -1,8 +1,6 @@
 import React, { useState, useEffect, useMemo } from "react";
 import DataTable from "react-data-table-component";
-import { getAllEmployees, deleteEmployee } from "@/actions/employee";
 import { EmployeeListItem } from "@/types/types";
-import { showToast } from "@/utils/toastHelper";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faDownload } from "@fortawesome/free-solid-svg-icons";
 
@@ -10,6 +8,7 @@ import dynamic from "next/dynamic";
 import EmployeeSearchFilters, { FilterState } from "@/components/EmployeeSearchFilters/EmployeeSearchFilters";
 import { useCSVExport } from "@/hooks/useCSVExport";
 import { useEmployeeTableColumns } from "@/hooks/useEmployeeTableColumns";
+import { useEmployeeData } from "@/hooks/useEmployeeData";
 
 // Dynamically import the ConfirmationModal component to keep the initial bundle size small
 const ConfirmationModal = dynamic(
@@ -30,13 +29,19 @@ const EmployeeTable: React.FC<EmployeeTableProps> = ({
   handleEdit,
   setEmployeeCount,
 }) => {
-  const [employees, setEmployees] = useState<EmployeeListItem[]>([]);
+  // Employee data management
+  const {
+    employees,
+    selectedEmployee,
+    showDialog,
+    handleDeleteClick,
+    confirmDelete,
+    closeDeleteDialog,
+  } = useEmployeeData({ refreshFlag, setEmployeeCount });
+
   const [activeSectionIndex, setActiveSectionIndex] = useState(0);
   const [activeColumnIndex, setActiveColumnIndex] = useState(0);
   const [isSmallScreen, setIsSmallScreen] = useState(false); // Track screen size
-  const [showDialog, setShowDialog] = useState(false);
-  const [selectedEmployee, setSelectedEmployee] =
-    useState<EmployeeListItem | null>(null);
   const [currentPage, setCurrentPage] = useState(1);
   const [rowsPerPage, setRowsPerPage] = useState(10);
   // Consolidated filter state
@@ -104,81 +109,6 @@ const EmployeeTable: React.FC<EmployeeTableProps> = ({
     window.addEventListener("resize", handleResize);
     return () => window.removeEventListener("resize", handleResize); // Cleanup on unmount
   }, []);
-
-  useEffect(() => {
-    async function fetchEmployees() {
-      const employees = await getAllEmployees();
-      setEmployees(employees);
-      setEmployeeCount(employees.length);
-    }
-    fetchEmployees();
-  }, [refreshFlag, setEmployeeCount]);
-
-  const handleDeleteClick = (employee: EmployeeListItem) => {
-    setSelectedEmployee(employee);
-    setShowDialog(true);
-  };
-
-  const confirmDelete = async () => {
-    if (!selectedEmployee) {
-      console.error("No employee selected for deletion");
-      setShowDialog(false);
-
-      showToast("error", "Failed to delete employee!", [
-        "No employee selected for deletion",
-      ]);
-      return;
-    }
-
-    try {
-      await deleteEmployee(selectedEmployee.id);
-      // console.log("Delete successful:", response.message);
-
-      // Show a success toast message
-      showToast("success", "Success!", [
-        `Employee "${selectedEmployee?.fullName}" deleted successfully!`,
-      ]);
-
-      // Update the UI on successful deletion
-      const updatedEmployees = employees.filter((emp) => emp.id !== selectedEmployee.id);
-      setEmployees(updatedEmployees);
-      setEmployeeCount(updatedEmployees.length);
-    } catch (err) {
-      if (err instanceof Error) {
-        // console.error("Error deleting employee:", err.message);
-
-        // Display the regular error message
-        const errorMessages = err.message.split("\n");
-        showToast("error", "Failed to delete employee!", errorMessages);
-      } else if (
-        err &&
-        typeof err === "object" &&
-        "status" in err &&
-        "message" in err
-      ) {
-        // Handle custom error object thrown from `deleteEmployee` and display its properties
-        const errorMessage = err.message;
-        showToast("error", "Failed to delete employee!", [
-          `Status: ${err.status}`,
-          errorMessage as string,
-        ]);
-      } else {
-        // Fallback for unknown errors
-        console.error(
-          "Error deleting employee, unexpected error occured: ",
-          err
-        );
-
-        // Display a generic error message
-        showToast("error", "Failed to delete employee!", [
-          "An unknown error occurred",
-        ]);
-      }
-    } finally {
-      setShowDialog(false);
-      setSelectedEmployee(null);
-    }
-  };
 
   // Column definitions
   const { columns } = useEmployeeTableColumns({
@@ -350,7 +280,7 @@ const EmployeeTable: React.FC<EmployeeTableProps> = ({
       {/* Confirmation Modal */}
       <ConfirmationModal
         isOpen={showDialog}
-        onClose={() => setShowDialog(false)}
+        onClose={closeDeleteDialog}
         onConfirm={confirmDelete}
         title="Confirm Deletion"
         description={`Are you sure you want to delete "${selectedEmployee?.fullName}"? This action cannot be undone.`}

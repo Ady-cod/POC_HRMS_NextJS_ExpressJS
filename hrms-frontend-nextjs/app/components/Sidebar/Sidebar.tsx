@@ -120,7 +120,7 @@ const Sidebar = ({ isOpen, toggleSidebar }: SideBarProps) => {
           </li>
           <li>
             <Link
-              href="/admin/employee"
+              href="/admin/employee/list"
               onClick={handleSidebarItemClick}
               className={`flex items-center gap-3 px-4 py-2 rounded-lg transition-all duration-200 ${
                 pathname === "/admin/employee"

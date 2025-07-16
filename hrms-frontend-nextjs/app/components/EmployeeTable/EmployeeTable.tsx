@@ -1,6 +1,7 @@
 import React, { useState, useEffect, useMemo } from "react";
 import DataTable from "react-data-table-component";
 import { EmployeeListItem } from "@/types/types";
+import { formatDate } from "@/utils/dateUtils";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faDownload } from "@fortawesome/free-solid-svg-icons";
 
@@ -77,26 +78,10 @@ const EmployeeTable: React.FC<EmployeeTableProps> = ({
     });
   };
 
-  // Utility function for consistent date formatting
-  const formatDate = (dateString: string, format: 'display' | 'csv' = 'display'): string => {
-    if (!dateString) return "N/A";
-    try {
-      const date = new Date(dateString);
-      if (format === 'csv') {
-        const day = String(date.getDate()).padStart(2, "0");
-        const month = String(date.getMonth() + 1).padStart(2, "0");
-        const year = date.getFullYear();
-        return `'${day}-${month}-${year}`;
-      }
-      // Default display format (YYYY-MM-DD for consistency)
-      return date.toISOString().split("T")[0];
-    } catch {
-      return "N/A";
-    }
-  };
+
 
   // CSV Export functionality
-  const { exportToCSV } = useCSVExport({ formatDate });
+  const { exportToCSV } = useCSVExport();
 
   useEffect(() => {
     // Set the initial state for the  screen size based on the window width
@@ -116,7 +101,6 @@ const EmployeeTable: React.FC<EmployeeTableProps> = ({
     rowsPerPage,
     handleEdit,
     handleDeleteClick,
-    formatDate,
     isSmallScreen,
     activeSectionIndex,
     activeColumnIndex,

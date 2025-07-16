@@ -9,13 +9,13 @@ import {
 } from '@fortawesome/free-solid-svg-icons';
 import { Trash2, Pencil } from 'lucide-react';
 import { EmployeeListItem } from '@/types/types';
+import { formatDate } from '@/utils/dateUtils';
 
 interface UseEmployeeTableColumnsProps {
   currentPage: number;
   rowsPerPage: number;
   handleEdit: (employee: EmployeeListItem) => void;
   handleDeleteClick: (employee: EmployeeListItem) => void;
-  formatDate: (dateString: string, format?: 'display' | 'csv') => string;
   isSmallScreen: boolean;
   activeSectionIndex: number;
   activeColumnIndex: number;
@@ -28,7 +28,6 @@ export const useEmployeeTableColumns = ({
   rowsPerPage,
   handleEdit,
   handleDeleteClick,
-  formatDate,
   isSmallScreen,
   activeSectionIndex,
   activeColumnIndex,
@@ -147,7 +146,7 @@ export const useEmployeeTableColumns = ({
         sortable: true,
       },
     ],
-  ], [formatDate]);
+  ], []);
 
   const columnSectionsExpanded = useMemo(
     () => columnSections.flat(),

@@ -1,11 +1,8 @@
 import { useCallback } from 'react';
 import { EmployeeListItem } from '@/types/types';
+import { formatDate } from '@/utils/dateUtils';
 
-interface UseCSVExportProps {
-  formatDate: (dateString: string, format?: 'display' | 'csv') => string;
-}
-
-export const useCSVExport = ({ formatDate }: UseCSVExportProps) => {
+export const useCSVExport = () => {
   // Helper function to format null/undefined values
   const formatValue = useCallback((value: string | null | undefined): string => {
     if (!value) return "N/A";
@@ -65,7 +62,7 @@ export const useCSVExport = ({ formatDate }: UseCSVExportProps) => {
 
     // Clean up the URL object
     URL.revokeObjectURL(url);
-  }, [formatDate, formatValue]);
+  }, [formatValue]);
 
   return { exportToCSV };
 }; 

@@ -81,7 +81,7 @@ const Sidebar = ({ isOpen, toggleSidebar }: SideBarProps) => {
             : "-translate-x-full absolute opacity-0"
         } bg-white sm:bg-gradient-to-b from-gray-200 to-white sm:p-6 pt-10 sidebar`}
       >
-        <ul className="whitespace-nowrap font-semibold sm:text-[15px] sticky top-28 flex flex-col gap-4 sidebaritems">
+        <ul className="whitespace-nowrap font-semibold sm:text-[15px] sticky top-28 flex flex-col gap-6 sidebaritems">
           {/* Home */}
           <li>
             <Link
@@ -96,8 +96,8 @@ const Sidebar = ({ isOpen, toggleSidebar }: SideBarProps) => {
               <Image
                 src="/images/home.png"
                 alt="Home icon"
-                width={40}
-                height={40}
+                width={24}
+                height={24}
               />
               Home
             </Link>
@@ -117,8 +117,8 @@ const Sidebar = ({ isOpen, toggleSidebar }: SideBarProps) => {
               <Image
                 src="/images/My profile icon.png"
                 alt="Profile icon"
-                width={40}
-                height={40}
+                width={24}
+                height={24}
               />
               My Profile
             </Link>
@@ -131,7 +131,7 @@ const Sidebar = ({ isOpen, toggleSidebar }: SideBarProps) => {
             onMouseLeave={() => setIsHovered(false)}
           >
             <div
-              className={`w-full flex items-center gap-3 px-4 rounded-lg cursor-default transition-all duration-200 ${
+              className={`w-full flex items-center gap-3 px-4 py-2 rounded-lg cursor-default transition-all duration-200 ${
                 pathname.startsWith("/admin/employee")
                   ? "bg-blue-200 border-r-4 border-blue-500 text-blue-700 scale-110"
                   : "hover:bg-gray-300 hover:border-r-2 hover:border-gray-500 hover:scale-110"
@@ -140,8 +140,8 @@ const Sidebar = ({ isOpen, toggleSidebar }: SideBarProps) => {
               <Image
                 src="/images/My learning path icon.png"
                 alt="Learning Path icon"
-                width={40}
-                height={40}
+                width={24}
+                height={24}
               />
               Employee
             </div>
@@ -156,17 +156,17 @@ const Sidebar = ({ isOpen, toggleSidebar }: SideBarProps) => {
             >
               <li>
                 <Link
-                  href="/admin/employee"
+                  href="/admin/employee/list"
                   onClick={handleSidebarItemClick}
                   className={`flex items-start gap-2 px-2 py-1 rounded-lg transition-all duration-200 ${
-                    pathname === "/admin/employee"
+                    pathname === "/admin/employee/list"
                       ? "text-blue-600"
                       : "hover:bg-gray-300 hover:border-r-2 hover:border-gray-500 hover:scale-105 text-black"
                   }`}
                 >
                   <span
                     className={`text-lg leading-none ${
-                      pathname === "/admin/employee" ? "text-blue-600" : ""
+                      pathname === "/admin/employee/list" ? "text-blue-600" : ""
                     }`}
                   >
                     •
@@ -177,17 +177,17 @@ const Sidebar = ({ isOpen, toggleSidebar }: SideBarProps) => {
 
               <li>
                 <Link
-                  href="/admin/employee/weekwise"
+                  href="/admin/employee/week-wise"
                   onClick={handleSidebarItemClick}
                   className={`flex items-start gap-2 px-2 py-1 rounded-lg transition-all duration-200 ${
-                    pathname === "/admin/employee/weekwise"
+                    pathname === "/admin/employee/week-wise"
                       ? "text-blue-600"
                       : "hover:bg-gray-300 hover:border-r-2 hover:border-gray-500 hover:scale-105 text-black"
                   }`}
                 >
                   <span
                     className={`text-lg leading-none ${
-                      pathname === "/admin/employee/weekwise"
+                      pathname === "/admin/employee/week-wise"
                         ? "text-blue-600"
                         : ""
                     }`}
@@ -214,8 +214,8 @@ const Sidebar = ({ isOpen, toggleSidebar }: SideBarProps) => {
               <Image
                 src="/images/Applicants.png"
                 alt="Applicant icon"
-                width={40}
-                height={40}
+                width={24}
+                height={24}
               />
               Applicants
             </Link>
@@ -235,8 +235,8 @@ const Sidebar = ({ isOpen, toggleSidebar }: SideBarProps) => {
               <Image
                 src="/images/My workflow icon.png"
                 alt="Workflow icon"
-                width={40}
-                height={40}
+                width={24}
+                height={24}
               />
               My Workflow
             </Link>
@@ -256,8 +256,8 @@ const Sidebar = ({ isOpen, toggleSidebar }: SideBarProps) => {
               <Image
                 src="/images/Master.png"
                 alt="Master icon"
-                width={40}
-                height={40}
+                width={24}
+                height={24}
               />
               Masters
             </Link>
@@ -277,15 +277,15 @@ const Sidebar = ({ isOpen, toggleSidebar }: SideBarProps) => {
               <Image
                 src="/images/HR.png"
                 alt="HR icon"
-                width={40}
-                height={40}
+                width={24}
+                height={24}
               />
               Core HR
             </Link>
           </li>
 
           {/* Logout */}
-          <li className="logout bottom-3">
+          <li className="logout bottom-3 mt-8">
             <Link
               href="/"
               onClick={handleSidebarItemClick}
@@ -294,8 +294,8 @@ const Sidebar = ({ isOpen, toggleSidebar }: SideBarProps) => {
               <Image
                 src="/images/Logout icon.png"
                 alt="Logout icon"
-                width={40}
-                height={40}
+                width={24}
+                height={24}
               />
               Logout
             </Link>

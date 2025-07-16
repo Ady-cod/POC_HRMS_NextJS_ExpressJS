@@ -1,16 +1,13 @@
 .sidebaritems li{
-    padding: 10px;
-    font-family: cursive;
+    font-family: 'Roboto', sans-serif;
 }
 
- .sidebaritems  li a img{
-    padding-right: 18px;
-}
 .logout{
     /* width: 80%; */
     font-size: 18px;
-    font-family: cursive;
+    font-family: 'Roboto', sans-serif;
     list-style: none;
     display: block;
     border-top: 2px solid black;
+    padding-top: 16px;
 }

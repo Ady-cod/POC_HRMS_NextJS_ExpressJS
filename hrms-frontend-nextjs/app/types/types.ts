@@ -45,9 +45,9 @@ export interface EmployeeListItem {
   birthDate: string;
   dateOfJoining: string;
   department: DepartmentListItem | null;
-  gender: EmployeeGender;
   role: EmployeeRole;
   status: EmployeeStatus;
+  gender: EmployeeGender;
   inductionCompleted?: boolean | null;
   profilePhotoUrl?: string | null;
   timezone?: string | null;

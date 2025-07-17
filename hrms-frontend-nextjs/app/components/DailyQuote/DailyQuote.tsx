@@ -1,12 +1,6 @@
 import { Card } from "@/components/ui/card";
-import { IBM_Plex_Sans } from "next/font/google";
 import { fetchDailyQuoteServer } from "@/lib/quotesApi";
 
-const ibmPlexSans = IBM_Plex_Sans({
-  subsets: ["latin"],
-  weight: ["400", "700"],
-  variable: "--font-ibm-plex-sans",
-});
 
 const DailyQuote = async () => {
   // Fetch quote on the server side

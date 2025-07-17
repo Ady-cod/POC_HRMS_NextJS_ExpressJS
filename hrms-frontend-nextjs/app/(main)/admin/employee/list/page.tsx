@@ -2,7 +2,7 @@
 import React, { useState } from "react";
 import AddNewDataButton from "@/components/AddNewDataButton/AddNewDataButton";
 import EmployeeTable from "@/components/EmployeeTable/EmployeeTable";
-import { EmployeeListItem } from "@/types/types";
+import { useEmployeeModal } from "@/hooks/useEmployeeModal";
 
 import dynamic from "next/dynamic";
 
@@ -12,31 +12,18 @@ const ModalForm = dynamic(() => import("@/components/ModalForm/ModalForm"), {
 });
 
 const EmployeePage = () => {
-  // Consolidated modal state
-  const [modalState, setModalState] = useState({
-    isOpen: false,
-    employeeData: null as EmployeeListItem | null,
-  });
-  const [refreshFlag, setRefreshFlag] = useState(false);
   const [employeeCount, setEmployeeCount] = useState(0);
-
-  // Modal management functions
-  const openModalForAdd = () => {
-    setModalState({ isOpen: true, employeeData: null });
-  };
-
-  const openModalForEdit = (employeeData: EmployeeListItem) => {
-    setModalState({ isOpen: true, employeeData });
-  };
-
-  const closeModal = () => {
-    setModalState({ isOpen: false, employeeData: null });
-  };
-
-  const refreshEmployees = () => {
-    setRefreshFlag(!refreshFlag);
-    closeModal();
-  };
+  
+  // Use the custom hook for modal management
+  const {
+    isModalOpen,
+    employeeData,
+    refreshFlag,
+    openModalForAdd,
+    openModalForEdit,
+    closeModal,
+    refreshEmployees,
+  } = useEmployeeModal();
 
   return (
     <div>
@@ -63,10 +50,10 @@ const EmployeePage = () => {
 
       {/* Modal Form for adding new data */}
       <ModalForm
-        isOpen={modalState.isOpen}
+        isOpen={isModalOpen}
         onClose={closeModal}
         refreshEmployees={refreshEmployees}
-        employeeData={modalState.employeeData}
+        employeeData={employeeData}
       />
 
       {/* Table section */}

@@ -1,21 +1,34 @@
 "use client";
 import React, { useState } from "react";
 import EmployeeTable from "@/components/EmployeeTable/EmployeeTable";
-import { EmployeeListItem } from "@/types/types";
 import { WEEK_WISE_COLUMN_CONFIG } from "@/types/columnConfig";
+import { useEmployeeModal } from "@/hooks/useEmployeeModal";
+import AddNewDataButton from "@/components/AddNewDataButton/AddNewDataButton";
+
+import dynamic from "next/dynamic";
+
+// Dynamically import the ModalForm component to reduce the initial bundle size
+const ModalForm = dynamic(() => import("@/components/ModalForm/ModalForm"), {
+  ssr: false,
+});
 
 const WeekWisePage = () => {
-  const [refreshFlag, setRefreshFlag] = useState(false);
   const [employeeCount, setEmployeeCount] = useState(0);
-
-  const handleEdit = (employeeData: EmployeeListItem) => {
-    console.log('Edit employee in week-wise view:', employeeData.fullName);
-    // TODO: Implement edit functionality for week-wise view
-    // This could open a modal or navigate to an edit page
-  };
+  
+  // Use the custom hook for modal management
+  const {
+    isModalOpen,
+    employeeData,
+    refreshFlag,
+    openModalForAdd,
+    openModalForEdit,
+    closeModal,
+    refreshEmployees,
+  } = useEmployeeModal();
 
   const handleRefresh = () => {
-    setRefreshFlag(!refreshFlag);
+    // Trigger refresh from the hook instead of local state
+    refreshEmployees();
   };
 
   return (
@@ -36,6 +49,9 @@ const WeekWisePage = () => {
             Total Count: {employeeCount}
           </button>
 
+          {/* Add New Data Button */}
+          <AddNewDataButton onClick={openModalForAdd} />
+
           {/* Refresh Button */}
           <button
             onClick={handleRefresh}
@@ -46,10 +62,18 @@ const WeekWisePage = () => {
         </div>
       </div>
 
+      {/* Modal Form for adding/editing employees */}
+      <ModalForm
+        isOpen={isModalOpen}
+        onClose={closeModal}
+        refreshEmployees={refreshEmployees}
+        employeeData={employeeData}
+      />
+
       {/* Week-wise Table */}
       <EmployeeTable
         refreshFlag={refreshFlag}
-        handleEdit={handleEdit}
+        handleEdit={openModalForEdit}
         setEmployeeCount={setEmployeeCount}
         columnConfig={WEEK_WISE_COLUMN_CONFIG}
       />

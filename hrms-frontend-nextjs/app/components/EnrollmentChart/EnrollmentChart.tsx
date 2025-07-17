@@ -191,52 +191,74 @@ export default function EnrollmentChart({ employees, hasError }: EnrollmentChart
             </Select>
           </div>
 
-      {loading ? (
-        <div className="w-full flex-1 flex items-center justify-center text-gray-600">
-          Loading...
-        </div>
-      ) : (
-        <div className="w-full overflow-x-auto flex-1">
-          <div
-            className="min-w-full h-full"
-            style={{
-              width:
-                selectedDept !== "all"
-                  ? Math.max(600, chartData.length * 60) + "px"
-                  : "100%",
-            }}
-          >
-            {chartData.length === 0 ? (
-              <div className="w-full h-full flex items-center justify-center text-gray-600">
-                No data available for the selected filters.
+          {loading ? (
+            <div className="w-full flex-1 flex items-center justify-center text-gray-600">
+              Loading...
+            </div>
+          ) : (
+            <div className="w-full overflow-x-auto flex-1">
+              <div
+                className="min-w-full h-full"
+                style={{
+                  width:
+                    selectedDept !== "all"
+                      ? Math.max(600, chartData.length * 60) + "px"
+                      : "100%",
+                }}
+              >
+                {chartData.length === 0 ? (
+                  <div className="flex flex-col items-center justify-center h-80 bg-red-50 border border-red-200 rounded-lg p-6 text-center">
+                    <svg
+                      xmlns="http://www.w3.org/2000/svg"
+                      className="h-16 w-16 text-red-800 mb-4"
+                      viewBox="0 0 24 24"
+                      fill="none"
+                      stroke="currentColor"
+                      strokeWidth={2}
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                    >
+                      <circle cx="12" cy="12" r="10" />
+                      <line x1="15" y1="9" x2="9" y2="15" />
+                      <line x1="9" y1="9" x2="15" y2="15" />
+                    </svg>
+                    <h2 className="text-lg font-semibold text-red-800 mb-1">
+                      No data available for the selected filter
+                    </h2>
+                    <p className="text-sm text-red-800">
+                      {displayError ||
+                        "Try changing the year or department to see results."}
+                    </p>
+                  </div>
+                ) : (
+                  <ResponsiveContainer width="100%" height={320}>
+                    <BarChart data={chartData}>
+                      <CartesianGrid strokeDasharray="3 3" />
+                      <XAxis
+                        dataKey={
+                          selectedDept === "all" ? "department" : "month"
+                        }
+                        interval={0}
+                        angle={selectedDept !== "all" ? -45 : 0}
+                        textAnchor={selectedDept !== "all" ? "end" : "middle"}
+                        height={selectedDept !== "all" ? 100 : 60}
+                      />
+                      <YAxis allowDecimals={false} />
+                      <Tooltip />
+                      <Bar
+                        dataKey="employees"
+                        fill="#6b767f"
+                        radius={[6, 6, 0, 0]}
+                        barSize={selectedDept !== "all" ? 35 : 40}
+                      />
+                    </BarChart>
+                  </ResponsiveContainer>
+                )}
               </div>
-            ):(
-              <ResponsiveContainer width="100%" height={320}>
-                <BarChart data={chartData}>
-                  <CartesianGrid strokeDasharray="3 3" />
-                  <XAxis
-                    dataKey={selectedDept === "all" ? "department" : "month"}
-                    interval={0}
-                    angle={selectedDept !== "all" ? -45 : 0}
-                    textAnchor={selectedDept !== "all" ? "end" : "middle"}
-                    height={selectedDept !== "all" ? 100 : 60}
-                  />
-                  <YAxis allowDecimals={false} />
-                  <Tooltip />
-                  <Bar
-                    dataKey="employees"
-                    fill="#6b767f"
-                    radius={[6, 6, 0, 0]}
-                    barSize={selectedDept !== "all" ? 35 : 40}
-                  />
-                </BarChart>
-              </ResponsiveContainer>
-            )}
-          </div>
-        </div>
+            </div>
+          )}
+        </>
       )}
-            </>
-      )}
-      </div>
+    </div>
   );
 }

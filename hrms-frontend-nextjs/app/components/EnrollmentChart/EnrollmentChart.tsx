@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useState, useMemo } from "react";
 import {
   Select,
   SelectTrigger,
@@ -17,73 +17,116 @@ import {
   Tooltip,
   ResponsiveContainer,
 } from "recharts";
-import { format, parseISO, parse, getYear } from "date-fns";
+import { format, parseISO, getYear } from "date-fns";
 import { EmployeeListItem } from "@/types/types";
 import { showToast } from "@/utils/toastHelper";
+
+interface ProcessedEmployee extends EmployeeListItem {
+  joinYear: number | null;
+  joinDate: Date | null;
+  joinMonthYear: string | null;
+}
 
 interface EnrollmentChartProps {
   employees: EmployeeListItem[];
   hasError?: boolean;
 }
 
+// Add discriminated union for year filter
+type YearFilter = { kind: "all" } | { kind: "year"; value: number };
+
 export default function EnrollmentChart({ employees, hasError }: EnrollmentChartProps) {
-  const [departments, setDepartments] = useState<string[]>([]);
-  const [years, setYears] = useState<number[]>([]);
   const [selectedDept, setSelectedDept] = useState<string>("all");
-  const [selectedYear, setSelectedYear] = useState<number | "all">("all");
+  const [selectedYear, setSelectedYear] = useState<YearFilter>({ kind: "all" });
   const [loading, setLoading] = useState<boolean>(true);
   const [displayError, setDisplayError] = useState<string>("");
 
+  // Pre-process employee data to avoid redundant date parsing
+  const processedEmployees = useMemo<ProcessedEmployee[]>(() => {
+    if (hasError || !employees.length) return [];
+    
+    return employees.map((emp) => {
+      let joinYear: number | null = null;
+      let joinDate: Date | null = null;
+      let joinMonthYear: string | null = null;
+
+      if (emp.dateOfJoining) {
+        try {
+          joinDate = parseISO(emp.dateOfJoining);
+          joinYear = getYear(joinDate);
+          joinMonthYear = format(joinDate, "MMM yyyy");
+        } catch (error) {
+          console.warn(`Invalid date format for employee ${emp.id}: ${emp.dateOfJoining}`, error);
+        }
+      }
+
+      return {
+        ...emp,
+        joinYear,
+        joinDate,
+        joinMonthYear,
+      };
+    });
+  }, [employees, hasError]);
+
+  // Extract unique departments and years from processed data
+  const { uniqueDepartments, uniqueYears } = useMemo(() => {
+    const deptSet = new Set<string>();
+    const yearSet = new Set<number>();
+
+    processedEmployees.forEach((emp) => {
+      deptSet.add(emp.department?.name || "Unknown");
+      if (emp.joinYear !== null) {
+        yearSet.add(emp.joinYear);
+      }
+    });
+
+    return {
+      uniqueDepartments: Array.from(deptSet),
+      uniqueYears: Array.from(yearSet).sort((a, b) => b - a), // Newest first
+    };
+  }, [processedEmployees]);
+
   useEffect(() => {
-    async function processData() {
+    setLoading(true);
+    setDisplayError(""); // Clear error before processing
+    function processData() {
       try {
         if (hasError) {
-          // Don't show toast - parent handles error display
           setDisplayError("Unable to load employee data");
-          setLoading(false);
           return;
         }
-
-        const deptNames = Array.from(
-          new Set(employees.map((emp) => emp.department?.name || "Unknown"))
-        );
-        setDepartments(deptNames);
-        setLoading(false);
-
-        // Extract unique years from dateOfJoining
-        const yearSet = new Set<number>();
-        employees.forEach((emp) => {
-          if (emp.dateOfJoining) {
-            yearSet.add(getYear(parseISO(emp.dateOfJoining)));
-          }
-        });
-
-        const sortedYears = Array.from(yearSet).sort((a, b) => b - a);
-        setYears(sortedYears);
-        setSelectedYear("all");
+        if (processedEmployees.length === 0) {
+          setDisplayError("No employee data available");
+          return;
+        }
+        setSelectedYear({ kind: "all" });
       } catch (processError) {
         console.error("Error processing data:", processError);
         setDisplayError("Error processing employee data");
-        // Show toast for component-specific processing errors (not employee fetch errors)
         showToast("error", "Enrollment Chart Error", [
           `Unable to process enrollment data: ${processError}`,
         ]);
+      } finally {
         setLoading(false);
       }
     }
-
     processData();
-  }, [employees, hasError]);
+  }, [processedEmployees, hasError]);
 
-  const getChartData = () => {
+  // Memoize chart data calculation to avoid recalculation on every render
+  const chartData = useMemo(() => {
     try {
+      if (processedEmployees.length === 0) {
+        return [];
+      }
+
       if (selectedDept === "all") {
+        // Department-wise view
         const deptMap: Record<string, number> = {};
-        employees
-          .filter(
-            (emp) =>
-              selectedYear === "all" ||
-              getYear(parseISO(emp.dateOfJoining)) === selectedYear
+        processedEmployees
+          .filter((emp) =>
+            selectedYear.kind === "all" || emp.joinYear === selectedYear.value
           )
           .forEach((emp) => {
             const dept = emp.department?.name || "Unknown";
@@ -95,33 +138,34 @@ export default function EnrollmentChart({ employees, hasError }: EnrollmentChart
           employees,
         }));
       } else {
-        const monthMap: Record<string, number> = {};
-        employees
-          .filter(
-            (emp) =>
-              emp.department?.name === selectedDept &&
-              (selectedYear === "all" ||
-                getYear(parseISO(emp.dateOfJoining)) === selectedYear)
+        // Monthly view for selected department
+        const monthMap: Record<string, { count: number; sortDate: Date }> = {};
+        processedEmployees
+          .filter((emp) =>
+            emp.department?.name === selectedDept &&
+            emp.joinMonthYear !== null &&
+            emp.joinDate !== null &&
+            (selectedYear.kind === "all" || emp.joinYear === selectedYear.value)
           )
           .forEach((emp) => {
-            const date = parseISO(emp.dateOfJoining);
-            const month = format(date, "MMM yyyy");
-            monthMap[month] = (monthMap[month] || 0) + 1;
+            const monthKey = emp.joinMonthYear!;
+            if (!monthMap[monthKey]) {
+              monthMap[monthKey] = {
+                count: 0,
+                sortDate: emp.joinDate!,
+              };
+            }
+            monthMap[monthKey].count += 1;
           });
 
-          // Sort entries chronologically
-          return Object.entries(monthMap)
-            .map(([month, employees]) => ({
-              month,
-              employees,
-              sortDate: parse(month, "MMM yyyy", new Date()), // Convert "MMM yyyy" to Date for sorting
-            }))
-            .sort((a, b) => a.sortDate.getTime() - b.sortDate.getTime())
-            .map(({ month, employees }) => ({
-              month,
-              employees,
-            }));
-        }
+        // Sort entries chronologically and return formatted data
+        return Object.entries(monthMap)
+          .sort(([, a], [, b]) => a.sortDate.getTime() - b.sortDate.getTime())
+          .map(([month, { count }]) => ({
+            month,
+            employees: count,
+          }));
+      }
     } catch (error) {
       console.error("Error generating chart data:", error);
       setDisplayError("Error generating chart data");
@@ -130,10 +174,7 @@ export default function EnrollmentChart({ employees, hasError }: EnrollmentChart
       ]);
       return []; // Return empty array as fallback
     }
-  };
-  
-
-  const chartData = getChartData();
+  }, [selectedDept, selectedYear, processedEmployees]);
 
   return (
     <div className="rounded-2xl shadow-sm px-8 pt-8 justify-center bg-black/10 border border-black-50 min-h-full flex flex-col">
@@ -142,16 +183,17 @@ export default function EnrollmentChart({ employees, hasError }: EnrollmentChart
 
         <Select
           onValueChange={(val) =>
-            setSelectedYear(val === "all" ? "all" : parseInt(val))
+            setSelectedYear(val === "all" ? { kind: "all" } : { kind: "year", value: Number(val) })
           }
           defaultValue="all"
+          disabled={loading || !!displayError}
         >
           <SelectTrigger className="w-32 border-0 shadow-none">
             <SelectValue placeholder="Select Year" />
           </SelectTrigger>
           <SelectContent>
             <SelectItem value="all">All Years</SelectItem>
-            {years.map((year) => (
+            {uniqueYears.map((year) => (
               <SelectItem key={year} value={year.toString()}>
                 {year}
               </SelectItem>
@@ -176,17 +218,20 @@ export default function EnrollmentChart({ employees, hasError }: EnrollmentChart
             <Select
               onValueChange={(val) => setSelectedDept(val)}
               defaultValue="all"
+              disabled={loading}
             >
               <SelectTrigger className="w-60 border-black">
                 <SelectValue placeholder="Select Department" />
               </SelectTrigger>
               <SelectContent>
                 <SelectItem value="all">Show All</SelectItem>
-                {departments.map((dept) => (
-                  <SelectItem key={dept} value={dept}>
-                    {dept}
-                  </SelectItem>
-                ))}
+                {uniqueDepartments
+                  .filter((dept) => dept !== "Unknown")
+                  .map((dept) => (
+                    <SelectItem key={dept} value={dept}>
+                      {dept}
+                    </SelectItem>
+                  ))}
               </SelectContent>
             </Select>
           </div>

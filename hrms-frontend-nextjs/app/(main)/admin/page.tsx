@@ -9,13 +9,6 @@ import EnrollmentChart from "@/components/EnrollmentChart/EnrollmentChart";
 import { getAllEmployees } from "@/actions/employee";
 import { EmployeeListItem } from "@/types/types";
 import ErrorToast from "@/components/ErrorToast/ErrorToast";
-import { Roboto } from "next/font/google";
-
-const roboto = Roboto({
-  subsets: ["latin"],
-  weight: ["400", "700"],
-  variable: "--font-ibm-plex-sans",
-});
 
 const getTimeBasedGreeting = () => {
   const hour = new Date().getHours();
@@ -45,7 +38,7 @@ const AdminHomePage = async () => {
   }
 
   return (
-    <div className={`p-2 space-y-8 w-full ${roboto.variable}`}>
+    <div className={`p-2 space-y-8 w-full`}>
       {/* Error toast handler */}
       <ErrorToast
         hasError={!!employeeDataError}

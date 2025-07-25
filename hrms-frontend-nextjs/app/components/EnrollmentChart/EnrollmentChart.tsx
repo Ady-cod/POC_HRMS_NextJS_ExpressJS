@@ -41,6 +41,9 @@ export default function EnrollmentChart({ employees, hasError }: EnrollmentChart
   const [loading, setLoading] = useState<boolean>(true);
   const [displayError, setDisplayError] = useState<string>("");
 
+  // Minimum pixels per bar to prevent label overlap
+  const MIN_BAR_PX = 80;
+
   // Pre-process employee data to avoid redundant date parsing
   const processedEmployees = useMemo<ProcessedEmployee[]>(() => {
     if (hasError || !employees.length) return [];
@@ -248,7 +251,7 @@ export default function EnrollmentChart({ employees, hasError }: EnrollmentChart
                   width:
                     selectedDept !== "all"
                       ? Math.max(600, chartData.length * 60) + "px"
-                      : "100%",
+                      : Math.max(chartData.length * MIN_BAR_PX, 600) + "px",
                 }}
               >
                 {chartData.length === 0 ? (
@@ -284,9 +287,9 @@ export default function EnrollmentChart({ employees, hasError }: EnrollmentChart
                           selectedDept === "all" ? "department" : "month"
                         }
                         interval={0}
-                        angle={selectedDept !== "all" ? -45 : 0}
-                        textAnchor={selectedDept !== "all" ? "end" : "middle"}
-                        height={selectedDept !== "all" ? 100 : 60}
+                        angle={selectedDept === "all" ? -35 : -45}
+                        textAnchor="end"
+                        height={90}
                       />
                       <YAxis allowDecimals={false} />
                       <Tooltip />

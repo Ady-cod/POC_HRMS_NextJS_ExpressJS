@@ -3,13 +3,6 @@
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Plus, Video } from "lucide-react";
-import { IBM_Plex_Sans } from "next/font/google";
-
-const ibmPlexSans = IBM_Plex_Sans({
-  subsets: ["latin"],
-  weight: ["400" ,"700"],
-  variable: "--font-ibm-plex-sans",
-})
 
 const ScheduleCard = () => {
   const tasks = [
@@ -26,7 +19,7 @@ const ScheduleCard = () => {
 
   return (
     <Card
-      className={`p-6 rounded-xl bg-black/10 h-full pt-14 shadow-none ${ibmPlexSans.variable}`}
+      className={`p-6 rounded-xl bg-black/10 h-full pt-14 shadow-none`}
     >
       <div className="flex justify-between items-center mb-4">
         <div className="text-center">

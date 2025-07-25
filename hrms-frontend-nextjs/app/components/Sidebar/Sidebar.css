@@ -1,11 +1,5 @@
-.sidebaritems li{
-    font-family: 'Roboto', sans-serif;
-}
-
 .logout{
-    /* width: 80%; */
     font-size: 18px;
-    font-family: 'Roboto', sans-serif;
     list-style: none;
     display: block;
     border-top: 2px solid black;

@@ -1,8 +1,11 @@
 "use server";
 import { EmployeeListItem } from "@/types/types";
-import { createEmployeeSchema, updateEmployeeSchema } from "@/schemas/employeeSchema";
+import {
+  createEmployeeSchema,
+  updateEmployeeSchema,
+} from "@/schemas/employeeSchema";
 import { z } from "zod";
-import { revalidatePath } from "next/cache";
+import { revalidateTag } from "next/cache";
 
 const BACKEND_BASE_URL = process.env.NEXT_PUBLIC_BACKEND_BASE_URL;
 const EMPLOYEE_ENDPOINT = process.env.NEXT_PUBLIC_EMPLOYEE_ENDPOINT;
@@ -10,7 +13,7 @@ const EMPLOYEE_ENDPOINT = process.env.NEXT_PUBLIC_EMPLOYEE_ENDPOINT;
 export async function getAllEmployees(): Promise<EmployeeListItem[]> {
   try {
     const response = await fetch(`${BACKEND_BASE_URL}${EMPLOYEE_ENDPOINT}`, {
-      cache: "no-store", // Ensure no caching for fresh data
+      next: { tags: ["employees"] }, // <— tag goes into the Data Cache
     });
 
     if (!response.ok) {
@@ -73,9 +76,8 @@ export async function deleteEmployee(id: string): Promise<{ message: string }> {
       throw { status: response.status, message: errorMessage };
     }
 
-    // Invalidate cache for pages that depend on employee data
-    // revalidate every page that uses the /admin layout
-    revalidatePath("/admin", "layout");
+    // Clear cache entries tagged "employees" in order to update the employee list according to the latest changes
+    revalidateTag("employees");
 
     return await response.json();
   } catch (error) {
@@ -128,18 +130,19 @@ export async function createEmployee(
 
     const result = await response.json();
 
-    // Invalidate cache for pages that depend on employee data
-    // revalidate every page that uses the /admin layout
-    revalidatePath("/admin", "layout");
+    // Clear cache entries tagged "employees" in order to update the employee list according to the latest changes
+    revalidateTag("employees");
 
     return { success: true, message: result.message };
     // console.log("Employee successfully created:", result);
   } catch (error) {
     if (error instanceof TypeError && error.message.includes("fetch")) {
       console.error("Unable to successfully perform the server action:", error);
-      throw new Error("Unable to complete the server action." +
-        "This may be due to a network issue, server downtime, or an unexpected error.\n" + 
-        "Please check your internet connection or try again later.");
+      throw new Error(
+        "Unable to complete the server action." +
+          "This may be due to a network issue, server downtime, or an unexpected error.\n" +
+          "Please check your internet connection or try again later."
+      );
     } else if (error instanceof Error) {
       console.error("Error creating employee:", error);
       throw new Error(`${error.message}`);
@@ -148,7 +151,7 @@ export async function createEmployee(
       throw new Error("Failed to create employee: Unknown error");
     }
   }
-};
+}
 export async function updateEmployee(
   id: string,
   validatedData: z.infer<typeof updateEmployeeSchema>
@@ -194,18 +197,19 @@ export async function updateEmployee(
 
     const result = await response.json();
 
-    // Invalidate cache for pages that depend on employee data
-    // revalidate every page that uses the /admin layout
-    revalidatePath("/admin", "layout");
+    // Clear cache entries tagged "employees" in order to update the employee list according to the latest changes
+    revalidateTag("employees");
 
     return { success: true, message: result.message };
     // console.log("Employee successfully updated:", result);
   } catch (error) {
     if (error instanceof TypeError && error.message.includes("fetch")) {
       // console.error("Unable to successfully perform the server action:", error);
-      throw new Error("Unable to complete the server action." +
-        "This may be due to a network issue, server downtime, or an unexpected error.\n" + 
-        "Please check your internet connection or try again later.");
+      throw new Error(
+        "Unable to complete the server action." +
+          "This may be due to a network issue, server downtime, or an unexpected error.\n" +
+          "Please check your internet connection or try again later."
+      );
     } else if (error instanceof Error) {
       // console.error("Error updating employee:", error);
       throw new Error(`${error.message}`);
@@ -214,4 +218,4 @@ export async function updateEmployee(
       throw new Error("Failed to update employee: Unknown error");
     }
   }
-};
+}

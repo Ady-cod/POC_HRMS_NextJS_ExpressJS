@@ -30,6 +30,8 @@ export const login = async (req: Request, res: Response): Promise<void> => {
     const token = generateToken({
       employeeId: employee.id,
       role: employee.role,
+      fullName: employee.fullName,
+      email: employee.email,
     });
 
     res.status(200).json({ token });

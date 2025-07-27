@@ -13,6 +13,7 @@ import {
   SheetTrigger,
   SheetDescription,
 } from "@/components/shadCN/shadCNDialog";
+import { logout } from "@/actions/auth";
 
 interface SideBarProps {
   isOpen: boolean;
@@ -286,19 +287,20 @@ const Sidebar = ({ isOpen, toggleSidebar }: SideBarProps) => {
 
           {/* Logout */}
           <li className="logout bottom-3 mt-8">
-            <Link
-              href="/"
-              onClick={handleSidebarItemClick}
-              className="flex items-center gap-3 px-4 py-2 rounded-lg hover:bg-gray-300 hover:border-r-2 hover:border-gray-500 hover:scale-110 transition-all duration-200"
-            >
-              <Image
-                src="/images/Logout icon.png"
-                alt="Logout icon"
-                width={24}
-                height={24}
-              />
-              Logout
-            </Link>
+            <form action={logout}>
+              <button
+                type="submit" 
+                className="flex items-center gap-3 px-4 py-2 rounded-lg hover:bg-gray-300 hover:border-r-2 hover:border-gray-500 hover:scale-110 transition-all duration-200 w-full text-left"
+              >
+                <Image
+                  src="/images/Logout icon.png"
+                  alt="Logout icon"
+                  width={24}
+                  height={24}
+                />
+                Logout
+              </button>
+            </form>
           </li>
         </ul>
       </div>

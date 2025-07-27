@@ -68,3 +68,11 @@ export async function login(
   // Redirect to admin page, later on we will add a check for the user role and redirect to the appropriate page
   redirect("/admin");
 }
+
+export async function logout(): Promise<void> {
+  // Clear the JWT token from cookies
+  cookies().delete("token");
+  
+  // Redirect to login page
+  redirect("/login");
+}

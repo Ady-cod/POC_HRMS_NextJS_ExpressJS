@@ -9,12 +9,18 @@ import EnrollmentChart from "@/components/EnrollmentChart/EnrollmentChart";
 import { getAllEmployees } from "@/actions/employee";
 import { EmployeeListItem } from "@/types/types";
 import ErrorToast from "@/components/ErrorToast/ErrorToast";
+import { getOptionalAuth, getUserDisplayName } from "@/utils/auth";
 
-const getTimeBasedGreeting = () => {
-  const hour = new Date().getHours();
-  if (hour < 12) return "Good Morning";
-  if (hour < 18) return "Good Afternoon";
-  return "Good Evening";
+const getTimeBasedGreeting = (): string => {
+  const currentHour = new Date().getHours();
+
+  if (currentHour < 12) {
+    return "Good morning";
+  } else if (currentHour < 18) {
+    return "Good afternoon";
+  } else {
+    return "Good evening";
+  }
 };
 
 const errorGettingEmployeesMessage =
@@ -24,7 +30,20 @@ const errorGettingEmployeesTitle = "Unable to load employee data";
 
 const AdminHomePage = async () => {
   const greeting = getTimeBasedGreeting();
-  const name = "Sabrina White";
+  
+  // Get the current user information from the JWT token (optional for testing)
+  const currentUser = getOptionalAuth();
+  const name = getUserDisplayName(currentUser);
+
+  // Conditional URLs for external integrations
+  // Trello: Supports email pre-filling via URL parameter
+  // Slack: Uses modern workspace signin flow (email pre-filling no longer supported)
+  // If no user (testing mode): use general login pages
+  const slackUrl = 'https://slack.com/workspace-signin';
+  
+  const trelloUrl = currentUser && currentUser.email
+    ? `https://trello.com/login?email=${encodeURIComponent(currentUser.email)}`
+    : 'https://trello.com/login';
 
   // Fetch employee data once in the server component
   let employees: EmployeeListItem[] = [];
@@ -52,7 +71,7 @@ const AdminHomePage = async () => {
         </div>
         <div className="flex gap-3 items-center text-[20px]">
           Connect to
-          <Link href="#">
+          <Link href={slackUrl} target="_blank" rel="noopener noreferrer">
             <Image
               src="/images/slack.png"
               alt="Slack logo"
@@ -60,7 +79,7 @@ const AdminHomePage = async () => {
               height={40}
             />
           </Link>
-          <Link href="#">
+          <Link href={trelloUrl} target="_blank" rel="noopener noreferrer">
             <Image
               src="/images/trello.png"
               alt="Trello logo"

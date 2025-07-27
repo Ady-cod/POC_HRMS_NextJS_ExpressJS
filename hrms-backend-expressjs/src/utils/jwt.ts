@@ -17,6 +17,8 @@ if (!process.env.JWT_SECRET) {
 interface JwtPayload {
   employeeId: Employee["id"];
   role: Role;
+  fullName: string;
+  email: string;
 }
 
 // Generate a new JWT

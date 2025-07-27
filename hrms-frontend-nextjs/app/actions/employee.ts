@@ -2,6 +2,7 @@
 import { EmployeeListItem } from "@/types/types";
 import { createEmployeeSchema, updateEmployeeSchema } from "@/schemas/employeeSchema";
 import { z } from "zod";
+import { revalidatePath } from "next/cache";
 
 const BACKEND_BASE_URL = process.env.NEXT_PUBLIC_BACKEND_BASE_URL;
 const EMPLOYEE_ENDPOINT = process.env.NEXT_PUBLIC_EMPLOYEE_ENDPOINT;
@@ -71,6 +72,11 @@ export async function deleteEmployee(id: string): Promise<{ message: string }> {
 
       throw { status: response.status, message: errorMessage };
     }
+
+    // Invalidate cache for pages that depend on employee data
+    // revalidate every page that uses the /admin layout
+    revalidatePath("/admin", "layout");
+
     return await response.json();
   } catch (error) {
     console.error("Error deleting employee:", error);
@@ -121,6 +127,11 @@ export async function createEmployee(
     }
 
     const result = await response.json();
+
+    // Invalidate cache for pages that depend on employee data
+    // revalidate every page that uses the /admin layout
+    revalidatePath("/admin", "layout");
+
     return { success: true, message: result.message };
     // console.log("Employee successfully created:", result);
   } catch (error) {
@@ -148,13 +159,16 @@ export async function updateEmployee(
 }> {
   try {
     // Send the data to the server
-    const response = await fetch(`${BACKEND_BASE_URL}${EMPLOYEE_ENDPOINT}/${id}`, {
-      method: "PATCH",
-      headers: {
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify(validatedData),
-    });
+    const response = await fetch(
+      `${BACKEND_BASE_URL}${EMPLOYEE_ENDPOINT}/${id}`,
+      {
+        method: "PATCH",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify(validatedData),
+      }
+    );
 
     if (!response.ok) {
       const error = await response.json();
@@ -179,6 +193,11 @@ export async function updateEmployee(
     }
 
     const result = await response.json();
+
+    // Invalidate cache for pages that depend on employee data
+    // revalidate every page that uses the /admin layout
+    revalidatePath("/admin", "layout");
+
     return { success: true, message: result.message };
     // console.log("Employee successfully updated:", result);
   } catch (error) {

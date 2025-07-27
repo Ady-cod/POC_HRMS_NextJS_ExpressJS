@@ -292,7 +292,31 @@ export default function EnrollmentChart({ employees, hasError }: EnrollmentChart
                         height={90}
                       />
                       <YAxis allowDecimals={false} />
-                      <Tooltip />
+                      <Tooltip
+                        content={({ active, payload, label }) => {
+                          if (active && payload && payload.length) {
+                            return (
+                              <div
+                                style={{
+                                  backgroundColor: "#fff",
+                                  border: "1px solid #d1d5db",
+                                  borderRadius: "6px",
+                                  padding: "8px 12px",
+                                  boxShadow: "0 4px 6px -1px rgba(0, 0, 0, 0.1)",
+                                }}
+                              >
+                                <p style={{ margin: 0, color: "#374151", fontWeight: "500" }}>
+                                  {label}
+                                </p>
+                                <p style={{ margin: 0, color: "#6b767f" }}>
+                                  Employees: {payload[0].value}
+                                </p>
+                              </div>
+                            );
+                          }
+                          return null;
+                        }}
+                      />
                       <Bar
                         dataKey="employees"
                         fill="#6b767f"

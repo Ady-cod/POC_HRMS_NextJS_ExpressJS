@@ -57,6 +57,18 @@ const WeekSlider: React.FC<WeekSliderProps> = ({
         ref={scrollRef}
         className="flex gap-2 overflow-x-auto scroll-smooth w-full hide-scrollbar mx-2 mb-5"
       >
+        {/* Show All Weeks Button */}
+        <button
+          onClick={() => setSelectedWeek(0)}
+          className={`flex-shrink-0 px-8 py-3 rounded-md text-white text-sm transition ${
+            selectedWeek === 0
+              ? "bg-blue-500"
+              : "bg-gray-400 hover:bg-gray-500"
+          }`}
+        >
+          All Weeks
+        </button>
+        
         {weeks.map((week) => (
           <button
             key={week}

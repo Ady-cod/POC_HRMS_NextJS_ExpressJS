@@ -21,7 +21,7 @@ const ModalForm = dynamic(() => import("@/components/ModalForm/ModalForm"), {
 
 const WeekWisePage = () => {
   const [employeeCount, setEmployeeCount] = useState(0);
-  const [selectedWeek, setSelectedWeek] = useState(1);
+  const [selectedWeek, setSelectedWeek] = useState(0);
   const [filterState, setFilterState] = useState<FilterState>(getInitialFilterState());
 
   const {

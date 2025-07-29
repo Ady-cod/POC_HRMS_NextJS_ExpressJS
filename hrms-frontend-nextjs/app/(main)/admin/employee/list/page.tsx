@@ -1,8 +1,16 @@
 "use client";
-import React, { useState } from "react";
+import React, { useState, useMemo } from "react";
 import AddNewDataButton from "@/components/AddNewDataButton/AddNewDataButton";
 import EmployeeTable from "@/components/EmployeeTable/EmployeeTable";
+import EmployeeSearchFilters from "@/components/EmployeeSearchFilters/EmployeeSearchFilters";
+import ExportCSVButton from "@/components/ExportCSVButton/ExportCSVButton";
 import { useEmployeeModal } from "@/hooks/useEmployeeModal";
+import { useEmployeeData } from "@/hooks/useEmployeeData";
+import { 
+  FilterState, 
+  getInitialFilterState, 
+  applyAllFilters 
+} from "@/utils/employeeFilters";
 
 import dynamic from "next/dynamic";
 
@@ -13,6 +21,7 @@ const ModalForm = dynamic(() => import("@/components/ModalForm/ModalForm"), {
 
 const EmployeePage = () => {
   const [employeeCount, setEmployeeCount] = useState(0);
+  const [filterState, setFilterState] = useState<FilterState>(getInitialFilterState());
   
   // Use the custom hook for modal management
   const {
@@ -24,6 +33,30 @@ const EmployeePage = () => {
     closeModal,
     refreshEmployees,
   } = useEmployeeModal();
+
+  // Use the employee data hook
+  const {
+    employees,
+    selectedEmployee,
+    showDialog,
+    handleDeleteClick,
+    confirmDelete,
+    closeDeleteDialog,
+  } = useEmployeeData({ refreshFlag, setEmployeeCount });
+
+  // Filter state management
+  const updateFilter = (key: keyof FilterState, value: string) => {
+    setFilterState((prev) => ({ ...prev, [key]: value }));
+  };
+
+  const clearAllFilters = () => {
+    setFilterState(getInitialFilterState());
+  };
+
+  // Apply filters to employees
+  const filteredEmployees = useMemo(() => {
+    return applyAllFilters(employees, filterState);
+  }, [employees, filterState]);
 
   return (
     <div>
@@ -56,11 +89,28 @@ const EmployeePage = () => {
         employeeData={employeeData}
       />
 
+      {/* Search Filters */}
+      <EmployeeSearchFilters
+        filterState={filterState}
+        updateFilter={updateFilter}
+        clearAllFilters={clearAllFilters}
+        employees={employees}
+      />
+
+      {/* Export Button */}
+      <div className="flex justify-start mb-4 px-3">
+        <ExportCSVButton employees={filteredEmployees} />
+      </div>
+
       {/* Table section */}
       <EmployeeTable
-        refreshFlag={refreshFlag}
+        employees={filteredEmployees}
         handleEdit={openModalForEdit}
-        setEmployeeCount={setEmployeeCount}
+        handleDeleteClick={handleDeleteClick}
+        selectedEmployee={selectedEmployee}
+        showDialog={showDialog}
+        confirmDelete={confirmDelete}
+        closeDeleteDialog={closeDeleteDialog}
       />
     </div>
   );

@@ -1,9 +1,18 @@
 "use client";
-import React, { useState } from "react";
+import React, { useState, useMemo } from "react";
 import EmployeeTable from "@/components/EmployeeTable/EmployeeTable";
+import EmployeeSearchFilters from "@/components/EmployeeSearchFilters/EmployeeSearchFilters";
+import WeekSlider from "@/components/WeekSlider/WeekSlider";
+import ExportCSVButton from "@/components/ExportCSVButton/ExportCSVButton";
 import { WEEK_WISE_COLUMN_CONFIG } from "@/types/columnConfig";
 import { useEmployeeModal } from "@/hooks/useEmployeeModal";
+import { useEmployeeData } from "@/hooks/useEmployeeData";
 import AddNewDataButton from "@/components/AddNewDataButton/AddNewDataButton";
+import { 
+  FilterState, 
+  getInitialFilterState, 
+  applyAllFilters 
+} from "@/utils/employeeFilters";
 import dynamic from "next/dynamic";
 
 const ModalForm = dynamic(() => import("@/components/ModalForm/ModalForm"), {
@@ -13,6 +22,7 @@ const ModalForm = dynamic(() => import("@/components/ModalForm/ModalForm"), {
 const WeekWisePage = () => {
   const [employeeCount, setEmployeeCount] = useState(0);
   const [selectedWeek, setSelectedWeek] = useState(1);
+  const [filterState, setFilterState] = useState<FilterState>(getInitialFilterState());
 
   const {
     isModalOpen,
@@ -23,6 +33,30 @@ const WeekWisePage = () => {
     closeModal,
     refreshEmployees,
   } = useEmployeeModal();
+
+  // Use the employee data hook
+  const {
+    employees,
+    selectedEmployee,
+    showDialog,
+    handleDeleteClick,
+    confirmDelete,
+    closeDeleteDialog,
+  } = useEmployeeData({ refreshFlag, setEmployeeCount });
+
+  // Filter state management
+  const updateFilter = (key: keyof FilterState, value: string) => {
+    setFilterState((prev) => ({ ...prev, [key]: value }));
+  };
+
+  const clearAllFilters = () => {
+    setFilterState(getInitialFilterState());
+  };
+
+  // Apply filters to employees (including week filtering)
+  const filteredEmployees = useMemo(() => {
+    return applyAllFilters(employees, filterState, selectedWeek, true);
+  }, [employees, filterState, selectedWeek]);
 
   return (
     <div className="w-full">
@@ -54,15 +88,35 @@ const WeekWisePage = () => {
         employeeData={employeeData}
       />
 
-      {/* Employee Table */}
-      <EmployeeTable
-        refreshFlag={refreshFlag}
-        handleEdit={openModalForEdit}
-        setEmployeeCount={setEmployeeCount}
-        columnConfig={WEEK_WISE_COLUMN_CONFIG}
-        isWeekWise={true}
+      {/* Search Filters */}
+      <EmployeeSearchFilters
+        filterState={filterState}
+        updateFilter={updateFilter}
+        clearAllFilters={clearAllFilters}
+        employees={employees}
+      />
+
+      {/* Export Button */}
+      <div className="flex justify-start mb-14 px-3">
+        <ExportCSVButton employees={filteredEmployees} />
+      </div>
+
+      {/* Week Slider */}
+      <WeekSlider
         selectedWeek={selectedWeek}
         setSelectedWeek={setSelectedWeek}
+      />
+
+      {/* Employee Table */}
+      <EmployeeTable
+        employees={filteredEmployees}
+        handleEdit={openModalForEdit}
+        handleDeleteClick={handleDeleteClick}
+        selectedEmployee={selectedEmployee}
+        showDialog={showDialog}
+        confirmDelete={confirmDelete}
+        closeDeleteDialog={closeDeleteDialog}
+        columnConfig={WEEK_WISE_COLUMN_CONFIG}
       />
     </div>
   );

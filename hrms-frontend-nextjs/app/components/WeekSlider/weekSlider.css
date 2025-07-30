@@ -6,3 +6,22 @@
   -ms-overflow-style: none; /* for Internet Explorer and Edge */
   scrollbar-width: none; /* for Firefox */
 }
+
+/* WeekSlider.css */
+.week-button {                      /*  every button gets this */
+  flex-shrink: 0;
+}
+
+/* When the selected week is flush with an edge, we pin it there */
+.week-button.sticky-left {          
+  position: sticky;
+  left: 0;
+  z-index: 2;                       /* keep it over its neighbours */
+}
+
+.week-button.sticky-right {         
+  position: sticky;
+  right: 0;
+  z-index: 2;
+}
+

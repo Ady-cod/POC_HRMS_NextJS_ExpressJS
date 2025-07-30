@@ -1,8 +1,8 @@
-import React from 'react';
-import { TableColumn } from 'react-data-table-component';
-import { Trash2, Pencil } from 'lucide-react';
-import { EmployeeListItem } from '@/types/types';
-import { formatDate } from '@/utils/dateUtils';
+import React from "react";
+import { TableColumn } from "react-data-table-component";
+import { Trash2, Pencil } from "lucide-react";
+import { EmployeeListItem } from "@/types/types";
+import { formatDate } from "@/utils/dateUtils";
 
 interface ColumnBuilderProps {
   currentPage?: number;
@@ -160,7 +160,7 @@ export class ColumnBuilder {
   // Action column
   buildActionColumn(): TableColumn<EmployeeListItem> {
     const { handleEdit, handleDeleteClick } = this.props;
-    
+
     if (!handleEdit || !handleDeleteClick) {
       return {
         name: "Action",
@@ -220,6 +220,8 @@ export const getDefaultColumnSections = (builder: ColumnBuilder) => [
 ];
 
 export const getWeekWiseColumns = (builder: ColumnBuilder) => [
+  builder.buildSerialNumberColumn(),
+  builder.buildFullNameColumn(),
   builder.buildDepartmentColumn(),
   builder.buildJoiningDateColumn(),
   builder.buildDaysSinceJoiningColumn(),
@@ -230,4 +232,4 @@ export const getDepartmentViewColumns = (builder: ColumnBuilder) => [
   builder.buildRoleColumn(),
   builder.buildJoiningDateColumn(),
   builder.buildStatusColumn(),
-]; 
+];

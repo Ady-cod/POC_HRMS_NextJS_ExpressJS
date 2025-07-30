@@ -2,18 +2,7 @@ import React from "react";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faArrowsRotate, faSearch } from "@fortawesome/free-solid-svg-icons";
 import { EmployeeListItem, EmployeeRole, EmployeeStatus } from "@/types/types";
-
-export interface FilterState {
-  searchText: string;
-  searchCategory: string;
-  selectedRole: string;
-  selectedDepartment: string;
-  selectedStartDate: string;
-  selectedEndDate: string;
-  selectedStartDOB: string;
-  selectedEndDOB: string;
-  selectedStatus: string;
-}
+import { FilterState, checkIfFiltersActive } from "@/utils/employeeFilters";
 
 interface EmployeeSearchFiltersProps {
   filterState: FilterState;
@@ -29,16 +18,7 @@ const EmployeeSearchFilters: React.FC<EmployeeSearchFiltersProps> = ({
   employees,
 }) => {
   // Check if any filters are active
-  const hasActiveFilters = 
-    filterState.searchCategory ||
-    filterState.searchText ||
-    filterState.selectedRole ||
-    filterState.selectedDepartment ||
-    filterState.selectedStartDate ||
-    filterState.selectedEndDate ||
-    filterState.selectedStartDOB ||
-    filterState.selectedEndDOB ||
-    filterState.selectedStatus;
+  const hasActiveFilters = checkIfFiltersActive(filterState);
 
   // Get unique departments from employees
   const uniqueDepartments = Array.from(

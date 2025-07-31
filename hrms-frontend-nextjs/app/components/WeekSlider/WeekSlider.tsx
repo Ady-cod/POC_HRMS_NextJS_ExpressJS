@@ -108,7 +108,7 @@ const WeekSlider: React.FC<WeekSliderProps> = ({
     const step = calculateScrollStep();
     const delta = direction === "left" ? -step : step;
     const currentScrollLeft = container.scrollLeft;
-    const targetScrollLeft = currentScrollLeft + delta * 8; // Scroll by 8 weeks for faster navigation (1 week = 1 step)
+    const targetScrollLeft = currentScrollLeft + delta * 9; // Scroll by 9 weeks (steps) for faster navigation (1 week = 1 step)
 
     // Apply only basic bounds checking to respect user intent
     const maxScrollLeft = container.scrollWidth - container.clientWidth;

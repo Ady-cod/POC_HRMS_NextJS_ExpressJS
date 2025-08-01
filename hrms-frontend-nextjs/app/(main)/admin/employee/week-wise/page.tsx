@@ -4,6 +4,7 @@ import EmployeeTable from "@/components/EmployeeTable/EmployeeTable";
 import EmployeeSearchFilters from "@/components/EmployeeSearchFilters/EmployeeSearchFilters";
 import WeekSlider from "@/components/WeekSlider/WeekSlider";
 import ExportCSVButton from "@/components/ExportCSVButton/ExportCSVButton";
+import TotalCountButton from "@/components/TotalCountButton/TotalCountButton";
 import { WEEK_WISE_COLUMN_CONFIG } from "@/types/columnConfig";
 import { useEmployeeModal } from "@/hooks/useEmployeeModal";
 import { useEmployeeData } from "@/hooks/useEmployeeData";
@@ -68,13 +69,8 @@ const WeekWisePage = () => {
         </h2>
 
         {/* Button Group */}
-        <div className="flex gap-2 sm:gap-3">
-          <button
-            disabled
-            className="border-2 border-gray-300 px-4 py-1.5 rounded-md text-sm cursor-default hover:bg-gray-100 hover:shadow-sm transition font-semibold text-gray-400"
-          >
-            Total Count: {employeeCount}
-          </button>
+        <div className="flex flex-row flex-wrap items-center gap-2 sm:gap-3">
+          <TotalCountButton count={employeeCount} />
 
           <AddNewDataButton onClick={openModalForAdd} />
         </div>

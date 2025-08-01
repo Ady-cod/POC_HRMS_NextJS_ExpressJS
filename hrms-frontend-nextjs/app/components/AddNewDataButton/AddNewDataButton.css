@@ -1,23 +1,7 @@
-/* src/components/AddNewDataButton.css */
-.add-new-data-button {
-  background-color: #a7aeb4;
-  border: none;
-  border-radius: 6px; /* Matches Tailwind's rounded-md */
-  padding: 4px 10px; /* Mobile padding: py-1 (4px), px-2.5 (10px) */
-  font-size: 12px; /* Mobile font size: text-xs */
-  cursor: pointer;
-  color: white;
-  transition: background-color 0.2s ease;
-}
-
 /* For medium and larger screens (sm in Tailwind = 640px+) */
 @media (min-width: 640px) {
   .add-new-data-button {
     padding: 8px 12px; /* sm:px-3, sm:py-2 */
     font-size: 14px; /* text-sm */
   }
-}
-
-.add-new-data-button:hover {
-  background-color: #c0c0c0;
 }

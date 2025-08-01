@@ -9,7 +9,22 @@ interface AddNewDataButtonProps {
 
 const AddNewDataButton: React.FC<AddNewDataButtonProps> = ({ onClick }) => {
   return (
-    <button className="add-new-data-button font-semibold" onClick={onClick}>
+    <button
+      className={`
+    add-new-data-button 
+    inline-flex items-center
+        bg-[#a7aeb4]
+        text-white
+        rounded-lg 
+        px-5 py-2          
+        text-sm font-semibold
+        shadow-sm
+        hover:bg-gray-500
+        focus:outline-none focus:ring-4 focus:ring-gray-700
+        transition-colors duration-150
+    `}
+      onClick={onClick}
+    >
       + Add New Data
     </button>
   );

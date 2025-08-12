@@ -322,7 +322,8 @@ const CountryStateCitySelect: React.FC<Props> = ({
       "&:hover": {
         borderColor: state.isFocused ? "black" : "#9ca3af",
       },
-      fontSize: "14.5px",
+      fontSize: "14px",
+      fontWeight: 400,
       backdropFilter: "none",
       WebkitBackdropFilter: "none",
       height: "100%",
@@ -335,6 +336,7 @@ const CountryStateCitySelect: React.FC<Props> = ({
       backgroundColor: "white",
       borderRadius: "4px", // Match input-field border-radius
       fontSize: "14px", // Match input-field font-size
+      fontWeight: 400,
       backdropFilter: "none",
       position: "absolute",
       width: "100%",
@@ -346,14 +348,13 @@ const CountryStateCitySelect: React.FC<Props> = ({
     menuList: (provided) => ({
       ...provided,
       zIndex: 9999,
-      fontFamily: "sans-serif",
-      fontWeight: "0",
+      fontWeight: 400,
       padding: "0",
       fontSize: "14px", // Match input-field font-size
       maxHeight: "15rem",
       color: "black",
       borderRadius: "4px", // Match input-field border-radius
-      backgorundColor: "white",
+      backgroundColor: "white",
       opacity: "100%",
       filter: "none",
       "&::-webkit-scrollbar": {
@@ -376,8 +377,7 @@ const CountryStateCitySelect: React.FC<Props> = ({
         ? "#2372f5"
         : "white",
       cursor: "pointer",
-      fontWeight: "0",
-      fontFamily: "sans-serif",
+      fontWeight: 400,
       zIndex: 10000,
       transition: "all 50ms",
       "&:active": {
@@ -393,6 +393,7 @@ const CountryStateCitySelect: React.FC<Props> = ({
       ...provided,
       color: "#6b7280",
       fontSize: "14px", // Match input-field font-size
+      fontWeight: 400,
     }),
 
     valueContainer: (provided) => ({
@@ -400,6 +401,7 @@ const CountryStateCitySelect: React.FC<Props> = ({
       padding: "10px 10px", // Match input-field padding exactly (top/bottom left/right)
       margin: "0",
       lineHeight: "20px", // Match expected line height for 14px font
+      fontWeight: 400,
     }),
 
     singleValue: (provided) => ({
@@ -408,6 +410,7 @@ const CountryStateCitySelect: React.FC<Props> = ({
       lineHeight: "20px",
       margin: "0",
       color: "#000", // Match input text color
+      fontWeight: 400,
     }),
 
     input: (provided) => ({
@@ -416,6 +419,7 @@ const CountryStateCitySelect: React.FC<Props> = ({
       lineHeight: "20px",
       margin: "0",
       padding: "0",
+      fontWeight: 400,
     }),
     dropdownIndicator: (provided) => ({
       ...provided,

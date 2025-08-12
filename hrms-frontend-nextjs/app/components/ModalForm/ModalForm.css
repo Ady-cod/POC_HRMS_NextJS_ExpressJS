@@ -194,6 +194,7 @@
   width: 100%;
   padding: 10px;
   font-size: 14px;
+  line-height: 20px; /* Keep 14px text on a 20px line for consistency with react-select */
   border: 1px solid #d1d5db;
   border-radius: 4px;
   background: #fff;
@@ -224,6 +225,7 @@ select.input-field {
   appearance: none;
   -webkit-appearance: none;
   -moz-appearance: none;
+  line-height: 20px; /* Align with react-select value height */
   background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 20 20'%3e%3cpath stroke='black' stroke-linecap='round' stroke-linejoin='round' stroke-width='2' d='m6 8 4 4 4-4'/%3e%3c/svg%3e");
   background-repeat: no-repeat;
   background-position: right 0.16rem center;

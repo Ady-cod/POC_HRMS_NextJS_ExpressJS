@@ -150,3 +150,10 @@ body {
     @apply bg-background text-foreground;
   }
 }
+
+/* Ensure native selects use Roboto consistently */
+select,
+select option,
+select optgroup {
+  font-family: inherit;
+}

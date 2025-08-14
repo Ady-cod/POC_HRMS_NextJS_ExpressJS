@@ -13,7 +13,11 @@ import SubmitButton from "@/components/SubmitButton/SubmitButton";
 import { Playfair_Display } from "next/font/google";
 const playfair = Playfair_Display({ weight: ["900"], subsets: ["latin"] });
 
-const LoginForm = () => {
+interface LoginFormProps {
+  onCloseModal?: () => void;
+}
+
+const LoginForm = ({ onCloseModal }: LoginFormProps) => {
   const [state, formAction] = useFormState(login, undefined);
 
   // State to track password visibility
@@ -38,19 +42,27 @@ const LoginForm = () => {
       </h1>
       <label
         htmlFor="email"
-        className="self-start mb-1 text-base text-gray-500 font-medium bg-[#d9d9d9] rounded"
+        className="self-start mb-1 text-base text-gray-500 font-medium bg-[#d9d9d9] rounded whitespace-nowrap"
       >
         Email Address
       </label>
-      <input
-        name="email"
-        type="email"
-        placeholder="Email*"
-        required
-        className={`w-auto sm:w-[30vw] mb-2 p-1 shadow-md shadow-gray-500 border border-gray-300 rounded-md focus:outline-none focus:ring-1 focus:ring-gray-400 ${
-          state?.errors?.email ? "border-2 border-red-500" : ""
-        }`}
-      />
+      <div
+        className={`relative rounded-md ${
+          onCloseModal
+            ? "w-full sm:w-[37vw] md:w-[35vw] lg:w-[30vw] xl:w-[25vw] xl:max-w-[440px]"
+            : "w-auto sm:w-[30vw]"
+        } mb-2`}
+      >
+        <input
+          name="email"
+          type="email"
+          placeholder="Email*"
+          required
+          className={`w-full p-1 shadow-md shadow-gray-500 border border-gray-300 rounded-md focus:outline-none focus:ring-1 focus:ring-gray-400 ${
+            state?.errors?.email ? "border-2 border-red-500" : ""
+          }`}
+        />
+      </div>
       {state?.errors?.email && (
         <p className="self-start mb-4 text-red-500 text-sm font-semibold bg-[#d9d9d9]">
           {state.errors.email}
@@ -58,18 +70,25 @@ const LoginForm = () => {
       )}
       <label
         htmlFor="password"
-        className="self-start mb-1 text-base text-gray-500 font-medium bg-[#d9d9d9] rounded"
+        className="self-start mb-1 text-base text-gray-500 font-medium bg-[#d9d9d9] rounded whitespace-nowrap"
       >
         Password
       </label>
-      <div className="relative rounded-md w-auto sm:w-[30vw] mb-2">
+      <div
+        className={`relative rounded-md ${
+          onCloseModal
+            ? "w-full sm:w-[37vw] md:w-[35vw] lg:w-[30vw] xl:w-[25vw] xl:max-w-[440px]"
+            : "w-auto sm:w-[30vw]"
+        } mb-2`}
+      >
         <input
           name="password"
           type={showPassword ? "text" : "password"}
           placeholder="Password*"
           required
-          className={`w-full p-1 pr-12 shadow-md shadow-gray-500 border rounded-md focus:outline-none focus:ring-1 focus:ring-gray-400 ${
-            state?.invalidCredentials || state?.errors && "password" in state.errors
+          className={`w-full p-1 shadow-md shadow-gray-500 border border-gray-300 rounded-md focus:outline-none focus:ring-1 focus:ring-gray-400 ${
+            state?.invalidCredentials ||
+            (state?.errors && "password" in state.errors)
               ? "border-2 border-red-500"
               : ""
           }`}
@@ -94,7 +113,7 @@ const LoginForm = () => {
       )}
       <Link
         href="#"
-        className="self-start text-sm font-semibold text-blue-600 hover:underline bg-[#d9d9d9] rounded"
+        className="self-start text-sm font-semibold text-blue-600 hover:underline bg-[#d9d9d9] rounded whitespace-nowrap max-[700px]:mb-2"
       >
         Forgot your password?
       </Link>
@@ -108,16 +127,30 @@ const LoginForm = () => {
         Register now
       </Link>
       {/* Home Button on the Left Dark Section */}
-      <Link
-        href="/"
-        className="absolute bottom-4 left-6 flex flex-col items-center p-2 rounded text-white bg-[#353535] transform transition-transform hover:scale-110 border border-transparent hover:border-white"
-      >
-        <FontAwesomeIcon
-          icon={faHome}
-          className="text-4xl max-[350px]:text-2xl"
-        />
-        <span className="text-sm max-[350px]:text-xs mt-2">Back Home</span>
-      </Link>
+      {onCloseModal ? (
+        <button
+          type="button"
+          onClick={onCloseModal}
+          className="absolute bottom-4 left-6 flex flex-col items-center p-2 rounded text-white bg-[#353535] transform transition-transform hover:scale-110 border border-transparent hover:border-white"
+        >
+          <FontAwesomeIcon
+            icon={faHome}
+            className="text-4xl max-[350px]:text-2xl"
+          />
+          <span className="text-sm max-[350px]:text-xs mt-2">Back Home</span>
+        </button>
+      ) : (
+        <Link
+          href="/"
+          className="absolute bottom-4 left-6 flex flex-col items-center p-2 rounded text-white bg-[#353535] transform transition-transform hover:scale-110 border border-transparent hover:border-white"
+        >
+          <FontAwesomeIcon
+            icon={faHome}
+            className="text-4xl max-[350px]:text-2xl"
+          />
+          <span className="text-sm max-[350px]:text-xs mt-2">Back Home</span>
+        </Link>
+      )}
     </form>
   );
 };

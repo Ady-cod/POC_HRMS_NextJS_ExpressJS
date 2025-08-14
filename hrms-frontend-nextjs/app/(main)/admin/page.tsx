@@ -10,18 +10,7 @@ import { getAllEmployees } from "@/actions/employee";
 import { EmployeeListItem } from "@/types/types";
 import ErrorToast from "@/components/ErrorToast/ErrorToast";
 import { getOptionalAuth, getUserDisplayName } from "@/utils/auth";
-
-const getTimeBasedGreeting = (): string => {
-  const currentHour = new Date().getHours();
-
-  if (currentHour < 12) {
-    return "Good morning";
-  } else if (currentHour < 18) {
-    return "Good afternoon";
-  } else {
-    return "Good evening";
-  }
-};
+import Greeting from "@/components/Greeting/Greeting";
 
 const errorGettingEmployeesMessage =
   "We're experiencing technical difficulties. Employee statistics and charts may not display correctly. Please refresh the page or try again later.";
@@ -29,21 +18,19 @@ const errorGettingEmployeesMessage =
 const errorGettingEmployeesTitle = "Unable to load employee data";
 
 const AdminHomePage = async () => {
-  const greeting = getTimeBasedGreeting();
-  
   // Get the current user information from the JWT token (optional for testing)
   const currentUser = getOptionalAuth();
   const name = getUserDisplayName(currentUser);
 
   // Conditional URLs for external integrations
-  // Trello: Supports email pre-filling via URL parameter
-  // Slack: Uses modern workspace signin flow (email pre-filling no longer supported)
-  // If no user (testing mode): use general login pages
-  const slackUrl = 'https://slack.com/workspace-signin';
-  
-  const trelloUrl = currentUser && currentUser.email
-    ? `https://trello.com/login?email=${encodeURIComponent(currentUser.email)}`
-    : 'https://trello.com/login';
+  const slackUrl = "https://slack.com/workspace-signin";
+
+  const trelloUrl =
+    currentUser && currentUser.email
+      ? `https://trello.com/login?email=${encodeURIComponent(
+          currentUser.email
+        )}`
+      : "https://trello.com/login";
 
   // Fetch employee data once in the server component
   let employees: EmployeeListItem[] = [];
@@ -66,9 +53,9 @@ const AdminHomePage = async () => {
       />
 
       <div className="flex flex-col gap-6 md:flex-row md:justify-between p-6 border border-red-500">
-        <div className="font-bold text-2xl md:text-4xl lg:text-5xl sm:text-3xl">
-          {greeting}, {name}!
-        </div>
+        {/* ✅ Client-side greeting */}
+        <Greeting name={name} />
+
         <div className="flex gap-3 items-center text-[20px]">
           Connect to
           <Link href={slackUrl} target="_blank" rel="noopener noreferrer">

@@ -2,6 +2,7 @@ import "@/globals.css";
 import { ToastContainer } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 import { Roboto } from "next/font/google";
+import TimezoneSync from "@/components/TimezoneSync/TimezoneSync";
 
 const roboto = Roboto({
   subsets: ["latin"],
@@ -18,6 +19,7 @@ export default function RootLayout({
     <html lang="en">
       <body className={`${roboto.className}`}>
         {children}
+        <TimezoneSync />
         <ToastContainer
           position="top-center"
           autoClose={3000}
@@ -30,6 +32,7 @@ export default function RootLayout({
             maxWidth: "500px",
           }}
         />
+        {/* Ensure the toast container is at the end of the body for proper stacking */}
       </body>
     </html>
   );

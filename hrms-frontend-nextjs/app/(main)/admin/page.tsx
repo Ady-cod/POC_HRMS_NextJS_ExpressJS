@@ -10,18 +10,25 @@ import { getAllEmployees } from "@/actions/employee";
 import { EmployeeListItem } from "@/types/types";
 import ErrorToast from "@/components/ErrorToast/ErrorToast";
 import { getOptionalAuth, getUserDisplayName } from "@/utils/auth";
+import { headers, cookies } from "next/headers";
 
-const getTimeBasedGreeting = (): string => {
-  const currentHour = new Date().getHours();
+const getTimeBasedGreeting = (h: number) =>
+  h < 12 ? "Good morning" : h < 18 ? "Good afternoon" : "Good evening";
 
-  if (currentHour < 12) {
-    return "Good morning";
-  } else if (currentHour < 18) {
-    return "Good afternoon";
-  } else {
-    return "Good evening";
-  }
-};
+function greetingForTZ(tz?: string) {
+  const hour = tz
+    ? Number(
+        new Intl.DateTimeFormat("en-US", {
+          timeZone: tz,
+          hour: "numeric",
+          hourCycle: "h23",
+        }).format(new Date())
+      )
+    : new Date().getHours();
+  return getTimeBasedGreeting(hour);
+}
+
+export const dynamic = "force-dynamic"; // ensure per-request rendering
 
 const errorGettingEmployeesMessage =
   "We're experiencing technical difficulties. Employee statistics and charts may not display correctly. Please refresh the page or try again later.";
@@ -29,7 +36,13 @@ const errorGettingEmployeesMessage =
 const errorGettingEmployeesTitle = "Unable to load employee data";
 
 const AdminHomePage = async () => {
-  const greeting = getTimeBasedGreeting();
+  const h = headers();
+  const tz =
+    h.get("x-vercel-ip-timezone") || cookies().get("tz")?.value || undefined;
+  
+  // console.log("Timezone from headers/cookies:", tz);
+
+  const greeting = greetingForTZ(tz);
   
   // Get the current user information from the JWT token (optional for testing)
   const currentUser = getOptionalAuth();

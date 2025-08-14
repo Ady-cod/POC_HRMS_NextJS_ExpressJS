@@ -1,4 +1,6 @@
-import React, { useState, useEffect } from "react";
+"use client";
+
+import React, { useState, useEffect, useRef } from "react";
 import DataTable from "react-data-table-component";
 import { EmployeeListItem } from "@/types/types";
 import dynamic from "next/dynamic";
@@ -34,11 +36,20 @@ const EmployeeTable: React.FC<EmployeeTableProps> = ({
   const [activeSectionIndex, setActiveSectionIndex] = useState(0);
   const [activeColumnIndex, setActiveColumnIndex] = useState(0);
   const [isSmallScreen, setIsSmallScreen] = useState(false);
+
   const [currentPage, setCurrentPage] = useState(1);
   const [rowsPerPage, setRowsPerPage] = useState(10);
-  const [isLoading, setIsLoading] = useState(true);
+
+  // Loading / timeout state machine (internal only)
+  const [isLoading, setIsLoading] = useState(true); // start loading immediately
   const [isServerTimeout, setIsServerTimeout] = useState(false);
-  const [hasFetchedOnce, setHasFetchedOnce] = useState(false);
+  const [hasFetchedOnce, setHasFetchedOnce] = useState(false); // becomes true after the first *prop change* from parent
+
+  // Refs to help detect the first real "response arrived" without involving parent
+  const mountedRef = useRef(false);
+  const prevEmployeesRef = useRef<EmployeeListItem[] | null>(null);
+  const serverTimeoutId = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const deflickerId = useRef<ReturnType<typeof setTimeout> | null>(null);
 
   // Detect screen size changes
   useEffect(() => {
@@ -48,31 +59,63 @@ const EmployeeTable: React.FC<EmployeeTableProps> = ({
     return () => window.removeEventListener("resize", handleResize);
   }, []);
 
-  // Loading + Server timeout detection
+  // Start a server-timeout only until we acknowledge the first response (any content, even empty)
   useEffect(() => {
-    if (employees.length === 0 && !hasFetchedOnce) {
-      // Still waiting for first server response
-      setIsLoading(true);
-      setIsServerTimeout(false);
+    if (hasFetchedOnce) return;
 
-      const timeoutId = setTimeout(() => {
+    setIsLoading(true);
+    setIsServerTimeout(false);
+
+    serverTimeoutId.current = setTimeout(() => {
+      if (!hasFetchedOnce) {
         setIsLoading(false);
         setIsServerTimeout(true);
-      }, 5000);
+      }
+    }, 10000); // 10s: safer for cold starts
 
-      return () => clearTimeout(timeoutId);
-    } else {
-      // We have received at least one response from the server
+    return () => {
+      if (serverTimeoutId.current) clearTimeout(serverTimeoutId.current);
+    };
+  }, [hasFetchedOnce]);
+
+  // Acknowledge the first *prop* update from parent as "response arrived" (even if array is empty)
+  useEffect(() => {
+    if (!mountedRef.current) {
+      mountedRef.current = true;
+      prevEmployeesRef.current = employees;
+
+      // If data is already present on first render, acknowledge immediately
+      if (Array.isArray(employees) && employees.length > 0 && !hasFetchedOnce) {
+        setHasFetchedOnce(true);
+        if (serverTimeoutId.current) clearTimeout(serverTimeoutId.current);
+      }
+      return;
+    }
+
+    // If the reference changes later, acknowledge the response (even if empty)
+    if (!hasFetchedOnce && prevEmployeesRef.current !== employees) {
+      prevEmployeesRef.current = employees;
       setHasFetchedOnce(true);
-
-      const shortDelay = setTimeout(() => {
-        setIsLoading(false);
-        setIsServerTimeout(false);
-      }, 300);
-
-      return () => clearTimeout(shortDelay);
+      if (serverTimeoutId.current) clearTimeout(serverTimeoutId.current);
+    } else {
+      prevEmployeesRef.current = employees;
     }
   }, [employees, hasFetchedOnce]);
+
+  useEffect(() => {
+    if (!hasFetchedOnce) return;
+
+    deflickerId.current = setTimeout(() => {
+      setIsLoading(false);
+      setIsServerTimeout(false);
+    }, 300);
+
+    return () => {
+      if (deflickerId.current) clearTimeout(deflickerId.current);
+    };
+  }, [hasFetchedOnce]);
+
+
 
   const { columns } = useEmployeeTableColumns({
     currentPage,
@@ -100,28 +143,48 @@ const EmployeeTable: React.FC<EmployeeTableProps> = ({
         onChangeRowsPerPage={setRowsPerPage}
         responsive
         fixedHeader
-        progressPending={isLoading || isServerTimeout || employees.length === 0}
+        // Only loading/timeout control the overlay now (empty employee list state moved to noDataComponent)
+        progressPending={isLoading || isServerTimeout}
         progressComponent={
-          <div className="flex flex-col items-center justify-center py-8">
+          <div
+            role="status"
+            aria-live="polite"
+            className="flex flex-col items-center justify-center py-8"
+          >
             {isLoading ? (
               <>
-                <div className="w-10 h-10 border-4 border-gray-600 border-t-transparent rounded-full animate-spin"></div>
-                <p className="mt-3 text-gray-600 font-medium text-sm">
-                  Loading employees...
-                </p>
-              </>
-            ) : isServerTimeout ? (
-              <>
-                <p className="mt-3 text-red-600 font-medium text-sm">
-                  Server is not responding. Please try again later.
+                <div className="w-10 h-10 border-4 border-gray-600 border-t-transparent rounded-full animate-spin" />
+                <p className="mt-3 text-gray-600 font-medium text-base">
+                  Loading employees…
                 </p>
               </>
             ) : (
-              <p className="mt-3 text-gray-600 font-medium text-sm">
-                No employees found.
-              </p>
+              <>
+                <p className="mt-3 text-red-600 font-medium text-base">
+                  Server is not responding. Check your internet connection and try again or contact support.
+                </p>
+                <button
+                  type="button"
+                  onClick={() => window.location.reload()}
+                  className="mt-3 rounded-xl px-3 py-1.5 text-sm font-medium border border-red-300 hover:bg-red-50"
+                >
+                  Retry
+                </button>
+              </>
             )}
           </div>
+        }
+        // Proper empty state after we've stopped loading and there is no timeout
+        noDataComponent={
+          !isLoading && !isServerTimeout ? (
+            <p
+              role="status"
+              aria-live="polite"
+              className="mt-3 text-gray-600 font-semibold text-xl"
+            >
+              No employees found.
+            </p>
+          ) : null
         }
       />
 

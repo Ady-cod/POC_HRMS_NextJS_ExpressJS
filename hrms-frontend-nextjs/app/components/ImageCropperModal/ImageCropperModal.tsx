@@ -4,6 +4,7 @@ import {
   CropperRef,
   CircleStencil,
   CropperPreview,
+  CropperPreviewRef,
 } from "react-advanced-cropper";
 import "react-advanced-cropper/dist/style.css";
 import { Button } from "@/components/ui/button";
@@ -29,7 +30,8 @@ const ImageCropperModal: React.FC<ImageCropperModalProps> = ({
   onSave,
 }) => {
   const cropperRef = useRef<CropperRef>(null);
-  const previewRef = useRef<any>(null);
+  const previewRef = useRef<CropperPreviewRef>(null);
+  // const previewRef = useRef<HTMLCanvasElement | null>(null);
 
   if (!open) return null;
 

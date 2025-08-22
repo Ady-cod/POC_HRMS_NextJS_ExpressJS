@@ -381,7 +381,7 @@ export default function Profile() {
                   <div className="flex gap-2">
                     <Button
                       size="sm"
-                      className="bg-slate-400 hover:bg-slate-800"
+                      className="bg-blue-600 hover:bg-blue-800"
                       onClick={() => handleFieldSave(key)}
                     >
                       Save
@@ -462,7 +462,7 @@ export default function Profile() {
           ))}
 
           <div className="flex gap-2">
-            <Button onClick={handlePasswordUpdate}>Update Password</Button>
+            <Button onClick={handlePasswordUpdate} className="bg-blue-600 hover:bg-blue-800">Update Password</Button>
             <Button
               variant="outline"
               onClick={() => setShowPasswordChange(false)}

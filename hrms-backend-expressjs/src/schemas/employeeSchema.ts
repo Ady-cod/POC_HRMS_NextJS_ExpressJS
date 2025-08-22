@@ -342,4 +342,11 @@ export const updateEmployeeSchema = z.object({
   inductionCompleted: z.boolean().optional(),
   role: z.nativeEnum(Role).optional(),
   status: z.nativeEnum(Status).optional(),
+
+  // timezone field added
+  timezone: z
+    .string()
+    .optional()
+    .nullable()
+    .transform((value) => (!value ? null : value)),
 });

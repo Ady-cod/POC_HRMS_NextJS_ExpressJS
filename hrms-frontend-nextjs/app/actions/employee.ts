@@ -152,6 +152,7 @@ export async function createEmployee(
     }
   }
 }
+
 export async function updateEmployee(
   id: string,
   validatedData: z.infer<typeof updateEmployeeSchema>

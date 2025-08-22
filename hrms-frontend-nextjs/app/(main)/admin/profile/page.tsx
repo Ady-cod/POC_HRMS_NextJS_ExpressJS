@@ -372,7 +372,7 @@ export default function Profile() {
                     </select>
                   ) : (
                     <Input
-                      className="w-full text-3xl"
+                      className="w-full text-xl"
                       value={value}
                       onChange={(e) => handleFieldChange(key, e.target.value)}
                     />
@@ -397,7 +397,7 @@ export default function Profile() {
                 </div>
               ) : (
                 <div className="flex items-center justify-between w-full sm:w-2/3">
-                  <span className="text-gray-800 text-3xl">
+                  <span className="text-gray-800 text-xl">
                     {key === "timezone"
                       ? formatTimeZone(formData.timezone)
                       : value || "Not set"}

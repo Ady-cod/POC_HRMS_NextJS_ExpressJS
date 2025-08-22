@@ -103,7 +103,7 @@ const handleZoomOut = () => {
           <Button variant="outline" onClick={onClose}>
             Cancel
           </Button>
-          <Button onClick={handleSave}>Save</Button>
+          <Button onClick={handleSave} className="bg-blue-600 hover:bg-blue-800">Save</Button>
         </div>
       </div>
     </div>

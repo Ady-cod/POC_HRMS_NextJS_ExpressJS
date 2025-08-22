@@ -181,12 +181,16 @@ export default function EnrollmentChart({ employees, hasError }: EnrollmentChart
 
   return (
     <div className="rounded-2xl shadow-sm px-8 pt-8 justify-center bg-black/10 border border-black-50 min-h-full flex flex-col">
-      <div className="flex justify-between items-center mb-4">
+      <div className="flex justify-between items-start mb-4">
         <h2 className="font-semibold text-lg">Employee Enrollment Trends</h2>
 
         <Select
           onValueChange={(val) =>
-            setSelectedYear(val === "all" ? { kind: "all" } : { kind: "year", value: Number(val) })
+            setSelectedYear(
+              val === "all"
+                ? { kind: "all" }
+                : { kind: "year", value: Number(val) }
+            )
           }
           defaultValue="all"
           disabled={loading || !!displayError}
@@ -302,10 +306,17 @@ export default function EnrollmentChart({ employees, hasError }: EnrollmentChart
                                   border: "1px solid #d1d5db",
                                   borderRadius: "6px",
                                   padding: "8px 12px",
-                                  boxShadow: "0 4px 6px -1px rgba(0, 0, 0, 0.1)",
+                                  boxShadow:
+                                    "0 4px 6px -1px rgba(0, 0, 0, 0.1)",
                                 }}
                               >
-                                <p style={{ margin: 0, color: "#374151", fontWeight: "500" }}>
+                                <p
+                                  style={{
+                                    margin: 0,
+                                    color: "#374151",
+                                    fontWeight: "500",
+                                  }}
+                                >
                                   {label}
                                 </p>
                                 <p style={{ margin: 0, color: "#6b767f" }}>

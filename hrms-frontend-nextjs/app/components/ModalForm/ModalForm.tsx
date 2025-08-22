@@ -496,7 +496,7 @@ const ModalForm: React.FC<ModalFormProps> = ({
               <input
                 name="fullName"
                 type="text"
-                placeholder={`Employee Name${!employeeData ? "*" : ""}`}
+                placeholder={`Employee Full Name${!employeeData ? "*" : ""}`}
                 required={!employeeData}
                 defaultValue={employeeData?.fullName}
                 className="input-field"

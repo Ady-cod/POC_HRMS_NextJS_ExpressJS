@@ -57,6 +57,10 @@ export const getAllEmployees = async (
 
     // console.log("Employees:", employees);
 
+    // test empty employee list
+    // const emptyEmployees: Employee[] = [];
+    // res.status(200).json(emptyEmployees);
+
     res.status(200).json(employees);
   } catch (error) {
     console.error("Error fetching employees:", error);

@@ -1,104 +1,122 @@
-import React, { useState, useEffect, useMemo } from "react";
+"use client";
+
+import React, { useState, useEffect, useRef } from "react";
 import DataTable from "react-data-table-component";
 import { EmployeeListItem } from "@/types/types";
-import { formatDate } from "@/utils/dateUtils";
-import { ColumnConfig } from "@/types/columnConfig";
-import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import { faDownload } from "@fortawesome/free-solid-svg-icons";
-
 import dynamic from "next/dynamic";
-import EmployeeSearchFilters, { FilterState } from "@/components/EmployeeSearchFilters/EmployeeSearchFilters";
-import { useCSVExport } from "@/hooks/useCSVExport";
 import { useEmployeeTableColumns } from "@/hooks/useEmployeeTableColumns";
-import { useEmployeeData } from "@/hooks/useEmployeeData";
+import { ColumnConfig } from "@/types/columnConfig";
 
-// Dynamically import the ConfirmationModal component to keep the initial bundle size small
 const ConfirmationModal = dynamic(
   () => import("@/components/ConfirmationModal/ConfirmationModal"),
-  {
-    ssr: false,
-  }
+  { ssr: false }
 );
 
 interface EmployeeTableProps {
-  refreshFlag: boolean;
+  employees: EmployeeListItem[];
   handleEdit: (employeeData: EmployeeListItem) => void;
-  setEmployeeCount: (count: number) => void;
+  handleDeleteClick: (employee: EmployeeListItem) => void;
+  selectedEmployee: EmployeeListItem | null;
+  showDialog: boolean;
+  confirmDelete: () => void;
+  closeDeleteDialog: () => void;
   columnConfig?: ColumnConfig;
 }
 
 const EmployeeTable: React.FC<EmployeeTableProps> = ({
-  refreshFlag,
+  employees,
   handleEdit,
-  setEmployeeCount,
+  handleDeleteClick,
+  selectedEmployee,
+  showDialog,
+  confirmDelete,
+  closeDeleteDialog,
   columnConfig,
 }) => {
-  // Employee data management
-  const {
-    employees,
-    selectedEmployee,
-    showDialog,
-    handleDeleteClick,
-    confirmDelete,
-    closeDeleteDialog,
-  } = useEmployeeData({ refreshFlag, setEmployeeCount });
-
   const [activeSectionIndex, setActiveSectionIndex] = useState(0);
   const [activeColumnIndex, setActiveColumnIndex] = useState(0);
-  const [isSmallScreen, setIsSmallScreen] = useState(false); // Track screen size
+  const [isSmallScreen, setIsSmallScreen] = useState(false);
+
   const [currentPage, setCurrentPage] = useState(1);
   const [rowsPerPage, setRowsPerPage] = useState(10);
-  // Consolidated filter state
-  const [filterState, setFilterState] = useState<FilterState>({
-    searchText: "",
-    searchCategory: "",
-    selectedRole: "",
-    selectedDepartment: "",
-    selectedStartDate: "",
-    selectedEndDate: "",
-    selectedStartDOB: "",
-    selectedEndDOB: "",
-    selectedStatus: "",
-  });
 
-  // Helper function to update filter state
-  const updateFilter = (key: keyof FilterState, value: string) => {
-    setFilterState(prev => ({ ...prev, [key]: value }));
-  };
+  // Loading / timeout state machine (internal only)
+  const [isLoading, setIsLoading] = useState(true); // start loading immediately
+  const [isServerTimeout, setIsServerTimeout] = useState(false);
+  const [hasFetchedOnce, setHasFetchedOnce] = useState(false); // becomes true after the first *prop change* from parent
 
-  // Helper function to clear all filters
-  const clearAllFilters = () => {
-    setFilterState({
-      searchText: "",
-      searchCategory: "",
-      selectedRole: "",
-      selectedDepartment: "",
-      selectedStartDate: "",
-      selectedEndDate: "",
-      selectedStartDOB: "",
-      selectedEndDOB: "",
-      selectedStatus: "",
-    });
-  };
+  // Refs to help detect the first real "response arrived" without involving parent
+  const mountedRef = useRef(false);
+  const prevEmployeesRef = useRef<EmployeeListItem[] | null>(null);
+  const serverTimeoutId = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const deflickerId = useRef<ReturnType<typeof setTimeout> | null>(null);
 
-
-
-  // CSV Export functionality
-  const { exportToCSV } = useCSVExport();
-
+  // Detect screen size changes
   useEffect(() => {
-    // Set the initial state for the  screen size based on the window width
     setIsSmallScreen(window.innerWidth < 640);
-
-    const handleResize = () => {
-      setIsSmallScreen(window.innerWidth < 640);
-    };
-
+    const handleResize = () => setIsSmallScreen(window.innerWidth < 640);
     window.addEventListener("resize", handleResize);
-    return () => window.removeEventListener("resize", handleResize); // Cleanup on unmount
+    return () => window.removeEventListener("resize", handleResize);
   }, []);
 
-  // Column definitions
+  // Start a server-timeout only until we acknowledge the first response (any content, even empty)
+  useEffect(() => {
+    if (hasFetchedOnce) return;
+
+    setIsLoading(true);
+    setIsServerTimeout(false);
+
+    serverTimeoutId.current = setTimeout(() => {
+      if (!hasFetchedOnce) {
+        setIsLoading(false);
+        setIsServerTimeout(true);
+      }
+    }, 10000); // 10s: safer for cold starts
+
+    return () => {
+      if (serverTimeoutId.current) clearTimeout(serverTimeoutId.current);
+    };
+  }, [hasFetchedOnce]);
+
+  // Acknowledge the first *prop* update from parent as "response arrived" (even if array is empty)
+  useEffect(() => {
+    if (!mountedRef.current) {
+      mountedRef.current = true;
+      prevEmployeesRef.current = employees;
+
+      // If data is already present on first render, acknowledge immediately
+      if (Array.isArray(employees) && employees.length > 0 && !hasFetchedOnce) {
+        setHasFetchedOnce(true);
+        if (serverTimeoutId.current) clearTimeout(serverTimeoutId.current);
+      }
+      return;
+    }
+
+    // If the reference changes later, acknowledge the response (even if empty)
+    if (!hasFetchedOnce && prevEmployeesRef.current !== employees) {
+      prevEmployeesRef.current = employees;
+      setHasFetchedOnce(true);
+      if (serverTimeoutId.current) clearTimeout(serverTimeoutId.current);
+    } else {
+      prevEmployeesRef.current = employees;
+    }
+  }, [employees, hasFetchedOnce]);
+
+  useEffect(() => {
+    if (!hasFetchedOnce) return;
+
+    deflickerId.current = setTimeout(() => {
+      setIsLoading(false);
+      setIsServerTimeout(false);
+    }, 300);
+
+    return () => {
+      if (deflickerId.current) clearTimeout(deflickerId.current);
+    };
+  }, [hasFetchedOnce]);
+
+
+
   const { columns } = useEmployeeTableColumns({
     currentPage,
     rowsPerPage,
@@ -112,166 +130,70 @@ const EmployeeTable: React.FC<EmployeeTableProps> = ({
     columnConfig,
   });
 
-  const handlePageChange = (page: number) => {
-    setCurrentPage(page);
-  };
-
-  const handleRowsPerPageChange = (currentRowsPerPage: number) => {
-    setRowsPerPage(currentRowsPerPage);
-    setCurrentPage(1); // Reset to first page when changing rows per page
-  };
-
-  const filteredEmployees = useMemo(() => {
-    const { 
-      searchCategory, 
-      searchText, 
-      selectedRole, 
-      selectedDepartment, 
-      selectedStatus,
-      selectedStartDate,
-      selectedEndDate,
-      selectedStartDOB,
-      selectedEndDOB
-    } = filterState;
-    
-    if (searchCategory === "all" || searchCategory === "") {
-      return employees;
-    }
-
-    if (
-      (searchCategory === "name" || searchCategory === "email") &&
-      !searchText
-    ) {
-      return employees;
-    }
-
-    if (searchCategory === "role" && !selectedRole) {
-      return employees;
-    }
-
-    if (searchCategory === "department" && !selectedDepartment) {
-      return employees;
-    }
-
-    if (searchCategory === "status" && !selectedStatus) {
-      return employees;
-    }
-
-    const lowercasedSearchText = searchText.toLowerCase();
-
-    return employees.filter((employee) => {
-      let valueToSearch = "";
-
-      switch (searchCategory) {
-        case "name":
-          valueToSearch = employee.fullName || "";
-          break;
-
-        case "email":
-          valueToSearch = employee.email || "";
-          break;
-
-        case "dateOfJoining":
-          if (employee.dateOfJoining) {
-            const employeeDate = formatDate(employee.dateOfJoining);
-            if (employeeDate === "N/A") return false;
-
-            if (selectedStartDate && selectedEndDate) {
-              return (
-                employeeDate >= selectedStartDate &&
-                employeeDate <= selectedEndDate
-              );
-            } else if (selectedStartDate) {
-              return employeeDate >= selectedStartDate;
-            } else if (selectedEndDate) {
-              return employeeDate <= selectedEndDate;
-            } else {
-              return true;
-            }
-          }
-          return false;
-
-        case "dateOfBirth":
-          if (employee.birthDate) {
-            const dob = formatDate(employee.birthDate);
-            if (dob === "N/A") return false;
-
-            if (selectedStartDOB && selectedEndDOB) {
-              return dob >= selectedStartDOB && dob <= selectedEndDOB;
-            } else if (selectedStartDOB) {
-              return dob >= selectedStartDOB;
-            } else if (selectedEndDOB) {
-              return dob <= selectedEndDOB;
-            } else {
-              return true;
-            }
-          }
-          return false;
-
-        case "status":
-          return employee.status === selectedStatus;
-
-        case "role":
-          return employee.role === selectedRole;
-
-        case "department":
-          return employee.department?.name === selectedDepartment;
-
-        default:
-          return true;
-      }
-
-      return valueToSearch.toLowerCase().includes(lowercasedSearchText);
-    });
-  }, [employees, filterState]);
-
-
-
-
-
   return (
     <div>
-      {/* Search and Filter Controls */}
-      <EmployeeSearchFilters
-        filterState={filterState}
-        updateFilter={updateFilter}
-        clearAllFilters={clearAllFilters}
-        employees={employees}
+      <DataTable
+        fixedHeaderScrollHeight="calc(100vh - 130px - 60px)"
+        columns={columns}
+        data={employees}
+        pagination
+        paginationPerPage={rowsPerPage}
+        paginationRowsPerPageOptions={[10, 25, 50, 100]}
+        onChangePage={setCurrentPage}
+        onChangeRowsPerPage={setRowsPerPage}
+        responsive
+        fixedHeader
+        // Only loading/timeout control the overlay now (empty employee list state moved to noDataComponent)
+        progressPending={isLoading || isServerTimeout}
+        progressComponent={
+          <div
+            role="status"
+            aria-live="polite"
+            className="flex flex-col items-center justify-center py-8"
+          >
+            {isLoading ? (
+              <>
+                <div className="w-10 h-10 border-4 border-gray-600 border-t-transparent rounded-full animate-spin" />
+                <p className="mt-3 text-gray-600 font-medium text-base">
+                  Loading employees…
+                </p>
+              </>
+            ) : (
+              <>
+                <p className="mt-3 text-red-600 font-medium text-base">
+                  Server is not responding. Check your internet connection and try again or contact support.
+                </p>
+                <button
+                  type="button"
+                  onClick={() => window.location.reload()}
+                  className="mt-3 rounded-xl px-3 py-1.5 text-sm font-medium border border-red-300 hover:bg-red-50"
+                >
+                  Retry
+                </button>
+              </>
+            )}
+          </div>
+        }
+        // Proper empty state after we've stopped loading and there is no timeout
+        noDataComponent={
+          !isLoading && !isServerTimeout ? (
+            <p
+              role="status"
+              aria-live="polite"
+              className="mt-3 text-gray-600 font-semibold text-xl"
+            >
+              No employees found.
+            </p>
+          ) : null
+        }
       />
-      {/* Export Button */}
-      <div className="flex justify-start mb-4 px-3">
-        <button
-          onClick={() => exportToCSV(filteredEmployees)}
-          className="flex items-center gap-2 bg-gray-400 hover:opacity-90 text-white px-4 py-2 rounded-md text-sm font-medium transition duration-200"
-        >
-          Export it into CSV file
-          <FontAwesomeIcon icon={faDownload} />
-        </button>
-      </div>
 
-      {/* Data Table */}
-      <div>
-        <DataTable
-          fixedHeaderScrollHeight="calc(100vh - 130px - 60px)"
-          columns={columns}
-          data={filteredEmployees}
-          pagination
-          paginationPerPage={rowsPerPage}
-          paginationRowsPerPageOptions={[10, 25, 50, 100]}
-          onChangePage={handlePageChange}
-          onChangeRowsPerPage={handleRowsPerPageChange}
-          responsive
-          fixedHeader
-        />
-      </div>
-
-      {/* Confirmation Modal */}
       <ConfirmationModal
         isOpen={showDialog}
         onClose={closeDeleteDialog}
         onConfirm={confirmDelete}
         title="Confirm Deletion"
-        description={`Are you sure you want to delete "${selectedEmployee?.fullName}"? This action cannot be undone.`}
+        description={`Are you sure you want to delete "${selectedEmployee?.fullName}"?`}
       />
     </div>
   );

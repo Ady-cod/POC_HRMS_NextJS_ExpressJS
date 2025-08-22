@@ -1,0 +1,12 @@
+/* src/components/TotalCountButton.css */
+
+/* For medium and larger screens (sm in Tailwind = 640px+) */
+@media (min-width: 640px) {
+  .total-count-button {
+    padding: 8px 12px; /* sm:px-3, sm:py-2 */
+    font-size: 14px; /* text-sm */
+  }
+}
+
+/* For smaller screens, the base Tailwind classes will apply */
+/* Base: px-5 py-2 text-sm from Tailwind */

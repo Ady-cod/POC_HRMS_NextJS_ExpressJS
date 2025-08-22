@@ -1,21 +1,30 @@
 "use client";
-import React, { useState } from "react";
+import React, { useState, useMemo } from "react";
 import EmployeeTable from "@/components/EmployeeTable/EmployeeTable";
+import EmployeeSearchFilters from "@/components/EmployeeSearchFilters/EmployeeSearchFilters";
+import WeekSlider from "@/components/WeekSlider/WeekSlider";
+import ExportCSVButton from "@/components/ExportCSVButton/ExportCSVButton";
+import TotalCountButton from "@/components/TotalCountButton/TotalCountButton";
 import { WEEK_WISE_COLUMN_CONFIG } from "@/types/columnConfig";
 import { useEmployeeModal } from "@/hooks/useEmployeeModal";
+import { useEmployeeData } from "@/hooks/useEmployeeData";
 import AddNewDataButton from "@/components/AddNewDataButton/AddNewDataButton";
-
+import { 
+  FilterState, 
+  getInitialFilterState, 
+  applyAllFilters 
+} from "@/utils/employeeFilters";
 import dynamic from "next/dynamic";
 
-// Dynamically import the ModalForm component to reduce the initial bundle size
 const ModalForm = dynamic(() => import("@/components/ModalForm/ModalForm"), {
   ssr: false,
 });
 
 const WeekWisePage = () => {
   const [employeeCount, setEmployeeCount] = useState(0);
-  
-  // Use the custom hook for modal management
+  const [selectedWeek, setSelectedWeek] = useState(0);
+  const [filterState, setFilterState] = useState<FilterState>(getInitialFilterState());
+
   const {
     isModalOpen,
     employeeData,
@@ -26,43 +35,48 @@ const WeekWisePage = () => {
     refreshEmployees,
   } = useEmployeeModal();
 
-  const handleRefresh = () => {
-    // Trigger refresh from the hook instead of local state
-    refreshEmployees();
+  // Use the employee data hook
+  const {
+    employees,
+    selectedEmployee,
+    showDialog,
+    handleDeleteClick,
+    confirmDelete,
+    closeDeleteDialog,
+  } = useEmployeeData({ refreshFlag, setEmployeeCount });
+
+  // Filter state management
+  const updateFilter = (key: keyof FilterState, value: string) => {
+    setFilterState((prev) => ({ ...prev, [key]: value }));
   };
 
+  const clearAllFilters = () => {
+    setFilterState(getInitialFilterState());
+  };
+
+  // Apply filters to employees (including week filtering)
+  const filteredEmployees = useMemo(() => {
+    return applyAllFilters(employees, filterState, selectedWeek, true);
+  }, [employees, filterState, selectedWeek]);
+
   return (
-    <div>
-      <div className="flex flex-row flex-wrap justify-between items-center mt-6 mb-4 px-4 gap-2 sm:gap-4">
+    <div className="w-full">
+      {/* Header Section */}
+      <div className="flex flex-wrap justify-between items-start gap-2 mt-6 mb-4 px-4">
         {/* Heading */}
-        <h2 className="text-2xl sm:text-3xl font-bold text-gray-900 whitespace-nowrap">
+        <h2 className="text-lg sm:text-xl md:text-2xl font-bold text-gray-900">
           Week-wise Employee View
         </h2>
 
-        {/* Button Section */}
+        {/* Button Group */}
         <div className="flex flex-row flex-wrap items-center gap-2 sm:gap-3">
-          {/* Total Count Button */}
-          <button
-            disabled
-            className="box-border border-2 border-gray-300 px-3 sm:px-4 py-1 sm:py-1.5 rounded-md text-xs sm:text-sm cursor-default hover:bg-gray-100 hover:shadow-sm transition duration-200 font-semibold text-gray-400"
-          >
-            Total Count: {employeeCount}
-          </button>
+          <TotalCountButton count={employeeCount} />
 
-          {/* Add New Data Button */}
           <AddNewDataButton onClick={openModalForAdd} />
-
-          {/* Refresh Button */}
-          <button
-            onClick={handleRefresh}
-            className="bg-blue-500 hover:bg-blue-600 text-white px-3 sm:px-4 py-1 sm:py-1.5 rounded-md text-xs sm:text-sm font-semibold transition duration-200"
-          >
-            Refresh Data
-          </button>
         </div>
       </div>
 
-      {/* Modal Form for adding/editing employees */}
+      {/* Modal Form */}
       <ModalForm
         isOpen={isModalOpen}
         onClose={closeModal}
@@ -70,15 +84,38 @@ const WeekWisePage = () => {
         employeeData={employeeData}
       />
 
-      {/* Week-wise Table */}
+      {/* Search Filters */}
+      <EmployeeSearchFilters
+        filterState={filterState}
+        updateFilter={updateFilter}
+        clearAllFilters={clearAllFilters}
+        employees={employees}
+      />
+
+      {/* Export Button */}
+      <div className="flex justify-start mb-14 px-3">
+        <ExportCSVButton employees={filteredEmployees} />
+      </div>
+
+      {/* Week Slider */}
+      <WeekSlider
+        selectedWeek={selectedWeek}
+        setSelectedWeek={setSelectedWeek}
+      />
+
+      {/* Employee Table */}
       <EmployeeTable
-        refreshFlag={refreshFlag}
+        employees={filteredEmployees}
         handleEdit={openModalForEdit}
-        setEmployeeCount={setEmployeeCount}
+        handleDeleteClick={handleDeleteClick}
+        selectedEmployee={selectedEmployee}
+        showDialog={showDialog}
+        confirmDelete={confirmDelete}
+        closeDeleteDialog={closeDeleteDialog}
         columnConfig={WEEK_WISE_COLUMN_CONFIG}
       />
     </div>
   );
 };
 
-export default WeekWisePage; 
+export default WeekWisePage;

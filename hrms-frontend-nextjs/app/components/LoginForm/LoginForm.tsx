@@ -15,9 +15,15 @@ const playfair = Playfair_Display({ weight: ["900"], subsets: ["latin"] });
 
 interface LoginFormProps {
   onCloseModal?: () => void;
+  appearance?: "live" | "ghost";
+  suppressAnchors?: boolean;
 }
 
-const LoginForm = ({ onCloseModal }: LoginFormProps) => {
+const LoginForm = ({
+  onCloseModal,
+  appearance = "live",
+  suppressAnchors = false,
+}: LoginFormProps) => {
   const [state, formAction] = useFormState(login, undefined);
 
   // State to track password visibility
@@ -33,7 +39,10 @@ const LoginForm = ({ onCloseModal }: LoginFormProps) => {
   return (
     <form
       action={formAction}
-      className="flex flex-col items-center justify-center"
+      // add "relative" for ghost so absolute children anchor to the form box, not the whole panel
+      className={`flex flex-col items-center justify-center ${
+        appearance === "ghost" ? "relative w-full h-full" : ""
+      }`}
     >
       <h1
         className={`${playfair.className} text-5xl text-[#323232] font-bold mb-12 bg-[#d9d9d9] rounded`}
@@ -120,37 +129,51 @@ const LoginForm = ({ onCloseModal }: LoginFormProps) => {
       <SubmitButton className="self-end bg-gray-400 hover:bg-gray-600 text-white font-medium py-2 px-8 rounded">
         Login
       </SubmitButton>
-      <Link
-        href="#"
-        className="absolute bottom-4 right-6 self-end p-2 text-sm font-semibold text-blue-600 hover:underline"
-      >
-        Register now
-      </Link>
-      {/* Home Button on the Left Dark Section */}
-      {onCloseModal ? (
-        <button
-          type="button"
-          onClick={onCloseModal}
-          className="absolute bottom-4 left-6 flex flex-col items-center p-2 rounded text-white bg-[#353535] transform transition-transform hover:scale-110 border border-transparent hover:border-white"
-        >
-          <FontAwesomeIcon
-            icon={faHome}
-            className="text-4xl max-[350px]:text-2xl"
-          />
-          <span className="text-sm max-[350px]:text-xs mt-2">Back Home</span>
-        </button>
-      ) : (
+
+      {/* Register now (hide in ghost clone) */}
+      {!suppressAnchors && (
         <Link
-          href="/"
-          className="absolute bottom-4 left-6 flex flex-col items-center p-2 rounded text-white bg-[#353535] transform transition-transform hover:scale-110 border border-transparent hover:border-white"
+          href="#"
+          className="absolute bottom-4 right-6 self-end p-2 text-sm font-semibold text-blue-600 hover:underline"
         >
-          <FontAwesomeIcon
-            icon={faHome}
-            className="text-4xl max-[350px]:text-2xl"
-          />
-          <span className="text-sm max-[350px]:text-xs mt-2">Back Home</span>
+          Register now
         </Link>
       )}
+
+      {/* Home Button on the Left Dark Section (hide in ghost clone) */}
+      {!suppressAnchors &&
+        (onCloseModal ? (
+          <button
+            type="button"
+            onClick={onCloseModal}
+            className="absolute bottom-4 left-6 flex flex-col items-center p-2 rounded text-white bg-[#353535] transform transition-transform hover:scale-110 border border-transparent hover:border-white"
+          >
+            <>
+              <FontAwesomeIcon
+                icon={faHome}
+                className="text-4xl max-[350px]:text-2xl"
+              />
+              <span className="text-sm max-[350px]:text-xs mt-2">
+                Back Home
+              </span>
+            </>
+          </button>
+        ) : (
+          <Link
+            href="/"
+            className="absolute bottom-4 left-6 flex flex-col items-center p-2 rounded text-white bg-[#353535] transform transition-transform hover:scale-110 border border-transparent hover:border-white"
+          >
+            <>
+              <FontAwesomeIcon
+                icon={faHome}
+                className="text-4xl max-[350px]:text-2xl"
+              />
+              <span className="text-sm max-[350px]:text-xs mt-2">
+                Back Home
+              </span>
+            </>
+          </Link>
+        ))}
     </form>
   );
 };

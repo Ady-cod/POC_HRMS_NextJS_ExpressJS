@@ -29,7 +29,9 @@ export default function Profile() {
   const [coverImage, setCoverImage] = useState<string | null>(null);
   const [showCoverChooser, setShowCoverChooser] = useState(false);
 
-
+  // TODO: Implement cover image preview & chooser modal
+  void coverImage;
+  void showCoverChooser;
 
   const [formData, setFormData] = useState({
     name: "",

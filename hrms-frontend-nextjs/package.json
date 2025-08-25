@@ -27,6 +27,7 @@
     "country-cities": "^1.0.8",
     "country-state-city": "^3.2.1",
     "date-fns": "^4.1.0",
+    "framer-motion": "^12.23.12",
     "libphonenumber-js": "^1.11.14",
     "lodash": "^4.17.21",
     "lucide-react": "^0.471.1",

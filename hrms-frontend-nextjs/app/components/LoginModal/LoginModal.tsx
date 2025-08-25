@@ -1,5 +1,5 @@
 "use client";
-import { useEffect, useState } from "react";
+import { useEffect, useState, useRef } from "react";
 import { AnimatePresence, motion, useReducedMotion } from "framer-motion";
 import type { Variants } from "framer-motion";
 import LoginForm from "@/components/LoginForm/LoginForm";
@@ -14,7 +14,15 @@ interface LoginModalProps {
 
 export default function LoginModal({ isOpen, onClose }: LoginModalProps) {
   const prefersReduced = useReducedMotion();
-  const [isShrinking, setIsShrinking] = useState(false); // controls the close morph
+  // const [isShrinking, setIsShrinking] = useState(false); // controls the close morph
+  const panelRef = useRef<HTMLDivElement | null>(null);
+  const [isShrinking, setIsShrinking] = useState(false);
+  const [shrinkTransform, setShrinkTransform] = useState<{
+    x: number;
+    y: number;
+    scaleX: number;
+    scaleY: number;
+  } | null>(null);
 
   // --- EASING (typed tuples to keep TS happy) ---
   const EASE_OUT = [0.22, 1, 0.36, 1] as const;
@@ -63,6 +71,26 @@ export default function LoginModal({ isOpen, onClose }: LoginModalProps) {
   // --- Close handler: start the "shrink to button" sequence ---
   function handleRequestClose() {
     if (isShrinking) return;
+
+    // measure panel and target (Login button)
+    const panelEl = panelRef.current;
+    const ctaEl = document.getElementById("login-cta");
+    if (panelEl && ctaEl) {
+      const p = panelEl.getBoundingClientRect();
+      const t = ctaEl.getBoundingClientRect();
+
+      // center-to-center delta
+      const dx = t.left + t.width / 2 - (p.left + p.width / 2);
+      const dy = t.top + t.height / 2 - (p.top + p.height / 2);
+
+      setShrinkTransform({
+        x: dx,
+        y: dy,
+        scaleX: t.width / p.width,
+        scaleY: t.height / p.height,
+      });
+    }
+
     setIsShrinking(true);
   }
 
@@ -100,19 +128,25 @@ export default function LoginModal({ isOpen, onClose }: LoginModalProps) {
 
           {/* ======================= MODAL PANEL ======================= */}
           <motion.div
+            ref={panelRef}
             role="dialog"
             aria-modal="true"
-            className="relative flex items-center justify-center w-[90%] h-[85%] max-w-[1000px] bg-[#d9d9d9] rounded shadow-xl overflow-hidden"
+            className={`relative flex items-center justify-center w-[90%] h-[85%] max-w-[1000px] rounded-lg overflow-hidden ${
+              isShrinking
+                ? "bg-transparent shadow-none"
+                : "bg-[#d9d9d9] shadow-xl"
+            }`}
             variants={panelVariants}
             initial="initial"
             animate="animate"
-            // Note: no exit — close is driven by the ghost with a shared layoutId
+            // Note: no exit — close is driven by the ghost morph
           >
             {/* Close button */}
             <button
               onClick={handleRequestClose}
               aria-label="Close login"
               className="absolute right-4 top-2 z-30 w-8 h-8 flex items-center justify-center text-2xl leading-none text-gray-700 hover:text-black hover:bg-gray-200 rounded-full cursor-pointer"
+              style={{ opacity: isShrinking ? 0 : 1 }}
             >
               ×
             </button>
@@ -177,21 +211,31 @@ export default function LoginModal({ isOpen, onClose }: LoginModalProps) {
             </motion.div>
 
             {/* ====== GHOST CLONE (CLOSE ONLY): full design shrinks to the Login button ====== */}
-            {isShrinking && (
+            {isShrinking && shrinkTransform && (
               <motion.div
-                layoutId="login-cta"
-                className="absolute inset-0 z-40 overflow-hidden bg-transparent"
+                // Start at the panel's current size/position
+                initial={{ x: 0, y: 0, scaleX: 1, scaleY: 1 }}
+                animate={{
+                  x: shrinkTransform.x,
+                  y: shrinkTransform.y,
+                  scaleX: shrinkTransform.scaleX,
+                  scaleY: shrinkTransform.scaleY,
+                }}
+                transition={{
+                  duration: 0.7,
+                  ease: [0.22, 1, 0.36, 1],
+                }}
+                onAnimationComplete={() => {
+                  setIsShrinking(false);
+                  setShrinkTransform(null);
+                  onClose();
+                }}
+                className="absolute inset-0 z-40 overflow-hidden bg-[#d9d9d9] rounded-lg shadow-xl"
                 style={{
-                  borderRadius: 12,
+                  transformOrigin: "center",
                   pointerEvents: "none",
                   width: "100%",
                   height: "100%",
-                  transformOrigin: "center right",
-                }}
-                transition={{ layout: { duration: 0.5, ease: EASE_OUT } }}
-                onLayoutAnimationComplete={() => {
-                  setIsShrinking(false);
-                  onClose();
                 }}
               >
                 {/* Left trapezoid clone */}

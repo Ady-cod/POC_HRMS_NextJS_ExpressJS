@@ -6,6 +6,7 @@ import { EmployeeListItem } from "@/types/types";
 import dynamic from "next/dynamic";
 import { useEmployeeTableColumns } from "@/hooks/useEmployeeTableColumns";
 import { ColumnConfig } from "@/types/columnConfig";
+import Image from "next/image";
 
 const ConfirmationModal = dynamic(
   () => import("@/components/ConfirmationModal/ConfirmationModal"),
@@ -149,19 +150,24 @@ const EmployeeTable: React.FC<EmployeeTableProps> = ({
           <div
             role="status"
             aria-live="polite"
-            className="flex flex-col items-center justify-center py-8"
+            className="flex flex-col items-center justify-center py-8 text-[#646d7d]"
           >
             {isLoading ? (
               <>
-                <div className="w-10 h-10 border-4 border-gray-600 border-t-transparent rounded-full animate-spin" />
-                <p className="mt-3 text-gray-600 font-medium text-base">
-                  Loading employees…
-                </p>
+                <div
+                  aria-hidden="true"
+                  className="w-10 h-10 border-4 border-current border-t-transparent rounded-full animate-spin"
+                />
+                <p className="mt-3 font-medium text-base">Loading employees…</p>
               </>
             ) : (
               <>
-                <p className="mt-3 text-red-600 font-medium text-base">
-                  Server is not responding. Check your internet connection and try again or contact support.
+                <p
+                  aria-live="assertive"
+                  className="mt-3 text-red-600 font-medium text-base"
+                >
+                  Server is not responding. Check your internet connection and
+                  try again or contact support.
                 </p>
                 <button
                   type="button"
@@ -177,13 +183,23 @@ const EmployeeTable: React.FC<EmployeeTableProps> = ({
         // Proper empty state after we've stopped loading and there is no timeout
         noDataComponent={
           !isLoading && !isServerTimeout ? (
-            <p
-              role="status"
-              aria-live="polite"
-              className="mt-3 text-gray-600 font-semibold text-xl"
-            >
-              No employees found.
-            </p>
+            <div className="flex flex-col gap-4 items-center justify-center py-10 text-[#646d7d]">
+              <p
+                role="status"
+                aria-live="polite"
+                className="font-semibold text-lg"
+              >
+                No employees found.
+              </p>
+              <Image
+                src="/images/no-results.svg"
+                alt=""
+                aria-hidden="true"
+                width={160}
+                height={120}
+                className="mb-3 opacity-90"
+              />
+            </div>
           ) : null
         }
       />

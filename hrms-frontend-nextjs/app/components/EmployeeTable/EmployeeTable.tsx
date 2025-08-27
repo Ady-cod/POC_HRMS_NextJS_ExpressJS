@@ -116,8 +116,6 @@ const EmployeeTable: React.FC<EmployeeTableProps> = ({
     };
   }, [hasFetchedOnce]);
 
-
-
   const { columns } = useEmployeeTableColumns({
     currentPage,
     rowsPerPage,
@@ -149,7 +147,6 @@ const EmployeeTable: React.FC<EmployeeTableProps> = ({
         progressComponent={
           <div
             role="status"
-            aria-live="polite"
             className="flex flex-col items-center justify-center py-8 text-[#646d7d]"
           >
             {isLoading ? (
@@ -183,13 +180,17 @@ const EmployeeTable: React.FC<EmployeeTableProps> = ({
         // Proper empty state after we've stopped loading and there is no timeout
         noDataComponent={
           !isLoading && !isServerTimeout ? (
-            <div className="flex flex-col gap-4 items-center justify-center py-10 text-[#646d7d]">
-              <p
-                role="status"
-                aria-live="polite"
-                className="font-semibold text-lg"
-              >
-                No employees found.
+            <div
+              role="status"
+              aria-live="polite"
+              aria-atomic="true"
+              className="flex flex-col items-center justify-center py-10 text-[#646d7d] text-center"
+            >
+              <p className="font-semibold text-lg">
+                No employee records to display.
+              </p>
+              <p className="mb-8">
+                If filters are applied, clear or adjust them to see results.
               </p>
               <Image
                 src="/images/no-results.svg"

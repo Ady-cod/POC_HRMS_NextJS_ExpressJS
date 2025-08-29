@@ -4,6 +4,13 @@ import { useRef, useEffect, useState } from "react";
 import Image from "next/image";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 import { showToast } from "@/utils/toastHelper";
 import { EmployeeListItem } from "@/types/types";
 import { Eye, EyeOff } from "lucide-react";
@@ -12,11 +19,46 @@ import AnimatedLoader from "@/components/LoaderScreen/AnimatedLoader";
 import TimeZoneSelect from "@/components/TimeZoneSelect/TimeZoneSelect";
 import moment from "moment-timezone";
 import ImageCropperModal from "@/components/ImageCropperModal/ImageCropperModal";
-import { Upload, Trash2 } from "lucide-react";
+import { Upload, Trash2, User, Briefcase, Shield } from "lucide-react";
 
 // helper to format time zones
 const formatTimeZone = (tz: string) =>
   tz ? `(UTC${moment.tz(tz).format("Z")}) ${tz}` : "Not set";
+
+type FormData = {
+  name: string;
+  email: string;
+  employeeId?: string;
+  department: string;
+  departmentName: string;
+  role: string;
+  timezone: string;
+  phone: string;
+  password: string;
+};
+
+// for header section of each field
+const fieldGroups: {
+  title: string;
+  icon: React.ElementType;
+  fields: (keyof FormData)[];
+}[] = [
+  {
+    title: "Personal Info",
+    icon: User,
+    fields: ["name", "email", "phone", "timezone"],
+  },
+  {
+    title: "Work Info",
+    icon: Briefcase,
+    fields: ["departmentName", "role"],
+  },
+  {
+    title: "Security Info",
+    icon: Shield,
+    fields: ["password"],
+  },
+];
 
 export default function Profile() {
   const [editingField, setEditingField] = useState<string | null>(null);
@@ -33,7 +75,7 @@ export default function Profile() {
   void coverImage;
   void showCoverChooser;
 
-  const [formData, setFormData] = useState({
+  const [formData, setFormData] = useState<FormData>({
     name: "",
     email: "",
     department: "",
@@ -123,9 +165,7 @@ export default function Profile() {
     };
     reader.readAsDataURL(file);
     e.target.value = "";
-
   };
-
 
   const handleFieldChange = (key: string, value: string) =>
     setFormData((prev) => ({ ...prev, [key]: value }));
@@ -214,7 +254,7 @@ export default function Profile() {
           </button>
           <button
             onClick={() => setShowCoverChooser(true)}
-            className="px-3 py-1 text-sm font-medium text-white bg-blue-600 rounded-md hover:bg-blue-700 transition flex items-center gap-1"
+            className="px-3 py-1 text-sm font-medium text-white bg-lightblue-600 rounded-md hover:bg-lightblue-700 transition flex items-center gap-1"
           >
             <svg
               xmlns="http://www.w3.org/2000/svg"
@@ -302,179 +342,219 @@ export default function Profile() {
 
           {/* Profile Info */}
           <div className="flex flex-col mb-8">
-            <h2 className="text-4xl font-semibold">{formData.name}</h2>
-            <p className="text-sm text-gray-600">{formData.email}</p>
+            <h2 className="text-4xl font-semibold text-darkblue-900">
+              {formData.name}
+            </h2>
+            <p className="text-sm text-lightblue-400">{formData.email}</p>
           </div>
         </div>
       </div>
 
       {/* Profile Fields */}
-      <div className="space-y-4 px-8">
-        {Object.entries(formData)
-          .filter(([key]) => key !== "department")
-          .map(([key, value]) => (
-            <div
-              key={key}
-              className="border-b py-3 flex flex-col sm:flex-row sm:items-center sm:justify-between"
-            >
-              <label className="text-2xl font-bold text-gray-700 capitalize">
-                {fieldLabels[key] || key}
-              </label>
+      <div className="space-y-8 px-8">
+        {fieldGroups.map((group) => (
+          <div key={group.title}>
+            <h2 className="text-xl font-bold text-lightblue-400 mb-4 flex items-center gap-2">
+              <group.icon className="w-5 h-5 text-orange-500" />
+              {group.title}
+            </h2>
+            <div className="space-y-4 bg-[#E7ECF0] p-6 rounded-lg">
+              {group.fields.map((key) => {
+                const value = formData[key];
+                return (
+                  <div
+                    key={key}
+                    className="border-b border-b-black-600 py-3 flex flex-col sm:flex-row sm:items-center sm:justify-between"
+                  >
+                    <label className="text-2xl font-bold text-darkblue-900 capitalize">
+                      {fieldLabels[key] || key}
+                    </label>
 
-              {editingField === key ? (
-                <div className="flex flex-col sm:flex-row sm:items-center gap-2 w-full sm:w-2/3">
-                  {key === "timezone" ? (
-                    <TimeZoneSelect
-                      value={formData.timezone}
-                      onChange={(val) => handleFieldChange("timezone", val)}
-                    />
-                  ) : key === "departmentName" ? (
-                    <select
-                      aria-label="Department"
-                      className="w-full border rounded-md p-2 text-xl"
-                      value={formData.departmentName}
-                      onChange={(e) =>
-                        handleFieldChange("departmentName", e.target.value)
-                      }
-                    >
-                      <option value="" disabled hidden>
-                        Select Department
-                      </option>
-                      {["HR", "Web Development", "UI/UX", "QA", "BA", "SM"].map(
-                        (dept) => (
-                          <option key={dept} value={dept}>
-                            {dept}
-                          </option>
-                        )
-                      )}
-                    </select>
-                  ) : key === "role" ? (
-                    <select
-                      aria-label="Role"
-                      className="w-full border rounded-md p-2 text-xl"
-                      value={formData.role}
-                      onChange={(e) => handleFieldChange(key, e.target.value)}
-                    >
-                      <option value="" disabled hidden>
-                        Select Role
-                      </option>
-                      {[
-                        "EMPLOYEE",
-                        "INTERN",
-                        "HR_INTERN",
-                        "HR_EMPLOYEE",
-                        "HR_MANAGER",
-                        "MANAGER",
-                        "ADMIN",
-                      ].map((role) => (
-                        <option key={role} value={role}>
-                          {role}
-                        </option>
-                      ))}
-                    </select>
-                  ) : (
-                    <Input
-                      className="w-full text-xl"
-                      value={value}
-                      onChange={(e) => handleFieldChange(key, e.target.value)}
-                    />
-                  )}
+                    {editingField === key ? (
+                      <div className="flex flex-col sm:flex-row sm:items-center gap-2 w-full sm:w-2/3">
+                        {key === "timezone" ? (
+                          <TimeZoneSelect
+                            value={formData.timezone}
+                            onChange={(val) =>
+                              handleFieldChange("timezone", val)
+                            }
+                          />
+                        ) : key === "departmentName" ? (
+                          <Select
+                            value={formData.departmentName}
+                            onValueChange={(val) =>
+                              handleFieldChange("departmentName", val)
+                            }
+                          >
+                            <SelectTrigger className="w-full border rounded-md p-2 text-xl text-lightblue-700">
+                              <SelectValue placeholder="Select Department" />
+                            </SelectTrigger>
+                            <SelectContent>
+                              {[
+                                "HR",
+                                "Web Development",
+                                "UI/UX",
+                                "QA",
+                                "BA",
+                                "SM",
+                              ].map((dept) => (
+                                <SelectItem
+                                  key={dept}
+                                  value={dept}
+                                  className="data-[highlighted]:bg-lightblue-100 data-[highlighted]:text-lightblue-700 data-[state=checked]:bg-lightblue-800 data-[state=checked]:text-white cursor-pointer text-lightblue-800"
+                                >
+                                  {dept}
+                                </SelectItem>
+                              ))}
+                            </SelectContent>
+                          </Select>
+                        ) : key === "role" ? (
+                          <Select
+                            value={formData.role}
+                            onValueChange={(val) =>
+                              handleFieldChange("role", val)
+                            }
+                          >
+                            <SelectTrigger className="w-full border rounded-md p-2 text-xl text-lightblue-700">
+                              <SelectValue placeholder="Select Role" />
+                            </SelectTrigger>
+                            <SelectContent>
+                              {[
+                                "EMPLOYEE",
+                                "INTERN",
+                                "HR_INTERN",
+                                "HR_EMPLOYEE",
+                                "HR_MANAGER",
+                                "MANAGER",
+                                "ADMIN",
+                              ].map((role) => (
+                                <SelectItem
+                                  key={role}
+                                  value={role}
+                                  className="data-[highlighted]:bg-lightblue-100 data-[highlighted]:text-lightblue-700 data-[state=checked]:bg-lightblue-800 data-[state=checked]:text-white cursor-pointer text-lightblue-800"
+                                >
+                                  {role}
+                                </SelectItem>
+                              ))}
+                            </SelectContent>
+                          </Select>
+                        ) : (
+                          <Input
+                            className="w-full text-xl text-lightblue-700 border border-lightblue-700 rounded px-3 py-2 focus:outline-none focus:ring-2 focus:ring-lightblue-700 focus:text-xl"
+                            value={value}
+                            onChange={(e) =>
+                              handleFieldChange(key, e.target.value)
+                            }
+                          />
+                        )}
 
-                  <div className="flex gap-2">
-                    <Button
-                      size="sm"
-                      className="bg-blue-600 hover:bg-blue-800"
-                      onClick={() => handleFieldSave(key)}
-                    >
-                      Save
-                    </Button>
-                    <Button
-                      variant="outline"
-                      size="sm"
-                      onClick={() => handleCancel(key)}
-                    >
-                      Cancel
-                    </Button>
-                  </div>
-                </div>
-              ) : (
-                <div className="flex items-center justify-between w-full sm:w-2/3">
-                  <span className="text-gray-800 text-xl">
-                    {key === "timezone"
-                      ? formatTimeZone(formData.timezone)
-                      : value || "Not set"}
-                  </span>
-                  {key !== "employeeId" &&
-                    (key === "password" ? (
-                      !showPasswordChange && (
-                        <Button
-                          variant="link"
-                          size="sm"
-                          className="text-blue-500 underline p-0"
-                          onClick={() => setShowPasswordChange(true)}
-                        >
-                          Change Password
-                        </Button>
-                      )
+                        <div className="flex gap-2">
+                          <Button
+                            variant="outline"
+                            onClick={() => handleCancel(key)}
+                            className="border-lightblue-800 text-lightblue-800 hover:bg-lightblue-50 hover:text-lightblue-900"
+                          >
+                            Cancel
+                          </Button>
+                          <Button
+                            className="bg-lightblue-800 hover:bg-lightblue-600"
+                            onClick={() => handleFieldSave(key)}
+                          >
+                            Save Changes
+                          </Button>
+                        </div>
+                      </div>
                     ) : (
-                      <Button
-                        variant="link"
-                        size="sm"
-                        className="text-blue-500 underline p-0"
-                        onClick={() => setEditingField(key)}
-                      >
-                        Edit
-                      </Button>
-                    ))}
-                </div>
-              )}
+                      <div className="flex items-center justify-between w-full sm:w-2/3">
+                        <span className="text-lightblue-700 text-xl">
+                          {key === "timezone"
+                            ? formatTimeZone(formData.timezone)
+                            : value || "Not set"}
+                        </span>
+                        {key !== "employeeId" &&
+                          (key === "password" ? (
+                            !showPasswordChange && (
+                              <Button
+                                variant="link"
+                                className="text-lightblue-700 p-0 font-bold text-lg"
+                                onClick={() => setShowPasswordChange(true)}
+                              >
+                                Change Password
+                              </Button>
+                            )
+                          ) : (
+                            <Button
+                              variant="link"
+                              className="text-lightblue-700 p-0 font-bold text-lg"
+                              onClick={() => setEditingField(key)}
+                            >
+                              Edit
+                            </Button>
+                          ))}
+                      </div>
+                    )}
+                  </div>
+                );
+              })}
             </div>
-          ))}
+          </div>
+        ))}
       </div>
 
       {/* Password Update */}
-      {showPasswordChange && (
-        <div className="space-y-4 px-8">
-          {["current", "new", "confirm"].map((field) => (
-            <div key={field} className="relative">
-              <Input
-                type={visible[field] ? "text" : "password"}
-                placeholder={`${
-                  field === "confirm"
-                    ? "Confirm New"
-                    : field.charAt(0).toUpperCase() + field.slice(1)
-                } Password`}
-                value={passwordData[field as keyof typeof passwordData]}
-                onChange={(e) =>
-                  setPasswordData({ ...passwordData, [field]: e.target.value })
-                }
-              />
-              <button
-                type="button"
-                className="absolute right-3 top-1/2 transform -translate-y-1/2"
-                onClick={() => toggleVisibility(field)}
-              >
-                {visible[field] ? (
-                  <Eye className="w-5 h-5" />
-                ) : (
-                  <EyeOff className="w-5 h-5" />
-                )}
-              </button>
-            </div>
-          ))}
+      <div className="flex justify-end px-8">
+        {showPasswordChange && (
+          <div className="space-y-4 md:w-3/4 w-full rounded-lg">
+            {["current", "new", "confirm"].map((field) => (
+              <div key={field} className="relative">
+                <input
+                  type={visible[field] ? "text" : "password"}
+                  placeholder={`${
+                    field === "confirm"
+                      ? "Confirm New"
+                      : field.charAt(0).toUpperCase() + field.slice(1)
+                  } Password`}
+                  value={passwordData[field as keyof typeof passwordData]}
+                  onChange={(e) =>
+                    setPasswordData({
+                      ...passwordData,
+                      [field]: e.target.value,
+                    })
+                  }
+                  className="w-full border border-lightblue-600 rounded-md px-4 py-2 text-base sm:text-lg focus:outline-none focus:ring-2 focus:ring-lightblue-600 text-lightblue-600"
+                />
+                <button
+                  type="button"
+                  className="absolute right-3 top-1/2 transform -translate-y-1/2"
+                  onClick={() => toggleVisibility(field)}
+                >
+                  {visible[field] ? (
+                    <Eye className="w-5 h-5 text-lightblue-600" />
+                  ) : (
+                    <EyeOff className="w-5 h-5 text-lightblue-600" />
+                  )}
+                </button>
+              </div>
+            ))}
 
-          <div className="flex gap-2">
-            <Button onClick={handlePasswordUpdate} className="bg-blue-600 hover:bg-blue-800">Update Password</Button>
-            <Button
-              variant="outline"
-              onClick={() => setShowPasswordChange(false)}
-            >
-              Cancel
-            </Button>
+            <div className="flex flex-col sm:flex-row gap-2 sm:justify-end">
+              <Button
+                variant="outline"
+                className="border-lightblue-800 text-lightblue-800 hover:bg-lightblue-50 hover:text-lightblue-900 w-full sm:w-auto"
+                onClick={() => setShowPasswordChange(false)}
+              >
+                Cancel
+              </Button>
+              <Button
+                onClick={handlePasswordUpdate}
+                className="bg-lightblue-800 hover:bg-lightblue-600 w-full sm:w-auto"
+              >
+                Update Password
+              </Button>
+            </div>
           </div>
-        </div>
-      )}
+        )}
+      </div>
     </div>
   );
 }
-

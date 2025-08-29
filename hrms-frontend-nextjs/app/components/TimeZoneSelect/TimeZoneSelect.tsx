@@ -15,7 +15,7 @@ import {
   CommandItem,
   CommandList,
 } from "@/components/ui/command";
-import { Check, ChevronsUpDown, X } from "lucide-react";
+import { Check, ChevronsUpDown } from "lucide-react";
 import { cn } from "@/lib/utils";
 import moment from "moment-timezone";
 
@@ -73,10 +73,6 @@ export default function TimeZoneSelect({
     return zones.find((z) => z.value === value)?.label ?? value;
   }, [value, zones]);
 
-  const clearSelection = (e: React.MouseEvent) => {
-    e.stopPropagation();
-    onChange("");
-  };
 
   return (
     <Popover open={open} onOpenChange={setOpen}>
@@ -85,19 +81,16 @@ export default function TimeZoneSelect({
           variant="outline"
           role="combobox"
           aria-expanded={open}
-          className="w-full justify-between"
+          className={cn(
+            "w-full justify-between border rounded-md p-2 text-base",
+            "text-lightblue-700 hover:bg-lightblue-50",
+            "hover:ring-2 hover:ring-lightblue-700",
+            "focus:outline-none focus:ring-2 focus:ring-lightblue-700"
+          )}
           disabled={disabled}
         >
           {selectedLabel || placeholder}
-          <div className="flex items-center gap-2">
-            {value && (
-              <X
-                className="h-4 w-4 opacity-70 cursor-pointer"
-                onClick={clearSelection}
-              />
-            )}
-            <ChevronsUpDown className="h-4 w-4 shrink-0 opacity-50" />
-          </div>
+          <ChevronsUpDown className="h-4 w-4 shrink-0 opacity-50 ml-2" />
         </Button>
       </PopoverTrigger>
 
@@ -106,7 +99,7 @@ export default function TimeZoneSelect({
           <CommandInput placeholder="Search timezone..." />
           <CommandList>
             {loading ? (
-              <div className="p-3 text-sm text-muted-foreground">
+              <div className="p-3 text-sm text-lightblue-600">
                 Loading time zones…
               </div>
             ) : (
@@ -117,6 +110,12 @@ export default function TimeZoneSelect({
                     <CommandItem
                       key={tz.value}
                       value={tz.label}
+                      className={cn(
+                        "cursor-pointer text-lightblue-800",
+                        "data-[highlighted]:bg-lightblue-500 data-[highlighted]:text-lightblue-700",
+                        value === tz.value &&
+                          "bg-lightblue-800 text-white data-[highlighted]:bg-lightblue-900"
+                      )}
                       onSelect={() => {
                         onChange(tz.value);
                         setOpen(false);

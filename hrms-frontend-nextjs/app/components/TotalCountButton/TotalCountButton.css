@@ -1,5 +1,3 @@
-/* src/components/TotalCountButton.css */
-
 /* For medium and larger screens (sm in Tailwind = 640px+) */
 @media (min-width: 640px) {
   .total-count-button {

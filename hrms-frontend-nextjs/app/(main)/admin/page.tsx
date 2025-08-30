@@ -78,7 +78,7 @@ const AdminHomePage = async () => {
         message={errorGettingEmployeesMessage}
       />
 
-      <div className="flex flex-col gap-6 md:flex-row md:justify-between p-6 border border-red-500">
+      <div className="flex flex-col gap-6 md:flex-row md:justify-between p-6">
         <div className="font-bold text-2xl md:text-4xl lg:text-5xl sm:text-3xl">
           {greeting}, {name}!
         </div>

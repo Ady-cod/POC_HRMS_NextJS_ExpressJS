@@ -21,7 +21,7 @@ const Navbar = ({toggleSideBar }:NavBarProps) => {
         </div>
         <div className="flex justify-center">
           <Image
-            src="/images/Zummitlabs Logo 3.png"
+            src="/images/DNA Logo.png"
             alt="Zummit Logo"
             width={40}
             height={40}

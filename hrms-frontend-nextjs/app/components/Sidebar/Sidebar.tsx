@@ -24,6 +24,7 @@ const Sidebar = ({ isOpen, toggleSidebar }: SideBarProps) => {
   const [isSmBreakpoint, setIsSmBreakpoint] = useState(true);
   const pathname = usePathname();
   const [isHovered, setIsHovered] = useState(false); // For Employee submenu
+  const [isCollapsed, setIsCollapsed] = useState(false); 
 
   useEffect(() => {
     if (pathname.startsWith("/admin/employee")) {
@@ -73,84 +74,164 @@ const Sidebar = ({ isOpen, toggleSidebar }: SideBarProps) => {
     );
   };
 
+  const toggleCollapse = () => {
+    setIsCollapsed(!isCollapsed);
+  };
+
   const renderSidebar = () => {
     return (
       <div
-        className={`w-64 h-full transition-all duration-75 ease-in-out sm:border-r-2 ${
+        className={`transition-all duration-75 ease-in-out sm:border-r-2 ${
           isOpen
             ? "translate-x-0 relative opacity-100"
             : "-translate-x-full absolute opacity-0"
-        } bg-white sm:bg-gradient-to-b from-gray-200 to-white sm:p-6 pt-10 sidebar`}
+        } m-10 sm:p-6 mt-14 pt-5 sidebar ${isCollapsed ? 'sm:w-32' : 'sm:w-60'}`}
+        style={{ borderRadius: "45px", backgroundColor: '#d9d9d9' }}
       >
-        <ul className="whitespace-nowrap font-semibold sm:text-[15px] sticky top-28 flex flex-col gap-6 sidebaritems">
+        <div className={`flex ${!isCollapsed ? "justify-end" : "justify-center"} mb-4`}>
+          <Image
+            src={isCollapsed ? "/images/expand menu icon.png" : "/images/collapse.png"}
+            alt={isCollapsed ? "expand menu icon" : "collapse menu icon"}
+            width={44}
+            height={44}
+            className={`rounded-lg transition-all duration-200 hover:cursor-pointer mb-4  `}
+            onClick={toggleCollapse}
+          />
+        </div>
+
+        <ul className="whitespace-nowrap font-semibold sm:text-[15px] sticky top-28 flex flex-col gap-4 sidebaritems">
           {/* Home */}
-          <li>
+          <li className="w-full">
             <Link
               href="/admin"
               onClick={handleSidebarItemClick}
-              className={`flex items-center gap-3 px-4 py-2 rounded-lg transition-all duration-200 ${
+              className={`flex items-center justify-${isCollapsed ? "center" : "start"} rounded-lg transition-all duration-200 
+                 ${isCollapsed 
+                  ? "gap-0 px-0 py-2"
+                  : "gap-3 px-4 py-2 hover:bg-gray-300 hover:border-r-2 hover:border-gray-500 hover:scale-110"}
+                ${
                 pathname === "/admin"
-                  ? "bg-blue-200 border-r-4 border-blue-500 text-blue-700 scale-110"
-                  : "hover:bg-gray-300 hover:border-r-2 hover:border-gray-500 hover:scale-110"
+                  ? " text-blue-700 scale-110"
+                  : ""
               }`}
             >
+              <div className={`relative w-6 h-6 flex items-center justify-center rounded-lg p-2 transition-all duration-200 ${
+                isCollapsed ? "hover:bg-gray-300 hover:border-r-2 hover:border-gray-500 hover:scale-110" : ""
+                }  
+                `}>
               <Image
                 src="/images/home.png"
                 alt="Home icon"
                 width={24}
                 height={24}
+                className={`absolute top-0 left-0 transition-opacity duration-200 ${pathname === "/admin" ? "opacity-0" : "opacity-100"}`}
+                style={{ pointerEvents: "none" }}
               />
-              Home
+              {/* Blue (active) icon */}
+              <Image
+                src="/images/home-blue.png"
+                alt="Home icon active"
+                width={24}
+                height={24}
+                className={`absolute top-0 left-0 transition-opacity duration-200 ${pathname === "/admin" ? "opacity-100" : "opacity-0"}`}
+                style={{ pointerEvents: "none" }}
+              />
+              </div>
+              {!isCollapsed && <span>Home</span>}
             </Link>
           </li>
 
           {/* Profile */}
-          <li>
+          <li className="w-full">
             <Link
               href="/admin/profile"
               onClick={handleSidebarItemClick}
-              className={`flex items-center gap-3 px-4 py-2 rounded-lg transition-all duration-200 ${
-                pathname === "/admin/profile"
-                  ? "bg-blue-200 border-r-4 border-blue-500 text-blue-700 scale-110"
-                  : "hover:bg-gray-300 hover:border-r-2 hover:border-gray-500 hover:scale-110"
+              className={`flex items-center justify-${isCollapsed ? "center" : "start"} rounded-lg transition-all duration-200 
+                 ${isCollapsed 
+                  ? "gap-0 px-0 py-2 "
+                  : "gap-3 px-4 py-2 hover:bg-gray-300 hover:border-r-2 hover:border-gray-500 hover:scale-110"}
+                ${pathname === "/admin/profile"
+                  ? "text-blue-700 scale-110"
+                  : ""
               }`}
             >
-              <Image
+              <div className={`relative w-6 h-6 flex items-center justify-center rounded-lg p-2 transition-all duration-200 ${
+                isCollapsed? "hover:bg-gray-300 hover:border-r-2 hover:border-gray-500 hover:scale-110" : ""
+                }`}>
+             <Image
                 src="/images/My profile icon.png"
                 alt="Profile icon"
                 width={24}
                 height={24}
+                className={`absolute top-0 left-0 transition-opacity duration-200 ${pathname === "/admin/profile" ? "opacity-0" : "opacity-100"}`}
+                style={{ pointerEvents: "none" }}
               />
-              My Profile
+              {/* Blue (active) icon */}
+              <Image
+                src="/images/MyProfileIcon-blue.png"
+                alt="Profile icon active"
+                width={24}
+                height={24}
+                className={`absolute top-0 left-0 transition-opacity duration-200 ${pathname === "/admin/profile" ? "opacity-100" : "opacity-0"}`}
+                style={{ pointerEvents: "none" }}
+              />
+              </div>
+              {!isCollapsed && <span>My Profile</span>}
             </Link>
           </li>
 
           {/* Employee menu */}
           <li
-            className="relative"
-            onMouseEnter={() => setIsHovered(true)}
+            className="relative w-full"
+            onMouseEnter={() => {
+              setIsHovered(true);
+              if (isCollapsed) setIsHovered(false);
+            }}
             onMouseLeave={() => setIsHovered(false)}
           >
             <div
-              className={`w-full flex items-center gap-3 px-4 py-2 rounded-lg cursor-default transition-all duration-200 ${
+              className={`w-full flex items-center justify-${isCollapsed ? "center" : "start"} rounded-lg cursor-default transition-all duration-200 
+                ${isCollapsed 
+                  ? "gap-0 px-0 py-2 "
+                  : "gap-3 px-4 py-2 hover:bg-gray-300 hover:border-r-2 hover:border-gray-500 hover:scale-110"}
+                ${
                 pathname.startsWith("/admin/employee")
-                  ? "bg-blue-200 border-r-4 border-blue-500 text-blue-700 scale-110"
-                  : "hover:bg-gray-300 hover:border-r-2 hover:border-gray-500 hover:scale-110"
-              }`}
+                  ? " text-blue-700 scale-110"
+                  : ""
+              } `}
+               onClick={()=>{
+                if(isCollapsed){
+                  setIsCollapsed(false);
+                  setIsHovered(true);
+                }
+               }}
             >
+              <div className={`relative w-6 h-6 flex items-center justify-center rounded-lg p-2 transition-all duration-200 ${
+                isCollapsed ? "hover:bg-gray-300 hover:border-r-2 hover:border-gray-500 hover:scale-110" : ""
+                }`}>
               <Image
                 src="/images/My learning path icon.png"
-                alt="Learning Path icon"
+                alt="Employee icon"
                 width={24}
                 height={24}
+                className={`absolute top-0 left-0 transition-opacity duration-200 ${pathname.startsWith("/admin/employee") ? "opacity-0" : "opacity-100"}`}
               />
-              Employee
+              {/* Blue (active) icon */}
+              <Image
+                src="/images/MyLearningPath-blue.png"
+                alt="Employee icon"
+                width={24}
+                height={24}
+                className={`absolute top-0 left-0 transition-opacity duration-200 ${pathname.startsWith("/admin/employee") ? "opacity-100" : "opacity-0"}`}
+              />
+              </div>
+              {!isCollapsed && <span>Employee</span>}
             </div>
 
             {/* Submenu */}
             <ul
               className={`ml-12 mt-1 list-inside text-sm space-y-1 transition-all duration-300 ease-in-out ${
-                isHovered || pathname.startsWith("/admin/employee")
+                !isCollapsed && (isHovered || pathname.startsWith("/admin/employee"))
                   ? "opacity-100 translate-y-0 max-h-40"
                   : "opacity-0 -translate-y-2 max-h-0 overflow-hidden"
               }`}
@@ -202,103 +283,184 @@ const Sidebar = ({ isOpen, toggleSidebar }: SideBarProps) => {
           </li>
 
           {/* Applicants */}
-          <li>
+          <li className="w-full">
             <Link
               href="/admin/applicants"
               onClick={handleSidebarItemClick}
-              className={`flex items-center gap-3 px-4 py-2 rounded-lg transition-all duration-200 ${
+              className={`flex items-center justify-${isCollapsed ? "center" : "start"} rounded-lg transition-all duration-200 
+                 ${isCollapsed 
+                  ? "gap-0 px-0 py-2"
+                  : "gap-3 px-4 py-2 hover:bg-gray-300 hover:border-r-2 hover:border-gray-500 hover:scale-110"} 
+                  ${
                 pathname === "/admin/applicants"
-                  ? "bg-blue-200 border-r-4 border-blue-500 text-blue-700 scale-110"
-                  : "hover:bg-gray-300 hover:border-r-2 hover:border-gray-500 hover:scale-110"
-              }`}
+                  ? " text-blue-700 scale-110"
+                  : ""
+              } `}
             >
+              <div className={`relative w-6 h-6 flex items-center justify-center rounded-lg p-2 transition-all duration-200 ${
+                isCollapsed ? "hover:bg-gray-300 hover:border-r-2 hover:border-gray-500 hover:scale-110" : ""
+                }`}>
               <Image
                 src="/images/Applicants.png"
                 alt="Applicant icon"
                 width={24}
                 height={24}
+                className={`absolute top-0 left-0 transition-opacity duration-200 ${pathname === "/admin/applicants" ? "opacity-0" : "opacity-100"}`}
+                style={{ pointerEvents: "none" }}
               />
-              Applicants
+              {/* Blue (active) icon */}
+              <Image
+                src="/images/MyProjectsIcon-blue.png"
+                alt="Applicant icon"
+                width={24}
+                height={24}
+                className={`absolute top-0 left-0 transition-opacity duration-200 ${pathname === "/admin/applicants" ? "opacity-1000" : "opacity-0"}`}
+              />
+              </div>
+              {!isCollapsed && <span>Applicants</span>}
             </Link>
           </li>
 
           {/* Workflow */}
-          <li>
+          <li className="w-full">
             <Link
               href="/admin/workflow"
               onClick={handleSidebarItemClick}
-              className={`flex items-center gap-3 px-4 py-2 rounded-lg transition-all duration-200 ${
+              className={`flex items-center justify-${isCollapsed ? "center" : "start"} rounded-lg transition-all duration-200 
+                 ${isCollapsed 
+                  ? "gap-0 px-0 py-2 "
+                  : "gap-3 px-4 py-2 hover:bg-gray-300 hover:border-r-2 hover:border-gray-500 hover:scale-110"}
+                   ${
                 pathname === "/admin/workflow"
-                  ? "bg-blue-200 border-r-4 border-blue-500 text-blue-700 scale-110"
-                  : "hover:bg-gray-300 hover:border-r-2 hover:border-gray-500 hover:scale-110"
-              }`}
+                  ? " text-blue-700 scale-110"
+                  : ""
+              } `}
             >
+              <div className={`relative w-6 h-6 flex items-center justify-center rounded-lg p-2 transition-all duration-200 ${
+                isCollapsed ? "hover:bg-gray-300 hover:border-r-2 hover:border-gray-500 hover:scale-110" : ""
+                }`}>
               <Image
                 src="/images/My workflow icon.png"
                 alt="Workflow icon"
                 width={24}
                 height={24}
+                className={`absolute top-0 left-0 transition-opacity duration-200 ${pathname.startsWith("/admin/workflow") ? "opacity-0" : "opacity-100"}`}
               />
-              My Workflow
+              {/* Blue (active) icon */}
+              <Image
+                src="/images/MyWorkflowIcon-blue.png"
+                alt="Workflow icon"
+                width={24}
+                height={24}
+                className={`absolute top-0 left-0 transition-opacity duration-200 ${pathname.startsWith("/admin/workflow") ? "opacity-100" : "opacity-0"}`}
+              />
+              </div>
+              {!isCollapsed && <span>My Workflow</span>}
             </Link>
           </li>
 
           {/* Masters */}
-          <li>
+          <li className="w-full">
             <Link
               href="/admin/masters"
               onClick={handleSidebarItemClick}
-              className={`flex items-center gap-3 px-4 py-2 rounded-lg transition-all duration-200 ${
+              className={`flex items-center justify-${isCollapsed ? "center" : "start"} rounded-lg transition-all duration-200 
+                 ${isCollapsed 
+                  ? "gap-0 px-0 py-2 "
+                  : "gap-3 px-4 py-2 hover:bg-gray-300 hover:border-r-2 hover:border-gray-500 hover:scale-110"}
+                   ${
                 pathname === "/admin/masters"
-                  ? "bg-blue-200 border-r-4 border-blue-500 text-blue-700 scale-110"
-                  : "hover:bg-gray-300 hover:border-r-2 hover:border-gray-500 hover:scale-110"
-              }`}
+                  ? " text-blue-700 scale-110"
+                  : ""
+              } `}
             >
+              <div className={`relative w-6 h-6 flex items-center justify-center rounded-lg p-2 transition-all duration-200 ${
+                isCollapsed ? "hover:bg-gray-300 hover:border-r-2 hover:border-gray-500 hover:scale-110" : ""
+                }`}>
               <Image
                 src="/images/Master.png"
                 alt="Master icon"
                 width={24}
                 height={24}
+                className={`absolute top-0 left-0 transition-opacity duration-200 ${pathname.startsWith("/admin/masters") ? "opacity-0" : "opacity-100"}`}
               />
-              Masters
+              {/* Blue (active) icon */}
+              <Image
+                src="/images/folderOpen-blue.png"
+                alt="Master icon"
+                width={24}
+                height={24}
+                className={`absolute top-0 left-0 transition-opacity duration-200 ${pathname.startsWith("/admin/masters") ? "opacity-100" : "opacity-0"}`}
+              />
+              </div>
+              {!isCollapsed && <span>Masters</span>}
             </Link>
           </li>
 
           {/* HR */}
-          <li>
+          <li className="w-full">
             <Link
               href="/admin/hr"
               onClick={handleSidebarItemClick}
-              className={`flex items-center gap-3 px-4 py-2 rounded-lg transition-all duration-200 ${
+              className={`flex items-center justify-${isCollapsed ? "center" : "start"} rounded-lg transition-all duration-200 
+                 ${isCollapsed 
+                  ? "gap-0 px-0 py-2"
+                  : "gap-3 px-4 py-2 hover:bg-gray-300 hover:border-r-2 hover:border-gray-500 hover:scale-110"}
+                   ${
                 pathname === "/admin/hr"
-                  ? "bg-blue-200 border-r-4 border-blue-500 text-blue-700 scale-110"
-                  : "hover:bg-gray-300 hover:border-r-2 hover:border-gray-500 hover:scale-110"
-              }`}
+                  ? " text-blue-700 scale-110"
+                  : ""
+              } `}
             >
+              <div
+                className={`relative w-6 h-6 flex items-center justify-center rounded-lg p-2 transition-all duration-200 ${
+                isCollapsed ? "hover:bg-gray-300 hover:border-r-2 hover:border-gray-500 hover:scale-110" : ""
+                }`}
+              >
               <Image
                 src="/images/HR.png"
                 alt="HR icon"
                 width={24}
                 height={24}
+                className={`absolute top-0 left-0 transition-opacity duration-200 ${pathname.startsWith("/admin/hr") ? "opacity-0" : "opacity-100"}`}
               />
-              Core HR
+              {/* Blue (active) icon */}
+              <Image
+                src="/images/speedometer-blue.png"
+                alt="HR icon"
+                width={24}
+                height={24}
+                className={`absolute top-0 left-0 transition-opacity duration-200 ${pathname.startsWith("/admin/hr") ? "opacity-100" : "opacity-0"}`}
+              />
+              </div>
+              {!isCollapsed && <span>Core HR</span>}
             </Link>
           </li>
 
           {/* Logout */}
-          <li className="logout bottom-3 mt-8">
+          <li className="logout bottom-3 mt-8 ">
             <form action={logout}>
               <button
                 type="submit" 
-                className="flex items-center gap-3 px-4 py-2 rounded-lg hover:bg-gray-300 hover:border-r-2 hover:border-gray-500 hover:scale-110 transition-all duration-200 w-full text-left"
+                className={`flex items-center  transition-all duration-200 w-full rounded-lg ${
+                  isCollapsed
+                  ? "justify-center gap-0 px-0 py-2 "
+                  : "justify-start gap-3 px-4 py-2 hover:bg-gray-300 hover:border-r-2 hover:border-gray-500 hover:scale-110"
+                }`}
               >
+                <div
+                  className={`flex items-center justify-center rounded-lg p-2 transition-all duration-200 ${
+                  isCollapsed ? "hover:bg-gray-300 hover:border-r-2 hover:border-gray-500 hover:scale-110" : ""
+                  }`}
+                >
                 <Image
                   src="/images/Logout icon.png"
                   alt="Logout icon"
                   width={24}
                   height={24}
                 />
-                Logout
+                </div>
+                {!isCollapsed && <span>Logout</span>}
               </button>
             </form>
           </li>

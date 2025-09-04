@@ -105,7 +105,7 @@ const EmployeeDistributionChart = ({
           </div>
 
           {/* grid now stretches & every row flexes */}
-          <div className="grid grid-cols-1 sm:grid-cols-2 auto-rows-fr gap-x-8 gap-y-6 flex-1">
+          <div className="grid grid-cols-1 sm:grid-cols-2 auto-rows-min gap-x-8 gap-y-8 flex-1">
             {employeeData.map(({ name, value }) => (
               <div key={name} className="flex flex-col space-y-1 min-w-0">
                 <div className="flex justify-between text-sm mb-1">

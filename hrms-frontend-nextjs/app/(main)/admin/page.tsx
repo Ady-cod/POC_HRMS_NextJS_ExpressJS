@@ -78,12 +78,12 @@ const AdminHomePage = async () => {
         message={errorGettingEmployeesMessage}
       />
 
-      <div className="flex flex-col gap-6 md:flex-row md:justify-between p-6 border border-red-500">
+      <div className="flex flex-col gap-6 md:flex-row md:justify-between p-6">
         <div className="font-bold text-2xl md:text-4xl lg:text-5xl sm:text-3xl">
           {greeting}, {name}!
         </div>
-        <div className="flex gap-3 items-center text-[20px]">
-          Connect to
+        <div className="flex gap-5 items-center text-[20px]">
+          <span className="mr-2">Connect to</span>
           <Link href={slackUrl} target="_blank" rel="noopener noreferrer">
             <Image
               src="/images/slack.png"

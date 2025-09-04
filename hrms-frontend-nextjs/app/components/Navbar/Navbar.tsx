@@ -1,44 +1,44 @@
 "use client";
-import React from 'react';
+import React from "react";
 import Image from "next/image";
 
 interface NavBarProps {
-    toggleSideBar: () => void;
+  toggleSideBar: () => void;
 }
 
-const Navbar = ({toggleSideBar }:NavBarProps) => {
-    return (
-      <div className="border border-gray-400 h-20 flex justify-between items-center px-4">
-        <div className="flex justify-center">
-          <Image
-            src="/images/left-align_2209567.png"
-            alt="Sidebar icon"
-            width={28}
-            height={28}
-            className="cursor-pointer"
-            onClick={toggleSideBar}
-          />
-        </div>
-        <div className="flex justify-center">
-          <Image
-            src="/images/DNA Logo.png"
-            alt="Zummit Logo"
-            width={40}
-            height={40}
-          />
-        </div>
-        <div className="flex items-center space-x-7">
-          <Image
-            src="/images/Notifications.png"
-            alt="Notifications"
-            width={24}
-            height={24}
-            style={{ width: "24px", height: "24px"}}
-          />
-          <div className="rounded-3xl bg-yellow-400 h-11 w-11 ml-12"></div>
-        </div>
+const Navbar = ({ toggleSideBar }: NavBarProps) => {
+  return (
+    <div className="border border-gray-400 h-20 flex justify-between items-center px-4">
+      <div className="flex justify-center">
+        <Image
+          src="/images/left-align_2209567.png"
+          alt="Sidebar icon"
+          width={28}
+          height={28}
+          className="cursor-pointer"
+          onClick={toggleSideBar}
+        />
       </div>
-    );
+      <div className="flex justify-center">
+        <Image
+          src="/images/DNA-logo.svg"
+          alt="DNA Logo"
+          width={50}
+          height={50}
+        />
+      </div>
+      <div className="flex items-center space-x-7">
+        <Image
+          src="/images/Notifications.png"
+          alt="Notifications"
+          width={24}
+          height={24}
+          style={{ width: "24px", height: "24px" }}
+        />
+        <div className="rounded-3xl bg-yellow-400 h-11 w-11 ml-12"></div>
+      </div>
+    </div>
+  );
 };
 
 export default Navbar;

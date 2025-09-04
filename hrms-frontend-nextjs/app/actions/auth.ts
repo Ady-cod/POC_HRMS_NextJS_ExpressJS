@@ -73,6 +73,6 @@ export async function logout(): Promise<void> {
   // Clear the JWT token from cookies
   cookies().delete("token");
   
-  // Redirect to login page
-  redirect("/login");
+  // Redirect to landing page
+  redirect("/");
 }

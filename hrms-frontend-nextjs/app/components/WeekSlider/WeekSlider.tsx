@@ -127,7 +127,7 @@ const WeekSlider: React.FC<WeekSliderProps> = ({
       {isDesktop && (
         <button
           onClick={() => scrollByStep("left")}
-          className="hidden md:flex items-center justify-center w-10 h-10 bg-gray-300 hover:bg-gray-400 rounded-full shadow-md mb-5"
+          className="hidden md:flex items-center justify-center w-10 h-10 bg-[#d0dae2] hover:bg-[#a1b4c4] rounded-full shadow-md mb-5"
         >
           <FontAwesomeIcon icon={faCaretLeft} className="text-black text-xl" />
         </button>
@@ -142,7 +142,9 @@ const WeekSlider: React.FC<WeekSliderProps> = ({
         <button
           onClick={() => setSelectedWeek(0)}
           className={`week-button px-8 py-3 rounded-md text-white text-sm transition ${
-            selectedWeek === 0 ? "bg-blue-500" : "bg-gray-400 hover:bg-gray-500"
+            selectedWeek === 0
+              ? "bg-blue-500"
+              : "bg-[#8fa6b9] hover:bg-[#5c7e98]"
           } ${
             selectedWeek === 0 && stickySide === "left" ? "sticky-left" : ""
           } ${
@@ -160,7 +162,7 @@ const WeekSlider: React.FC<WeekSliderProps> = ({
               key={week}
               onClick={() => setSelectedWeek(week)}
               className={`week-button px-8 py-3 rounded-md text-white text-sm transition ${
-                isSelected ? "bg-green-500" : "bg-gray-400 hover:bg-gray-500"
+                isSelected ? "bg-green-500" : "bg-[#8fa6b9] hover:bg-[#5c7e98]"
               } ${isSelected && stickySide === "left" ? "sticky-left" : ""} ${
                 isSelected && stickySide === "right" ? "sticky-right" : ""
               }`}
@@ -175,7 +177,7 @@ const WeekSlider: React.FC<WeekSliderProps> = ({
       {isDesktop && (
         <button
           onClick={() => scrollByStep("right")}
-          className="hidden md:flex items-center justify-center w-10 h-10 bg-gray-300 hover:bg-gray-400 rounded-full shadow-md mb-5"
+          className="hidden md:flex items-center justify-center w-10 h-10 bg-[#d0dae2] hover:bg-[#a1b4c4] rounded-full shadow-md mb-5"
         >
           <FontAwesomeIcon icon={faCaretRight} className="text-black text-xl" />
         </button>

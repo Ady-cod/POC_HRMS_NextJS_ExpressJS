@@ -2,6 +2,7 @@ import { z } from "zod";
 import { isValid, parseISO } from "date-fns";
 import { parsePhoneNumberFromString } from "libphonenumber-js";
 import { parse } from "tldts";
+import { EmployeeRole } from "@/types/types";
 
 // Helper function to ensure the birth date is no older than 100 years ago
 const isNotMoreThan100YearsAgo = (dateString: string): boolean => {
@@ -127,12 +128,10 @@ export const createEmployeeSchema = (hasFetched: boolean) =>
           /[^\p{L}\d]/u,
           "Password must include at least one special character"
         ),
-      phoneNumber: z
-        .string()
-        .refine(isValidPhoneNumber, {
-          message:
-            "Invalid phone number format. Use international format (e.g., +123456789)",
-        }),
+      phoneNumber: z.string().refine(isValidPhoneNumber, {
+        message:
+          "Invalid phone number format. Use international format (e.g., +123456789)",
+      }),
       country: hasFetched
         ? z.string().min(2, "Select a country") // Adjust the validation message based on the fetch status
         : z
@@ -182,14 +181,22 @@ export const createEmployeeSchema = (hasFetched: boolean) =>
         .string()
         .min(2, "Department name is required, select from the list"),
       gender: z.enum(["MALE", "FEMALE", "OTHER"]).optional(), // Based on radio buttons
-      role: z.enum(
-  ["EMPLOYEE", "INTERN", "HR_INTERN", "HR_EMPLOYEE", "HR_MANAGER", "MANAGER", "ADMIN"],
-  {
-    required_error: "Role is required",
-  }
-),
+      // Role is optional; default to INTERN if missing/empty; validate if provided
+      role: z
+        .preprocess(
+          (val) => (val === "" || val == null ? undefined : String(val).trim()),
+          z
+            .custom<EmployeeRole>(
+              (v): v is EmployeeRole =>
+                (Object.values(EmployeeRole) as string[]).includes(v),
+              {
+                message: "Invalid role selection. Please choose a valid role.",
+              }
+            )
+            .optional()
+        )
+        .default(EmployeeRole.INTERN),
     })
-    
     .refine(() => hasFetched, {
       message:
         "Unable to submit the form due to error in fetching countries/states/cities. Please try again later or inform the technical team.",
@@ -309,10 +316,18 @@ export const updateEmployeeSchema = z
       .min(2, "Department name is required, select from the list")
       .optional(),
     gender: z.enum(["MALE", "FEMALE", "OTHER"]).optional(), // Based on radio buttons
-    role: z
-  .enum(["EMPLOYEE", "INTERN", "HR_INTERN", "HR_EMPLOYEE", "HR_MANAGER", "MANAGER", "ADMIN"])
-  .optional(),
-
+    role: z.preprocess(
+      (val) => (val === "" || val == null ? undefined : String(val).trim()),
+      z
+        .custom<EmployeeRole>(
+          (v): v is EmployeeRole =>
+            (Object.values(EmployeeRole) as string[]).includes(v),
+          {
+            message: "Invalid role selection. Please choose a valid role.",
+          }
+        )
+        .optional()
+    ),
   })
   .superRefine((data, ctx) => {
     // If new value is provided for country, state should change accordingly

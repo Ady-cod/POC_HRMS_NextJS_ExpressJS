@@ -14,8 +14,10 @@ import {
 } from "@/schemas/employeeSchema";
 import { formatZodErrors } from "@/utils/formatZodErrors";
 import { showToast } from "@/utils/toastHelper";
-import { EmployeeListItem } from "@/types/types";
+import { EmployeeListItem, EmployeeRole, DepartmentName } from "@/types/types";
 import CountryStateCitySelect from "@/components/CountryStateCitySelect/CountryStateCitySelect";
+import Select from "react-select";
+import { getBaseSelectStyles } from "@/lib/reactSelectStyles";
 
 interface ModalFormProps {
   isOpen: boolean;
@@ -38,6 +40,11 @@ type InputRefKey = keyof InputRefs;
 
 type CalendarState = {
   [key in InputRefKey]: CalendarInputState;
+};
+
+type Option = {
+  label: string;
+  value: string;
 };
 
 const ModalForm: React.FC<ModalFormProps> = ({
@@ -75,6 +82,10 @@ const ModalForm: React.FC<ModalFormProps> = ({
   const [city, setCity] = useState<string>("");
   const [hasFetched, setHasFetched] = useState<boolean>(false);
 
+  // Local state for Department and Role using react-select for Firefox parity
+  const [departmentName, setDepartmentName] = useState<string>("");
+  const [role, setRole] = useState<string>("");
+
   useEffect(() => {
     if (employeeData) {
       setPhoneNumber(employeeData.phoneNumber ?? "");
@@ -83,6 +94,8 @@ const ModalForm: React.FC<ModalFormProps> = ({
       setState(employeeData.state ?? "");
       setStateCode(employeeData.stateCode ?? "");
       setCity(employeeData.city);
+      setDepartmentName(employeeData.department?.name ?? "");
+      setRole(employeeData.role ?? "");
     } else {
       setPhoneNumber("");
       setCountry("");
@@ -90,6 +103,8 @@ const ModalForm: React.FC<ModalFormProps> = ({
       setState("");
       setStateCode("");
       setCity("");
+      setDepartmentName("");
+      setRole("");
     }
   }, [employeeData]);
 
@@ -179,6 +194,7 @@ const ModalForm: React.FC<ModalFormProps> = ({
     const form = e.currentTarget; // Get the form element
     const formData = new FormData(form);
     const employeeInputData = Object.fromEntries(formData.entries());
+    // console.log("Form Data Submitted with employeeInputData:", employeeInputData); // Debug log for form data
 
     employeeInputData.country = country;
     employeeInputData.countryCode = countryCode;
@@ -350,6 +366,8 @@ const ModalForm: React.FC<ModalFormProps> = ({
     setStateCode("");
     setCity("");
     setHasFetched(false);
+    setDepartmentName("");
+    setRole("");
   };
 
   const today = new Date();
@@ -385,6 +403,17 @@ const ModalForm: React.FC<ModalFormProps> = ({
     // Calculate the tooltip width based on the error message width
     errorMessage.style.setProperty("--tooltip-width", `${rect.width}px`);
   };
+
+  // Shared styles for react-select to match CountryStateCitySelect
+  const selectStyles = getBaseSelectStyles<Option>();
+
+  const departmentOptions: Option[] = (
+    Object.values(DepartmentName) as string[]
+  ).map((value) => ({ label: value, value }));
+
+  const roleOptions: Option[] = (Object.values(EmployeeRole) as string[]).map(
+    (value) => ({ label: value, value })
+  );
 
   // Ensure all hooks run consistently before conditionally returning null.
   if (!isOpen) return null;
@@ -668,20 +697,18 @@ const ModalForm: React.FC<ModalFormProps> = ({
                 errors?.departmentName ? "error" : ""
               }`}
             >
-              <select
-                name="departmentName"
-                required={!employeeData}
-                defaultValue={employeeData?.department?.name}
-                className="input-field"
-              >
-                <option value="">Department{!employeeData && "*"}</option>
-                <option value="HR">HR</option>
-                <option value="Web Development">Web Dev</option>
-                <option value="UI/UX">UI/UX</option>
-                <option value="QA">QA</option>
-                <option value="BA">BA</option>
-                <option value="SM">SM</option>
-              </select>
+              <Select
+                options={departmentOptions}
+                styles={selectStyles}
+                placeholder={`Department${!employeeData ? "*" : ""}`}
+                value={
+                  departmentName
+                    ? departmentOptions.find((o) => o.label === departmentName || o.value === departmentName) ?? null
+                    : null
+                }
+                onChange={(opt) => setDepartmentName(opt ? opt.value : "")}
+              />
+              <input type="hidden" name="departmentName" value={departmentName} required={!employeeData} />
               {errors?.departmentName && (
                 <p
                   className="error-message"
@@ -694,21 +721,14 @@ const ModalForm: React.FC<ModalFormProps> = ({
             </div>
 
             <div className={`input-wrapper ${errors?.role ? "error" : ""}`}>
-              <select
-                name="role"
-                required={!employeeData}
-                defaultValue={employeeData?.role}
-                className="input-field"
-              >
-                <option value="">Role{!employeeData && "*"}</option>
-                <option value="EMPLOYEE">EMPLOYEE</option>
-                <option value="INTERN">INTERN</option>
-                <option value="HR_INTERN">HR INTERN</option>
-                <option value="HR_EMPLOYEE">HR EMPLOYEE</option>
-                <option value="HR_MANAGER">HR MANAGER</option>
-                <option value="MANAGER">MANAGER</option>
-                <option value="ADMIN">ADMIN</option>
-              </select>
+              <Select
+                options={roleOptions}
+                styles={selectStyles}
+                placeholder={`Role`}
+                value={role ? roleOptions.find((o) => o.value === role) ?? null : null}
+                onChange={(opt) => setRole(opt ? opt.value : "")}
+              />
+              <input type="hidden" name="role" value={role} />
               {errors?.role && (
                 <p
                   className="error-message"

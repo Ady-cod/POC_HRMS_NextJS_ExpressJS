@@ -9,6 +9,16 @@ export enum EmployeeRole {
   ADMIN = "ADMIN",
 }
 
+// Centralized department names used across the app
+export enum DepartmentName {
+  HR = "HR",
+  WEB_DEVELOPMENT = "Web Development",
+  UI_UX = "UI/UX",
+  QA = "QA",
+  BA = "BA",
+  SM = "SM",
+}
+
 // Define EmployeeStatus enum
 export enum EmployeeStatus {
   ACTIVE = "ACTIVE",

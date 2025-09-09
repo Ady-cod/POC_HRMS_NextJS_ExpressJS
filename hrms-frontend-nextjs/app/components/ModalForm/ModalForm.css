@@ -221,29 +221,6 @@
   outline: none; /*Remove default browser outline for consistent box-shadow and border */
 }
 
-/* Styles for native select dropdown arrow */
-select.input-field {
-  appearance: none;
-  -webkit-appearance: none;
-  -moz-appearance: none;
-  line-height: 20px; /* Align with react-select value height */
-  background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 20 20'%3e%3cpath stroke='black' stroke-linecap='round' stroke-linejoin='round' stroke-width='2' d='m6 8 4 4 4-4'/%3e%3c/svg%3e");
-  background-repeat: no-repeat;
-  background-position: right 0.16rem center;
-  background-size: 1.1rem 1.1rem;
-  padding-right: 2rem;
-}
-
-/* Style for native select when placeholder option is selected */
-select.input-field:required:invalid {
-  color: #6b7280; /* Gray color for placeholder text */
-}
-
-/* Style for actual options once selected (to ensure they are not gray) */
-select.input-field option {
-  color: #000000; /* Black color for selected options */
-}
-
 .gender-selection {
   display: flex;
   flex-direction: column;

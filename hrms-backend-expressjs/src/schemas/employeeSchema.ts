@@ -209,7 +209,18 @@ export const createEmployeeSchema = z.object({
     .transform(capitalizeEachWord),
   gender: z.nativeEnum(Gender).optional().default(Gender.OTHER), // Based on radio buttons
   inductionCompleted: z.boolean().optional().default(false), // Default to false
-  role: z.nativeEnum(Role).optional().default(Role.EMPLOYEE), // Default to EMPLOYEE
+  // Role is optional. If not provided, default to INTERN. If provided but not
+  // part of the allowed enum, raise a clear validation error.
+  role: z
+    .preprocess(
+      (val) => (val === "" || val == null ? undefined : String(val).trim()),
+      z.custom<Role>((v):v is Role => (Object.values(Role) as string[]).includes(v), {
+        message: "Invalid role selection. Please choose a valid role.",
+      })
+      .optional()
+    )
+    .default(Role.INTERN),
+
   status: z.nativeEnum(Status).optional().default(Status.ACTIVE), // Default to ACTIVE
 });
 
@@ -340,7 +351,18 @@ export const updateEmployeeSchema = z.object({
     .optional()
     .transform((value) => (!value ? null : value)),
   inductionCompleted: z.boolean().optional(),
-  role: z.nativeEnum(Role).optional(),
+  role: z
+    .preprocess(
+      (val) => (val === "" || val == null ? undefined : String(val).trim()),
+      z.string().optional()
+    )
+    .refine(
+      (v) =>
+        typeof v === "string" && (Object.values(Role) as string[]).includes(v),
+      {
+        message: "Invalid role selection. Please choose a valid role.",
+      }
+    ),
   status: z.nativeEnum(Status).optional(),
 
   // timezone field added

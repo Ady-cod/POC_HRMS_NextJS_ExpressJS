@@ -1,5 +1,3 @@
-// src/components/TotalCountButton.tsx
-"use client";
 import React from "react";
 import "./TotalCountButton.css";
 
@@ -21,8 +19,6 @@ const TotalCountButton: React.FC<TotalCountButtonProps> = ({ count }) => {
         px-5 py-2          
         text-sm font-semibold
         cursor-default
-        hover:bg-gray-100 hover:shadow-sm
-        transition duration-200
       `}
     >
       Total Count: {count}

@@ -14,7 +14,7 @@
 }
 
 .modal-content {
-  background: #b1b1b1;
+  background: #d0dae2;
   padding: 30px;
   border-radius: 8px;
   width: auto;
@@ -91,7 +91,6 @@
   grid-template-rows: auto auto;
 }
 
-
 /* Street field positioning */
 .input-group:has(.country-state-city-layout) > .input-wrapper:first-child {
   grid-column: 1;
@@ -100,7 +99,7 @@
 }
 
 /* CountryStateCitySelect container positioning */
- .country-state-city-layout {
+.country-state-city-layout {
   grid-column: 1 / -1;
   grid-row: 1 / -1;
   display: grid;
@@ -113,7 +112,7 @@
 .input-group .country-state-city-layout > .input-wrapper:first-child {
   grid-column: 2;
   grid-row: 1;
-  width: 100% ;
+  width: 100%;
   position: relative;
 }
 
@@ -132,13 +131,15 @@
 .address.hasErrors .country-state-city-layout > .input-wrapper:first-child {
   margin-bottom: 30px;
 }
-.address.hasErrors .state-city-row .input-wrapper.error  {
+.address.hasErrors .state-city-row .input-wrapper.error {
   margin-bottom: 20px;
 }
 
 /* Mobile responsive layout for address grid */
 @media (max-width: 406px) {
-  .input-group.hasErrors .country-state-city-layout > .input-wrapper:first-child {
+  .input-group.hasErrors
+    .country-state-city-layout
+    > .input-wrapper:first-child {
     margin-bottom: 0;
   }
   .input-group.hasErrors {
@@ -154,7 +155,7 @@
   .input-group.address.hasErrors {
     margin-bottom: -10px;
   }
-  .input-group.hasErrors .country-state-city-layout  .input-wrapper.error {
+  .input-group.hasErrors .country-state-city-layout .input-wrapper.error {
     margin-bottom: 25px;
   }
 
@@ -175,13 +176,13 @@
     grid-column: 1;
     grid-row: 2;
     /*   …and turn *its* inner grid into a single column ...... */
-    grid-template-columns: 1fr ; 
+    grid-template-columns: 1fr;
     grid-template-rows: auto auto auto; /* Country | State | City */
   }
 
   /*   Override the desktop “grid-column:2” on the Country box */
   .input-group .country-state-city-layout > .input-wrapper:first-child {
-    grid-column: 1 / -1 ; /* span the only column           */
+    grid-column: 1 / -1; /* span the only column           */
   }
 
   /*   State-City row becomes vertical on phones .............. */
@@ -218,29 +219,6 @@
   border-color: black;
   box-shadow: 0 0 0 1px black; /* Mimics react-select focus ring */
   outline: none; /*Remove default browser outline for consistent box-shadow and border */
-}
-
-/* Styles for native select dropdown arrow */
-select.input-field {
-  appearance: none;
-  -webkit-appearance: none;
-  -moz-appearance: none;
-  line-height: 20px; /* Align with react-select value height */
-  background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 20 20'%3e%3cpath stroke='black' stroke-linecap='round' stroke-linejoin='round' stroke-width='2' d='m6 8 4 4 4-4'/%3e%3c/svg%3e");
-  background-repeat: no-repeat;
-  background-position: right 0.16rem center;
-  background-size: 1.1rem 1.1rem;
-  padding-right: 2rem;
-}
-
-/* Style for native select when placeholder option is selected */
-select.input-field:required:invalid {
-  color: #6b7280; /* Gray color for placeholder text */
-}
-
-/* Style for actual options once selected (to ensure they are not gray) */
-select.input-field option {
-  color: #000000; /* Black color for selected options */
 }
 
 .gender-selection {

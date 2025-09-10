@@ -164,12 +164,14 @@ export class ColumnBuilder {
     if (!handleEdit || !handleDeleteClick) {
       return {
         name: "Action",
+        center: true, // Center align the header and cell content
         cell: () => <span>No actions available</span>,
       };
     }
 
     return {
       name: "Action",
+      center: true, // Center align the header and cell content
       cell: (employee) => (
         <div className="flex items-center gap-2 whitespace-nowrap">
           {/* Edit Button */}

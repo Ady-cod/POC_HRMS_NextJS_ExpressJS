@@ -22,15 +22,16 @@ const ExportCSVButton: React.FC<ExportCSVButtonProps> = ({
       onClick={() => exportToCSV(employees)}
       className={`
         inline-flex items-center
-        bg-[#a7aeb4]
+        bg-[#008ec7]
         text-white
         rounded-lg 
         px-5 py-2          
         text-sm font-semibold
         shadow-sm
-        hover:bg-gray-500
-        focus:outline-none focus:ring-4 focus:ring-gray-700
-        transition-colors duration-150
+        hover:bg-[#0c3e66]
+        focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#008ec7]
+        focus-visible:ring-offset-2 focus-visible:ring-offset-white
+        transition-colors duration-150 motion-reduce:transition-none
         ${className}
         `}
     >

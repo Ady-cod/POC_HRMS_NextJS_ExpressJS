@@ -79,9 +79,9 @@ const EmployeeDistributionChart = ({
   );
 
   return (
-    <div className="rounded-2xl shadow-sm px-8 pt-8 justify-center bg-black/10 border border-black-50 min-h-full flex flex-col">
+    <div className="rounded-2xl shadow-sm px-8 pt-8 justify-center bg-darkblue-50 border border-black-50 min-h-full flex flex-col">
       <div className="flex items-start mb-4">
-        <h2 className="font-semibold text-lg">
+        <h2 className="font-semibold text-lg text-darkblue-700">
           Employee Department Distribution
         </h2>
       </div>
@@ -97,7 +97,7 @@ const EmployeeDistributionChart = ({
           </div>
         </div>
       ) : (
-        <div className="flex-1 flex flex-col gap-y-6 mb-6">
+        <div className="flex-1 flex flex-col gap-y-6 mb-6 text-darkblue-700">
           {/* total line */}
           <div className="text-3xl font-bold">
             {totalEmployees}{" "}
@@ -108,13 +108,13 @@ const EmployeeDistributionChart = ({
           <div className="grid grid-cols-1 sm:grid-cols-2 auto-rows-min gap-x-8 gap-y-8 flex-1">
             {employeeData.map(({ name, value }) => (
               <div key={name} className="flex flex-col space-y-1 min-w-0">
-                <div className="flex justify-between text-sm mb-1">
+                <div className="flex justify-between text-sm mb-1 text-darkblue-700">
                   <span className="truncate mr-2">{name}</span>
                   <span className="flex-shrink-0">{value}</span>
                 </div>
                 <Progress
                   value={(value / totalEmployees) * 100}
-                  className="h-2 bg-black/15 [&>div]:bg-[#6b767f]"
+                  className="h-2 bg-darkblue-100 [&>div]:bg-darkblue-400"
                 />
               </div>
             ))}

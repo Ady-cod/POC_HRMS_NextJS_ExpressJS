@@ -113,7 +113,7 @@ const MetricsCards = ({ employees, hasError }: MetricsCardsProps) => {
   }, [employees, hasError]);
 
   return (
-    <Card className="grid grid-cols-1 md:grid-cols-3 gap-4 border p-6 items-center shadow-none bg-black/10 flex-1">
+    <Card className="grid grid-cols-1 md:grid-cols-3 gap-4 border p-6 items-center shadow-none bg-darkblue-50 flex-1">
       {displayError ? (
         // Error placeholder state
         <div className="col-span-3 flex items-center justify-center py-8 text-gray-500">
@@ -130,7 +130,7 @@ const MetricsCards = ({ employees, hasError }: MetricsCardsProps) => {
           <Card key={index} className="p-2 h-36 shadow-none">
             <CardContent className="-p-2">
               <div className="flex items-center gap-4 mb-1">
-                <div className="text-xs text-gray-500">
+                <div className="text-xs text-darkblue-500">
                   {loading && stat.label === "Employees"
                     ? "Loading..."
                     : stat.change}
@@ -143,8 +143,8 @@ const MetricsCards = ({ employees, hasError }: MetricsCardsProps) => {
                   {stat.direction === "up" ? <FaArrowUp /> : <FaArrowDown />}
                 </div>
               </div>
-              <div className="text-sm text-gray-500">{stat.label}</div>
-              <div className="text-xl font-bold">
+              <div className="text-sm text-darkblue-500">{stat.label}</div>
+              <div className="text-xl font-bold text-darkblue-700">
                 {loading && stat.label === "Employees"
                   ? "Loading..."
                   : stat.value}

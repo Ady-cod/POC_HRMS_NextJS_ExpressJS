@@ -68,6 +68,51 @@ export const getAllEmployees = async (
   }
 };
 
+export const getEmployee = async (
+  req: Request,
+  res: Response
+): Promise<void> => {
+  try {
+    const { id } = req.params;
+    if (!ObjectId.isValid(id)) {
+      res.status(400).json({ error: "Employee ID is required" });
+      return;
+    }
+
+    const employee = await prisma.employee.findUnique({
+      where: { id },
+      include: {
+        employeeProjects: {
+          select: {
+            project: {
+              select: {
+                id: true,
+                name: true,
+              },
+            },
+          },
+        },
+        department: {
+          select: {
+            id: true,
+            name: true,
+          },
+        },
+      },
+    });
+
+    if (!employee) {
+      res.status(404).json({ error: "Employee not found" });
+      return;
+    }
+
+    res.status(200).json(employee);
+  } catch (error) {
+    console.error("Error fetching employee:", error);
+    res.status(500).json({ error: "Failed to fetch employee" });
+  }
+};
+
 const DEMO_MODE = process.env.DEMO_MODE || true; // Set this based on your environment
 
 export const createEmployee = async (

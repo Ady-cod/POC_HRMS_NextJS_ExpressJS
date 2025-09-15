@@ -86,7 +86,7 @@ const Sidebar = ({ isOpen, toggleSidebar }: SideBarProps) => {
           transition-all duration-75 ease-in-out 
           sm:border-r-2 
           ${
-          isOpen ? "translate-x-0 opacity-100 sticky ml-2 mr-6 top-32" : "-translate-x-full absolute opacity-0"} 
+          isOpen ? "translate-x-0 opacity-100 sticky ml-2 mr-6 top-40" : "-translate-x-full absolute opacity-0"} 
           sm:p-6 pt-5 sidebar 
           ${isCollapsed ? 'sm:w-28' : 'sm:w-60'}`}
         style={{ borderRadius: "45px", backgroundColor: '#d9d9d9',width: isCollapsed ? "7rem" : "15rem",
@@ -109,39 +109,40 @@ const Sidebar = ({ isOpen, toggleSidebar }: SideBarProps) => {
             <Link
               href="/admin"
               onClick={handleSidebarItemClick}
-              className={`flex items-center justify-${isCollapsed ? "center" : "start"} rounded-lg transition-all duration-200 
+              className={`group flex items-center justify-${isCollapsed ? "center" : "start"} rounded-lg transition-all duration-200 
                  ${isCollapsed 
-                  ? "gap-0 px-0 py-2"
-                  : "gap-3 px-4 py-2 hover:bg-gray-300 hover:border-r-2 hover:border-gray-500 hover:scale-110"}
-                ${
-                pathname === "/admin"
-                  ? " text-blue-700 scale-110"
-                  : ""
-              }`}
+                  ? pathname === "/admin"
+                    ? "gap-0 px-0 py-2 bg-[#008EC7] border-r-8 border-[#E97128] text-white scale-110"
+                    : "gap-0 px-0 py-2 hover:bg-[#0C3E66] hover:border-r-4 hover:border-[#E97128]"
+                  : pathname === "/admin"
+                    ? "gap-3 px-4 py-2 bg-[#008EC7] border-r-8 border-[#E97128] text-white scale-110"
+                    : "gap-3 px-4 py-2 hover:bg-[#0C3E66] hover:border-r-4 hover:border-[#E97128] hover:scale-110"}
+                `}
             >
-              <div className={`relative w-6 h-6 flex items-center justify-center rounded-lg p-2 transition-all duration-200 ${
-                isCollapsed ? "hover:bg-gray-300 hover:border-r-2 hover:border-gray-500 hover:scale-110" : ""
-                }  
-                `}>
+              <div className={`relative w-6 h-6 flex items-center justify-center rounded-lg p-2 transition-all duration-200`}>
               <Image
-                src="/images/home.png"
+                src="/images/home-darkblue.png"
                 alt="Home icon"
                 width={24}
                 height={24}
-                className={`absolute top-0 left-0 transition-opacity duration-200 ${pathname === "/admin" ? "opacity-0" : "opacity-100"}`}
+                className={`absolute top-0 left-0 transition-opacity duration-200 ${pathname === "/admin" ? "opacity-0" : "opacity-100 group-hover:opacity-0"}`}
                 style={{ pointerEvents: "none" }}
               />
-              {/* Blue (active) icon */}
+              {/* White (active) icon */}
               <Image
-                src="/images/home-blue.png"
+                src="/images/home-white.png"
                 alt="Home icon active"
                 width={24}
                 height={24}
-                className={`absolute top-0 left-0 transition-opacity duration-200 ${pathname === "/admin" ? "opacity-100" : "opacity-0"}`}
+                className={`absolute top-0 left-0 transition-opacity duration-200 ${pathname === "/admin" ? "opacity-100" : "opacity-0 group-hover:opacity-100"}`}
                 style={{ pointerEvents: "none" }}
               />
               </div>
-              {!isCollapsed && <span>Home</span>}
+              {!isCollapsed && 
+              <span className={`transition-colors duration-200 ${pathname === "/admin"
+              ? "text-white"
+              : "text-[#0C3E66] group-hover:text-white"
+              }`}>Home</span>}
             </Link>
           </li>
 
@@ -150,37 +151,39 @@ const Sidebar = ({ isOpen, toggleSidebar }: SideBarProps) => {
             <Link
               href="/admin/profile"
               onClick={handleSidebarItemClick}
-              className={`flex items-center justify-${isCollapsed ? "center" : "start"} rounded-lg transition-all duration-200 
+              className={`group flex items-center justify-${isCollapsed ? "center" : "start"} rounded-lg transition-all duration-200 
                  ${isCollapsed 
-                  ? "gap-0 px-0 py-2 "
-                  : "gap-3 px-4 py-2 hover:bg-gray-300 hover:border-r-2 hover:border-gray-500 hover:scale-110"}
-                ${pathname === "/admin/profile"
-                  ? "text-blue-700 scale-110"
-                  : ""
-              }`}
+                  ? pathname === "/admin/profile"
+                    ? "gap-0 px-0 py-2 bg-[#008EC7] border-r-8 border-[#E97128] text-white scale-110"
+                    : "gap-0 px-0 py-2 hover:bg-[#0C3E66] hover:border-r-4 hover:border-[#E97128]"
+                  : pathname === "/admin/profile"
+                    ? "gap-3 px-4 py-2 bg-[#008EC7] border-r-8 border-[#E97128] text-white scale-110"
+                    : "gap-3 px-4 py-2 hover:bg-[#0C3E66] hover:border-r-4 hover:border-[#E97128] hover:scale-110"}`}
             >
-              <div className={`relative w-6 h-6 flex items-center justify-center rounded-lg p-2 transition-all duration-200 ${
-                isCollapsed? "hover:bg-gray-300 hover:border-r-2 hover:border-gray-500 hover:scale-110" : ""
-                }`}>
+              <div className={`relative w-6 h-6 flex items-center justify-center rounded-lg p-2 transition-all duration-200`}>
              <Image
-                src="/images/My profile icon.png"
+                src="/images/My profile icon-darkblue.png"
                 alt="Profile icon"
                 width={24}
                 height={24}
-                className={`absolute top-0 left-0 transition-opacity duration-200 ${pathname === "/admin/profile" ? "opacity-0" : "opacity-100"}`}
+                className={`absolute top-0 left-0 transition-opacity duration-200 ${pathname === "/admin/profile" ? "opacity-0" : "opacity-100 group-hover:opacity-0"}`}
                 style={{ pointerEvents: "none" }}
               />
-              {/* Blue (active) icon */}
+              {/* White (active) icon */}
               <Image
-                src="/images/MyProfileIcon-blue.png"
+                src="/images/MyProfileIcon-white.png"
                 alt="Profile icon active"
                 width={24}
                 height={24}
-                className={`absolute top-0 left-0 transition-opacity duration-200 ${pathname === "/admin/profile" ? "opacity-100" : "opacity-0"}`}
+                className={`absolute top-0 left-0 transition-opacity duration-200 ${pathname === "/admin/profile" ? "opacity-100" : "opacity-0 group-hover:opacity-100"}`}
                 style={{ pointerEvents: "none" }}
               />
               </div>
-              {!isCollapsed && <span>My Profile</span>}
+              {!isCollapsed && 
+              <span className={`transition-colors duration-200 ${pathname === "/admin/profile"
+              ? "text-white"
+              : "text-[#0C3E66] group-hover:text-white"
+              }`}>My Profile</span>}
             </Link>
           </li>
 
@@ -194,15 +197,13 @@ const Sidebar = ({ isOpen, toggleSidebar }: SideBarProps) => {
             onMouseLeave={() => setIsHovered(false)}
           >
             <div
-              className={`w-full flex items-center justify-${isCollapsed ? "center" : "start"} rounded-lg cursor-default transition-all duration-200 
-                ${isCollapsed 
-                  ? "gap-0 px-0 py-2 "
-                  : "gap-3 px-4 py-2 hover:bg-gray-300 hover:border-r-2 hover:border-gray-500 hover:scale-110"}
-                ${
-                pathname.startsWith("/admin/employee")
-                  ? " text-blue-700 scale-110"
-                  : ""
-              } `}
+              className={`w-full group flex items-center justify-${isCollapsed ? "center" : "start"} rounded-lg cursor-default transition-all duration-200 
+                ${pathname.startsWith("/admin/employee")
+                  ? "gap-3 px-4 py-2 bg-[#008EC7] border-r-8 border-[#E97128] text-white scale-110"
+                  : isCollapsed
+                  ? "gap-0 px-0 py-2 hover:bg-[#0C3E66] hover:border-r-4 hover:border-[#E97128]"
+                  : "gap-3 px-4 py-2 hover:bg-[#0C3E66] hover:border-r-4 hover:border-[#E97128] hover:scale-110 text-[#0C3E66]"
+                }`}
                onClick={()=>{
                 if(isCollapsed){
                   setIsCollapsed(false);
@@ -210,26 +211,29 @@ const Sidebar = ({ isOpen, toggleSidebar }: SideBarProps) => {
                 }
                }}
             >
-              <div className={`relative w-6 h-6 flex items-center justify-center rounded-lg p-2 transition-all duration-200 ${
-                isCollapsed ? "hover:bg-gray-300 hover:border-r-2 hover:border-gray-500 hover:scale-110" : ""
-                }`}>
+              <div className={`relative w-6 h-6 flex items-center justify-center rounded-lg p-2 transition-all duration-200`}>
               <Image
-                src="/images/My learning path icon.png"
+                src="/images/My learning path icon-darkblue.png"
                 alt="Employee icon"
                 width={24}
                 height={24}
-                className={`absolute top-0 left-0 transition-opacity duration-200 ${pathname.startsWith("/admin/employee") ? "opacity-0" : "opacity-100"}`}
+                className={`absolute top-0 left-0 transition-opacity duration-200 ${pathname.startsWith("/admin/employee") ? "opacity-0" : "opacity-100 group-hover:opacity-0"}`}
               />
-              {/* Blue (active) icon */}
+              {/* White (active) icon */}
               <Image
-                src="/images/MyLearningPath-blue.png"
+                src="/images/MyLearningPath-white.png"
                 alt="Employee icon"
                 width={24}
                 height={24}
-                className={`absolute top-0 left-0 transition-opacity duration-200 ${pathname.startsWith("/admin/employee") ? "opacity-100" : "opacity-0"}`}
+                className={`absolute top-0 left-0 transition-opacity duration-200 ${pathname.startsWith("/admin/employee") ? "opacity-100" : "opacity-0 group-hover:opacity-100"}`}
               />
               </div>
-              {!isCollapsed && <span>Employee</span>}
+              {!isCollapsed && 
+              <span className={`transition-colors duration-200 ${
+              pathname.startsWith("/admin/employee")
+              ? "text-white"
+              : "text-[#0C3E66] group-hover:text-white"
+              }`}>Employee</span>}
             </div>
 
             {/* Submenu */}
@@ -244,20 +248,34 @@ const Sidebar = ({ isOpen, toggleSidebar }: SideBarProps) => {
                 <Link
                   href="/admin/employee/list"
                   onClick={handleSidebarItemClick}
-                  className={`flex items-start gap-2 px-2 py-1 rounded-lg transition-all duration-200 ${
-                    pathname === "/admin/employee/list"
-                      ? "text-blue-600"
-                      : "hover:bg-gray-300 hover:border-r-2 hover:border-gray-500 hover:scale-105 text-black"
-                  }`}
+                  className={`group flex items-start gap-2 px-2 py-1 rounded-lg transition-all duration-200 
+                  ${
+                    isCollapsed
+                      ? ""
+                      : pathname === "/admin/employee/list"
+                      ? ""
+                      : "hover:bg-[#0C3E66] hover:border-r-4 hover:border-[#E97128] hover:scale-105"
+                  }
+                  ${pathname === "/admin/employee/list" ? "text-[#E97128]" : "text-[#0C3E66]"}`}
                 >
                   <span
-                    className={`text-lg leading-none ${
-                      pathname === "/admin/employee/list" ? "text-blue-600" : ""
-                    }`}
+                    className={`text-lg leading-none transition-colors duration-200
+                      ${
+                        pathname === "/admin/employee/list"
+                          ? "text-[#E97128]" 
+                          : "group-hover:text-white"
+                      }
+                    `}
                   >
                     •
                   </span>
-                  <span className="leading-tight">List</span>
+                  <span className={`leading-tight transition-colors duration-200
+                  ${
+                    pathname === "/admin/employee/list"
+                      ? "text-[#E97128]" 
+                      : "group-hover:text-white"
+                  }
+                  `}>List</span>
                 </Link>
               </li>
 
@@ -265,22 +283,34 @@ const Sidebar = ({ isOpen, toggleSidebar }: SideBarProps) => {
                 <Link
                   href="/admin/employee/week-wise"
                   onClick={handleSidebarItemClick}
-                  className={`flex items-start gap-2 px-2 py-1 rounded-lg transition-all duration-200 ${
-                    pathname === "/admin/employee/week-wise"
-                      ? "text-blue-600"
-                      : "hover:bg-gray-300 hover:border-r-2 hover:border-gray-500 hover:scale-105 text-black"
-                  }`}
+                  className={`group flex items-start gap-2 px-2 py-1 rounded-lg transition-all duration-200 
+                    ${
+                    isCollapsed
+                      ? ""
+                      : pathname === "/admin/employee/week-wise"
+                      ? ""
+                      : "hover:bg-[#0C3E66] hover:border-r-4 hover:border-[#E97128] hover:scale-105"
+                  }
+                   ${pathname === "/admin/employee/week-wise" ? "text-[#E97128]" : "text-[#0C3E66]"}`}
                 >
                   <span
-                    className={`text-lg leading-none ${
-                      pathname === "/admin/employee/week-wise"
-                        ? "text-blue-600"
-                        : ""
-                    }`}
+                    className={`text-lg leading-none transition-colors duration-200
+                  ${
+                    pathname === "/admin/employee/week-wise"
+                      ? "text-[#E97128]"
+                      : "group-hover:text-white"
+                  }
+                  `}
                   >
                     •
                   </span>
-                  <span className="leading-tight">Week-wise</span>
+                  <span className={`leading-tight transition-colors duration-200
+                  ${
+                    pathname === "/admin/employee/week-wise"
+                      ? "text-[#E97128]"
+                      : "group-hover:text-white"
+                  }
+                  `}>Week-wise</span>
                 </Link>
               </li>
             </ul>
@@ -291,37 +321,38 @@ const Sidebar = ({ isOpen, toggleSidebar }: SideBarProps) => {
             <Link
               href="/admin/applicants"
               onClick={handleSidebarItemClick}
-              className={`flex items-center justify-${isCollapsed ? "center" : "start"} rounded-lg transition-all duration-200 
+              className={`group flex items-center justify-${isCollapsed ? "center" : "start"} rounded-lg transition-all duration-200 
                  ${isCollapsed 
-                  ? "gap-0 px-0 py-2"
-                  : "gap-3 px-4 py-2 hover:bg-gray-300 hover:border-r-2 hover:border-gray-500 hover:scale-110"} 
-                  ${
-                pathname === "/admin/applicants"
-                  ? " text-blue-700 scale-110"
-                  : ""
-              } `}
+                  ? pathname === "/admin/applicants"
+                    ? "gap-0 px-0 py-2 bg-[#008EC7] border-r-8 border-[#E97128] text-white scale-110"
+                    : "gap-0 px-0 py-2 hover:bg-[#0C3E66] hover:border-r-4 hover:border-[#E97128]"
+                  : pathname === "/admin/applicants"
+                    ? "gap-3 px-4 py-2 bg-[#008EC7] border-r-8 border-[#E97128] text-white scale-110"
+                    : "gap-3 px-4 py-2 hover:bg-[#0C3E66] hover:border-r-4 hover:border-[#E97128] hover:scale-110"}`}
             >
-              <div className={`relative w-6 h-6 flex items-center justify-center rounded-lg p-2 transition-all duration-200 ${
-                isCollapsed ? "hover:bg-gray-300 hover:border-r-2 hover:border-gray-500 hover:scale-110" : ""
-                }`}>
+              <div className={`relative w-6 h-6 flex items-center justify-center rounded-lg p-2 transition-all duration-200`}>
               <Image
-                src="/images/Applicants.png"
+                src="/images/Applicants-darkblue.png"
                 alt="Applicant icon"
                 width={24}
                 height={24}
-                className={`absolute top-0 left-0 transition-opacity duration-200 ${pathname === "/admin/applicants" ? "opacity-0" : "opacity-100"}`}
+                className={`absolute top-0 left-0 transition-opacity duration-200 ${pathname === "/admin/applicants" ? "opacity-0" : "opacity-100 group-hover:opacity-0"}`}
                 style={{ pointerEvents: "none" }}
               />
-              {/* Blue (active) icon */}
+              {/* White (active) icon */}
               <Image
-                src="/images/MyProjectsIcon-blue.png"
+                src="/images/MyProjectsIcon-white.png"
                 alt="Applicant icon"
                 width={24}
                 height={24}
-                className={`absolute top-0 left-0 transition-opacity duration-200 ${pathname === "/admin/applicants" ? "opacity-1000" : "opacity-0"}`}
+                className={`absolute top-0 left-0 transition-opacity duration-200 ${pathname === "/admin/applicants" ? "opacity-1000" : "opacity-0 group-hover:opacity-100"}`}
               />
               </div>
-              {!isCollapsed && <span>Applicants</span>}
+              {!isCollapsed && 
+              <span className={`transition-colors duration-200 ${pathname === "/admin/applicants"
+              ? "text-white"
+              : "text-[#0C3E66] group-hover:text-white"
+              }`}>Applicants</span>}
             </Link>
           </li>
 
@@ -330,36 +361,37 @@ const Sidebar = ({ isOpen, toggleSidebar }: SideBarProps) => {
             <Link
               href="/admin/workflow"
               onClick={handleSidebarItemClick}
-              className={`flex items-center justify-${isCollapsed ? "center" : "start"} rounded-lg transition-all duration-200 
+              className={`group flex items-center justify-${isCollapsed ? "center" : "start"} rounded-lg transition-all duration-200 
                  ${isCollapsed 
-                  ? "gap-0 px-0 py-2 "
-                  : "gap-3 px-4 py-2 hover:bg-gray-300 hover:border-r-2 hover:border-gray-500 hover:scale-110"}
-                   ${
-                pathname === "/admin/workflow"
-                  ? " text-blue-700 scale-110"
-                  : ""
-              } `}
+                  ? pathname === "/admin/workflow"
+                    ? "gap-0 px-0 py-2 bg-[#008EC7] border-r-8 border-[#E97128] text-white scale-110"
+                    : "gap-0 px-0 py-2 hover:bg-[#0C3E66] hover:border-r-4 hover:border-[#E97128]"
+                  : pathname === "/admin/workflow"
+                    ? "gap-3 px-4 py-2 bg-[#008EC7] border-r-8 border-[#E97128] text-white scale-110"
+                    : "gap-3 px-4 py-2 hover:bg-[#0C3E66] hover:border-r-4 hover:border-[#E97128] hover:scale-110"}`}
             >
-              <div className={`relative w-6 h-6 flex items-center justify-center rounded-lg p-2 transition-all duration-200 ${
-                isCollapsed ? "hover:bg-gray-300 hover:border-r-2 hover:border-gray-500 hover:scale-110" : ""
-                }`}>
+              <div className={`relative w-6 h-6 flex items-center justify-center rounded-lg p-2 transition-all duration-200`}>
               <Image
-                src="/images/My workflow icon.png"
+                src="/images/My workflow icon-darkblue.png"
                 alt="Workflow icon"
                 width={24}
                 height={24}
-                className={`absolute top-0 left-0 transition-opacity duration-200 ${pathname.startsWith("/admin/workflow") ? "opacity-0" : "opacity-100"}`}
+                className={`absolute top-0 left-0 transition-opacity duration-200 ${pathname.startsWith("/admin/workflow") ? "opacity-0" : "opacity-100 group-hover:opacity-0"}`}
               />
-              {/* Blue (active) icon */}
+              {/* White (active) icon */}
               <Image
-                src="/images/MyWorkflowIcon-blue.png"
+                src="/images/MyWorkflowIcon-white.png"
                 alt="Workflow icon"
                 width={24}
                 height={24}
-                className={`absolute top-0 left-0 transition-opacity duration-200 ${pathname.startsWith("/admin/workflow") ? "opacity-100" : "opacity-0"}`}
+                className={`absolute top-0 left-0 transition-opacity duration-200 ${pathname.startsWith("/admin/workflow") ? "opacity-100" : "opacity-0 group-hover:opacity-100"}`}
               />
               </div>
-              {!isCollapsed && <span>My Workflow</span>}
+              {!isCollapsed && 
+              <span className={`transition-colors duration-200 ${pathname === "/admin/workflow"
+              ? "text-white"
+              : "text-[#0C3E66] group-hover:text-white"
+              }`}>My Workflow</span>}
             </Link>
           </li>
 
@@ -368,36 +400,38 @@ const Sidebar = ({ isOpen, toggleSidebar }: SideBarProps) => {
             <Link
               href="/admin/masters"
               onClick={handleSidebarItemClick}
-              className={`flex items-center justify-${isCollapsed ? "center" : "start"} rounded-lg transition-all duration-200 
+              className={`group flex items-center justify-${isCollapsed ? "center" : "start"} rounded-lg transition-all duration-200 
                  ${isCollapsed 
-                  ? "gap-0 px-0 py-2 "
-                  : "gap-3 px-4 py-2 hover:bg-gray-300 hover:border-r-2 hover:border-gray-500 hover:scale-110"}
-                   ${
-                pathname === "/admin/masters"
-                  ? " text-blue-700 scale-110"
-                  : ""
-              } `}
+                  ? pathname === "/admin/masters"
+                    ? "gap-0 px-0 py-2 bg-[#008EC7] border-r-8 border-[#E97128] text-white scale-110"
+                    : "gap-0 px-0 py-2 hover:bg-[#0C3E66] hover:border-r-4 hover:border-[#E97128]"
+                  : pathname === "/admin/masters"
+                    ? "gap-3 px-4 py-2 bg-[#008EC7] border-r-8 border-[#E97128] text-white scale-110"
+                    : "gap-3 px-4 py-2 hover:bg-[#0C3E66] hover:border-r-4 hover:border-[#E97128] hover:scale-110"
+                }`}
             >
-              <div className={`relative w-6 h-6 flex items-center justify-center rounded-lg p-2 transition-all duration-200 ${
-                isCollapsed ? "hover:bg-gray-300 hover:border-r-2 hover:border-gray-500 hover:scale-110" : ""
-                }`}>
+              <div className={`relative w-6 h-6 flex items-center justify-center rounded-lg p-2 transition-all duration-200`}>
               <Image
-                src="/images/Master.png"
+                src="/images/Master-darkblue.png"
                 alt="Master icon"
                 width={24}
                 height={24}
-                className={`absolute top-0 left-0 transition-opacity duration-200 ${pathname.startsWith("/admin/masters") ? "opacity-0" : "opacity-100"}`}
+                className={`absolute top-0 left-0 transition-opacity duration-200 ${pathname.startsWith("/admin/masters") ? "opacity-0" : "opacity-100 group-hover:opacity-0"}`}
               />
-              {/* Blue (active) icon */}
+              {/* White (active) icon */}
               <Image
-                src="/images/folderOpen-blue.png"
+                src="/images/folderOpen-white.png"
                 alt="Master icon"
                 width={24}
                 height={24}
-                className={`absolute top-0 left-0 transition-opacity duration-200 ${pathname.startsWith("/admin/masters") ? "opacity-100" : "opacity-0"}`}
+                className={`absolute top-0 left-0 transition-opacity duration-200 ${pathname.startsWith("/admin/masters") ? "opacity-100" : "opacity-0 group-hover:opacity-100"}`}
               />
               </div>
-              {!isCollapsed && <span>Masters</span>}
+              {!isCollapsed && 
+              <span className={`transition-colors duration-200 ${pathname === "/admin/masters"
+              ? "text-white"
+              : "text-[#0C3E66] group-hover:text-white"
+              }`}>Masters</span>}
             </Link>
           </li>
 
@@ -406,38 +440,40 @@ const Sidebar = ({ isOpen, toggleSidebar }: SideBarProps) => {
             <Link
               href="/admin/hr"
               onClick={handleSidebarItemClick}
-              className={`flex items-center justify-${isCollapsed ? "center" : "start"} rounded-lg transition-all duration-200 
+              className={`group flex items-center justify-${isCollapsed ? "center" : "start"} rounded-lg transition-all duration-200 
                  ${isCollapsed 
-                  ? "gap-0 px-0 py-2"
-                  : "gap-3 px-4 py-2 hover:bg-gray-300 hover:border-r-2 hover:border-gray-500 hover:scale-110"}
-                   ${
-                pathname === "/admin/hr"
-                  ? " text-blue-700 scale-110"
-                  : ""
-              } `}
+                  ? pathname === "/admin/hr"
+                    ? "gap-0 px-0 py-2 bg-[#008EC7] border-r-8 border-[#E97128] text-white scale-110"
+                    : "gap-0 px-0 py-2 hover:bg-[#0C3E66] hover:border-r-4 hover:border-[#E97128]"
+                  : pathname === "/admin/hr"
+                    ? "gap-3 px-4 py-2 bg-[#008EC7] border-r-8 border-[#E97128] text-white scale-110"
+                    : "gap-3 px-4 py-2 hover:bg-[#0C3E66] hover:border-r-4 hover:border-[#E97128] hover:scale-110"
+                }`}
             >
               <div
-                className={`relative w-6 h-6 flex items-center justify-center rounded-lg p-2 transition-all duration-200 ${
-                isCollapsed ? "hover:bg-gray-300 hover:border-r-2 hover:border-gray-500 hover:scale-110" : ""
-                }`}
+                className={`relative w-6 h-6 flex items-center justify-center rounded-lg p-2 transition-all duration-200`}
               >
               <Image
-                src="/images/HR.png"
+                src="/images/HR-darkblue.png"
                 alt="HR icon"
                 width={24}
                 height={24}
-                className={`absolute top-0 left-0 transition-opacity duration-200 ${pathname.startsWith("/admin/hr") ? "opacity-0" : "opacity-100"}`}
+                className={`absolute top-0 left-0 transition-opacity duration-200 ${pathname.startsWith("/admin/hr") ? "opacity-0" : "opacity-100 group-hover:opacity-0"}`}
               />
-              {/* Blue (active) icon */}
+              {/* White (active) icon */}
               <Image
-                src="/images/speedometer-blue.png"
+                src="/images/speedometer-white.png"
                 alt="HR icon"
                 width={24}
                 height={24}
-                className={`absolute top-0 left-0 transition-opacity duration-200 ${pathname.startsWith("/admin/hr") ? "opacity-100" : "opacity-0"}`}
+                className={`absolute top-0 left-0 transition-opacity duration-200 ${pathname.startsWith("/admin/hr") ? "opacity-100" : "opacity-0 group-hover:opacity-100"}`}
               />
               </div>
-              {!isCollapsed && <span>Core HR</span>}
+              {!isCollapsed && 
+              <span className={`transition-colors duration-200 ${pathname === "/admin/hr"
+              ? "text-white"
+              : "text-[#0C3E66] group-hover:text-white"
+              }`}>Core HR</span>}
             </Link>
           </li>
 
@@ -446,25 +482,36 @@ const Sidebar = ({ isOpen, toggleSidebar }: SideBarProps) => {
             <form action={logout}>
               <button
                 type="submit" 
-                className={`flex items-center  transition-all duration-200 w-full rounded-lg ${
+                className={`group flex items-center justify-${isCollapsed ? "center" : "start"} transition-all duration-200 w-full rounded-lg ${
                   isCollapsed
-                  ? "justify-center gap-0 px-0 py-2 "
-                  : "justify-start gap-3 px-4 py-2 hover:bg-gray-300 hover:border-r-2 hover:border-gray-500 hover:scale-110"
-                }`}
+                  ? "gap-0 px-0 py-2 hover:bg-[#0C3E66] hover:border-r-4 hover:border-[#E97128]"
+                  : "gap-3 px-4 py-2 hover:bg-[#0C3E66] hover:border-r-4 hover:border-[#E97128] hover:scale-110"
+                }
+              text-[#0C3E66]`}
               >
                 <div
-                  className={`flex items-center justify-center rounded-lg p-2 transition-all duration-200 ${
-                  isCollapsed ? "hover:bg-gray-300 hover:border-r-2 hover:border-gray-500 hover:scale-110" : ""
-                  }`}
+                  className={`relative w-6 h-5 flex items-center justify-center rounded-lg transition-all duration-200`}
                 >
                 <Image
-                  src="/images/Logout icon.png"
+                  src="/images/Logout icon-darkblue.png"
                   alt="Logout icon"
                   width={24}
                   height={24}
+                  className={`absolute top-0 left-0 transition-opacity duration-200 ${pathname==="/" ? "opacity-0" : "opacity-100 group-hover:opacity-0"}`}
+                />
+                <Image
+                  src="/images/Logout-white.png"
+                  alt="Logout icon"
+                  width={24}
+                  height={24}
+                   className={`absolute top-0 left-0 transition-opacity duration-200 ${pathname==="/" ? "opacity-100" : "opacity-0 group-hover:opacity-100"}`}
                 />
                 </div>
-                {!isCollapsed && <span>Logout</span>}
+                {!isCollapsed && 
+                <span className={`transition-colors duration-200 ${pathname === "/"
+              ? "text-white"
+              : "text-[#0C3E66] group-hover:text-white"
+              }`}>Logout</span>}
               </button>
             </form>
           </li>

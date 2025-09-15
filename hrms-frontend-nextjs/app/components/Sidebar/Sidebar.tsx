@@ -112,10 +112,10 @@ const Sidebar = ({ isOpen, toggleSidebar }: SideBarProps) => {
               className={`group flex items-center justify-${isCollapsed ? "center" : "start"} rounded-lg transition-all duration-200 
                  ${isCollapsed 
                   ? pathname === "/admin"
-                    ? "gap-0 px-0 py-2 bg-[#008EC7] border-r-8 border-[#E97128] text-white scale-110"
+                    ? "gap-0 px-0 py-2 bg-[#008EC7] border-r-8 border-[#E97128] text-white cursor-default scale-110"
                     : "gap-0 px-0 py-2 hover:bg-[#0C3E66] hover:border-r-4 hover:border-[#E97128]"
                   : pathname === "/admin"
-                    ? "gap-3 px-4 py-2 bg-[#008EC7] border-r-8 border-[#E97128] text-white scale-110"
+                    ? "gap-3 px-4 py-2 bg-[#008EC7] border-r-8 border-[#E97128] text-white cursor-default scale-110"
                     : "gap-3 px-4 py-2 hover:bg-[#0C3E66] hover:border-r-4 hover:border-[#E97128] hover:scale-110"}
                 `}
             >
@@ -154,10 +154,10 @@ const Sidebar = ({ isOpen, toggleSidebar }: SideBarProps) => {
               className={`group flex items-center justify-${isCollapsed ? "center" : "start"} rounded-lg transition-all duration-200 
                  ${isCollapsed 
                   ? pathname === "/admin/profile"
-                    ? "gap-0 px-0 py-2 bg-[#008EC7] border-r-8 border-[#E97128] text-white scale-110"
+                    ? "gap-0 px-0 py-2 bg-[#008EC7] border-r-8 border-[#E97128] text-white cursor-default scale-110"
                     : "gap-0 px-0 py-2 hover:bg-[#0C3E66] hover:border-r-4 hover:border-[#E97128]"
                   : pathname === "/admin/profile"
-                    ? "gap-3 px-4 py-2 bg-[#008EC7] border-r-8 border-[#E97128] text-white scale-110"
+                    ? "gap-3 px-4 py-2 bg-[#008EC7] border-r-8 border-[#E97128] text-white cursor-default scale-110"
                     : "gap-3 px-4 py-2 hover:bg-[#0C3E66] hover:border-r-4 hover:border-[#E97128] hover:scale-110"}`}
             >
               <div className={`relative w-6 h-6 flex items-center justify-center rounded-lg p-2 transition-all duration-200`}>
@@ -201,7 +201,7 @@ const Sidebar = ({ isOpen, toggleSidebar }: SideBarProps) => {
                 ${pathname.startsWith("/admin/employee")
                   ? "gap-3 px-4 py-2 bg-[#008EC7] border-r-8 border-[#E97128] text-white scale-110"
                   : isCollapsed
-                  ? "gap-0 px-0 py-2 hover:bg-[#0C3E66] hover:border-r-4 hover:border-[#E97128]"
+                  ? "gap-0 px-0 py-2 hover:bg-[#0C3E66] hover:border-r-4 hover:border-[#E97128] cursor-pointer"
                   : "gap-3 px-4 py-2 hover:bg-[#0C3E66] hover:border-r-4 hover:border-[#E97128] hover:scale-110 text-[#0C3E66]"
                 }`}
                onClick={()=>{
@@ -256,7 +256,7 @@ const Sidebar = ({ isOpen, toggleSidebar }: SideBarProps) => {
                       ? ""
                       : "hover:bg-[#0C3E66] hover:border-r-4 hover:border-[#E97128] hover:scale-105"
                   }
-                  ${pathname === "/admin/employee/list" ? "text-[#E97128]" : "text-[#0C3E66]"}`}
+                  ${pathname === "/admin/employee/list" ? "text-[#E97128] cursor-default" : "text-[#0C3E66]"}`}
                 >
                   <span
                     className={`text-lg leading-none transition-colors duration-200
@@ -291,7 +291,7 @@ const Sidebar = ({ isOpen, toggleSidebar }: SideBarProps) => {
                       ? ""
                       : "hover:bg-[#0C3E66] hover:border-r-4 hover:border-[#E97128] hover:scale-105"
                   }
-                   ${pathname === "/admin/employee/week-wise" ? "text-[#E97128]" : "text-[#0C3E66]"}`}
+                   ${pathname === "/admin/employee/week-wise" ? "text-[#E97128] cursor-default" : "text-[#0C3E66]"}`}
                 >
                   <span
                     className={`text-lg leading-none transition-colors duration-200
@@ -324,10 +324,10 @@ const Sidebar = ({ isOpen, toggleSidebar }: SideBarProps) => {
               className={`group flex items-center justify-${isCollapsed ? "center" : "start"} rounded-lg transition-all duration-200 
                  ${isCollapsed 
                   ? pathname === "/admin/applicants"
-                    ? "gap-0 px-0 py-2 bg-[#008EC7] border-r-8 border-[#E97128] text-white scale-110"
+                    ? "gap-0 px-0 py-2 bg-[#008EC7] border-r-8 border-[#E97128] text-white cursor-default scale-110"
                     : "gap-0 px-0 py-2 hover:bg-[#0C3E66] hover:border-r-4 hover:border-[#E97128]"
                   : pathname === "/admin/applicants"
-                    ? "gap-3 px-4 py-2 bg-[#008EC7] border-r-8 border-[#E97128] text-white scale-110"
+                    ? "gap-3 px-4 py-2 bg-[#008EC7] border-r-8 border-[#E97128] text-white cursor-default scale-110"
                     : "gap-3 px-4 py-2 hover:bg-[#0C3E66] hover:border-r-4 hover:border-[#E97128] hover:scale-110"}`}
             >
               <div className={`relative w-6 h-6 flex items-center justify-center rounded-lg p-2 transition-all duration-200`}>
@@ -364,10 +364,10 @@ const Sidebar = ({ isOpen, toggleSidebar }: SideBarProps) => {
               className={`group flex items-center justify-${isCollapsed ? "center" : "start"} rounded-lg transition-all duration-200 
                  ${isCollapsed 
                   ? pathname === "/admin/workflow"
-                    ? "gap-0 px-0 py-2 bg-[#008EC7] border-r-8 border-[#E97128] text-white scale-110"
+                    ? "gap-0 px-0 py-2 bg-[#008EC7] border-r-8 border-[#E97128] text-white cursor-default scale-110"
                     : "gap-0 px-0 py-2 hover:bg-[#0C3E66] hover:border-r-4 hover:border-[#E97128]"
                   : pathname === "/admin/workflow"
-                    ? "gap-3 px-4 py-2 bg-[#008EC7] border-r-8 border-[#E97128] text-white scale-110"
+                    ? "gap-3 px-4 py-2 bg-[#008EC7] border-r-8 border-[#E97128] text-white cursor-default scale-110"
                     : "gap-3 px-4 py-2 hover:bg-[#0C3E66] hover:border-r-4 hover:border-[#E97128] hover:scale-110"}`}
             >
               <div className={`relative w-6 h-6 flex items-center justify-center rounded-lg p-2 transition-all duration-200`}>
@@ -403,10 +403,10 @@ const Sidebar = ({ isOpen, toggleSidebar }: SideBarProps) => {
               className={`group flex items-center justify-${isCollapsed ? "center" : "start"} rounded-lg transition-all duration-200 
                  ${isCollapsed 
                   ? pathname === "/admin/masters"
-                    ? "gap-0 px-0 py-2 bg-[#008EC7] border-r-8 border-[#E97128] text-white scale-110"
+                    ? "gap-0 px-0 py-2 bg-[#008EC7] border-r-8 border-[#E97128] text-white cursor-default scale-110"
                     : "gap-0 px-0 py-2 hover:bg-[#0C3E66] hover:border-r-4 hover:border-[#E97128]"
                   : pathname === "/admin/masters"
-                    ? "gap-3 px-4 py-2 bg-[#008EC7] border-r-8 border-[#E97128] text-white scale-110"
+                    ? "gap-3 px-4 py-2 bg-[#008EC7] border-r-8 border-[#E97128] text-white cursor-default scale-110"
                     : "gap-3 px-4 py-2 hover:bg-[#0C3E66] hover:border-r-4 hover:border-[#E97128] hover:scale-110"
                 }`}
             >
@@ -443,10 +443,10 @@ const Sidebar = ({ isOpen, toggleSidebar }: SideBarProps) => {
               className={`group flex items-center justify-${isCollapsed ? "center" : "start"} rounded-lg transition-all duration-200 
                  ${isCollapsed 
                   ? pathname === "/admin/hr"
-                    ? "gap-0 px-0 py-2 bg-[#008EC7] border-r-8 border-[#E97128] text-white scale-110"
+                    ? "gap-0 px-0 py-2 bg-[#008EC7] border-r-8 border-[#E97128] text-white cursor-default scale-110"
                     : "gap-0 px-0 py-2 hover:bg-[#0C3E66] hover:border-r-4 hover:border-[#E97128]"
                   : pathname === "/admin/hr"
-                    ? "gap-3 px-4 py-2 bg-[#008EC7] border-r-8 border-[#E97128] text-white scale-110"
+                    ? "gap-3 px-4 py-2 bg-[#008EC7] border-r-8 border-[#E97128] text-white cursor-default scale-110"
                     : "gap-3 px-4 py-2 hover:bg-[#0C3E66] hover:border-r-4 hover:border-[#E97128] hover:scale-110"
                 }`}
             >

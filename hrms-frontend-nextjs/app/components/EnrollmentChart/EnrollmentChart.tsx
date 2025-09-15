@@ -180,8 +180,8 @@ export default function EnrollmentChart({ employees, hasError }: EnrollmentChart
   }, [selectedDept, selectedYear, processedEmployees]);
 
   return (
-    <div className="rounded-2xl shadow-sm px-8 pt-8 justify-center bg-black/10 border border-black-50 min-h-full flex flex-col">
-      <div className="flex justify-between items-start mb-4">
+    <div className="rounded-2xl shadow-sm px-8 pt-8 justify-center bg-darkblue-50 border border-black-50 min-h-full flex flex-col">
+      <div className="flex justify-between items-start mb-4 text-darkblue-700">
         <h2 className="font-semibold text-lg">Employee Enrollment Trends</h2>
 
         <Select
@@ -231,7 +231,9 @@ export default function EnrollmentChart({ employees, hasError }: EnrollmentChart
                 <SelectValue placeholder="Select Department" />
               </SelectTrigger>
               <SelectContent>
-                <SelectItem value="all">Show All</SelectItem>
+                <SelectItem value="all" className="text-darkblue-900">
+                  Show All
+                </SelectItem>
                 {uniqueDepartments
                   .filter((dept) => dept !== "Unknown")
                   .map((dept) => (
@@ -283,8 +285,13 @@ export default function EnrollmentChart({ employees, hasError }: EnrollmentChart
                     </p>
                   </div>
                 ) : (
-                  <ResponsiveContainer width="100%" height={320}>
-                    <BarChart data={chartData}>
+                  <ResponsiveContainer
+                    width="100%"
+                    height={320}
+                    style={{ color: "#072238" }}
+                    className={"text-darkblue-700"}
+                  >
+                    <BarChart data={chartData} className="text-darkblue-700">
                       <CartesianGrid strokeDasharray="3 3" />
                       <XAxis
                         dataKey={
@@ -294,8 +301,13 @@ export default function EnrollmentChart({ employees, hasError }: EnrollmentChart
                         angle={selectedDept === "all" ? -35 : -45}
                         textAnchor="end"
                         height={90}
+                        tick={{ fill: "#0b385b" }}
                       />
-                      <YAxis allowDecimals={false} />
+                      <YAxis
+                        allowDecimals={false}
+                        className="text-darkblue-700"
+                        tick={{ fill: "#0b385b" }}
+                      />
                       <Tooltip
                         content={({ active, payload, label }) => {
                           if (active && payload && payload.length) {
@@ -303,7 +315,7 @@ export default function EnrollmentChart({ employees, hasError }: EnrollmentChart
                               <div
                                 style={{
                                   backgroundColor: "#fff",
-                                  border: "1px solid #d1d5db",
+                                  border: "1px solid #8fa6b9",
                                   borderRadius: "6px",
                                   padding: "8px 12px",
                                   boxShadow:
@@ -313,13 +325,13 @@ export default function EnrollmentChart({ employees, hasError }: EnrollmentChart
                                 <p
                                   style={{
                                     margin: 0,
-                                    color: "#374151",
+                                    color: "#072238",
                                     fontWeight: "500",
                                   }}
                                 >
                                   {label}
                                 </p>
-                                <p style={{ margin: 0, color: "#6b767f" }}>
+                                <p style={{ margin: 0, color: "#5c7e98" }}>
                                   Employees: {payload[0].value}
                                 </p>
                               </div>
@@ -330,7 +342,7 @@ export default function EnrollmentChart({ employees, hasError }: EnrollmentChart
                       />
                       <Bar
                         dataKey="employees"
-                        fill="#6b767f"
+                        fill="#3d6585"
                         radius={[6, 6, 0, 0]}
                         barSize={selectedDept !== "all" ? 35 : 40}
                       />

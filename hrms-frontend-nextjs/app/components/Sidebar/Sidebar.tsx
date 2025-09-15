@@ -83,13 +83,12 @@ const Sidebar = ({ isOpen, toggleSidebar }: SideBarProps) => {
     return (
       <div
         className={`
-          transition-all duration-75 ease-in-out 
-          sm:border-r-2 
+          transition-all duration-75 ease-in-out
           ${
           isOpen ? "translate-x-0 opacity-100 sticky ml-2 mr-6 top-40" : "-translate-x-full absolute opacity-0"} 
           sm:p-6 pt-5 sidebar 
           ${isCollapsed ? 'sm:w-28' : 'sm:w-60'}`}
-        style={{ borderRadius: "45px", backgroundColor: '#d9d9d9',width: isCollapsed ? "7rem" : "15rem",
+        style={{ borderRadius: "45px", backgroundColor: '#d0dae2',width: isCollapsed ? "7rem" : "15rem",
     minWidth: isCollapsed ? "7rem" : "15rem" }}
       >
         <div className={`flex ${!isCollapsed ? "justify-end" : "justify-center"}  mb-4`}>

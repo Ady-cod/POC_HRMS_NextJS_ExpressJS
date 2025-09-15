@@ -140,7 +140,6 @@ export const createEmployee = async (
   }
 };
 
-
 export const deleteEmployee = async (
   req: Request,
   res: Response
@@ -169,19 +168,23 @@ export const updateEmployee = async (
 ): Promise<void> => {
   try {
     const { id } = req.params;
+    // console.log("=== Backend updateEmployee Debug ===");
+    // console.log("Employee ID:", id);
+    // console.log("Request body received:", req.body);
+
     if (!ObjectId.isValid(id)) {
-      res
-        .status(400)
-        .json({
-          error:
-            "The update cannot be performed without a valid employee ID. \nContact support.",
-        });
+      res.status(400).json({
+        error:
+          "The update cannot be performed without a valid employee ID. \nContact support.",
+      });
       return;
     }
 
     // Validate request body using Zod
     const validatedData: UpdateEmployeeInput =
       await updateEmployeeSchema.parseAsync(req.body);
+
+    // console.log("Validated data after Zod:", validatedData);
 
     const { departmentName, password, ...employeeData } = validatedData;
 
@@ -234,11 +237,13 @@ export const updateEmployee = async (
     }
 
     // Update the employee
+    // console.log("Data being sent to Prisma update:", updatedEmployeeData);
     const updatedEmployee: Employee = await prisma.employee.update({
       where: { id },
       data: updatedEmployeeData,
     });
 
+    // console.log("Update successful, returning employee:", updatedEmployee.id);
     res.status(200).json(updatedEmployee);
   } catch (error) {
     if (error instanceof z.ZodError) {

@@ -6,6 +6,7 @@ import {
 } from "@/schemas/employeeSchema";
 import { z } from "zod";
 import { revalidateTag } from "next/cache";
+import { getOptionalAuth } from "@/utils/auth";
 
 const BACKEND_BASE_URL = process.env.NEXT_PUBLIC_BACKEND_BASE_URL;
 const EMPLOYEE_ENDPOINT = process.env.NEXT_PUBLIC_EMPLOYEE_ENDPOINT;
@@ -57,6 +58,64 @@ export async function getAllEmployees(): Promise<EmployeeListItem[]> {
 
     // Fallback return  to match the return type of the function
     return [];
+  }
+}
+
+export async function getCurrentEmployee(): Promise<EmployeeListItem> {
+  const user = getOptionalAuth();
+  if (!user) {
+    throw { status: 401, message: "Unauthorized: No user found" };
+  }
+
+  try {
+    // console.log("Preparing to fetch current employee data...");
+    const response = await fetch(
+      `${BACKEND_BASE_URL}${EMPLOYEE_ENDPOINT}/${user.employeeId}`,
+      {
+        cache: "no-store", // Ensure fresh data for profile
+      }
+    );
+
+    if (!response.ok) {
+      const errorResponse = await response.json();
+      console.error("Error fetching current employee data:", errorResponse);
+      const errorMessage =
+        errorResponse.error ||
+        errorResponse.message ||
+        "Unknown error occurred";
+
+      throw { status: response.status, message: errorMessage };
+    }
+
+    const employee = await response.json();
+
+    // console.log("Current employee data:", employee);
+    return employee;
+  } catch (error: Error | unknown) {
+    console.error("Caught error while retrieving current employee:", error);
+
+    if (error instanceof TypeError && error.message.includes("fetch")) {
+      // Log specific network-related issues for the user
+      throw {
+        status: 0,
+        message: "Network error: Unable to fetch employee data.",
+      };
+    }
+
+    // If we caught an error we threw earlier (with a status and message), pass it along
+    const typedError = error as { status?: number; message?: string };
+    if (typedError.status && typedError.message) {
+      throw { status: typedError.status, message: typedError.message };
+    } else if (error instanceof Error) {
+      // Handle unexpected Error instances
+      throw { status: 500, message: error.message };
+    } else {
+      throw {
+        // Fallback for unknown errors (unexpected issues)
+        status: 500,
+        message: "Failed to retrieve employee data: Unknown error",
+      };
+    }
   }
 }
 //delete operations
@@ -152,6 +211,7 @@ export async function createEmployee(
     }
   }
 }
+
 export async function updateEmployee(
   id: string,
   validatedData: z.infer<typeof updateEmployeeSchema>
@@ -160,6 +220,11 @@ export async function updateEmployee(
   message: string;
   zodError?: z.ZodError;
 }> {
+  // console.log("=== updateEmployee Action Debug ===");
+  // console.log("Employee ID:", id);
+  // console.log("Data to update:", validatedData);
+  // console.log("Backend URL:", `${BACKEND_BASE_URL}${EMPLOYEE_ENDPOINT}/${id}`);
+
   try {
     // Send the data to the server
     const response = await fetch(
@@ -173,12 +238,16 @@ export async function updateEmployee(
       }
     );
 
+    // console.log("Response status:", response.status);
+    // console.log("Response ok:", response.ok);
+
     if (!response.ok) {
       const error = await response.json();
-      // console.error("Failed to update employee:", error);
+      console.error("Backend error response:", error);
 
       // Check if backend returned zod validation errors
       if (response.status === 400 && error.zodError) {
+        console.error("Backend Zod validation errors:", error.zodError);
         // Return structured validation errors, passing zod errors to the form
         return {
           success: false,
@@ -191,22 +260,30 @@ export async function updateEmployee(
       const errorMessage =
         error.error || "An unknown error occurred on the server.";
 
+      console.error("Error message:", errorMessage);
       // Return the error message to be displayed in the form
       return { success: false, message: errorMessage };
     }
 
     const result = await response.json();
+    // console.log("Update successful, result:", result);
 
     // Clear cache entries tagged "employees" in order to update the employee list according to the latest changes
     revalidateTag("employees");
 
     return { success: true, message: result.message };
-    // console.log("Employee successfully updated:", result);
   } catch (error) {
+    console.error("=== updateEmployee Catch Block ===");
+    console.error(
+      "Error type:",
+      error instanceof Error ? error.constructor.name : typeof error
+    );
+    console.error("Error:", error);
+
     if (error instanceof TypeError && error.message.includes("fetch")) {
       // console.error("Unable to successfully perform the server action:", error);
       throw new Error(
-        "Unable to complete the server action." +
+        "Unable to complete the server action. " +
           "This may be due to a network issue, server downtime, or an unexpected error.\n" +
           "Please check your internet connection or try again later."
       );

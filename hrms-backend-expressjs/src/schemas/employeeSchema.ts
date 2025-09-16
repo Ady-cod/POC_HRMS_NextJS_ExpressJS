@@ -214,10 +214,14 @@ export const createEmployeeSchema = z.object({
   role: z
     .preprocess(
       (val) => (val === "" || val == null ? undefined : String(val).trim()),
-      z.custom<Role>((v):v is Role => (Object.values(Role) as string[]).includes(v), {
-        message: "Invalid role selection. Please choose a valid role.",
-      })
-      .optional()
+      z
+        .custom<Role>(
+          (v): v is Role => (Object.values(Role) as string[]).includes(v),
+          {
+            message: "Invalid role selection. Please choose a valid role.",
+          }
+        )
+        .optional()
     )
     .default(Role.INTERN),
 
@@ -358,10 +362,19 @@ export const updateEmployeeSchema = z.object({
     )
     .refine(
       (v) =>
-        typeof v === "string" && (Object.values(Role) as string[]).includes(v),
+        v === undefined ||
+        (typeof v === "string" &&
+          (Object.values(Role) as string[]).includes(v)),
       {
         message: "Invalid role selection. Please choose a valid role.",
       }
     ),
   status: z.nativeEnum(Status).optional(),
+
+  // timezone field added
+  timezone: z
+    .string()
+    .optional()
+    .nullable()
+    .transform((value) => (!value ? null : value)),
 });

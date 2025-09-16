@@ -70,7 +70,9 @@ const config: Config = {
           900: "#003C54",
         },
         darkblue: {
+          25: "#F2F5F7",
           50: "#E7ECF0",
+          75: "#D0DAE2",
           100: "#B4C3D0",
           200: "#8FA6B9",
           300: "#5C7E98",

@@ -63,7 +63,7 @@ const EmployeePage = () => {
     <div>
       <div className="flex flex-row flex-wrap justify-between items-center mt-6 mb-4 px-4 gap-2 sm:gap-4">
         {/* Heading */}
-        <h2 className="text-2xl sm:text-3xl font-bold text-gray-900 whitespace-nowrap">
+        <h2 className="text-2xl sm:text-3xl font-bold text-darkblue-900 whitespace-nowrap">
           List
         </h2>
 

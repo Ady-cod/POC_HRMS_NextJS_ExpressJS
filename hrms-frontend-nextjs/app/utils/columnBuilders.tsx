@@ -177,7 +177,7 @@ export class ColumnBuilder {
           {/* Edit Button */}
           <button
             onClick={() => handleEdit(employee)}
-            className="flex items-center gap-1 text-sm text-gray-700 hover:text-black transition"
+            className="flex items-center gap-1 text-sm text-darkblue-900 hover:bg-darkblue-75 rounded-full p-2 transition-all"
           >
             <Pencil size={18} />
             <span>Edit</span>
@@ -186,7 +186,7 @@ export class ColumnBuilder {
           {/* Delete Button */}
           <button
             onClick={() => handleDeleteClick(employee)}
-            className="flex items-center gap-1 text-sm text-gray-700 hover:text-black transition"
+            className="flex items-center gap-1 text-sm text-darkblue-900 hover:bg-darkblue-75 rounded-full p-2 transition-all"
           >
             <Trash2 size={18} />
             <span>Delete</span>

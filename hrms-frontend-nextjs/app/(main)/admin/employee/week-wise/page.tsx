@@ -64,7 +64,7 @@ const WeekWisePage = () => {
       {/* Header Section */}
       <div className="flex flex-wrap justify-between items-start gap-2 mt-6 mb-4 px-4">
         {/* Heading */}
-        <h2 className="text-lg sm:text-xl md:text-2xl font-bold text-gray-900">
+        <h2 className="text-lg sm:text-xl md:text-2xl font-bold text-darkblue-900">
           Week-wise Employee View
         </h2>
 

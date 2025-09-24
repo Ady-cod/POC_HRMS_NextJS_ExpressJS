@@ -1,5 +1,5 @@
 "use client";
-import React, { useState, useMemo } from "react";
+import React, { useState, useMemo, useEffect } from "react";
 import AddNewDataButton from "@/components/AddNewDataButton/AddNewDataButton";
 import TotalCountButton from "@/components/TotalCountButton/TotalCountButton";
 import EmployeeTable from "@/components/EmployeeTable/EmployeeTable";
@@ -14,6 +14,8 @@ import {
 } from "@/utils/employeeFilters";
 
 import dynamic from "next/dynamic";
+import { useSearchParams } from "next/navigation";
+import { showToast } from "@/utils/toastHelper";
 
 // Dynamically import the ModalForm component to reduce the initial bundle size
 const ModalForm = dynamic(() => import("@/components/ModalForm/ModalForm"), {
@@ -23,7 +25,18 @@ const ModalForm = dynamic(() => import("@/components/ModalForm/ModalForm"), {
 const EmployeePage = () => {
   const [employeeCount, setEmployeeCount] = useState(0);
   const [filterState, setFilterState] = useState<FilterState>(getInitialFilterState());
-  
+
+  const sp = useSearchParams();
+
+useEffect(() => {
+    if (sp.get("migrated") === "table") {
+      showToast("success", "Page Migration", [
+        "Heads up: the old \"admin/employee/table\" page moved to \"admin/employee/list\" ",
+        "You’re in the right place!"
+      ]);
+    }
+  }, [sp]);
+
   // Use the custom hook for modal management
   const {
     isModalOpen,

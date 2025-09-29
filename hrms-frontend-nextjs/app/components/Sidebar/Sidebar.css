@@ -1,31 +1,7 @@
-@media (max-height: 830px) {
-  .sidebaritems {
-    gap: 0.5rem;
-    transition: gap 0.3s ease-in-out;
-  }
-  .logout{
-    margin-top: 0.5rem;
-    transition: margin 0.3s ease-in-out;
-  }
-  .sidebar-expand-btn{
-    margin-bottom: 0;
-    transition: margin 0.3s ease-in-out;
-  }
+.logout {
+  list-style: none;
+  display: block;
+  border-top: 1px solid #0c3e66;
+  padding-top: 8px;
+  margin-top: 16px;
 }
-
-@media (max-height: 730px) {
-  .sidebaritems {
-    gap: 0.175rem;
-    transition: gap 0.3s ease-in-out;
-  }
-  .logout{
-    margin-top: 0.2rem;
-    transition: margin 0.3s ease-in-out;
-  }
-  .sidebar-expand-btn{
-    margin-bottom: 0;
-    transition: margin 0.3s ease-in-out;
-  }
-}
-
-

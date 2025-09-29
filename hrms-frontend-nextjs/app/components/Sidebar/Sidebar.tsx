@@ -24,7 +24,33 @@ const Sidebar = ({ isOpen, toggleSidebar }: SideBarProps) => {
   const [isSmBreakpoint, setIsSmBreakpoint] = useState(true);
   const pathname = usePathname();
   const [isHovered, setIsHovered] = useState(false); // For Employee submenu
-  const [isCollapsed, setIsCollapsed] = useState(false); 
+  const [isCollapsed, setIsCollapsed] = useState(false);
+  const [isXsBreakpoint, setIsXsBreakpoint] = useState(false);
+
+  useEffect(()=>{
+    const handleResize = ()=>{
+      if(window.innerWidth<=440){
+        setIsCollapsed(true);
+      }
+      else{
+        setIsCollapsed(false);
+      }
+    }
+
+    handleResize();
+
+    window.addEventListener("resize", handleResize);
+    return () => window.removeEventListener("resize", handleResize);
+  }, []);
+
+  useEffect(() => {
+  const handleResize = () => {
+    setIsXsBreakpoint(window.innerWidth <= 440);
+  };
+  handleResize();
+  window.addEventListener("resize", handleResize);
+  return () => window.removeEventListener("resize", handleResize);
+  }, []);
 
   useEffect(() => {
     if (pathname.startsWith("/admin/employee")) {
@@ -60,7 +86,7 @@ const Sidebar = ({ isOpen, toggleSidebar }: SideBarProps) => {
     return (
       <Sheet open={isOpen} onOpenChange={(open) => toggleSidebar(open)}>
         <SheetTrigger></SheetTrigger>
-        <SheetContent className="w-fit pt-12" side="left">
+        <SheetContent className="w-4/6 sm:w-fit pt-12" side="left">
           <SheetHeader>
             <SheetTitle>{renderSidebar()}</SheetTitle>
           </SheetHeader>
@@ -87,11 +113,34 @@ const Sidebar = ({ isOpen, toggleSidebar }: SideBarProps) => {
           ${
           isOpen ? "translate-x-0 opacity-100 sticky ml-2 mr-6 top-40" : "-translate-x-full absolute opacity-0"} 
           sm:p-6 pt-5 sidebar 
-          ${isCollapsed ? 'sm:w-28' : 'sm:w-60'}`}
-        style={{ borderRadius: "45px", backgroundColor: '#d0dae2',width: isCollapsed ? "7rem" : "15rem",
-    minWidth: isCollapsed ? "7rem" : "15rem" }}
+          ${isCollapsed ? 'sm:w-28' : 'sm:w-60'}
+          `}
+        style={{ 
+                borderRadius: "45px",
+                backgroundColor: '#D0DAE2',
+                width: !isSmBreakpoint || window.innerWidth <=440
+                  ? isCollapsed
+                    ? "7rem"       
+                    : "80%"       
+                  : isCollapsed
+                    ? "7rem"      
+                    : "15rem",    
+                minWidth: !isSmBreakpoint
+                  ? isCollapsed
+                    ? "4rem"
+                    : "80%"
+                  : isCollapsed
+                    ? "7rem"
+                    : "15rem",
+                padding: !isSmBreakpoint
+                  ? isCollapsed
+                    ? "1.5rem"    
+                    : "1.5rem"      
+                  : undefined,
+                margin: !isSmBreakpoint && isCollapsed ? "0 auto" : undefined
+               }}
       >
-        <div className={`flex ${!isCollapsed ? "justify-end" : "justify-center"}  mb-4`}>
+        <div className={`flex ${!isCollapsed ? "justify-end" : "justify-center"}  mb-4 transition-[margin] duration-300 ease-in-out sidebar-expand-btn`}>
           <Image
             src={isCollapsed ? "/images/expand menu icon.png" : "/images/collapse.png"}
             alt={isCollapsed ? "expand menu icon" : "collapse menu icon"}
@@ -99,12 +148,16 @@ const Sidebar = ({ isOpen, toggleSidebar }: SideBarProps) => {
             height={44}
             className={`rounded-lg transition-all duration-200 hover:cursor-pointer mb-4  `}
             onClick={toggleCollapse}
+            style={{margin: !isSmBreakpoint
+                    ? isCollapsed
+                      ? "0 0 1rem 0"    
+                      : undefined      
+                    : undefined}}
           />
         </div>
-
-        <ul className="whitespace-nowrap font-semibold sm:text-[15px]  flex flex-col gap-4 sidebaritems">
+        <ul className="whitespace-nowrap font-semibold sm:text-[15px] flex flex-col gap-4 transition-[gap] duration-300 ease-in-out sidebaritems">
           {/* Home */}
-          <li className="w-full">
+          <li className={`relative w-full ${isXsBreakpoint ? "text-xs" : "sm:text-[15px]"}`}>
             <Link
               href="/admin"
               onClick={handleSidebarItemClick}
@@ -120,7 +173,7 @@ const Sidebar = ({ isOpen, toggleSidebar }: SideBarProps) => {
             >
               <div className={`relative w-6 h-6 flex items-center justify-center rounded-lg p-2 transition-all duration-200`}>
               <Image
-                src="/images/home-darkblue.png"
+                src="/images/home-darkblue-900.png"
                 alt="Home icon"
                 width={24}
                 height={24}
@@ -140,13 +193,13 @@ const Sidebar = ({ isOpen, toggleSidebar }: SideBarProps) => {
               {!isCollapsed && 
               <span className={`transition-colors duration-200 ${pathname === "/admin"
               ? "text-white"
-              : "text-[#0C3E66] group-hover:text-white"
+              : "text-[#051A2B] group-hover:text-white"
               }`}>Home</span>}
             </Link>
           </li>
 
           {/* Profile */}
-          <li className="w-full">
+          <li className={`relative w-full ${isXsBreakpoint ? "text-xs" : "sm:text-[15px]"}`}>
             <Link
               href="/admin/profile"
               onClick={handleSidebarItemClick}
@@ -161,7 +214,7 @@ const Sidebar = ({ isOpen, toggleSidebar }: SideBarProps) => {
             >
               <div className={`relative w-6 h-6 flex items-center justify-center rounded-lg p-2 transition-all duration-200`}>
              <Image
-                src="/images/My profile icon-darkblue.png"
+                src="/images/My profile icon-darkblue-900.png"
                 alt="Profile icon"
                 width={24}
                 height={24}
@@ -181,17 +234,16 @@ const Sidebar = ({ isOpen, toggleSidebar }: SideBarProps) => {
               {!isCollapsed && 
               <span className={`transition-colors duration-200 ${pathname === "/admin/profile"
               ? "text-white"
-              : "text-[#0C3E66] group-hover:text-white"
+              : "text-[#051A2B] group-hover:text-white"
               }`}>My Profile</span>}
             </Link>
           </li>
 
           {/* Employee menu */}
           <li
-            className="relative w-full"
+            className={`relative w-full ${isXsBreakpoint ? "text-xs" : "sm:text-[15px]"}`}
             onMouseEnter={() => {
               setIsHovered(true);
-              if (isCollapsed) setIsHovered(false);
             }}
             onMouseLeave={() => setIsHovered(false)}
           >
@@ -212,7 +264,7 @@ const Sidebar = ({ isOpen, toggleSidebar }: SideBarProps) => {
             >
               <div className={`relative w-6 h-6 flex items-center justify-center rounded-lg p-2 transition-all duration-200`}>
               <Image
-                src="/images/My learning path icon-darkblue.png"
+                src="/images/My learning path icon-darkblue-900.png"
                 alt="Employee icon"
                 width={24}
                 height={24}
@@ -231,19 +283,20 @@ const Sidebar = ({ isOpen, toggleSidebar }: SideBarProps) => {
               <span className={`transition-colors duration-200 ${
               pathname.startsWith("/admin/employee")
               ? "text-white"
-              : "text-[#0C3E66] group-hover:text-white"
-              }`}>Employee</span>}
+              : "text-[#051A2B] group-hover:text-white"
+              }`}
+              >Employee</span>}
             </div>
 
             {/* Submenu */}
             <ul
-              className={`ml-12 mt-1 list-inside text-sm space-y-1 transition-all duration-300 ease-in-out ${
+              className={`mt-1 ${isXsBreakpoint ? "ml-6" : "ml-12"} list-inside text-sm space-y-1 transition-all duration-300 ease-in-out ${
                 !isCollapsed && (isHovered || pathname.startsWith("/admin/employee"))
                   ? "opacity-100 translate-y-0 max-h-40"
                   : "opacity-0 -translate-y-2 max-h-0 overflow-hidden"
               }`}
             >
-              <li>
+              <li className={`relative w-full ${isXsBreakpoint ? "text-xs" : "sm:text-[15px]"}`}>
                 <Link
                   href="/admin/employee/list"
                   onClick={handleSidebarItemClick}
@@ -255,7 +308,7 @@ const Sidebar = ({ isOpen, toggleSidebar }: SideBarProps) => {
                       ? ""
                       : "hover:bg-[#0C3E66] hover:border-r-4 hover:border-[#E97128] hover:scale-105"
                   }
-                  ${pathname === "/admin/employee/list" ? "text-[#E97128] cursor-default" : "text-[#0C3E66]"}`}
+                  ${pathname === "/admin/employee/list" ? "text-[#E97128] cursor-default" : "text-[#051A2B]"}`}
                 >
                   <span
                     className={`text-lg leading-none transition-colors duration-200
@@ -278,7 +331,7 @@ const Sidebar = ({ isOpen, toggleSidebar }: SideBarProps) => {
                 </Link>
               </li>
 
-              <li>
+              <li className={`relative w-full ${isXsBreakpoint ? "text-xs" : "sm:text-[15px]"}`}>
                 <Link
                   href="/admin/employee/week-wise"
                   onClick={handleSidebarItemClick}
@@ -290,7 +343,7 @@ const Sidebar = ({ isOpen, toggleSidebar }: SideBarProps) => {
                       ? ""
                       : "hover:bg-[#0C3E66] hover:border-r-4 hover:border-[#E97128] hover:scale-105"
                   }
-                   ${pathname === "/admin/employee/week-wise" ? "text-[#E97128] cursor-default" : "text-[#0C3E66]"}`}
+                   ${pathname === "/admin/employee/week-wise" ? "text-[#E97128] cursor-default" : "text-[#051A2B]"}`}
                 >
                   <span
                     className={`text-lg leading-none transition-colors duration-200
@@ -316,7 +369,7 @@ const Sidebar = ({ isOpen, toggleSidebar }: SideBarProps) => {
           </li>
 
           {/* Applicants */}
-          <li className="w-full">
+          <li className={`relative w-full ${isXsBreakpoint ? "text-xs" : "sm:text-[15px]"}`}>
             <Link
               href="/admin/applicants"
               onClick={handleSidebarItemClick}
@@ -331,7 +384,7 @@ const Sidebar = ({ isOpen, toggleSidebar }: SideBarProps) => {
             >
               <div className={`relative w-6 h-6 flex items-center justify-center rounded-lg p-2 transition-all duration-200`}>
               <Image
-                src="/images/Applicants-darkblue.png"
+                src="/images/Applicants-darkblue-900.png"
                 alt="Applicant icon"
                 width={24}
                 height={24}
@@ -350,13 +403,13 @@ const Sidebar = ({ isOpen, toggleSidebar }: SideBarProps) => {
               {!isCollapsed && 
               <span className={`transition-colors duration-200 ${pathname === "/admin/applicants"
               ? "text-white"
-              : "text-[#0C3E66] group-hover:text-white"
+              : "text-[#051A2B] group-hover:text-white"
               }`}>Applicants</span>}
             </Link>
           </li>
 
           {/* Workflow */}
-          <li className="w-full">
+          <li className={`relative w-full ${isXsBreakpoint ? "text-xs" : "sm:text-[15px]"}`}>
             <Link
               href="/admin/workflow"
               onClick={handleSidebarItemClick}
@@ -371,7 +424,7 @@ const Sidebar = ({ isOpen, toggleSidebar }: SideBarProps) => {
             >
               <div className={`relative w-6 h-6 flex items-center justify-center rounded-lg p-2 transition-all duration-200`}>
               <Image
-                src="/images/My workflow icon-darkblue.png"
+                src="/images/My workflow icon-darkblue-900.png"
                 alt="Workflow icon"
                 width={24}
                 height={24}
@@ -389,13 +442,13 @@ const Sidebar = ({ isOpen, toggleSidebar }: SideBarProps) => {
               {!isCollapsed && 
               <span className={`transition-colors duration-200 ${pathname === "/admin/workflow"
               ? "text-white"
-              : "text-[#0C3E66] group-hover:text-white"
+              : "text-[#051A2B] group-hover:text-white"
               }`}>My Workflow</span>}
             </Link>
           </li>
 
           {/* Masters */}
-          <li className="w-full">
+          <li className={`relative w-full ${isXsBreakpoint ? "text-xs" : "sm:text-[15px]"}`}>
             <Link
               href="/admin/masters"
               onClick={handleSidebarItemClick}
@@ -411,7 +464,7 @@ const Sidebar = ({ isOpen, toggleSidebar }: SideBarProps) => {
             >
               <div className={`relative w-6 h-6 flex items-center justify-center rounded-lg p-2 transition-all duration-200`}>
               <Image
-                src="/images/Master-darkblue.png"
+                src="/images/Master-darkblue-900.png"
                 alt="Master icon"
                 width={24}
                 height={24}
@@ -429,13 +482,13 @@ const Sidebar = ({ isOpen, toggleSidebar }: SideBarProps) => {
               {!isCollapsed && 
               <span className={`transition-colors duration-200 ${pathname === "/admin/masters"
               ? "text-white"
-              : "text-[#0C3E66] group-hover:text-white"
+              : "text-[#051A2B] group-hover:text-white"
               }`}>Masters</span>}
             </Link>
           </li>
 
           {/* HR */}
-          <li className="w-full">
+          <li className={`relative w-full ${isXsBreakpoint ? "text-xs" : "sm:text-[15px]"}`}>
             <Link
               href="/admin/hr"
               onClick={handleSidebarItemClick}
@@ -453,7 +506,7 @@ const Sidebar = ({ isOpen, toggleSidebar }: SideBarProps) => {
                 className={`relative w-6 h-6 flex items-center justify-center rounded-lg p-2 transition-all duration-200`}
               >
               <Image
-                src="/images/HR-darkblue.png"
+                src="/images/HR-darkblue-900.png"
                 alt="HR icon"
                 width={24}
                 height={24}
@@ -471,17 +524,23 @@ const Sidebar = ({ isOpen, toggleSidebar }: SideBarProps) => {
               {!isCollapsed && 
               <span className={`transition-colors duration-200 ${pathname === "/admin/hr"
               ? "text-white"
-              : "text-[#0C3E66] group-hover:text-white"
+              : "text-[#051A2B] group-hover:text-white"
               }`}>Core HR</span>}
             </Link>
           </li>
 
           {/* Logout */}
-          <li className="logout bottom-3 mt-8 ">
+          <li className={`logout bottom-3 mt-8 pt-4 transition-[margin,_padding] duration-300 ease-in-out list-none block border-t-2 border-black`}
+          style={{margin:!isSmBreakpoint
+                  ? isCollapsed
+                    ? "1.5rem 0 0.5rem 0"
+                    : undefined
+                  : undefined
+          }}>
             <form action={logout}>
               <button
                 type="submit" 
-                className={`group flex items-center justify-${isCollapsed ? "center" : "start"} transition-all duration-200 w-full rounded-lg ${
+                className={`group flex items-center justify-${isCollapsed ? "center" : "start"} ${isXsBreakpoint ? "text-xs" : "sm:text-[15px]"} transition-all duration-200 w-full rounded-lg ${
                   isCollapsed
                   ? "gap-0 px-0 py-2 hover:bg-[#0C3E66] hover:border-r-4 hover:border-[#E97128]"
                   : "gap-3 px-4 py-2 hover:bg-[#0C3E66] hover:border-r-4 hover:border-[#E97128] hover:scale-110"
@@ -492,7 +551,7 @@ const Sidebar = ({ isOpen, toggleSidebar }: SideBarProps) => {
                   className={`relative w-6 h-5 flex items-center justify-center rounded-lg transition-all duration-200`}
                 >
                 <Image
-                  src="/images/Logout icon-darkblue.png"
+                  src="/images/Logout icon-darkblue-900.png"
                   alt="Logout icon"
                   width={24}
                   height={24}
@@ -509,13 +568,13 @@ const Sidebar = ({ isOpen, toggleSidebar }: SideBarProps) => {
                 {!isCollapsed && 
                 <span className={`transition-colors duration-200 ${pathname === "/"
               ? "text-white"
-              : "text-[#0C3E66] group-hover:text-white"
+              : "text-[#051A2B] group-hover:text-white"
               }`}>Logout</span>}
               </button>
             </form>
           </li>
         </ul>
-      </div>
+        </div>
     );
   };
 

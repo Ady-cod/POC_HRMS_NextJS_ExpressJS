@@ -1,7 +1,31 @@
-.logout{
-    font-size: 18px;
-    list-style: none;
-    display: block;
-    border-top: 2px solid black;
-    padding-top: 16px;
+@media (max-height: 830px) {
+  .sidebaritems {
+    gap: 0.5rem;
+    transition: gap 0.3s ease-in-out;
+  }
+  .logout{
+    margin-top: 0.5rem;
+    transition: margin 0.3s ease-in-out;
+  }
+  .sidebar-expand-btn{
+    margin-bottom: 0;
+    transition: margin 0.3s ease-in-out;
+  }
 }
+
+@media (max-height: 730px) {
+  .sidebaritems {
+    gap: 0.175rem;
+    transition: gap 0.3s ease-in-out;
+  }
+  .logout{
+    margin-top: 0.2rem;
+    transition: margin 0.3s ease-in-out;
+  }
+  .sidebar-expand-btn{
+    margin-bottom: 0;
+    transition: margin 0.3s ease-in-out;
+  }
+}
+
+

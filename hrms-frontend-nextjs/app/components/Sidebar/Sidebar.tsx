@@ -30,35 +30,35 @@ const SIDEBAR_PATHS = {
 
 const ICONS = {
   HOME: {
-    normal: "/images/home-darkblue.png",
+    normal: "/images/home-darkblue-900.png",
     active: "/images/home-white.png",
   },
   PROFILE: {
-    normal: "/images/My profile icon-darkblue.png",
+    normal: "/images/My profile icon-darkblue-900.png",
     active: "/images/MyProfileIcon-white.png",
   },
   EMPLOYEE: {
-    normal: "/images/My learning path icon-darkblue.png",
+    normal: "/images/My learning path icon-darkblue-900.png",
     active: "/images/MyLearningPath-white.png",
   },
   APPLICANTS: {
-    normal: "/images/Applicants-darkblue.png",
+    normal: "/images/Applicants-darkblue-900.png",
     active: "/images/MyProjectsIcon-white.png",
   },
   WORKFLOW: {
-    normal: "/images/My workflow icon-darkblue.png",
+    normal: "/images/My workflow icon-darkblue-900.png",
     active: "/images/MyWorkflowIcon-white.png",
   },
   MASTERS: {
-    normal: "/images/Master-darkblue.png",
+    normal: "/images/Master-darkblue-900.png",
     active: "/images/folderOpen-white.png",
   },
   HR: {
-    normal: "/images/HR-darkblue.png",
+    normal: "/images/HR-darkblue-900.png",
     active: "/images/speedometer-white.png",
   },
   LOGOUT: {
-    normal: "/images/Logout icon-darkblue.png",
+    normal: "/images/Logout icon-darkblue-900.png",
     active: "/images/Logout-white.png",
   },
   COLLAPSE: "/images/collapse.png",
@@ -524,7 +524,6 @@ const Sidebar = ({ isOpen, toggleSidebar }: SideBarProps) => {
             pathname={pathname}
             onMouseEnter={() => {
               setIsHovered(true);
-              // if (isCollapsed) setIsHovered(false);
             }}
             onMouseLeave={() => setIsHovered(false)}
             onItemClick={handleSidebarItemClick}

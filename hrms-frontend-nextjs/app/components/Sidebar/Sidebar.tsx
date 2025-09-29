@@ -457,7 +457,7 @@ const Sidebar = ({ isOpen, toggleSidebar }: SideBarProps) => {
     return (
       <Sheet open={isOpen} onOpenChange={(open) => toggleSidebar(open)}>
         <SheetTrigger></SheetTrigger>
-        <SheetContent className="w-fit" side="left">
+        <SheetContent className="w-fit pt-12" side="left">
           <SheetHeader>
             <SheetTitle>{renderSidebar()}</SheetTitle>
           </SheetHeader>

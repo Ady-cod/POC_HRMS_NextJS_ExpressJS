@@ -457,7 +457,7 @@ const Sidebar = ({ isOpen, toggleSidebar }: SideBarProps) => {
     return (
       <Sheet open={isOpen} onOpenChange={(open) => toggleSidebar(open)}>
         <SheetTrigger></SheetTrigger>
-        <SheetContent className="w-4/6 sm:w-fit pt-12" side="left">
+        <SheetContent className="w-fit" side="left">
           <SheetHeader>
             <SheetTitle>{renderSidebar()}</SheetTitle>
           </SheetHeader>
@@ -495,11 +495,6 @@ const Sidebar = ({ isOpen, toggleSidebar }: SideBarProps) => {
             height={44}
             className="rounded-lg transition-all duration-200 hover:cursor-pointer mb-4"
             onClick={toggleCollapse}
-            style={{margin: !isSmBreakpoint
-                    ? isCollapsed
-                      ? "0 0 1rem 0"    
-                      : undefined      
-                    : undefined}}
           />
         </div>
 
@@ -618,7 +613,7 @@ const Sidebar = ({ isOpen, toggleSidebar }: SideBarProps) => {
             </form>
           </li>
         </ul>
-        </div>
+      </div>
     );
   };
 

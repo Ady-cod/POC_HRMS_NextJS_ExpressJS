@@ -2,7 +2,7 @@ import { z } from "zod";
 import { isValid, parseISO } from "date-fns";
 import { parsePhoneNumberFromString } from "libphonenumber-js";
 import { parse } from "tldts";
-import { EmployeeRole } from "@/types/types";
+import { EmployeeRole, EmployeeStatus } from "@/types/types";
 
 // Helper function to ensure the birth date is no older than 100 years ago
 const isNotMoreThan100YearsAgo = (dateString: string): boolean => {
@@ -324,6 +324,18 @@ export const updateEmployeeSchema = z
             (Object.values(EmployeeRole) as string[]).includes(v),
           {
             message: "Invalid role selection. Please choose a valid role.",
+          }
+        )
+        .optional()
+    ),
+    status: z.preprocess(
+      (val) => (val === "" || val == null ? undefined : String(val).trim()),
+      z
+        .custom<EmployeeStatus>(
+          (v): v is EmployeeStatus =>
+            (Object.values(EmployeeStatus) as string[]).includes(v),
+          {
+            message: "Invalid status selection. Please choose a valid status.",
           }
         )
         .optional()

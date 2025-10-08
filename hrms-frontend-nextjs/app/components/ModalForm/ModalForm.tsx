@@ -14,7 +14,7 @@ import {
 } from "@/schemas/employeeSchema";
 import { formatZodErrors } from "@/utils/formatZodErrors";
 import { showToast } from "@/utils/toastHelper";
-import { EmployeeListItem, EmployeeRole, DepartmentName } from "@/types/types";
+import { EmployeeListItem, EmployeeRole, DepartmentName, EmployeeStatus } from "@/types/types";
 import CountryStateCitySelect from "@/components/CountryStateCitySelect/CountryStateCitySelect";
 import Select from "react-select";
 import { getBaseSelectStyles } from "@/lib/reactSelectStyles";
@@ -82,9 +82,10 @@ const ModalForm: React.FC<ModalFormProps> = ({
   const [city, setCity] = useState<string>("");
   const [hasFetched, setHasFetched] = useState<boolean>(false);
 
-  // Local state for Department and Role using react-select for Firefox parity
+  // Local state for Department, Role and Status using react-select for Firefox parity
   const [departmentName, setDepartmentName] = useState<string>("");
   const [role, setRole] = useState<string>("");
+  const [status, setStatus] = useState<string>("");
 
   useEffect(() => {
     if (employeeData) {
@@ -96,6 +97,7 @@ const ModalForm: React.FC<ModalFormProps> = ({
       setCity(employeeData.city);
       setDepartmentName(employeeData.department?.name ?? "");
       setRole(employeeData.role ?? "");
+      setStatus(employeeData.status ?? "")
     } else {
       setPhoneNumber("");
       setCountry("");
@@ -105,6 +107,7 @@ const ModalForm: React.FC<ModalFormProps> = ({
       setCity("");
       setDepartmentName("");
       setRole("");
+      setStatus("");
     }
   }, [employeeData]);
 
@@ -368,6 +371,7 @@ const ModalForm: React.FC<ModalFormProps> = ({
     setHasFetched(false);
     setDepartmentName("");
     setRole("");
+    setStatus("");
   };
 
   const today = new Date();
@@ -412,6 +416,10 @@ const ModalForm: React.FC<ModalFormProps> = ({
   ).map((value) => ({ label: value, value }));
 
   const roleOptions: Option[] = (Object.values(EmployeeRole) as string[]).map(
+    (value) => ({ label: value, value })
+  );
+
+  const statusOptions: Option[] = (Object.values(EmployeeStatus) as string[]).map(
     (value) => ({ label: value, value })
   );
 
@@ -740,11 +748,43 @@ const ModalForm: React.FC<ModalFormProps> = ({
               )}
             </div>
           </div>
+          <div>
+            {/* Row 6: Status */}
+            {employeeData && (
+              <div className="input-group flex flex-row items-center status-row">
+                <div className="input-wrapper title">
+                <h4 className="section-subtitle bold">
+                Please select your gender identity:
+                </h4>
+                </div>
+                <div className={`input-wrapper dropdown ${errors?.status ? "error" : ""}`}>
+                  <Select
+                    options={statusOptions}
+                    styles={selectStyles}
+                    placeholder="Status"
+                    value={status ? statusOptions.find((o) => o.value === status) ?? null : null}
+                   onChange={(opt) => setStatus(opt ? opt.value : "")}
+                  />
+                  <input type="hidden" name="status" value={status ?? EmployeeStatus.ACTIVE} />
+                  {errors?.status && (
+                    <p
+                      className="error-message"
+                      data-tooltip={errors.status}
+                      onMouseEnter={handleTooltipPosition}
+                    >
+                      {errors.status}
+                    </p>
+                  )}
+                </div>
+              </div>
+            )}
 
           <div className="input-group gender-selection">
+          {!employeeData && (
             <h4 className="section-subtitle bold">
               Please select your gender identity:
             </h4>
+            )}
             <label>
               <input
                 type="radio"
@@ -773,7 +813,7 @@ const ModalForm: React.FC<ModalFormProps> = ({
               Other
             </label>
           </div>
-
+          </div>
           {!employeeData && (
             <section>
               <h3 className="section-title">Terms and Mailing</h3>

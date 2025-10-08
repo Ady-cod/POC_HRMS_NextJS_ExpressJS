@@ -1,7 +1,7 @@
-.logout{
-    font-size: 18px;
-    list-style: none;
-    display: block;
-    border-top: 2px solid black;
-    padding-top: 16px;
+.logout {
+  list-style: none;
+  display: block;
+  border-top: 1px solid #0c3e66;
+  padding-top: 8px;
+  margin-top: 16px;
 }

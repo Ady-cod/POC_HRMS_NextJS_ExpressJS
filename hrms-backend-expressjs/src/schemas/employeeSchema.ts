@@ -369,7 +369,20 @@ export const updateEmployeeSchema = z.object({
         message: "Invalid role selection. Please choose a valid role.",
       }
     ),
-  status: z.nativeEnum(Status).optional(),
+  status: z
+    .preprocess(
+      (val) => (val === "" || val == null ? undefined : String(val).trim()),
+      z.string().optional()
+    )
+    .refine(
+      (v) =>
+        v === undefined ||
+        (typeof v === "string" &&
+          (Object.values(Status) as string[]).includes(v)),
+      {
+        message: "Invalid status selection. Please choose a valid status.",
+      }
+    ),
 
   // timezone field added
   timezone: z

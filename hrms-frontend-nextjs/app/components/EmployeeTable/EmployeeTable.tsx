@@ -129,6 +129,43 @@ const EmployeeTable: React.FC<EmployeeTableProps> = ({
     columnConfig,
   });
 
+  const customStyles = {
+    pagination: {
+      style: {
+        color: "#051A2B"
+      },
+      pageButtonsStyle: {
+        "&:hover:not(:disabled)": {
+          backgroundColor: "#D0DAE2",
+        },
+        "&:focus":{
+          backgroundColor: "none"
+        },
+        "& svg": {
+          fill: "#008EC7",
+          transition: "fill 50ms ease-in-out"
+        },
+        "&:hover svg":{
+          fill: "#0C3E66"
+        },
+        "&:disabled svg": {
+          fill: "#B4C3D0"
+        }
+      }
+    },
+     headCells: {
+    style: {
+      color: "#051A2B", 
+      
+    },
+  },
+  cells: {
+    style: {
+      color: "#051A2B",  
+    },
+  }
+  }
+
   return (
     <div>
       <DataTable
@@ -142,6 +179,7 @@ const EmployeeTable: React.FC<EmployeeTableProps> = ({
         onChangeRowsPerPage={setRowsPerPage}
         responsive
         fixedHeader
+        customStyles={customStyles}
         // Only loading/timeout control the overlay now (empty employee list state moved to noDataComponent)
         progressPending={isLoading || isServerTimeout}
         progressComponent={

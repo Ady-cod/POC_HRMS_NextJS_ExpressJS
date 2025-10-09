@@ -227,6 +227,7 @@ export const getWeekWiseColumns = (builder: ColumnBuilder) => [
   builder.buildDepartmentColumn(),
   builder.buildJoiningDateColumn(),
   builder.buildDaysSinceJoiningColumn(),
+  builder.buildStatusColumn()
 ];
 
 export const getDepartmentViewColumns = (builder: ColumnBuilder) => [

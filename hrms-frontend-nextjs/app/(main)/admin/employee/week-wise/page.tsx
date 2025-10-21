@@ -4,6 +4,7 @@ import EmployeeTable from "@/components/EmployeeTable/EmployeeTable";
 import EmployeeSearchFilters from "@/components/EmployeeSearchFilters/EmployeeSearchFilters";
 import WeekSlider from "@/components/WeekSlider/WeekSlider";
 import ExportCSVButton from "@/components/ExportCSVButton/ExportCSVButton";
+import SelectButton from "@/components/SelectButton/SelectButton";
 import TotalCountButton from "@/components/TotalCountButton/TotalCountButton";
 import { WEEK_WISE_COLUMN_CONFIG } from "@/types/columnConfig";
 import { EmployeeStatus } from "@/types/types";
@@ -24,6 +25,8 @@ const ModalForm = dynamic(() => import("@/components/ModalForm/ModalForm"), {
 const WeekWisePage = () => {
   const [employeeCount, setEmployeeCount] = useState(0);
   const [selectedWeek, setSelectedWeek] = useState(0);
+  const [selectMode, setSelectMode] = useState(false);
+  const [selectedEmployees, setSelectedEmployees] = useState<string[]>([]);
   const [filterState, setFilterState] = useState<FilterState>({
   ...getInitialFilterState(),
   selectedStatus: EmployeeStatus.ACTIVE
@@ -60,6 +63,19 @@ const WeekWisePage = () => {
     selectedStatus: EmployeeStatus.ACTIVE
   });
   };
+
+  // Toggle handler for Select/Unselect
+const handleToggleSelectMode = () => {
+  if (selectMode) {
+    // Turn off select mode → clear all selections
+    setSelectedEmployees([]);
+    setSelectMode(false);
+  } else {
+    // Turn on select mode → always start with empty checkboxes
+    setSelectedEmployees([]);
+    setSelectMode(true);
+  }
+};
 
   // Apply filters to employees (including week filtering)
   const filteredEmployees = useMemo(() => {
@@ -99,9 +115,17 @@ const WeekWisePage = () => {
         employees={employees}
       />
 
-      {/* Export Button */}
-      <div className="flex justify-start mb-14 px-3">
-        <ExportCSVButton employees={filteredEmployees} />
+      {/* Export and Select/Deactivate Button */}
+      <div className="flex justify-between items-center mb-10 px-3">
+        <div className="exportCSV">
+          <ExportCSVButton employees={filteredEmployees} />
+        </div>
+        <div className="statusButtons">
+        <SelectButton
+          selectMode={selectMode}
+          onToggleSelectMode={handleToggleSelectMode}
+          ></SelectButton>
+        </div>
       </div>
 
       {/* Week Slider */}
@@ -120,6 +144,9 @@ const WeekWisePage = () => {
         confirmDelete={confirmDelete}
         closeDeleteDialog={closeDeleteDialog}
         columnConfig={WEEK_WISE_COLUMN_CONFIG}
+        selectMode={selectMode}
+        selectedEmployees={selectedEmployees}
+        setSelectedEmployees={setSelectedEmployees}
       />
     </div>
   );

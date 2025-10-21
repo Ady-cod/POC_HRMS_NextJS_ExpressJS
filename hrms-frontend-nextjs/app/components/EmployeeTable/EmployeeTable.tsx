@@ -22,6 +22,9 @@ interface EmployeeTableProps {
   confirmDelete: () => void;
   closeDeleteDialog: () => void;
   columnConfig?: ColumnConfig;
+  selectMode?: boolean;
+  selectedEmployees?: string[];
+  setSelectedEmployees?: React.Dispatch<React.SetStateAction<string[]>>;
 }
 
 const EmployeeTable: React.FC<EmployeeTableProps> = ({
@@ -33,6 +36,9 @@ const EmployeeTable: React.FC<EmployeeTableProps> = ({
   confirmDelete,
   closeDeleteDialog,
   columnConfig,
+  selectMode,
+  selectedEmployees,
+  setSelectedEmployees,
 }) => {
   const [activeSectionIndex, setActiveSectionIndex] = useState(0);
   const [activeColumnIndex, setActiveColumnIndex] = useState(0);
@@ -116,7 +122,7 @@ const EmployeeTable: React.FC<EmployeeTableProps> = ({
     };
   }, [hasFetchedOnce]);
 
-  const { columns } = useEmployeeTableColumns({
+  const baseColumns = useEmployeeTableColumns({
     currentPage,
     rowsPerPage,
     handleEdit,
@@ -127,7 +133,50 @@ const EmployeeTable: React.FC<EmployeeTableProps> = ({
     setActiveSectionIndex,
     setActiveColumnIndex,
     columnConfig,
-  });
+  }).columns;
+
+  const columns = React.useMemo(() => {
+  if (!selectMode) return baseColumns;
+  
+  const allSelected = selectedEmployees?.length === employees.length;
+
+  return [
+    {
+      name: (
+        <input
+          type="checkbox"
+          checked={allSelected}
+          onChange={(e) => {
+            if (e.target.checked) {
+              // Select all employees
+              setSelectedEmployees?.(employees.map(emp => emp.id));
+            } else {
+              // Deselect all
+              setSelectedEmployees?.([]);
+            }
+          }}
+        />
+      ),
+      width: "50px",
+      cell: (row: EmployeeListItem) => (
+        <input
+          type="checkbox"
+          checked={selectedEmployees?.includes(row.id)}
+          onChange={(e) => {
+            if (e.target.checked) {
+              setSelectedEmployees?.((prev) => [...prev, row.id]);
+            } else {
+              setSelectedEmployees?.((prev) =>
+                prev.filter((id) => id !== row.id)
+              );
+            }
+          }}
+        />
+      ),
+    },
+    ...baseColumns,
+  ];
+  }, [selectMode, baseColumns, selectedEmployees, setSelectedEmployees]);
 
   const customStyles = {
     pagination: {

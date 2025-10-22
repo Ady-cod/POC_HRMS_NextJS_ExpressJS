@@ -143,36 +143,86 @@ const EmployeeTable: React.FC<EmployeeTableProps> = ({
   return [
     {
       name: (
-        <input
-          type="checkbox"
-          checked={allSelected}
-          onChange={(e) => {
-            if (e.target.checked) {
-              // Select all employees
-              setSelectedEmployees?.(employees.map(emp => emp.id));
-            } else {
-              // Deselect all
-              setSelectedEmployees?.([]);
-            }
-          }}
-        />
+        <label className="flex items-center justify-center cursor-pointer">
+          <input
+            type="checkbox"
+            checked={allSelected}
+            onChange={(e) => {
+              if (e.target.checked) {
+                // Select all employees
+                setSelectedEmployees?.(employees.map(emp => emp.id));
+              } else {
+                // Deselect all
+                setSelectedEmployees?.([]);
+              }
+            }}
+            className="peer hidden"
+          />
+          <div
+            className={`
+              w-4 h-4 border-2 flex items-center justify-center
+              transition-all duration-150
+              border-lightblue-900 bg-white
+            `}
+          >
+            <svg
+              xmlns="http://www.w3.org/2000/svg"
+              fill="none"
+              viewBox="0 0 24 24"
+              strokeWidth="4"
+              stroke="#1E40AF"
+              className={`w-3 h-3 transition-opacity ${
+                allSelected ? "opacity-100" : "opacity-0"
+              }`}
+            >
+              <polyline points="20 6 9 17 4 12" />
+            </svg>
+          </div>
+        </label>
       ),
       width: "50px",
-      cell: (row: EmployeeListItem) => (
-        <input
-          type="checkbox"
-          checked={selectedEmployees?.includes(row.id)}
-          onChange={(e) => {
-            if (e.target.checked) {
-              setSelectedEmployees?.((prev) => [...prev, row.id]);
-            } else {
-              setSelectedEmployees?.((prev) =>
-                prev.filter((id) => id !== row.id)
-              );
-            }
-          }}
-        />
-      ),
+      cell: (row: EmployeeListItem) => {
+        const isChecked = selectedEmployees?.includes(row.id);
+
+        return (
+          <label className="flex items-center justify-center cursor-pointer">
+            <input
+              type="checkbox"
+              checked={isChecked}
+              onChange={(e) => {
+                if (e.target.checked) {
+                  setSelectedEmployees?.((prev) => [...prev, row.id]);
+                } else {
+                  setSelectedEmployees?.((prev) =>
+                    prev.filter((id) => id !== row.id)
+                  );
+                }
+              }}
+              className="peer hidden"
+            />
+            <div
+              className={`
+                w-4 h-4 border-2 flex items-center justify-center
+                transition-all duration-150
+                ${isChecked ? "border-lightblue-900 bg-white" : "border-lightblue-900 bg-white"}
+              `}
+            >
+              <svg
+                xmlns="http://www.w3.org/2000/svg"
+                fill="none"
+                viewBox="0 0 24 24"
+                strokeWidth="4"
+                stroke="#1E40AF"
+                className={`w-3 h-3 transition-opacity ${
+                  isChecked ? "opacity-100" : "opacity-0"
+                }`}
+              >
+                <polyline points="20 6 9 17 4 12" />
+              </svg>
+            </div>
+          </label>
+        );
+      },
     },
     ...baseColumns,
   ];

@@ -18,8 +18,8 @@ const SelectButton: React.FC<SelectButtonProps> = ({ selectMode, onToggleSelectM
         px-2 py-2          
         text-sm font-semibold
         shadow-sm
-        hover:border-darkblue-500
-        hover:text-darkblue-500
+        hover:bg-lightblue-900
+        hover:text-white
         focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#008ec7]
         focus-visible:ring-offset-2 focus-visible:ring-offset-white
         transition-colors duration-300 motion-reduce:transition-none

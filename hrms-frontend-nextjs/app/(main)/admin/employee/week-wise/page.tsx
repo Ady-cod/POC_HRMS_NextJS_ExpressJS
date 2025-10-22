@@ -5,6 +5,7 @@ import EmployeeSearchFilters from "@/components/EmployeeSearchFilters/EmployeeSe
 import WeekSlider from "@/components/WeekSlider/WeekSlider";
 import ExportCSVButton from "@/components/ExportCSVButton/ExportCSVButton";
 import SelectButton from "@/components/SelectButton/SelectButton";
+import DeactivateButton from "@/components/DeactivateButton/DeactivateButton";
 import TotalCountButton from "@/components/TotalCountButton/TotalCountButton";
 import { WEEK_WISE_COLUMN_CONFIG } from "@/types/columnConfig";
 import { EmployeeStatus } from "@/types/types";
@@ -28,9 +29,10 @@ const WeekWisePage = () => {
   const [selectMode, setSelectMode] = useState(false);
   const [selectedEmployees, setSelectedEmployees] = useState<string[]>([]);
   const [filterState, setFilterState] = useState<FilterState>({
-  ...getInitialFilterState(),
-  selectedStatus: EmployeeStatus.ACTIVE
-});
+    ...getInitialFilterState(),
+    selectedStatus: EmployeeStatus.ACTIVE
+  });
+  
 
   const {
     isModalOpen,
@@ -45,6 +47,7 @@ const WeekWisePage = () => {
   // Use the employee data hook
   const {
     employees,
+    setEmployees,
     selectedEmployee,
     showDialog,
     handleDeleteClick,
@@ -116,15 +119,27 @@ const handleToggleSelectMode = () => {
       />
 
       {/* Export and Select/Deactivate Button */}
-      <div className="flex justify-between items-center mb-10 px-3">
+      <div className="flex justify-between items-center mb-10 px-3 pr-4">
         <div className="exportCSV">
           <ExportCSVButton employees={filteredEmployees} />
         </div>
-        <div className="statusButtons">
+        <div className="statusButtons flex flex-row gap-4">
         <SelectButton
           selectMode={selectMode}
           onToggleSelectMode={handleToggleSelectMode}
-          ></SelectButton>
+        />
+        <DeactivateButton 
+          selectedEmployees={selectedEmployees}
+          onDeactivate={() => {
+            const updatedEmployees = employees.map(emp =>
+              selectedEmployees.includes(emp.id)
+                ? { ...emp, status: EmployeeStatus.INACTIVE }
+                : emp
+            );
+            setEmployees(updatedEmployees);
+            setSelectedEmployees([]);
+          }}
+        />
         </div>
       </div>
 

@@ -131,7 +131,7 @@ export default function LoginModal({ isOpen, onClose }: LoginModalProps) {
             ref={panelRef}
             role="dialog"
             aria-modal="true"
-            className={`relative flex items-center justify-center w-[90%] h-[85%] max-w-[1000px] rounded-lg overflow-hidden ${
+            className={`relative flex items-center justify-center w-[90%] h-[85%] max-w-[1440px] rounded-lg overflow-hidden ${
               isShrinking
                 ? "bg-transparent shadow-none"
                 : "bg-[#d9d9d9] shadow-xl"

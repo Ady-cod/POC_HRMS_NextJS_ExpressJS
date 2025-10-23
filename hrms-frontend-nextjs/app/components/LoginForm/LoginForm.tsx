@@ -39,9 +39,8 @@ const LoginForm = ({
   return (
     <form
       action={formAction}
-      // add "relative" for ghost so absolute children anchor to the form box, not the whole panel
-      className={`flex flex-col items-center justify-center ${
-        appearance === "ghost" ? "relative w-full h-full" : ""
+      className={`flex flex-col items-center justify-center w-full max-w-[900px] mx-auto px-4 ${
+        appearance === "ghost" ? "relative h-full" : ""
       }`}
     >
       <h1
@@ -49,25 +48,21 @@ const LoginForm = ({
       >
         Login
       </h1>
+
+      {/* Email */}
       <label
         htmlFor="email"
         className="self-start mb-1 text-base text-gray-500 font-medium bg-[#d9d9d9] rounded whitespace-nowrap"
       >
         Email Address
       </label>
-      <div
-        className={`relative rounded-md ${
-          onCloseModal
-            ? "w-full sm:w-[37vw] md:w-[35vw] lg:w-[30vw] xl:w-[25vw] xl:max-w-[440px]"
-            : "w-auto sm:w-[30vw]"
-        } mb-2`}
-      >
+      <div className="relative w-full mb-2">
         <input
           name="email"
           type="email"
           placeholder="Email*"
           required
-          className={`w-full p-1 shadow-md shadow-gray-500 border border-gray-300 rounded-md focus:outline-none focus:ring-1 focus:ring-gray-400 ${
+          className={`w-full p-2 shadow-md shadow-gray-500 border border-gray-300 rounded-md focus:outline-none focus:ring-1 focus:ring-gray-400 ${
             state?.errors?.email ? "border-2 border-red-500" : ""
           }`}
         />
@@ -77,25 +72,21 @@ const LoginForm = ({
           {state.errors.email}
         </p>
       )}
+
+      {/* Password */}
       <label
         htmlFor="password"
         className="self-start mb-1 text-base text-gray-500 font-medium bg-[#d9d9d9] rounded whitespace-nowrap"
       >
         Password
       </label>
-      <div
-        className={`relative rounded-md ${
-          onCloseModal
-            ? "w-full sm:w-[37vw] md:w-[35vw] lg:w-[30vw] xl:w-[25vw] xl:max-w-[440px]"
-            : "w-auto sm:w-[30vw]"
-        } mb-2`}
-      >
+      <div className="relative w-full mb-2">
         <input
           name="password"
           type={showPassword ? "text" : "password"}
           placeholder="Password*"
           required
-          className={`w-full p-1 shadow-md shadow-gray-500 border border-gray-300 rounded-md focus:outline-none focus:ring-1 focus:ring-gray-400 ${
+          className={`w-full p-2 shadow-md shadow-gray-500 border border-gray-300 rounded-md focus:outline-none focus:ring-1 focus:ring-gray-400 ${
             state?.invalidCredentials ||
             (state?.errors && "password" in state.errors)
               ? "border-2 border-red-500"
@@ -120,17 +111,21 @@ const LoginForm = ({
           {state.errors.password}
         </p>
       )}
+
+      {/* Forgot password link */}
       <Link
         href="#"
         className="self-start text-sm font-semibold text-blue-600 hover:underline bg-[#d9d9d9] rounded whitespace-nowrap max-[700px]:mb-2"
       >
         Forgot your password?
       </Link>
+
+      {/* Submit button */}
       <SubmitButton className="self-end bg-gray-400 hover:bg-gray-600 text-white font-medium py-2 px-8 rounded">
         Login
       </SubmitButton>
 
-      {/* Register now (hide in ghost clone) */}
+      {/* Register link */}
       {!suppressAnchors && (
         <Link
           href="#"
@@ -140,7 +135,7 @@ const LoginForm = ({
         </Link>
       )}
 
-      {/* Home Button on the Left Dark Section (hide in ghost clone) */}
+      {/* Home button */}
       {!suppressAnchors &&
         (onCloseModal ? (
           <button

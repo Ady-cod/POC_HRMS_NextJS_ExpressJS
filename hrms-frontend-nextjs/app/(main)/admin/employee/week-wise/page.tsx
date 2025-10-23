@@ -119,11 +119,11 @@ const handleToggleSelectMode = () => {
       />
 
       {/* Export and Select/Deactivate Button */}
-      <div className="flex justify-between items-center mb-10 px-3 pr-4">
+      <div className="flex justify-between items-center mb-10 px-3 pr-[68px]">
         <div className="exportCSV">
           <ExportCSVButton employees={filteredEmployees} />
         </div>
-        <div className="statusButtons flex flex-row gap-4">
+        <div className="statusButtons flex flex-row gap-3">
         <SelectButton
           selectMode={selectMode}
           onToggleSelectMode={handleToggleSelectMode}

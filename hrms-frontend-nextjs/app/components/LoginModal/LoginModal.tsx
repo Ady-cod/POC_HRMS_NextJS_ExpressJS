@@ -4,8 +4,8 @@ import { AnimatePresence, motion, useReducedMotion } from "framer-motion";
 import type { Variants } from "framer-motion";
 import LoginForm from "@/components/LoginForm/LoginForm";
 import "@/(auth)/login/LoginPage.css";
-import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import { faHome } from "@fortawesome/free-solid-svg-icons";
+// import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
+// import { faHome } from "@fortawesome/free-solid-svg-icons";
 
 interface LoginModalProps {
   isOpen: boolean;
@@ -94,6 +94,198 @@ export default function LoginModal({ isOpen, onClose }: LoginModalProps) {
     setIsShrinking(true);
   }
 
+  const DnaLogo = ({ className }: { className?: string }) => (
+  <svg
+    className={className}
+    width="300"
+    height="305"
+    viewBox="0 0 300 305"
+    fill="none"
+    xmlns="http://www.w3.org/2000/svg"
+  >
+    <g filter="url(#filter0_d_4325_16976)">
+      <path
+        d="M45 82.5L177.5 10V57.5L45 132.5L135 182.5V230L45 185V132.5V82.5Z"
+        fill="#E97128"
+      />
+      <path
+        d="M45 132.5V185L135 230V182.5L45 132.5ZM45 132.5V82.5L177.5 10V57.5L45 132.5Z"
+        stroke="#E97128"
+        strokeWidth="6.66667"
+      />
+    </g>
+    <g filter="url(#filter1_d_4325_16976)">
+      <path
+        d="M105 160L157.5 72.5L52.5 132.5L105 160Z"
+        fill="#008EC7"
+        stroke="#008EC7"
+        strokeWidth="6.66667"
+      />
+    </g>
+    <g filter="url(#filter2_d_4325_16976)">
+      <path
+        d="M247.869 173.895L138.911 233.581L193.602 144.974L247.869 173.895Z"
+        fill="#008EC7"
+        stroke="#008EC7"
+        strokeWidth="6.66667"
+      />
+    </g>
+    <g filter="url(#filter3_d_4325_16976)">
+      <path
+        d="M162.5 70L252.5 115V172.5V177.5V225L122.5 287.5V245L252.5 177.5V172.5L162.5 127.5V70Z"
+        fill="#0C3E66"
+      />
+      <path
+        d="M252.5 172.5V115L162.5 70V127.5L252.5 172.5ZM252.5 172.5V177.5M252.5 177.5V225L122.5 287.5V245L252.5 177.5Z"
+        stroke="#0C3E66"
+        strokeWidth="6.66667"
+      />
+    </g>
+    <defs>
+      <filter
+        id="filter0_d_4325_16976"
+        x="37.2665"
+        y="1.97598"
+        width="151.967"
+        height="243.818"
+        filterUnits="userSpaceOnUse"
+        colorInterpolationFilters="sRGB"
+      >
+        <feFlood floodOpacity="0" result="BackgroundImageFix" />
+        <feColorMatrix
+          in="SourceAlpha"
+          type="matrix"
+          values="0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 127 0"
+          result="hardAlpha"
+        />
+        <feOffset dx="2" dy="4" />
+        <feGaussianBlur stdDeviation="3.2" />
+        <feComposite in2="hardAlpha" operator="out" />
+        <feColorMatrix
+          type="matrix"
+          values="0 0 0 0 1 0 0 0 0 1 0 0 0 0 1 0 0 0 1 0"
+        />
+        <feBlend
+          mode="normal"
+          in2="BackgroundImageFix"
+          result="effect1_dropShadow_4325_16976"
+        />
+        <feBlend
+          mode="normal"
+          in="SourceGraphic"
+          in2="effect1_dropShadow_4325_16976"
+          result="shape"
+        />
+      </filter>
+      <filter
+        id="filter1_d_4325_16976"
+        x="41.5591"
+        y="63.2773"
+        width="129.362"
+        height="109.135"
+        filterUnits="userSpaceOnUse"
+        colorInterpolationFilters="sRGB"
+      >
+        <feFlood floodOpacity="0" result="BackgroundImageFix" />
+        <feColorMatrix
+          in="SourceAlpha"
+          type="matrix"
+          values="0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 127 0"
+          result="hardAlpha"
+        />
+        <feOffset dy="4" />
+        <feGaussianBlur stdDeviation="2" />
+        <feComposite in2="hardAlpha" operator="out" />
+        <feColorMatrix
+          type="matrix"
+          values="0 0 0 0 1 0 0 0 0 1 0 0 0 0 1 0 0 0 0.25 0"
+        />
+        <feBlend
+          mode="normal"
+          in2="BackgroundImageFix"
+          result="effect1_dropShadow_4325_16976"
+        />
+        <feBlend
+          mode="normal"
+          in="SourceGraphic"
+          in2="effect1_dropShadow_4325_16976"
+          result="shape"
+        />
+      </filter>
+      <filter
+        id="filter2_d_4325_16976"
+        x="125.448"
+        y="140.562"
+        width="133.433"
+        height="110.004"
+        filterUnits="userSpaceOnUse"
+        colorInterpolationFilters="sRGB"
+      >
+        <feFlood floodOpacity="0" result="BackgroundImageFix" />
+        <feColorMatrix
+          in="SourceAlpha"
+          type="matrix"
+          values="0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 127 0"
+          result="hardAlpha"
+        />
+        <feOffset dy="4" />
+        <feGaussianBlur stdDeviation="2" />
+        <feComposite in2="hardAlpha" operator="out" />
+        <feColorMatrix
+          type="matrix"
+          values="0 0 0 0 1 0 0 0 0 1 0 0 0 0 1 0 0 0 0.25 0"
+        />
+        <feBlend
+          mode="normal"
+          in2="BackgroundImageFix"
+          result="effect1_dropShadow_4325_16976"
+        />
+        <feBlend
+          mode="normal"
+          in="SourceGraphic"
+          in2="effect1_dropShadow_4325_16976"
+          result="shape"
+        />
+      </filter>
+      <filter
+        id="filter3_d_4325_16976"
+        x="113.767"
+        y="61.2064"
+        width="151.467"
+        height="242.994"
+        filterUnits="userSpaceOnUse"
+        colorInterpolationFilters="sRGB"
+      >
+        <feFlood floodOpacity="0" result="BackgroundImageFix" />
+        <feColorMatrix
+          in="SourceAlpha"
+          type="matrix"
+          values="0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 127 0"
+          result="hardAlpha"
+        />
+        <feOffset dx="2" dy="4" />
+        <feGaussianBlur stdDeviation="3.7" />
+        <feComposite in2="hardAlpha" operator="out" />
+        <feColorMatrix
+          type="matrix"
+          values="0 0 0 0 1 0 0 0 0 1 0 0 0 0 1 0 0 0 1 0"
+        />
+        <feBlend
+          mode="normal"
+          in2="BackgroundImageFix"
+          result="effect1_dropShadow_4325_16976"
+        />
+        <feBlend
+          mode="normal"
+          in="SourceGraphic"
+          in2="effect1_dropShadow_4325_16976"
+          result="shape"
+        />
+      </filter>
+    </defs>
+  </svg>
+);
+
   // --- Escape to close + lock page scroll while open ---
   useEffect(() => {
     if (!isOpen) return;
@@ -121,8 +313,20 @@ export default function LoginModal({ isOpen, onClose }: LoginModalProps) {
           {/* Overlay (click outside to close) */}
           <motion.button
             aria-label="Close overlay"
-            className="absolute inset-0 bg-black/60"
-            variants={overlayVariants}
+            className="absolute inset-0 bg-cover bg-center bg-no-repeat"
+            style={{
+              backgroundImage: "url('/images/loginModal.png')",
+              filter: "blur(32px)",
+              transform: "scale(1.15)",
+             }} // initial blur
+            variants={{
+              initial: { opacity: 0, backdropFilter: "blur(0px)" },
+              animate: { opacity: 1, backdropFilter: "blur(8px)" },
+            }}
+            initial="initial"
+            animate="animate"
+            exit={{ opacity: 0, backdropFilter: "blur(0px)" }} // fade out
+            transition={{ duration: 0.3, ease: "easeOut" }}
             onClick={handleRequestClose}
           />
 
@@ -131,10 +335,10 @@ export default function LoginModal({ isOpen, onClose }: LoginModalProps) {
             ref={panelRef}
             role="dialog"
             aria-modal="true"
-            className={`relative flex items-center justify-center w-[90%] h-[85%] max-w-[1440px] rounded-lg overflow-hidden ${
+            className={`relative flex items-center justify-center w-[80%] h-[83%] max-w-[1440px] rounded-lg overflow-hidden ${
               isShrinking
                 ? "bg-transparent shadow-none"
-                : "bg-[#d9d9d9] shadow-xl"
+                : "bg-darkblue-50 shadow-xl"
             }`}
             variants={panelVariants}
             initial="initial"
@@ -145,7 +349,7 @@ export default function LoginModal({ isOpen, onClose }: LoginModalProps) {
             <button
               onClick={handleRequestClose}
               aria-label="Close login"
-              className="absolute right-4 top-2 z-30 w-8 h-8 flex items-center justify-center text-2xl leading-none text-gray-700 hover:text-black hover:bg-gray-200 rounded-full cursor-pointer"
+              className="absolute right-4 top-2 z-30 w-8 h-8 flex items-center justify-center text-4xl leading-none text-[#1C1B1F] hover:text-black hover:bg-gray-200 rounded-full cursor-pointer transition"
               style={{ opacity: isShrinking ? 0 : 1 }}
             >
               ×
@@ -177,31 +381,31 @@ export default function LoginModal({ isOpen, onClose }: LoginModalProps) {
             >
               {/* Left trapezoidal black section */}
               <motion.div
-                className="w-1/2 h-full bg-[#353535]"
+                className="w-1/2 h-full"
                 style={{
-                  clipPath: "polygon(0% 0%, 100% 0%, 75% 100%, 0% 100%)",
+                clipPath: "polygon(0% 0%, 100% 0%, 60% 100%, 0% 100%)",
+                backgroundImage: "url('/images/blueBackground.png')",
+                backgroundSize: "cover",
                 }}
                 variants={leftVariants}
-                // SLOWER open for the trapezoid
                 transition={{ duration: 6.0, delay: 0.02, ease: "easeOut" }}
               />
 
-              {/* Letter design overlay (final touch after ~1.0s) */}
+              {/* DNA Logo design overlay (final touch after ~1.0s) */}
               <motion.div
                 id="letter-design-overlay"
-                className="absolute top-1/2 -translate-y-1/2 left-[20%] min-[520px]:left-1/4 w-[25%] aspect-[4/3] bg-[#d9d9d9] border-2 border-[#bfbfbf] flex items-center justify-center"
+                className="absolute top-1/2 -translate-y-1/2 left-[20%] min-[520px]:left-1/4 w-[27%] aspect-[4/3] flex items-center justify-center"
                 initial={{ opacity: 0, scale: 0.96 }}
                 animate={{ opacity: 1, scale: 1 }}
                 // Deliberately late: adjust delay to 1.0–1.6s to taste
                 transition={{ duration: 1.0, delay: 1.0, ease: "easeOut" }}
               >
-                <div className="absolute w-full scale-x-[1.24] h-[3px] bg-[#808080] rotate-[36.5deg]" />
-                <div className="absolute w-full scale-x-[1.24] h-[3px] bg-[#808080] -rotate-[36.5deg]" />
+                <DnaLogo className="w-full h-full" />
               </motion.div>
 
               {/* Right section with Login Form (quick) */}
               <motion.div
-                className="z-10 w-[50%] h-[100%] mr-2 sm:mr-0 pr-10 xxs:pr-0 flex items-center justify-center sm:justify-start sm:pl-8 md:pl-12 lg:pl-16"
+                className="z-10 w-[50%] h-[100%] mr-2 sm:mr-0 pr-10 xxs:pr-0 flex items-center justify-center sm:justify-start "
                 variants={rightVariants}
                 // QUICKER than left: small delay + short duration
                 transition={{ duration: 0.01, delay: 0, ease: "easeOut" }}
@@ -230,26 +434,27 @@ export default function LoginModal({ isOpen, onClose }: LoginModalProps) {
                   setShrinkTransform(null);
                   onClose();
                 }}
-                className="absolute inset-0 z-40 overflow-hidden bg-[#d9d9d9] rounded-lg shadow-xl"
+                className="absolute inset-0 z-40 overflow-hidden bg-darkblue-50 rounded-lg shadow-xl"
                 style={{
                   transformOrigin: "center",
                   pointerEvents: "none",
                   width: "100%",
-                  height: "100%",
+                  height: "100%"
                 }}
               >
                 {/* Left trapezoid clone */}
                 <div
                   className="absolute left-0 top-0 h-full w-1/2 bg-[#353535]"
                   style={{
-                    clipPath: "polygon(0% 0%, 100% 0%, 75% 100%, 0% 100%)",
+                    clipPath: "polygon(0% 0%, 100% 0%, 60% 100%, 0% 100%)",
+                    backgroundImage: "url('/images/blueBackground.png')",
+                    backgroundSize: "cover",
                   }}
                 />
 
                 {/* Letter overlay clone */}
-                <div className="absolute top-1/2 -translate-y-1/2 left-[20%] min-[520px]:left-1/4 w-[25%] aspect-[4/3] bg-[#d9d9d9] border-2 border-[#bfbfbf] flex items-center justify-center">
-                  <div className="absolute w-full scale-x-[1.24] h-[3px] bg-[#808080] rotate-[36.5deg]" />
-                  <div className="absolute w-full scale-x-[1.24] h-[3px] bg-[#808080] -rotate-[36.5deg]" />
+                <div className="absolute top-1/2 -translate-y-1/2 left-[20%] min-[520px]:left-1/4 w-[25%] aspect-[4/3] flex items-center justify-center">
+                  <DnaLogo className="w-full h-full" />
                 </div>
 
                 {/* Right side (ghost) – give it its own positioning context */}
@@ -264,10 +469,12 @@ export default function LoginModal({ isOpen, onClose }: LoginModalProps) {
 
                 {/* Static clone of "Back Home" pinned to the left dark section */}
                 <div
-                  className="absolute bottom-4 left-6 flex flex-col items-center p-2 rounded text-white bg-[#353535] border border-transparent"
+                  className="absolute bottom-4 left-6 flex flex-col items-center p-2 rounded text-white border border-transparent"
                   style={{ pointerEvents: "none" }}
                 >
-                  <FontAwesomeIcon icon={faHome} className="text-4xl" />
+                  <svg width="20" height="23" viewBox="0 0 20 23" fill="none" xmlns="http://www.w3.org/2000/svg">
+                    <path d="M2.5 20H6.25V12.5H13.75V20H17.5V8.75L10 3.125L2.5 8.75V20ZM0 22.5V7.5L10 0L20 7.5V22.5H11.25V15H8.75V22.5H0Z" fill="white"/>
+                  </svg>
                   <span className="text-sm mt-2">Back Home</span>
                 </div>
 

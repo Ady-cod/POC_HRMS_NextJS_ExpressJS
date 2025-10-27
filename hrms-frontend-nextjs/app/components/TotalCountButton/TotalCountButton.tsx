@@ -12,10 +12,9 @@ const TotalCountButton: React.FC<TotalCountButtonProps> = ({ count }) => {
       className={`
         total-count-button 
         inline-flex items-center
-        border-2 border-gray-300
+        border-b-2 border-orange-500
         bg-white
-        text-gray-400
-        rounded-lg 
+        text-[#1C1C1C]/50
         px-5 py-2          
         text-sm font-semibold
         cursor-default

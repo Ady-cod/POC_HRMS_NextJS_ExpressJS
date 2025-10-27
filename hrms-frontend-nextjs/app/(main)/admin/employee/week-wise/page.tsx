@@ -88,7 +88,7 @@ const handleToggleSelectMode = () => {
   return (
     <div className="w-full">
       {/* Header Section */}
-      <div className="flex flex-wrap justify-between items-start gap-2 mt-6 mb-4 px-4">
+      <div className="flex flex-wrap justify-between items-start gap-2 mt-6 mb-4 px-4 pr-[68px]">
         {/* Heading */}
         <h2 className="text-lg sm:text-xl md:text-2xl font-bold text-darkblue-900">
           Week-wise Employee View

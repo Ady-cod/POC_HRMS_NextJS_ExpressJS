@@ -15,6 +15,10 @@ import { showToast } from "@/utils/toastHelper";
 import { EmployeeListItem } from "@/types/types";
 import { Eye, EyeOff } from "lucide-react";
 import { updateEmployee } from "@/actions/employee";
+import { AsYouType } from "libphonenumber-js";
+import { ZodError } from "zod";
+import { updateEmployeeSchema } from "@/schemas/employeeSchema";
+import { formatZodErrors } from "@/utils/formatZodErrors";
 // import AnimatedLoader from "@/components/LoaderScreen/AnimatedLoader";
 import TimeZoneSelect from "@/components/TimeZoneSelect/TimeZoneSelect";
 import moment from "moment-timezone";
@@ -108,6 +112,18 @@ export default function Profile() {
     password: "Password",
   };
 
+  // map local form keys to server schema keys
+  const serverKeyMap: Record<string, string> = {
+    name: "fullName",
+    email: "email",
+    phone: "phoneNumber",
+    timezone: "timezone",
+    departmentName: "departmentName",
+    role: "role",
+  };
+
+  const [errors, setErrors] = useState<Record<string, string> | null>(null);
+
   // Fetch profile
   useEffect(() => {
     const fetchProfile = async () => {
@@ -171,29 +187,117 @@ export default function Profile() {
   const handleFieldChange = (key: string, value: string) =>
     setFormData((prev) => ({ ...prev, [key]: value }));
 
+  // Format phone as user types, similar to ModalForm
+  const handlePhoneInputChange = (value: string) => {
+    let newValue = value;
+
+    // Ensure leading + if user types digits without it
+    if (!newValue.startsWith("+") && newValue.length > 0) {
+      if (/^\d+$/.test(newValue)) {
+        newValue = "+" + newValue;
+      }
+    }
+
+    const formatted = new AsYouType().input(newValue);
+
+    // Limit to 15 digits (E.164)
+    const digitCount = formatted.replace(/\D/g, "").length;
+    if (digitCount > 15) return;
+
+    // clear phone related error when user starts editing
+    handleFieldChange("phone", formatted);
+    setErrors((prev) => {
+      if (!prev) return prev;
+      const copy = { ...prev };
+      delete copy[serverKeyMap.phone];
+      return Object.keys(copy).length ? copy : null;
+    });
+  };
+
   const handleFieldSave = async (key: string) => {
     try {
-      const map: Record<string, string> = {
-        name: "fullName",
-        email: "email",
-        phone: "phoneNumber",
-        timezone: "timezone",
-        departmentName: "departmentName",
-        role: "role",
+      const serverKey = serverKeyMap[key] || key;
+
+      // Basic client-side quick validations preserved
+      if (key === "name") {
+        if (!formData.name || formData.name.trim().length === 0) {
+          showToast("error", "Validation Error", ["Name cannot be empty"]);
+          return;
+        }
+      }
+
+      if (key === "email") {
+        const email = String(formData.email || "");
+        const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+        if (!emailRegex.test(email)) {
+          showToast("error", "Validation Error", ["Invalid email address"]);
+          return;
+        }
+      }
+
+      if (key === "phone") {
+        const phone = String(formData.phone || "");
+        const digits = phone.replace(/\D/g, "");
+        if (digits.length < 6 || digits.length > 15) {
+          showToast("error", "Validation Error", [
+            "Phone number must have between 6 and 15 digits (E.164).",
+          ]);
+          return;
+        }
+        // Ensure phone has leading +
+        if (!phone.startsWith("+")) {
+          formData.phone = "+" + digits;
+        }
+      }
+
+      // Build payload and validate against zod partial schema (single-field validation)
+      const payload: Record<string, unknown> = {
+        [serverKey]: formData[key as keyof typeof formData],
       };
 
-      await updateEmployee(employeeId, {
-        [map[key]]: formData[key as keyof typeof formData],
-      });
+      try {
+        // updateEmployeeSchema already marks update fields as optional,
+        // so validating the single-field payload directly is sufficient.
+        updateEmployeeSchema.parse(payload);
+      } catch (e) {
+        if (e instanceof ZodError) {
+          const formatted = formatZodErrors(e);
+          setErrors(formatted);
+          const errorMessages = e.issues.map((i) => i.message);
+          showToast("error", "Validation Error(s):", errorMessages);
+          return;
+        }
+        throw e;
+      }
+
+      await updateEmployee(employeeId, payload);
+
       showToast("success", "Updated", [
         `${fieldLabels[key] || key} updated successfully`,
       ]);
 
       setEditingField(null);
       setOriginalData(formData);
+      // clear errors on success
+      setErrors((prev) => {
+        if (!prev) return null;
+        const copy = { ...prev };
+        delete copy[serverKey];
+        return Object.keys(copy).length ? copy : null;
+      });
     } catch (err) {
-      showToast("error", "Update failed", [String(err)]);
-      console.error(err);
+      if (err instanceof ZodError) {
+        const formatted = formatZodErrors(err);
+        setErrors(formatted);
+        const errorMessages = err.issues.map((i) => i.message);
+        showToast("error", "Validation Error(s):", errorMessages);
+      } else if (err instanceof Error) {
+        showToast("error", "Update failed", [err.message]);
+        console.error(err);
+      } else {
+        showToast("error", "Update failed", [String(err)]);
+        console.error(err);
+      }
     }
   };
 
@@ -219,10 +323,32 @@ export default function Profile() {
       ]);
 
     try {
+      // Validate password against shared Zod schema before sending to server
+      try {
+        updateEmployeeSchema.parse({ password: newPass });
+      } catch (e) {
+        if (e instanceof ZodError) {
+          const formatted = formatZodErrors(e);
+          setErrors(formatted);
+          const errorMessages = e.issues.map((i) => i.message);
+          showToast("error", "Validation Error(s):", errorMessages);
+          return;
+        }
+        throw e;
+      }
+
       await updateEmployee(employeeId, { password: newPass });
       showToast("success", "Password Updated", [
         "Your password has been updated",
       ]);
+      // clear password errors on success
+      setErrors((prev) => {
+        if (!prev) return null;
+        const copy = { ...prev };
+        delete copy["password"];
+        return Object.keys(copy).length ? copy : null;
+      });
+
       setPasswordData({ current: "", new: "", confirm: "" });
       setShowPasswordChange(false);
     } catch (err) {
@@ -362,6 +488,7 @@ export default function Profile() {
             <div className="space-y-4 bg-[#E7ECF0] p-6 rounded-lg">
               {group.fields.map((key) => {
                 const value = formData[key];
+                const serverKey = serverKeyMap[key] || key;
                 return (
                   <div
                     key={key}
@@ -373,81 +500,138 @@ export default function Profile() {
 
                     {editingField === key ? (
                       <div className="flex flex-col sm:flex-row sm:items-center gap-2 w-full sm:w-2/3">
-                        {key === "timezone" ? (
-                          <TimeZoneSelect
-                            value={formData.timezone}
-                            onChange={(val) =>
-                              handleFieldChange("timezone", val)
-                            }
-                          />
-                        ) : key === "departmentName" ? (
-                          <Select
-                            value={formData.departmentName}
-                            onValueChange={(val) =>
-                              handleFieldChange("departmentName", val)
-                            }
-                          >
-                            <SelectTrigger className="w-full border rounded-md p-2 text-xl text-lightblue-700">
-                              <SelectValue placeholder="Select Department" />
-                            </SelectTrigger>
-                            <SelectContent>
-                              {[
-                                "HR",
-                                "Web Development",
-                                "UI/UX",
-                                "QA",
-                                "BA",
-                                "SM",
-                              ].map((dept) => (
-                                <SelectItem
-                                  key={dept}
-                                  value={dept}
-                                  className="data-[highlighted]:bg-lightblue-100 data-[highlighted]:text-lightblue-700 data-[state=checked]:bg-lightblue-800 data-[state=checked]:text-white cursor-pointer text-lightblue-800"
-                                >
-                                  {dept}
-                                </SelectItem>
-                              ))}
-                            </SelectContent>
-                          </Select>
-                        ) : key === "role" ? (
-                          <Select
-                            value={formData.role}
-                            onValueChange={(val) =>
-                              handleFieldChange("role", val)
-                            }
-                          >
-                            <SelectTrigger className="w-full border rounded-md p-2 text-xl text-lightblue-700">
-                              <SelectValue placeholder="Select Role" />
-                            </SelectTrigger>
-                            <SelectContent>
-                              {[
-                                "EMPLOYEE",
-                                "INTERN",
-                                "HR_INTERN",
-                                "HR_EMPLOYEE",
-                                "HR_MANAGER",
-                                "MANAGER",
-                                "ADMIN",
-                              ].map((role) => (
-                                <SelectItem
-                                  key={role}
-                                  value={role}
-                                  className="data-[highlighted]:bg-lightblue-100 data-[highlighted]:text-lightblue-700 data-[state=checked]:bg-lightblue-800 data-[state=checked]:text-white cursor-pointer text-lightblue-800"
-                                >
-                                  {role}
-                                </SelectItem>
-                              ))}
-                            </SelectContent>
-                          </Select>
-                        ) : (
-                          <Input
-                            className="w-full text-xl text-lightblue-700 border border-lightblue-700 rounded px-3 py-2 focus:outline-none focus:ring-2 focus:ring-lightblue-700 focus:text-xl"
-                            value={value}
-                            onChange={(e) =>
-                              handleFieldChange(key, e.target.value)
-                            }
-                          />
-                        )}
+                        <div className="w-full">
+                          {key === "timezone" ? (
+                            <>
+                              <TimeZoneSelect
+                                value={formData.timezone}
+                                onChange={(val) =>
+                                  handleFieldChange("timezone", val)
+                                }
+                              />
+                              {errors?.[serverKey] && (
+                                <p className="text-sm text-red-600 mt-1">
+                                  {errors[serverKey]}
+                                </p>
+                              )}
+                            </>
+                          ) : key === "departmentName" ? (
+                            <>
+                              <Select
+                                value={formData.departmentName}
+                                onValueChange={(val) =>
+                                  handleFieldChange("departmentName", val)
+                                }
+                              >
+                                <SelectTrigger className="w-full border rounded-md p-2 text-xl text-lightblue-700">
+                                  <SelectValue placeholder="Select Department" />
+                                </SelectTrigger>
+                                <SelectContent>
+                                  {[
+                                    "HR",
+                                    "Web Development",
+                                    "UI/UX",
+                                    "QA",
+                                    "BA",
+                                    "SM",
+                                  ].map((dept) => (
+                                    <SelectItem
+                                      key={dept}
+                                      value={dept}
+                                      className="data-[highlighted]:bg-lightblue-100 data-[highlighted]:text-lightblue-700 data-[state=checked]:bg-lightblue-800 data-[state=checked]:text-white cursor-pointer text-lightblue-800"
+                                    >
+                                      {dept}
+                                    </SelectItem>
+                                  ))}
+                                </SelectContent>
+                              </Select>
+                              <input
+                                type="hidden"
+                                name="departmentName"
+                                value={formData.departmentName}
+                                required={false}
+                              />
+                              {errors?.[serverKey] && (
+                                <p className="text-sm text-red-600 mt-1">
+                                  {errors[serverKey]}
+                                </p>
+                              )}
+                            </>
+                          ) : key === "role" ? (
+                            <>
+                              <Select
+                                value={formData.role}
+                                onValueChange={(val) =>
+                                  handleFieldChange("role", val)
+                                }
+                              >
+                                <SelectTrigger className="w-full border rounded-md p-2 text-xl text-lightblue-700">
+                                  <SelectValue placeholder="Select Role" />
+                                </SelectTrigger>
+                                <SelectContent>
+                                  {[
+                                    "EMPLOYEE",
+                                    "INTERN",
+                                    "HR_INTERN",
+                                    "HR_EMPLOYEE",
+                                    "HR_MANAGER",
+                                    "MANAGER",
+                                    "ADMIN",
+                                  ].map((r) => (
+                                    <SelectItem
+                                      key={r}
+                                      value={r}
+                                      className="data-[highlighted]:bg-lightblue-100 data-[highlighted]:text-lightblue-700 data-[state=checked]:bg-lightblue-800 data-[state=checked]:text-white cursor-pointer text-lightblue-800"
+                                    >
+                                      {r}
+                                    </SelectItem>
+                                  ))}
+                                </SelectContent>
+                              </Select>
+                              <input
+                                type="hidden"
+                                name="role"
+                                value={formData.role}
+                              />
+                              {errors?.[serverKey] && (
+                                <p className="text-sm text-red-600 mt-1">
+                                  {errors[serverKey]}
+                                </p>
+                              )}
+                            </>
+                          ) : key === "phone" ? (
+                            <>
+                              <Input
+                                className="w-full text-xl text-lightblue-700 border border-lightblue-700 rounded px-3 py-2 focus:outline-none focus:ring-2 focus:ring-lightblue-700 focus:text-xl"
+                                value={formData.phone}
+                                onChange={(e) =>
+                                  handlePhoneInputChange(e.target.value)
+                                }
+                                placeholder={"e.g., +40715632783"}
+                              />
+                              {errors?.[serverKey] && (
+                                <p className="text-sm text-red-600 mt-1">
+                                  {errors[serverKey]}
+                                </p>
+                              )}
+                            </>
+                          ) : (
+                            <>
+                              <Input
+                                className="w-full text-xl text-lightblue-700 border border-lightblue-700 rounded px-3 py-2 focus:outline-none focus:ring-2 focus:ring-lightblue-700 focus:text-xl"
+                                value={value}
+                                onChange={(e) =>
+                                  handleFieldChange(key, e.target.value)
+                                }
+                              />
+                              {errors?.[serverKey] && (
+                                <p className="text-sm text-red-600 mt-1">
+                                  {errors[serverKey]}
+                                </p>
+                              )}
+                            </>
+                          )}
+                        </div>
 
                         <div className="flex gap-2">
                           <Button
@@ -487,7 +671,10 @@ export default function Profile() {
                             <Button
                               variant="link"
                               className="text-lightblue-700 p-0 font-bold text-lg"
-                              onClick={() => setEditingField(key)}
+                              onClick={() => {
+                                setEditingField(key);
+                                setErrors(null);
+                              }}
                             >
                               Edit
                             </Button>
@@ -537,6 +724,10 @@ export default function Profile() {
                 </button>
               </div>
             ))}
+
+            {errors?.password && (
+              <p className="text-sm text-red-600 mt-1">{errors.password}</p>
+            )}
 
             <div className="flex flex-col sm:flex-row gap-2 sm:justify-end">
               <Button

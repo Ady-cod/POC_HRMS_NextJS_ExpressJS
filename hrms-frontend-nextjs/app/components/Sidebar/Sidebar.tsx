@@ -374,8 +374,9 @@ const Submenu = ({
 
 // Utility functions
 const getActiveState = (currentPath: string, itemPath: string): boolean => {
-  if (itemPath === "/admin/employee") {
-    return currentPath.startsWith("/admin/employee");
+  const pathsWithSubmenus = ["/admin/employee", "/admin/masters"];
+  if (pathsWithSubmenus.includes(itemPath)) {
+    return currentPath.startsWith(itemPath);
   }
   return currentPath === itemPath;
 };

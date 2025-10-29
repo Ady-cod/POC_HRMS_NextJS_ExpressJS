@@ -6,7 +6,7 @@ import {
   CropperPreview,
   CropperPreviewRef,
 } from "react-advanced-cropper";
-import "react-advanced-cropper/dist/style.css";
+// import "react-advanced-cropper/dist/style.css";
 import { Button } from "@/components/ui/button";
 import {
   ZoomIn,
@@ -103,7 +103,7 @@ const handleZoomOut = () => {
           <Button variant="outline" onClick={onClose}>
             Cancel
           </Button>
-          <Button onClick={handleSave} className="bg-blue-600 hover:bg-blue-800">Save</Button>
+          <Button onClick={handleSave} className="bg-lightblue-600 hover:bg-lightblue-800">Save</Button>
         </div>
       </div>
     </div>

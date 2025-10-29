@@ -15,7 +15,7 @@ import { showToast } from "@/utils/toastHelper";
 import { EmployeeListItem } from "@/types/types";
 import { Eye, EyeOff } from "lucide-react";
 import { updateEmployee } from "@/actions/employee";
-import AnimatedLoader from "@/components/LoaderScreen/AnimatedLoader";
+// import AnimatedLoader from "@/components/LoaderScreen/AnimatedLoader";
 import TimeZoneSelect from "@/components/TimeZoneSelect/TimeZoneSelect";
 import moment from "moment-timezone";
 import ImageCropperModal from "@/components/ImageCropperModal/ImageCropperModal";
@@ -67,7 +67,7 @@ export default function Profile() {
   const [tempImage, setTempImage] = useState<string | null>(null);
   const [showPasswordChange, setShowPasswordChange] = useState(false);
   const [employeeId, setEmployeeId] = useState("");
-  const [loading, setLoading] = useState(true);
+  // const [loading, setLoading] = useState(true);
   const [coverImage, setCoverImage] = useState<string | null>(null);
   const [showCoverChooser, setShowCoverChooser] = useState(false);
 
@@ -135,9 +135,10 @@ export default function Profile() {
           "Unable to fetch employee information.",
         ]);
         console.error(err);
-      } finally {
-        setLoading(false);
       }
+      // finally {
+      //   setLoading(false);
+      // }
     };
 
     fetchProfile();
@@ -233,7 +234,7 @@ export default function Profile() {
   // UI
   return (
     <div className="flex flex-col my-8 px-4 gap-2 sm:gap-4">
-      {loading && <AnimatedLoader isVisible={loading} />}
+      {/* {loading && <AnimatedLoader isVisible={loading} />} */}
       <h1 className="text-2xl sm:text-3xl font-bold text-gray-900">
         My Profile
       </h1>

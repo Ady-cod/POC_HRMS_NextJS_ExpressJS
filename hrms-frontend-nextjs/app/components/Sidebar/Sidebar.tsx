@@ -24,7 +24,10 @@ const SIDEBAR_PATHS = {
   },
   APPLICANTS: "/admin/applicants",
   WORKFLOW: "/admin/workflow",
-  MASTERS: "/admin/masters",
+  MASTERS: {
+    DEPARTMENTS: "/admin/masters/departments",
+    PROJECTS: "/admin/masters/projects"
+  },
   HR: "/admin/hr",
 } as const;
 
@@ -124,9 +127,14 @@ const MENU_CONFIG: Record<MenuItemKey, MenuItemConfig> = {
     icons: ICONS.WORKFLOW,
   },
   MASTERS: {
-    path: SIDEBAR_PATHS.MASTERS,
+    path: "/admin/masters",
     label: "Masters",
     icons: ICONS.MASTERS,
+    hasSubmenu: true,
+    submenuItems: [
+      { path: SIDEBAR_PATHS.MASTERS.DEPARTMENTS, label: "Departments" },
+      { path: SIDEBAR_PATHS.MASTERS.PROJECTS, label: "Projects" },
+    ]
   },
   HR: {
     path: SIDEBAR_PATHS.HR,
@@ -420,13 +428,17 @@ const Sidebar = ({ isOpen, toggleSidebar }: SideBarProps) => {
       : true
   );
   const pathname = usePathname();
-  const [isHovered, setIsHovered] = useState(false); // For Employee submenu
+  const [hoveredSubmenu, setHoveredSubmenu] = useState<string | null>(null);
   const [isCollapsed, setIsCollapsed] = useState(false);
 
   useEffect(() => {
     if (pathname.startsWith("/admin/employee")) {
-      setIsHovered(true);
-    }
+    setHoveredSubmenu("employee");
+  } else if (pathname.startsWith("/admin/masters")) {
+    setHoveredSubmenu("masters");
+  } else {
+    setHoveredSubmenu(null);
+  }
   }, [pathname]);
 
   useEffect(() => {
@@ -520,17 +532,15 @@ const Sidebar = ({ isOpen, toggleSidebar }: SideBarProps) => {
             config={MENU_CONFIG.EMPLOYEE}
             isActive={getActiveState(pathname, "/admin/employee")}
             isCollapsed={isCollapsed}
-            isHovered={isHovered}
+            isHovered={hoveredSubmenu==="employee"}
             pathname={pathname}
-            onMouseEnter={() => {
-              setIsHovered(true);
-            }}
-            onMouseLeave={() => setIsHovered(false)}
+            onMouseEnter={() => {setHoveredSubmenu("employee");}}
+            onMouseLeave={() => setHoveredSubmenu(null)}
             onItemClick={handleSidebarItemClick}
             onExpandClick={() => {
               if (isCollapsed) {
                 setIsCollapsed(false);
-                setIsHovered(true);
+                setHoveredSubmenu("employee");
               }
             }}
           />
@@ -552,12 +562,22 @@ const Sidebar = ({ isOpen, toggleSidebar }: SideBarProps) => {
           />
 
           {/* Masters */}
-          <MenuItem
+          <Submenu
             config={MENU_CONFIG.MASTERS}
-            isActive={getActiveState(pathname, SIDEBAR_PATHS.MASTERS)}
+            isActive={getActiveState(pathname, "/admin/masters")}
             isCollapsed={isCollapsed}
-            onClick={handleSidebarItemClick}
-          />
+            isHovered={hoveredSubmenu === "masters"}
+            pathname={pathname}
+            onMouseEnter={() => setHoveredSubmenu("masters")}
+            onMouseLeave={() => setHoveredSubmenu(null)}
+            onItemClick={handleSidebarItemClick}
+            onExpandClick={() => {
+              if (isCollapsed) {
+                setIsCollapsed(false);
+                setHoveredSubmenu("masters");
+              }
+            }}
+          /> 
 
           {/* HR */}
           <MenuItem

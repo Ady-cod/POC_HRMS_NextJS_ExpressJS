@@ -1,7 +1,7 @@
 "use client";
 
 import { motion } from "framer-motion";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import Image from "next/image";
 
@@ -9,6 +9,27 @@ export default function NotFound() {
   const router = useRouter();
   const [loading, setLoading] = useState(false);
   const [countdown, setCountdown] = useState(5); // start countdown from 5
+
+  // When this not-found page mounts we set a short-lived flag so
+  // global components (like the AnimatedLoader) can detect that
+  // the app is rendering a 404 and suppress global loading UI.
+  // The flag is removed when the component unmounts or when
+  // redirect starts.
+  useEffect(() => {
+    try {
+      localStorage.setItem("suppressLoader", "1");
+    } catch {
+      /* ignore when storage unavailable */
+    }
+
+    return () => {
+      try {
+        localStorage.removeItem("suppressLoader");
+      } catch {
+        /* ignore */
+      }
+    };
+  }, []);
 
   const handleRedirect = () => {
     setLoading(true);

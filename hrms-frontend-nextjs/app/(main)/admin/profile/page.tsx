@@ -441,10 +441,10 @@ export default function Profile() {
               <Button
                 size="sm"
                 variant="link"
-                className="text-white flex items-center gap-2 no-underline font-bold text-xl"
+                className="flex items-center gap-2 no-underline font-bold text-xl text-lightblue-200"
                 onClick={() => fileInputRef.current?.click()}
               >
-                <Upload className="w-4 h-4 font-bold text-xl" />
+                <Upload className="w-4 h-4 font-bold text-xl text-lightblue-200" />
                 Upload
               </Button>
               <Button

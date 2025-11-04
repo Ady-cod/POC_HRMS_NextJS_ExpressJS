@@ -717,9 +717,9 @@ export default function Profile() {
                   onClick={() => toggleVisibility(field)}
                 >
                   {visible[field] ? (
-                    <Eye className="w-5 h-5 text-lightblue-600" />
-                  ) : (
                     <EyeOff className="w-5 h-5 text-lightblue-600" />
+                  ) : (
+                    <Eye className="w-5 h-5 text-lightblue-600" />
                   )}
                 </button>
               </div>

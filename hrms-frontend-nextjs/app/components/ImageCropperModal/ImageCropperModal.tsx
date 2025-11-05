@@ -6,7 +6,7 @@ import {
   CropperPreview,
   CropperPreviewRef,
 } from "react-advanced-cropper";
-// import "react-advanced-cropper/dist/style.css";
+import "react-advanced-cropper/dist/style.css";
 import { Button } from "@/components/ui/button";
 import {
   ZoomIn,
@@ -53,8 +53,8 @@ const ImageCropperModal: React.FC<ImageCropperModalProps> = ({
   };
 
   return (
-    <div className="fixed inset-0 flex items-center justify-center bg-black bg-opacity-70 z-50">
-      <div className="bg-white p-6 rounded-lg shadow-lg max-w-2xl w-full flex flex-col gap-4">
+    <div className="fixed inset-0 flex items-center justify-center bg-black bg-opacity-70 z-50 p-4">
+      <div className="bg-white p-4 sm:p-6 rounded-lg shadow-lg w-full max-w-full sm:max-w-xl md:max-w-2xl lg:max-w-3xl flex flex-col gap-4">
         <div className="text-center">
           <h2 className="text-xl font-semibold text-darkblue-900">
             Crop Your Image
@@ -64,25 +64,27 @@ const ImageCropperModal: React.FC<ImageCropperModalProps> = ({
           </p>
         </div>
         {/* Cropper */}
-        <Cropper
-          ref={cropperRef}
-          src={image}
-          className="cropper h-[400px] w-full"
-          stencilComponent={CircleStencil}
-          stencilProps={{ movable: true, resizable: true }}
-          onUpdate={(cropper) => previewRef.current?.update(cropper)}
-        />
-
-        {/* Preview */}
-        <div className="flex justify-center">
-          <CropperPreview
-            ref={previewRef}
-            className="w-32 h-32 rounded-full overflow-hidden border"
+        <div className="w-full flex flex-col items-center gap-4">
+          <Cropper
+            ref={cropperRef}
+            src={image}
+            className="cropper h-64 sm:h-80 md:h-[400px] w-full max-w-full"
+            stencilComponent={CircleStencil}
+            stencilProps={{ movable: true, resizable: true }}
+            onUpdate={(cropper) => previewRef.current?.update(cropper)}
           />
+
+          {/* Preview */}
+          <div className="flex justify-center">
+            <CropperPreview
+              ref={previewRef}
+              className="w-20 h-20 sm:w-28 sm:h-28 md:w-32 md:h-32 rounded-full overflow-hidden border"
+            />
+          </div>
         </div>
 
         {/* Controls */}
-        <div className="flex justify-center gap-2">
+        <div className="flex flex-wrap justify-center gap-2 sm:gap-3">
           <Button
             size="icon"
             variant="outline"
@@ -136,17 +138,17 @@ const ImageCropperModal: React.FC<ImageCropperModalProps> = ({
         </div>
 
         {/* Save / Cancel */}
-        <div className="flex justify-end gap-2">
+        <div className="flex flex-col sm:flex-row justify-end gap-2">
           <Button
             variant="outline"
             onClick={onClose}
-            className="text-lightblue-700 border-2 border-lightblue-100 hover:bg-lightblue-50 hover:text-lightblue-700"
+            className="text-orange-500 border-2 border-orange-500 hover:bg-orange-50 w-full sm:w-auto"
           >
             Cancel
           </Button>
           <Button
             onClick={handleSave}
-            className="bg-lightblue-600 hover:bg-lightblue-800"
+            className="bg-lightblue-600 hover:bg-lightblue-800 w-full sm:w-auto"
           >
             Save
           </Button>

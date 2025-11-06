@@ -268,6 +268,42 @@ export const updateEmployee = async (
       }
     }
 
+    // If email is being changed, require currentPassword in the raw request body
+    // and verify it against the stored hashed password. This prevents changing
+    // the email with any arbitrary password from the client side.
+    const rawBody = req.body as Record<string, unknown>;
+    if (validatedData.email) {
+      const currentPasswordFromBody =
+        typeof rawBody.currentPassword === "string"
+          ? rawBody.currentPassword
+          : null;
+      if (!currentPasswordFromBody) {
+        res
+          .status(400)
+          .json({ error: "Current password is required to change email." });
+        return;
+      }
+
+      // Fetch existing employee to validate password
+      const existingEmployee = await prisma.employee.findUnique({
+        where: { id },
+      });
+      if (!existingEmployee) {
+        res.status(404).json({ error: "Employee not found." });
+        return;
+      }
+
+      // Verify provided password matches stored hash
+      const passwordMatches = await verifyPassword(
+        currentPasswordFromBody,
+        existingEmployee.password as string
+      );
+      if (!passwordMatches) {
+        res.status(401).json({ error: "Invalid current password provided." });
+        return;
+      }
+    }
+
     // Prepare the data for Prisma
     const updatedEmployeeData: Prisma.EmployeeUpdateInput = {
       ...filteredEmployeeData,

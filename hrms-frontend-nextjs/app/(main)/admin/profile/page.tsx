@@ -23,6 +23,7 @@ import { formatZodErrors } from "@/utils/formatZodErrors";
 import TimeZoneSelect from "@/components/TimeZoneSelect/TimeZoneSelect";
 import moment from "moment-timezone";
 import ImageCropperModal from "@/components/ImageCropperModal/ImageCropperModal";
+import ConfirmationModal from "@/components/ConfirmationModal/ConfirmationModal";
 import { Upload, Trash2, User, Briefcase, Shield } from "lucide-react";
 
 // helper to format time zones
@@ -100,6 +101,17 @@ export default function Profile() {
   const [visible, setVisible] = useState<Record<string, boolean>>({});
 
   const fileInputRef = useRef<HTMLInputElement>(null);
+  const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
+  const [showEmailConfirm, setShowEmailConfirm] = useState(false);
+  const [emailConfirmPassword, setEmailConfirmPassword] = useState("");
+  const emailPasswordRef = useRef<HTMLInputElement | null>(null);
+
+  useEffect(() => {
+    if (showEmailConfirm) {
+      // autofocus the password input when modal opens
+      setTimeout(() => emailPasswordRef.current?.focus(), 50);
+    }
+  }, [showEmailConfirm]);
 
   const fieldLabels: Record<string, string> = {
     departmentName: "Department",
@@ -214,7 +226,7 @@ export default function Profile() {
     });
   };
 
-  const handleFieldSave = async (key: string) => {
+  const handleFieldSave = async (key: string, currentPassword?: string) => {
     try {
       const serverKey = serverKeyMap[key] || key;
 
@@ -254,6 +266,10 @@ export default function Profile() {
       const payload: Record<string, unknown> = {
         [serverKey]: formData[key as keyof typeof formData],
       };
+      // if caller provided current password (for sensitive updates), include it
+      if (currentPassword) {
+        payload.currentPassword = currentPassword;
+      }
 
       try {
         // updateEmployeeSchema already marks update fields as optional,
@@ -270,7 +286,39 @@ export default function Profile() {
         throw e;
       }
 
-      await updateEmployee(employeeId, payload);
+      const result = await updateEmployee(employeeId, payload);
+
+      // updateEmployee returns an object with success/message (and optional zodError)
+      if (!result || !result.success) {
+        // Server-side validation errors (zod) might be returned as zodError
+        type ServerErrorLike = {
+          zodError?: unknown;
+          message?: string;
+          [key: string]: unknown;
+        };
+
+        if (result && typeof result === "object") {
+          const resObj = result as ServerErrorLike;
+          if (resObj.zodError) {
+            try {
+              // If backend returned a zod-like error payload, show its message.
+              setErrors(
+                (prev) => prev || { [serverKey]: String(resObj.message) }
+              );
+            } catch {
+              // ignore formatting errors
+            }
+          }
+        }
+
+        const message =
+          result && typeof result === "object"
+            ? (result as ServerErrorLike).message
+            : undefined;
+
+        showToast("error", "Update failed", [message || "Unknown error"]);
+        return;
+      }
 
       showToast("success", "Updated", [
         `${fieldLabels[key] || key} updated successfully`,
@@ -371,13 +419,16 @@ export default function Profile() {
           Cover Image
         </h1>
 
-        {/* Action Buttons (Bottom-Right of Cover Block) */}
-        <div className="absolute bottom-0 right-0 flex flex-wrap md:flex-nowrap gap-1 md:gap-2 bg-black/30 p-1 md:p-2 rounded-tl-md md:rounded-tl-lg rounded-br-md md:rounded-br-lg">
+        {/* Action Buttons (top-right on small screens, bottom-right on md+) */}
+        <div className="absolute top-0 right-0 md:top-auto md:bottom-0 flex flex-wrap md:flex-nowrap gap-1 md:gap-2 bg-black/30 p-1 md:p-2 rounded-md">
           <button
             onClick={() => setCoverImage(null)}
-            className="px-2 md:px-3 py-1 text-xs md:text-sm font-medium text-orange-200 transition hover:text-orange-100"
+            aria-label="Remove cover image"
+            className="flex items-center justify-center px-2 md:px-3 py-1 text-xs md:text-sm font-medium text-orange-200 transition hover:text-orange-100"
           >
-            Remove
+            {/* Trash icon visible only on mobile, text visible on md+ */}
+            <Trash2 className="w-4 h-4 md:hidden" />
+            <span className="hidden md:inline">Remove</span>
           </button>
 
           <button
@@ -433,6 +484,9 @@ export default function Profile() {
                 onSave={(croppedImg) => {
                   setProfileImage(croppedImg);
                   setShowCropper(false);
+                  showToast("success", "Image saved", [
+                    "Profile image updated.",
+                  ]);
                 }}
               />
             )}
@@ -448,15 +502,17 @@ export default function Profile() {
                 <Upload className="w-4 h-4 text-lightblue-200" />
                 Upload
               </Button>
-              <Button
-                size="sm"
-                variant="link"
-                className="text-orange-200 flex items-center gap-2 no-underline font-bold text-sm sm:text-xl"
-                onClick={() => setProfileImage(null)}
-              >
-                <Trash2 className="w-4 h-4" />
-                Delete
-              </Button>
+              {profileImage && (
+                <Button
+                  size="sm"
+                  variant="link"
+                  className="text-orange-200 flex items-center gap-2 no-underline font-bold text-sm sm:text-xl"
+                  onClick={() => setShowDeleteConfirm(true)}
+                >
+                  <Trash2 className="w-4 h-4" />
+                  Delete
+                </Button>
+              )}
             </div>
 
             <input
@@ -467,6 +523,61 @@ export default function Profile() {
               onChange={handleImageUpload}
             />
           </div>
+
+          {/* Confirmation modal for deleting profile image */}
+          <ConfirmationModal
+            isOpen={showDeleteConfirm}
+            onClose={() => setShowDeleteConfirm(false)}
+            onConfirm={() => {
+              setProfileImage(null);
+              setShowDeleteConfirm(false);
+              showToast("success", "Image deleted", [
+                "Profile image has been removed.",
+              ]);
+            }}
+            title="Delete profile image"
+            description="Are you sure you want to delete your profile image? This action cannot be undone."
+          />
+
+          {/* Confirmation modal for updating email address */}
+          <ConfirmationModal
+            isOpen={showEmailConfirm}
+            onClose={() => {
+              setShowEmailConfirm(false);
+              setEmailConfirmPassword("");
+            }}
+            onConfirm={() => {
+              setShowEmailConfirm(false);
+              // proceed with saving the email field and send current password for verification/audit
+              void handleFieldSave("email", emailConfirmPassword);
+              setEmailConfirmPassword("");
+            }}
+            title="Confirm email change"
+            description={
+              <span>
+                Are you sure you want to change your email to{" "}
+                {<strong className="font-semibold">{formData.email}</strong>}?
+                Changing your email may affect sign-in and you may need to
+                verify the new address.
+              </span>
+            }
+            confirmDisabled={!emailConfirmPassword}
+          >
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-2">
+                Enter current password to confirm
+              </label>
+              <input
+                ref={emailPasswordRef}
+                type="password"
+                value={emailConfirmPassword}
+                onChange={(e) => setEmailConfirmPassword(e.target.value)}
+                className="w-full border border-gray-300 rounded-md px-3 py-2"
+                placeholder="Current password"
+                autoFocus
+              />
+            </div>
+          </ConfirmationModal>
 
           {/* Profile Info */}
           <div className="flex flex-col md:mb-8 mb-0 items-center md:items-start text-center md:text-left">
@@ -644,7 +755,14 @@ export default function Profile() {
                           </Button>
                           <Button
                             className="bg-lightblue-800 hover:bg-lightblue-600"
-                            onClick={() => handleFieldSave(key)}
+                            onClick={() => {
+                              if (key === "email") {
+                                // show confirmation before changing email
+                                setShowEmailConfirm(true);
+                              } else {
+                                void handleFieldSave(key);
+                              }
+                            }}
                           >
                             Save Changes
                           </Button>

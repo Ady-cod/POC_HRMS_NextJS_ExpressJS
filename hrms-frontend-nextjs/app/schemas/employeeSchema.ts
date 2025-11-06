@@ -177,9 +177,12 @@ export const createEmployeeSchema = (hasFetched: boolean) =>
         .refine(isAfterFoundingYear, {
           message: "Joining date cannot be less than 2021.",
         }),
-      departmentName: z
+      departmentId: z
         .string()
-        .min(2, "Department name is required, select from the list"),
+        .min(1, "Department selection is required")
+        .refine((id) => /^[a-f\d]{24}$/i.test(id), {
+          message: "Invalid department ID format",
+        }),
       gender: z.enum(["MALE", "FEMALE", "OTHER"]).optional(), // Based on radio buttons
       // Role is optional; default to INTERN if missing/empty; validate if provided
       role: z
@@ -311,10 +314,12 @@ export const updateEmployeeSchema = z
         message: "Joining date cannot be less than 2021.",
       })
       .optional(),
-    departmentName: z
+    departmentId: z
       .string()
-      .min(2, "Department name is required, select from the list")
-      .optional(),
+      .min(1, "Department selection is required")
+      .refine((id) => /^[a-f\d]{24}$/i.test(id), {
+        message: "Invalid department ID format",
+      }),
     gender: z.enum(["MALE", "FEMALE", "OTHER"]).optional(), // Based on radio buttons
     role: z.preprocess(
       (val) => (val === "" || val == null ? undefined : String(val).trim()),

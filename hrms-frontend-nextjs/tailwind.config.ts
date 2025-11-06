@@ -13,6 +13,7 @@ const config: Config = {
       screens: {
         xxs: "300px",
         xs: "440px",
+        '3xl': "2440px"
       },
       colors: {
         background: "hsl(var(--background))",

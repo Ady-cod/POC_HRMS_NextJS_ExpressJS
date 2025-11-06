@@ -40,6 +40,7 @@ model Employee {
   departmentId String?     @db.ObjectId
   department   Department? @relation(fields: [departmentId], references: [id], onDelete: SetNull) // Reference to the Department model will be set to null if the department is deleted
 
+  headOfDepartment    Department?  @relation("HeadOfDepartment")
   employeeLearningPathProgress EmployeeLearningPathProgress? // One-to-one relationship with EmployeeLearningPathProgress
 
   createdAt DateTime? @default(now()) // Records when the employee record was created
@@ -52,9 +53,12 @@ model Employee {
 model Department {
   id                 String  @id @default(auto()) @map("_id") @db.ObjectId
   name               String  @unique // e.g., "HR", "Web Dev", etc.
+  description        String?
   timezone           String? // IANA time zone identifier for the department (e.g., "America/New_York"). Chosen for its global standard and flexibility in representing time across different regions.
-  deptHeadEmployeeId String? // Optional reference to an employee ID representing the head of the department                       // Reference to an employee ID for tracking the department head
+  deptHeadEmployeeId String? @unique @db.ObjectId // Optional reference to an employee ID representing the head of the department                       // Reference to an employee ID for tracking the department head
+  icon               String?
 
+  head Employee? @relation("HeadOfDepartment", fields: [deptHeadEmployeeId], references: [id], onDelete: NoAction, onUpdate: NoAction)
   employees Employee[]
 
   createdAt DateTime @default(now()) // Records when the department was created

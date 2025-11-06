@@ -124,20 +124,20 @@ export const createEmployee = async (
     const validatedData: CreateEmployeeInput =
       await createEmployeeSchema.parseAsync(req.body);
 
-    const { departmentName, password, ...employeeData } = validatedData;
+    const { departmentId, password, ...employeeData } = validatedData;
 
     // Hash the password
     const hashedPassword = await hashPassword(password);
 
     // Find or create department
     let department = await prisma.department.findUnique({
-      where: { name: departmentName },
+      where: { id: departmentId },
     });
 
     if (!department) {
       if (DEMO_MODE) {
         department = await prisma.department.create({
-          data: { name: departmentName },
+          data: { name: departmentId },
         });
       } else {
         res.status(400).json({ error: "Department not found." });
@@ -231,7 +231,7 @@ export const updateEmployee = async (
 
     // console.log("Validated data after Zod:", validatedData);
 
-    const { departmentName, password, ...employeeData } = validatedData;
+    const { departmentId, password, ...employeeData } = validatedData;
 
     // Filter out undefined properties from employeeData in order to match Prisma's update type
     // and filter out null values to avoid frontend empty values (left unfilled) being set as null in the database
@@ -248,17 +248,20 @@ export const updateEmployee = async (
     }
 
     let department: Department | null = null;
-    if (departmentName) {
+    if (departmentId) {
       // Find or create department
       department = await prisma.department.findUnique({
-        where: { name: departmentName },
+        where: { id: departmentId },
       });
 
       if (!department) {
         if (DEMO_MODE) {
           // Create department in demo mode
           department = await prisma.department.create({
-            data: { name: departmentName },
+            data: { 
+                    name: `Demo Department (${departmentId.slice(0, 6)})`,
+                    description: "Auto-generated department (DEMO_MODE)" 
+            },
           });
         } else {
           // Return error in strict mode

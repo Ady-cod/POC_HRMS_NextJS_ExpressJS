@@ -366,26 +366,27 @@ export default function Profile() {
       </h1>
 
       {/* Profile Header */}
-      <div className="bg-orange-500 rounded-lg p-6 m-6 relative h-60 mb-36 flex justify-center items-center">
-        <h1 className="font-bold text-orange-300 text-6xl text-center">
+      <div className="bg-orange-500 rounded-lg p-6 mx-4 sm:mx-6 relative h-40 md:h-60 mb-40 md:mb-36 flex justify-center items-center">
+        <h1 className="font-bold text-orange-300 text-2xl sm:text-6xl text-center">
           Cover Image
         </h1>
 
-        {/* Action Buttons (Top-Right of Cover Block) */}
-        <div className="absolute bottom-0 right-0 flex gap-2 bg-black/30 p-2 rounded-br-lg rounded-tl-lg">
+        {/* Action Buttons (Bottom-Right of Cover Block) */}
+        <div className="absolute bottom-0 right-0 flex flex-wrap md:flex-nowrap gap-1 md:gap-2 bg-black/30 p-1 md:p-2 rounded-tl-md md:rounded-tl-lg rounded-br-md md:rounded-br-lg">
           <button
             onClick={() => setCoverImage(null)}
-            className="px-3 py-1 text-sm font-medium text-orange-200 transition"
+            className="px-2 md:px-3 py-1 text-xs md:text-sm font-medium text-orange-200 transition hover:text-orange-100"
           >
             Remove
           </button>
+
           <button
             onClick={() => setShowCoverChooser(true)}
-            className="px-3 py-1 text-sm font-medium text-white bg-lightblue-600 rounded-md hover:bg-lightblue-700 transition flex items-center gap-1"
+            className="flex items-center justify-center gap-1 px-2 md:px-3 py-1 text-xs md:text-sm font-medium text-white bg-lightblue-600 rounded-md hover:bg-lightblue-700 transition"
           >
             <svg
               xmlns="http://www.w3.org/2000/svg"
-              className="h-4 w-4"
+              className="w-3 h-3 md:w-4 md:h-4"
               fill="none"
               viewBox="0 0 24 24"
               stroke="currentColor"
@@ -397,13 +398,13 @@ export default function Profile() {
                 d="M11 5h2M12 4v16m8-8H4"
               />
             </svg>
-            Edit Image
+            <span className="hidden md:inline">Edit Image</span>
           </button>
         </div>
 
-        <div className="flex items-end gap-6 absolute -bottom-32 left-8">
+        <div className="flex flex-col md:flex-row items-center md:items-end gap-2 md:gap-6 absolute -bottom-40 md:-bottom-28 left-1/2 md:left-8 -translate-x-1/2 md:translate-x-0 bg-transparent w-full md:w-auto">
           {/* Profile Image with Hover Actions */}
-          <div className="relative w-60 h-60 bg-white rounded-full border overflow-hidden flex items-center justify-center group">
+          <div className="relative w-48 h-48 md:w-60 md:h-60 bg-white rounded-full border overflow-hidden flex items-center justify-center group">
             {profileImage ? (
               <Image
                 src={profileImage}
@@ -414,7 +415,7 @@ export default function Profile() {
             ) : (
               <div className="text-gray-400 flex items-center justify-center w-full h-full">
                 <svg
-                  className="w-16 h-16"
+                  className="w-12 h-12 sm:w-16 sm:h-16"
                   fill="currentColor"
                   viewBox="0 0 24 24"
                 >
@@ -441,16 +442,16 @@ export default function Profile() {
               <Button
                 size="sm"
                 variant="link"
-                className="flex items-center gap-2 no-underline font-bold text-xl text-lightblue-200"
+                className="flex items-center gap-2 no-underline font-bold text-sm sm:text-xl text-lightblue-200"
                 onClick={() => fileInputRef.current?.click()}
               >
-                <Upload className="w-4 h-4 font-bold text-xl text-lightblue-200" />
+                <Upload className="w-4 h-4 text-lightblue-200" />
                 Upload
               </Button>
               <Button
                 size="sm"
                 variant="link"
-                className="text-red-200 flex items-center gap-2 no-underline font-bold text-xl"
+                className="text-red-200 flex items-center gap-2 no-underline font-bold text-sm sm:text-xl"
                 onClick={() => setProfileImage(null)}
               >
                 <Trash2 className="w-4 h-4" />
@@ -468,8 +469,8 @@ export default function Profile() {
           </div>
 
           {/* Profile Info */}
-          <div className="flex flex-col mb-8">
-            <h2 className="text-4xl font-semibold text-darkblue-900">
+          <div className="flex flex-col md:mb-8 mb-0 items-center md:items-start text-center md:text-left">
+            <h2 className="text-2xl sm:text-4xl font-semibold text-darkblue-900">
               {formData.name}
             </h2>
             <p className="text-sm text-lightblue-400">{formData.email}</p>
@@ -478,14 +479,14 @@ export default function Profile() {
       </div>
 
       {/* Profile Fields */}
-      <div className="space-y-8 px-8">
+      <div className="space-y-8 px-4 sm:px-8">
         {fieldGroups.map((group) => (
           <div key={group.title}>
             <h2 className="text-xl font-bold text-lightblue-400 mb-4 flex items-center gap-2">
               <group.icon className="w-5 h-5 text-orange-500" />
               {group.title}
             </h2>
-            <div className="space-y-4 bg-[#E7ECF0] p-6 rounded-lg">
+            <div className="space-y-4 bg-[#E7ECF0] p-4 sm:p-6 rounded-lg">
               {group.fields.map((key) => {
                 const value = formData[key];
                 const serverKey = serverKeyMap[key] || key;
@@ -494,7 +495,7 @@ export default function Profile() {
                     key={key}
                     className="border-b border-b-black-600 py-3 flex flex-col sm:flex-row sm:items-center sm:justify-between"
                   >
-                    <label className="text-2xl font-bold text-darkblue-900 capitalize">
+                    <label className="text-lg sm:text-2xl font-bold text-darkblue-900 capitalize">
                       {fieldLabels[key] || key}
                     </label>
 
@@ -523,7 +524,7 @@ export default function Profile() {
                                   handleFieldChange("departmentName", val)
                                 }
                               >
-                                <SelectTrigger className="w-full border rounded-md p-2 text-xl text-lightblue-700">
+                                <SelectTrigger className="w-full border rounded-md p-2 text-base sm:text-xl text-lightblue-700">
                                   <SelectValue placeholder="Select Department" />
                                 </SelectTrigger>
                                 <SelectContent>
@@ -565,7 +566,7 @@ export default function Profile() {
                                   handleFieldChange("role", val)
                                 }
                               >
-                                <SelectTrigger className="w-full border rounded-md p-2 text-xl text-lightblue-700">
+                                <SelectTrigger className="w-full border rounded-md p-2 text-base sm:text-xl text-lightblue-700">
                                   <SelectValue placeholder="Select Role" />
                                 </SelectTrigger>
                                 <SelectContent>
@@ -602,7 +603,7 @@ export default function Profile() {
                           ) : key === "phone" ? (
                             <>
                               <Input
-                                className="w-full text-xl text-lightblue-700 border border-lightblue-700 rounded px-3 py-2 focus:outline-none focus:ring-2 focus:ring-lightblue-700 focus:text-xl"
+                                className="w-full text-base sm:text-xl text-lightblue-700 border border-lightblue-700 rounded px-3 py-2 focus:outline-none focus:ring-2 focus:ring-lightblue-700"
                                 value={formData.phone}
                                 onChange={(e) =>
                                   handlePhoneInputChange(e.target.value)
@@ -618,7 +619,7 @@ export default function Profile() {
                           ) : (
                             <>
                               <Input
-                                className="w-full text-xl text-lightblue-700 border border-lightblue-700 rounded px-3 py-2 focus:outline-none focus:ring-2 focus:ring-lightblue-700 focus:text-xl"
+                                className="w-full text-base sm:text-xl text-lightblue-700 border border-lightblue-700 rounded px-3 py-2 focus:outline-none focus:ring-2 focus:ring-lightblue-700"
                                 value={value}
                                 onChange={(e) =>
                                   handleFieldChange(key, e.target.value)
@@ -651,7 +652,7 @@ export default function Profile() {
                       </div>
                     ) : (
                       <div className="flex items-center justify-between w-full sm:w-2/3">
-                        <span className="text-lightblue-700 text-xl">
+                        <span className="text-lightblue-700 text-sm sm:text-xl">
                           {key === "timezone"
                             ? formatTimeZone(formData.timezone)
                             : value || "Not set"}
@@ -661,7 +662,7 @@ export default function Profile() {
                             !showPasswordChange && (
                               <Button
                                 variant="link"
-                                className="text-lightblue-700 p-0 font-bold text-lg"
+                                className="text-lightblue-700 p-0 font-bold text-sm sm:text-lg"
                                 onClick={() => setShowPasswordChange(true)}
                               >
                                 Change Password
@@ -670,7 +671,7 @@ export default function Profile() {
                           ) : (
                             <Button
                               variant="link"
-                              className="text-lightblue-700 p-0 font-bold text-lg"
+                              className="text-lightblue-700 p-0 font-bold text-sm sm:text-lg"
                               onClick={() => {
                                 setEditingField(key);
                                 setErrors(null);
@@ -690,7 +691,7 @@ export default function Profile() {
       </div>
 
       {/* Password Update */}
-      <div className="flex justify-end px-8">
+      <div className="flex justify-end px-4 sm:px-8">
         {showPasswordChange && (
           <div className="space-y-4 md:w-3/4 w-full rounded-lg">
             {["current", "new", "confirm"].map((field) => (

@@ -1,4 +1,7 @@
+"use client";
+
 import React, { useRef } from "react";
+import { createPortal } from "react-dom";
 import {
   Cropper,
   CropperRef,
@@ -52,8 +55,12 @@ const ImageCropperModal: React.FC<ImageCropperModalProps> = ({
     }
   };
 
-  return (
-    <div className="fixed inset-0 flex items-center justify-center bg-black bg-opacity-70 z-50 p-4">
+  // Safely compute the portal container only when `document` is available.
+  const container = typeof document !== "undefined" ? (document.body ?? document.documentElement) : null;
+  if (!container) return null;
+
+  return createPortal(
+    <div className="fixed inset-0 bg-black/70 flex items-center justify-center z-50 p-4">
       <div className="bg-white p-4 sm:p-6 rounded-lg shadow-lg w-full max-w-full sm:max-w-xl md:max-w-2xl lg:max-w-3xl flex flex-col gap-4">
         <div className="text-center">
           <h2 className="text-xl font-semibold text-darkblue-900">
@@ -68,7 +75,7 @@ const ImageCropperModal: React.FC<ImageCropperModalProps> = ({
           <Cropper
             ref={cropperRef}
             src={image}
-            className="cropper h-64 sm:h-80 md:h-[400px] w-full max-w-full"
+            className="cropper h-72 md:h-80 w-auto max-w-auto"
             stencilComponent={CircleStencil}
             stencilProps={{ movable: true, resizable: true }}
             onUpdate={(cropper) => previewRef.current?.update(cropper)}
@@ -138,11 +145,11 @@ const ImageCropperModal: React.FC<ImageCropperModalProps> = ({
         </div>
 
         {/* Save / Cancel */}
-        <div className="flex flex-col sm:flex-row justify-end gap-2">
+        <div className="flex flex-row justify-end gap-2">
           <Button
             variant="outline"
             onClick={onClose}
-            className="text-orange-500 border-2 border-orange-500 hover:bg-orange-50 w-full sm:w-auto"
+            className="text-orange-500 border-orange-500 hover:bg-orange-50 w-full sm:w-auto"
           >
             Cancel
           </Button>
@@ -154,7 +161,9 @@ const ImageCropperModal: React.FC<ImageCropperModalProps> = ({
           </Button>
         </div>
       </div>
-    </div>
+    </div>,
+    // render modal at the end of document body so fixed positioning isn't clipped
+    container
   );
 };
 

@@ -451,7 +451,7 @@ export default function Profile() {
               <Button
                 size="sm"
                 variant="link"
-                className="text-red-200 flex items-center gap-2 no-underline font-bold text-sm sm:text-xl"
+                className="text-orange-200 flex items-center gap-2 no-underline font-bold text-sm sm:text-xl"
                 onClick={() => setProfileImage(null)}
               >
                 <Trash2 className="w-4 h-4" />
@@ -638,7 +638,7 @@ export default function Profile() {
                           <Button
                             variant="outline"
                             onClick={() => handleCancel(key)}
-                            className="border-lightblue-800 text-lightblue-800 hover:bg-lightblue-50 hover:text-lightblue-900"
+                            className="text-orange-500 border-orange-500 hover:bg-orange-50"
                           >
                             Cancel
                           </Button>

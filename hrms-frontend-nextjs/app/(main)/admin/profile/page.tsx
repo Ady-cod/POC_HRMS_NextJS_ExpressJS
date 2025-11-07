@@ -421,15 +421,17 @@ export default function Profile() {
 
         {/* Action Buttons (top-right on small screens, bottom-right on md+) */}
         <div className="absolute top-0 right-0 md:top-auto md:bottom-0 flex flex-wrap md:flex-nowrap gap-1 md:gap-2 bg-black/30 p-1 md:p-2 rounded-md">
-          <button
-            onClick={() => setCoverImage(null)}
-            aria-label="Remove cover image"
-            className="flex items-center justify-center px-2 md:px-3 py-1 text-xs md:text-sm font-medium text-orange-200 transition hover:text-orange-100"
-          >
-            {/* Trash icon visible only on mobile, text visible on md+ */}
-            <Trash2 className="w-4 h-4 md:hidden" />
-            <span className="hidden md:inline">Remove</span>
-          </button>
+          {coverImage ? (
+            <button
+              onClick={() => setCoverImage(null)}
+              aria-label="Remove cover image"
+              className="flex items-center justify-center px-2 md:px-3 py-1 text-xs md:text-sm font-medium text-orange-200 transition hover:text-orange-100"
+            >
+              {/* Trash icon visible only on mobile, text visible on md+ */}
+              <Trash2 className="w-4 h-4 md:hidden" />
+              <span className="hidden md:inline">Remove</span>
+            </button>
+          ) : null}
 
           <button
             onClick={() => setShowCoverChooser(true)}

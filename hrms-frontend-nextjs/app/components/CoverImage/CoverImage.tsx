@@ -57,7 +57,7 @@ export default function CoverImage({
             className="text-gray-600 hover:text-gray-900"
             onClick={onClose}
           >
-            ×
+            <X className="w-6 h-6 text-gray-700" />
           </button>
         </div>
 

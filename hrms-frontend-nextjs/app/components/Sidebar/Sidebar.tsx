@@ -1,7 +1,7 @@
 "use client";
 import React, { useEffect, useState } from "react";
 import Link from "next/link";
-import Image from "next/image";
+import SBIcons from "../SidebarIcons/SidebarIcons";
 import "./Sidebar.css";
 import { usePathname } from "next/navigation";
 import {
@@ -32,50 +32,23 @@ const SIDEBAR_PATHS = {
 } as const;
 
 const ICONS = {
-  HOME: {
-    normal: "/images/home-darkblue-900.png",
-    active: "/images/home-white.png",
-  },
-  PROFILE: {
-    normal: "/images/My profile icon-darkblue-900.png",
-    active: "/images/MyProfileIcon-white.png",
-  },
-  EMPLOYEE: {
-    normal: "/images/My learning path icon-darkblue-900.png",
-    active: "/images/MyLearningPath-white.png",
-  },
-  APPLICANTS: {
-    normal: "/images/Applicants-darkblue-900.png",
-    active: "/images/MyProjectsIcon-white.png",
-  },
-  WORKFLOW: {
-    normal: "/images/My workflow icon-darkblue-900.png",
-    active: "/images/MyWorkflowIcon-white.png",
-  },
-  MASTERS: {
-    normal: "/images/Master-darkblue-900.png",
-    active: "/images/folderOpen-white.png",
-  },
-  HR: {
-    normal: "/images/HR-darkblue-900.png",
-    active: "/images/speedometer-white.png",
-  },
-  LOGOUT: {
-    normal: "/images/Logout icon-darkblue-900.png",
-    active: "/images/Logout-white.png",
-  },
-  COLLAPSE: "/images/collapse.png",
-  EXPAND: "/images/expand menu icon.png",
+  HOME: SBIcons.Home,
+  PROFILE: SBIcons.Profile,
+  EMPLOYEE: SBIcons.Employee,
+  APPLICANTS: SBIcons.Applicants,
+  WORKFLOW: SBIcons.Workflow,
+  MASTERS: SBIcons.Masters,
+  HR: SBIcons.Hr,
+  LOGOUT: SBIcons.Logout,
+  COLLAPSE: SBIcons.Collapse,
+  EXPAND: SBIcons.Expand,
 } as const;
 
 // Menu item configuration
 interface MenuItemConfig {
   path: string;
   label: string;
-  icons: {
-    normal: string;
-    active: string;
-  };
+  icons: React.FC<{ className?: string }>;
   hasSubmenu?: boolean;
   submenuItems?: SubmenuItemConfig[];
 }
@@ -164,27 +137,13 @@ const MenuItem = ({
   onClick,
   children,
 }: MenuItemProps) => {
-  const getItemClasses = () => {
-    const baseClasses =
-      "group flex items-center rounded-lg transition-all duration-200";
-
-    if (isCollapsed) {
-      return `${baseClasses} justify-center ${
-        isActive
-          ? "gap-0 px-0 py-1 bg-lightblue-500 border-r-8 border-orange-500 text-white cursor-default"
-          : "gap-0 px-0 py-1 hover:bg-darkblue-500 hover:border-r-4 hover:border-orange-500"
-      }`;
-    }
-
-    return `${baseClasses} justify-start ${
-      isActive
-        ? "gap-2 px-3 py-1.5 bg-lightblue-500 border-r-8 border-orange-500 text-white cursor-default"
-        : "gap-2 px-3 py-1.5 hover:bg-darkblue-500 hover:border-r-4 hover:border-orange-500"
-    }`;
-  };
+  const getItemClasses = () => `group flex items-center rounded-lg transition-all duration-200
+    ${isCollapsed ? "justify-center px-0 py-1" : "justify-start px-3 py-1.5"}
+    ${isActive ? "bg-lightblue-500 border-r-8 border-orange-500 text-white" : "hover:bg-darkblue-500 hover:border-r-4 hover:border-orange-500 text-darkblue-900"}
+  `;
 
   const getTextClasses = () => {
-    return `transition-colors duration-200 ${
+    return `ml-2 transition-colors duration-200 ${
       isActive ? "text-white" : "text-darkblue-900 group-hover:text-white"
     }`;
   };
@@ -192,26 +151,9 @@ const MenuItem = ({
   return (
     <li className="w-full">
       <Link href={config.path} onClick={onClick} className={getItemClasses()}>
-        <div className="relative w-6 h-6 flex items-center justify-center rounded-lg p-2 transition-all duration-200">
-          <Image
-            src={config.icons.normal}
-            alt={`${config.label} icon`}
-            width={24}
-            height={24}
-            className={`absolute top-0 left-0 transition-opacity duration-200 ${
-              isActive ? "opacity-0" : "opacity-100 group-hover:opacity-0"
-            }`}
-            style={{ pointerEvents: "none" }}
-          />
-          <Image
-            src={config.icons.active}
-            alt={`${config.label} icon active`}
-            width={24}
-            height={24}
-            className={`absolute top-0 left-0 transition-opacity duration-200 ${
-              isActive ? "opacity-100" : "opacity-0 group-hover:opacity-100"
-            }`}
-            style={{ pointerEvents: "none" }}
+        <div className="relative w-6 h-6 flex items-center justify-center transition-all duration-200">
+          <config.icons
+            className={`transition-colors duration-200 ${isActive ? "text-white" : "text-darkblue-900 group-hover:text-white"}`}
           />
         </div>
         {!isCollapsed && (
@@ -238,23 +180,11 @@ const SubmenuItem = ({ path, label, isActive, onClick }: SubmenuItemProps) => {
         href={path}
         onClick={onClick}
         className={`group flex items-start gap-2 px-2 py-1 rounded-lg transition-all duration-200 ${
-          isActive
-            ? "text-orange-500 cursor-default"
-            : "text-darkblue-900 hover:bg-darkblue-500 hover:border-r-4 hover:border-orange-500"
+          isActive ? "text-orange-500 cursor-default" : "text-darkblue-900 hover:bg-darkblue-500 hover:border-r-4 hover:border-orange-500"
         }`}
       >
-        <span
-          className={`text-lg leading-none transition-colors duration-200 ${
-            isActive ? "text-orange-500" : "group-hover:text-white"
-          }`}
-        >
-          •
-        </span>
-        <span
-          className={`leading-tight transition-colors duration-200 ${
-            isActive ? "text-orange-500" : "group-hover:text-white"
-          }`}
-        >
+        <span className={`text-lg leading-none transition-colors duration-200 ${isActive ? "text-orange-500" : "group-hover:text-white"}`}>•</span>
+        <span className={`leading-tight transition-colors duration-200 ${isActive ? "text-orange-500" : "group-hover:text-white"}`}>
           {label}
         </span>
       </Link>
@@ -286,31 +216,17 @@ const Submenu = ({
   onItemClick,
   onExpandClick,
 }: SubmenuProps) => {
-  const getContainerClasses = () => {
-    const baseClasses = "group relative w-full rounded-lg";
+  const getContainerClasses = () => `group relative w-full flex items-center rounded-lg transition-all duration-200
+    ${isCollapsed ? "justify-center px-0 py-1" : "justify-start px-3 py-1.5"}
+    ${isActive ? "bg-lightblue-500 border-r-8 border-orange-500 text-white" : "hover:bg-darkblue-500 hover:border-r-4 hover:border-orange-500 text-darkblue-900"}
+  `;
 
-    if (isCollapsed) {
-      return `${baseClasses} flex items-center justify-center ${
-        isActive
-          ? "gap-0 px-0 py-1 bg-lightblue-500 border-r-8 border-orange-500 text-white cursor-pointer"
-          : "gap-0 px-0 py-1 hover:bg-darkblue-500 hover:border-r-4 hover:border-orange-500"
-      }`;
-    }
-
-    return `${baseClasses} flex items-center ${
-      isActive
-        ? "gap-2 px-3 py-1.5 bg-lightblue-500 border-r-8 border-orange-500 text-white"
-        : "gap-2 px-3 py-1.5 hover:bg-darkblue-500 hover:border-r-4 hover:border-orange-500 text-darkblue-900"
-    }`;
-  };
-
-  const getSubmenuClasses = () => {
-    return `ml-8 mt-1 list-inside sm:text-[13px] space-y-0.5 transition-all duration-300 ease-in-out ${
+  const getSubmenuClasses = () =>
+    `ml-8 mt-1 list-inside sm:text-[13px] space-y-0.5 transition-all duration-300 ease-in-out ${
       !isCollapsed && (isHovered || isActive)
         ? "opacity-100 translate-y-0 max-h-[40vh] overflow-y-auto"
         : "opacity-0 -translate-y-2 max-h-0 overflow-hidden"
     }`;
-  };
 
   return (
     <li
@@ -319,37 +235,14 @@ const Submenu = ({
       onMouseLeave={onMouseLeave}
     >
       <div className={getContainerClasses()} onClick={onExpandClick}>
-        <div className="relative w-6 h-6 flex items-center justify-center rounded-lg p-2 transition-all duration-200">
-          <Image
-            src={config.icons.normal}
-            alt={`${config.label} icon`}
-            width={24}
-            height={24}
-            className={`absolute top-0 left-0 transition-opacity duration-200 ${
-              isActive ? "opacity-0" : "opacity-100 group-hover:opacity-0"
-            }`}
-          />
-          <Image
-            src={config.icons.active}
-            alt={`${config.label} icon active`}
-            width={24}
-            height={24}
-            className={`absolute top-0 left-0 transition-opacity duration-200 ${
-              isActive ? "opacity-100" : "opacity-0 group-hover:opacity-100"
+        <div className="relative w-6 h-6 flex items-center justify-center transition-all duration-200">
+          <config.icons
+            className={`transition-colors duration-200 ${
+              isActive ? "text-white" : "text-darkblue-900 group-hover:text-white"
             }`}
           />
         </div>
-        {!isCollapsed && (
-          <span
-            className={`transition-colors duration-200 ${
-              isActive
-                ? "text-white"
-                : "text-darkblue-900 group-hover:text-white"
-            }`}
-          >
-            {config.label}
-          </span>
-        )}
+        {!isCollapsed && <span className={`ml-2 transition-colors duration-200 ${isActive ? "text-white" : "text-darkblue-900 group-hover:text-white"}`}>{config.label}</span>}
         {isCollapsed && isHovered && (
           <span className="absolute left-full ml-2 bg-gray-800 text-white text-sm px-2 py-1 rounded whitespace-nowrap z-50">
             {config.label}
@@ -405,16 +298,9 @@ const getSidebarStyle = (isCollapsed: boolean): React.CSSProperties => ({
   scrollbarColor: "#0c3e66 #d0dae2", // Firefox
 });
 
-interface CollapseIcon {
-  src: string;
-  alt: string;
-}
 
-const getCollapseIcon = (isCollapsed: boolean): CollapseIcon => {
-  return {
-    src: isCollapsed ? ICONS.EXPAND : ICONS.COLLAPSE,
-    alt: isCollapsed ? "expand menu icon" : "collapse menu icon",
-  };
+const getCollapseIcon = (isCollapsed: boolean) => {
+  return isCollapsed ? ICONS.EXPAND : ICONS.COLLAPSE;
 };
 
 interface SideBarProps {
@@ -484,12 +370,9 @@ const Sidebar = ({ isOpen, toggleSidebar }: SideBarProps) => {
     );
   };
 
-  const toggleCollapse = () => {
-    setIsCollapsed(!isCollapsed);
-  };
 
   const renderSidebar = () => {
-    const collapseIcon = getCollapseIcon(isCollapsed);
+    const CollapseIcon  = getCollapseIcon(isCollapsed);
 
     return (
       <div
@@ -501,13 +384,9 @@ const Sidebar = ({ isOpen, toggleSidebar }: SideBarProps) => {
             !isCollapsed ? "justify-end" : "justify-center"
           } mb-2`}
         >
-          <Image
-            src={collapseIcon.src}
-            alt={collapseIcon.alt}
-            width={44}
-            height={44}
-            className="rounded-lg transition-all duration-200 hover:cursor-pointer mb-4"
-            onClick={toggleCollapse}
+          <CollapseIcon
+            className="transition-all duration-200 hover:cursor-pointer mt-4 mb-8"
+            onClick={() => setIsCollapsed(!isCollapsed)}
           />
         </div>
 
@@ -593,7 +472,6 @@ const Sidebar = ({ isOpen, toggleSidebar }: SideBarProps) => {
             <form
               action={logout}
               onSubmit={() => {
-                // Clear connection status from localStorage on logout
                 if (typeof window !== "undefined") {
                   localStorage.removeItem("hrms_connection_status");
                 }
@@ -601,35 +479,12 @@ const Sidebar = ({ isOpen, toggleSidebar }: SideBarProps) => {
             >
               <button
                 type="submit"
-                className={`group flex items-center justify-${
-                  isCollapsed ? "center" : "start"
-                } transition-all duration-200 w-full rounded-lg ${
-                  isCollapsed
-                    ? "gap-0 px-0 py-1 hover:bg-darkblue-500 hover:border-r-4 hover:border-orange-500"
-                    : "gap-2 px-3 py-1.5 hover:bg-darkblue-500 hover:border-r-4 hover:border-orange-500"
-                } text-darkblue-900`}
+                className={`group flex items-center justify-${isCollapsed ? "center" : "start"} transition-all duration-200 w-full rounded-lg gap-2 px-3 py-1.5 hover:bg-darkblue-500 hover:border-r-4 hover:border-orange-500 text-darkblue-900`}
               >
-                <div className="relative w-6 h-5 flex items-center justify-center rounded-lg transition-all duration-200">
-                  <Image
-                    src={ICONS.LOGOUT.normal}
-                    alt="Logout icon"
-                    width={24}
-                    height={24}
-                    className="absolute top-0 left-0 transition-opacity duration-200 opacity-100 group-hover:opacity-0"
-                  />
-                  <Image
-                    src={ICONS.LOGOUT.active}
-                    alt="Logout icon"
-                    width={24}
-                    height={24}
-                    className="absolute top-0 left-0 transition-opacity duration-200 opacity-0 group-hover:opacity-100"
-                  />
+                <div className="w-6 h-6 flex items-center justify-center">
+                  <ICONS.LOGOUT className="transition-colors duration-200 group-hover:text-white text-darkblue-900" />
                 </div>
-                {!isCollapsed && (
-                  <span className="transition-colors duration-200 text-darkblue-900 group-hover:text-white">
-                    Logout
-                  </span>
-                )}
+                {!isCollapsed && <span className="  transition-colors duration-200 text-darkblue-900 group-hover:text-white">Logout</span>}
               </button>
             </form>
           </li>

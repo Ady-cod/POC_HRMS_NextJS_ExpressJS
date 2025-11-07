@@ -413,8 +413,8 @@ export default function Profile() {
         My Profile
       </h1>
 
-      {/* Profile Header */}
-      <div className="bg-orange-500 rounded-lg p-6 mx-4 sm:mx-6 relative h-40 md:h-60 mb-40 md:mb-36 flex justify-center items-center">
+      {/* Profile Cover Image */}
+      <div className="bg-orange-500 rounded-lg p-6 mx-4 relative h-40 md:h-60 flex justify-center items-center">
         <h1 className="font-bold text-orange-300 text-2xl sm:text-6xl text-center">
           Cover Image
         </h1>
@@ -454,140 +454,139 @@ export default function Profile() {
             <span className="hidden md:inline">Edit Image</span>
           </button>
         </div>
+      </div>
 
-        <div className="flex flex-col md:flex-row items-center md:items-end gap-2 md:gap-6 absolute -bottom-40 md:-bottom-28 left-1/2 md:left-8 -translate-x-1/2 md:translate-x-0 bg-transparent w-full md:w-auto">
-          {/* Profile Image with Hover Actions */}
-          <div className="relative w-48 h-48 md:w-60 md:h-60 bg-white rounded-full border overflow-hidden flex items-center justify-center group">
-            {profileImage ? (
-              <Image
-                src={profileImage}
-                alt="Profile"
-                fill
-                className="object-cover"
-              />
-            ) : (
-              <div className="text-gray-400 flex items-center justify-center w-full h-full">
-                <svg
-                  className="w-12 h-12 sm:w-16 sm:h-16"
-                  fill="currentColor"
-                  viewBox="0 0 24 24"
-                >
-                  <path d="M12 12c2.7 0 4.8-2.1 4.8-4.8S14.7 2.4 12 2.4 7.2 4.5 7.2 7.2 9.3 12 12 12zm0 2.4c-3.2 0-9.6 1.6-9.6 4.8V22h19.2v-2.8c0-3.2-6.4-4.8-9.6-4.8z" />
-                </svg>
-              </div>
-            )}
+      {/* Profile Image - overlap cover (50% inside cover area) */}
+      <div className="-z-2 relative mx-auto md:ml-8 -mt-24 md:-mt-32 flex flex-col md:flex-row items-center md:items-end gap-2 md:gap-6 w-full md:w-auto">
+        {/* Profile Image with Hover Actions */}
+        <div className="relative w-48 h-48 md:w-60 md:h-60 bg-white rounded-full border overflow-hidden flex items-center justify-center group">
+          {profileImage ? (
+            <Image
+              src={profileImage}
+              alt="Profile"
+              fill
+              className="object-cover"
+            />
+          ) : (
+            <div className="text-gray-400 flex items-center justify-center w-full h-full">
+              <svg
+                className="w-12 h-12 sm:w-16 sm:h-16"
+                fill="currentColor"
+                viewBox="0 0 24 24"
+              >
+                <path d="M12 12c2.7 0 4.8-2.1 4.8-4.8S14.7 2.4 12 2.4 7.2 4.5 7.2 7.2 9.3 12 12 12zm0 2.4c-3.2 0-9.6 1.6-9.6 4.8V22h19.2v-2.8c0-3.2-6.4-4.8-9.6-4.8z" />
+              </svg>
+            </div>
+          )}
 
-            {/* Cropper Modal */}
-            {tempImage && (
-              <ImageCropperModal
-                image={tempImage}
-                open={showCropper}
-                onClose={() => setShowCropper(false)}
-                onSave={(croppedImg) => {
-                  setProfileImage(croppedImg);
-                  setShowCropper(false);
-                  showToast("success", "Image saved", [
-                    "Profile image updated.",
-                  ]);
-                }}
-              />
-            )}
+          {/* Cropper Modal */}
+          {tempImage && (
+            <ImageCropperModal
+              image={tempImage}
+              open={showCropper}
+              onClose={() => setShowCropper(false)}
+              onSave={(croppedImg) => {
+                setProfileImage(croppedImg);
+                setShowCropper(false);
+                showToast("success", "Image saved", ["Profile image updated."]);
+              }}
+            />
+          )}
 
-            {/* Hover Overlay with Buttons */}
-            <div className="absolute inset-0 backdrop-blur-sm bg-black/50 opacity-0 group-hover:opacity-100 flex flex-col items-center justify-center gap-2 transition-opacity duration-300">
+          {/* Hover Overlay with Buttons */}
+          <div className="absolute inset-0 backdrop-blur-sm bg-black/50 opacity-0 group-hover:opacity-100 flex flex-col items-center justify-center gap-2 transition-opacity duration-300">
+            <Button
+              size="sm"
+              variant="link"
+              className="flex items-center gap-2 no-underline font-bold text-sm sm:text-xl text-lightblue-200"
+              onClick={() => fileInputRef.current?.click()}
+            >
+              <Upload className="w-4 h-4 text-lightblue-200" />
+              Upload
+            </Button>
+            {profileImage && (
               <Button
                 size="sm"
                 variant="link"
-                className="flex items-center gap-2 no-underline font-bold text-sm sm:text-xl text-lightblue-200"
-                onClick={() => fileInputRef.current?.click()}
+                className="text-orange-200 flex items-center gap-2 no-underline font-bold text-sm sm:text-xl"
+                onClick={() => setShowDeleteConfirm(true)}
               >
-                <Upload className="w-4 h-4 text-lightblue-200" />
-                Upload
+                <Trash2 className="w-4 h-4" />
+                Delete
               </Button>
-              {profileImage && (
-                <Button
-                  size="sm"
-                  variant="link"
-                  className="text-orange-200 flex items-center gap-2 no-underline font-bold text-sm sm:text-xl"
-                  onClick={() => setShowDeleteConfirm(true)}
-                >
-                  <Trash2 className="w-4 h-4" />
-                  Delete
-                </Button>
-              )}
-            </div>
+            )}
+          </div>
 
+          <input
+            type="file"
+            accept="image/*"
+            hidden
+            ref={fileInputRef}
+            onChange={handleImageUpload}
+          />
+        </div>
+
+        {/* Confirmation modal for deleting profile image */}
+        <ConfirmationModal
+          isOpen={showDeleteConfirm}
+          onClose={() => setShowDeleteConfirm(false)}
+          onConfirm={() => {
+            setProfileImage(null);
+            setShowDeleteConfirm(false);
+            showToast("success", "Image deleted", [
+              "Profile image has been removed.",
+            ]);
+          }}
+          title="Delete profile image"
+          description="Are you sure you want to delete your profile image? This action cannot be undone."
+        />
+
+        {/* Confirmation modal for updating email address */}
+        <ConfirmationModal
+          isOpen={showEmailConfirm}
+          onClose={() => {
+            setShowEmailConfirm(false);
+            setEmailConfirmPassword("");
+          }}
+          onConfirm={() => {
+            setShowEmailConfirm(false);
+            // proceed with saving the email field and send current password for verification/audit
+            void handleFieldSave("email", emailConfirmPassword);
+            setEmailConfirmPassword("");
+          }}
+          title="Confirm email change"
+          description={
+            <span>
+              Are you sure you want to change your email to{" "}
+              {<strong className="font-semibold">{formData.email}</strong>}?
+              Changing your email may affect sign-in and you may need to verify
+              the new address.
+            </span>
+          }
+          confirmDisabled={!emailConfirmPassword}
+        >
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-2">
+              Enter current password to confirm
+            </label>
             <input
-              type="file"
-              accept="image/*"
-              hidden
-              ref={fileInputRef}
-              onChange={handleImageUpload}
+              ref={emailPasswordRef}
+              type="password"
+              value={emailConfirmPassword}
+              onChange={(e) => setEmailConfirmPassword(e.target.value)}
+              className="w-full border border-gray-300 rounded-md px-3 py-2"
+              placeholder="Current password"
+              autoFocus
             />
           </div>
+        </ConfirmationModal>
 
-          {/* Confirmation modal for deleting profile image */}
-          <ConfirmationModal
-            isOpen={showDeleteConfirm}
-            onClose={() => setShowDeleteConfirm(false)}
-            onConfirm={() => {
-              setProfileImage(null);
-              setShowDeleteConfirm(false);
-              showToast("success", "Image deleted", [
-                "Profile image has been removed.",
-              ]);
-            }}
-            title="Delete profile image"
-            description="Are you sure you want to delete your profile image? This action cannot be undone."
-          />
-
-          {/* Confirmation modal for updating email address */}
-          <ConfirmationModal
-            isOpen={showEmailConfirm}
-            onClose={() => {
-              setShowEmailConfirm(false);
-              setEmailConfirmPassword("");
-            }}
-            onConfirm={() => {
-              setShowEmailConfirm(false);
-              // proceed with saving the email field and send current password for verification/audit
-              void handleFieldSave("email", emailConfirmPassword);
-              setEmailConfirmPassword("");
-            }}
-            title="Confirm email change"
-            description={
-              <span>
-                Are you sure you want to change your email to{" "}
-                {<strong className="font-semibold">{formData.email}</strong>}?
-                Changing your email may affect sign-in and you may need to
-                verify the new address.
-              </span>
-            }
-            confirmDisabled={!emailConfirmPassword}
-          >
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2">
-                Enter current password to confirm
-              </label>
-              <input
-                ref={emailPasswordRef}
-                type="password"
-                value={emailConfirmPassword}
-                onChange={(e) => setEmailConfirmPassword(e.target.value)}
-                className="w-full border border-gray-300 rounded-md px-3 py-2"
-                placeholder="Current password"
-                autoFocus
-              />
-            </div>
-          </ConfirmationModal>
-
-          {/* Profile Info */}
-          <div className="flex flex-col md:mb-8 mb-0 items-center md:items-start text-center md:text-left">
-            <h2 className="text-2xl sm:text-4xl font-semibold text-darkblue-900">
-              {formData.name}
-            </h2>
-            <p className="text-sm text-lightblue-400">{formData.email}</p>
-          </div>
+        {/* Profile Info */}
+        <div className="flex flex-col md:mb-8 mb-0 items-center md:items-start text-center md:text-left">
+          <h2 className="text-2xl sm:text-4xl font-semibold text-darkblue-900">
+            {formData.name}
+          </h2>
+          <p className="text-sm text-lightblue-400">{formData.email}</p>
         </div>
       </div>
 

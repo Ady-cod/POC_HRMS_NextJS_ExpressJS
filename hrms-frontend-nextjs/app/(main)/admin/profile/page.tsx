@@ -105,6 +105,12 @@ export default function Profile() {
   const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
   const [showEmailConfirm, setShowEmailConfirm] = useState(false);
   const [showCoverRemoveConfirm, setShowCoverRemoveConfirm] = useState(false);
+  const [showRoleDeptConfirm, setShowRoleDeptConfirm] = useState<{
+    open: boolean;
+    key?: string;
+  }>({ open: false });
+  // user must type the exact role/department name to confirm
+  const [roleDeptConfirmText, setRoleDeptConfirmText] = useState("");
   const [emailConfirmPassword, setEmailConfirmPassword] = useState("");
   const emailPasswordRef = useRef<HTMLInputElement | null>(null);
 
@@ -607,6 +613,71 @@ export default function Profile() {
             description="Are you sure you want to remove your cover image? This action cannot be undone."
           />
 
+          {/* Confirmation modal for role / department changes (type exact name to confirm) */}
+          <ConfirmationModal
+            isOpen={showRoleDeptConfirm.open}
+            onClose={() => {
+              setShowRoleDeptConfirm({ open: false });
+              setRoleDeptConfirmText("");
+            }}
+            onConfirm={() => {
+              // call handleFieldSave without password; the typed confirmation already validated
+              if (showRoleDeptConfirm.key) {
+                void handleFieldSave(showRoleDeptConfirm.key);
+              }
+              setShowRoleDeptConfirm({ open: false });
+              setRoleDeptConfirmText("");
+            }}
+            title="Confirm change"
+            description={
+              <span>
+                Are you sure you want to change your{" "}
+                <strong>
+                  {showRoleDeptConfirm.key === "departmentName"
+                    ? "Department"
+                    : showRoleDeptConfirm.key}
+                </strong>
+                ? This may affect access and permissions.
+              </span>
+            }
+            // disabled unless user typed the exact value (case-insensitive, trimmed)
+            confirmDisabled={
+              !(
+                showRoleDeptConfirm.key &&
+                String(
+                  formData[showRoleDeptConfirm.key as keyof FormData] || ""
+                )
+                  .trim()
+                  .toLowerCase() === roleDeptConfirmText.trim().toLowerCase()
+              )
+            }
+          >
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-2">
+                Type the exact{" "}
+                {showRoleDeptConfirm.key === "departmentName"
+                  ? "department"
+                  : "role"}{" "}
+                name to confirm
+              </label>
+              <input
+                type="text"
+                value={roleDeptConfirmText}
+                onChange={(e) => setRoleDeptConfirmText(e.target.value)}
+                className="w-full border border-gray-300 rounded-md px-3 py-2"
+                placeholder={
+                  showRoleDeptConfirm.key
+                    ? `Type "${String(
+                        formData[showRoleDeptConfirm.key as keyof FormData] ||
+                          ""
+                      )}" to confirm`
+                    : "Type the exact name to confirm"
+                }
+                autoFocus
+              />
+            </div>
+          </ConfirmationModal>
+
           {/* Profile Info */}
           <div className="flex flex-col md:mb-8 mb-0 items-center md:items-start text-center md:text-left">
             <h2 className="text-2xl sm:text-4xl font-semibold text-darkblue-900">
@@ -786,6 +857,12 @@ export default function Profile() {
                                 if (key === "email") {
                                   // show confirmation before changing email
                                   setShowEmailConfirm(true);
+                                } else if (
+                                  key === "role" ||
+                                  key === "departmentName"
+                                ) {
+                                  // require confirmation (and password) for role/department changes
+                                  setShowRoleDeptConfirm({ open: true, key });
                                 } else {
                                   void handleFieldSave(key);
                                 }
@@ -878,7 +955,7 @@ export default function Profile() {
               <div className="flex flex-col sm:flex-row gap-2 sm:justify-end">
                 <Button
                   variant="outline"
-                  className="border-lightblue-800 text-lightblue-800 hover:bg-lightblue-50 hover:text-lightblue-900 w-full sm:w-auto"
+                  className="text-orange-500 border-orange-500 hover:bg-orange-50 w-full sm:w-auto"
                   onClick={() => setShowPasswordChange(false)}
                 >
                   Cancel

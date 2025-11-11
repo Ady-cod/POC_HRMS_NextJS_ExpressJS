@@ -140,7 +140,7 @@ export default function Profile() {
     email: "email",
     phone: "phoneNumber",
     timezone: "timezone",
-    departmentName: "departmentName",
+    departmentName: "departmentId",
     role: "role",
   };
 
@@ -317,8 +317,20 @@ export default function Profile() {
       }
 
       // Build payload and validate against zod partial schema (single-field validation)
+      if (key === "departmentName" && !formData.department) {
+        showToast("error", "Select a department", [
+          "Please choose a department before saving.",
+        ]);
+        return;
+      }
+
+      const valueForPayload =
+        key === "departmentName"
+          ? formData.department
+          : formData[key as keyof typeof formData];
+
       const payload: Record<string, unknown> = {
-        [serverKey]: formData[key as keyof typeof formData],
+        [serverKey]: valueForPayload,
       };
       // if caller provided current password (for sensitive updates), include it
       if (currentPassword) {
@@ -752,7 +764,6 @@ export default function Profile() {
               <div className="space-y-4 bg-[#E7ECF0] p-4 sm:p-6 rounded-lg">
                 {group.fields.map((key) => {
                   const value = formData[key];
-                  const serverKey = serverKeyMap[key] || key;
                   return (
                     <div
                       key={key}
@@ -762,77 +773,85 @@ export default function Profile() {
                         {fieldLabels[key] || key}
                       </label>
 
-                    {editingField === key ? (
-                      <div className="flex flex-col sm:flex-row sm:items-center gap-2 w-full sm:w-2/3">
-                        {key === "timezone" ? (
-                          <TimeZoneSelect
-                            value={formData.timezone}
-                            onChange={(val) =>
-                              handleFieldChange("timezone", val)
-                            }
-                          />
-                        ) : key === "departmentName" ? (
-                          <Select
-                            disabled={isLoadingDepartments}
-                            value={formData.department || ""}
-                            onValueChange={(val) =>
-                              handleFieldChange("departmentName", val)
-                            }
-                          >
-                            <SelectTrigger className="w-full border rounded-md p-2 text-xl text-lightblue-700">
-                              <SelectValue placeholder="Select Department" />
-                            </SelectTrigger>
-                            <SelectContent>
-                              {departments.map((dept) => (
-                                <SelectItem
-                                  key={dept.id}
-                                  value={dept.id}
-                                  className="data-[highlighted]:bg-lightblue-100 data-[highlighted]:text-lightblue-700 data-[state=checked]:bg-lightblue-800 data-[state=checked]:text-white cursor-pointer text-lightblue-800"
-                                >
-                                  {dept.name}
-                                </SelectItem>
-                              ))}
-                            </SelectContent>
-                          </Select>
-                        ) : key === "role" ? (
-                          <Select
-                            value={formData.role}
-                            onValueChange={(val) =>
-                              handleFieldChange("role", val)
-                            }
-                          >
-                            <SelectTrigger className="w-full border rounded-md p-2 text-xl text-lightblue-700">
-                              <SelectValue placeholder="Select Role" />
-                            </SelectTrigger>
-                            <SelectContent>
-                              {[
-                                "EMPLOYEE",
-                                "INTERN",
-                                "HR_INTERN",
-                                "HR_EMPLOYEE",
-                                "HR_MANAGER",
-                                "MANAGER",
-                                "ADMIN",
-                              ].map((role) => (
-                                <SelectItem
-                                  key={role}
-                                  value={role}
-                                  className="data-[highlighted]:bg-lightblue-100 data-[highlighted]:text-lightblue-700 data-[state=checked]:bg-lightblue-800 data-[state=checked]:text-white cursor-pointer text-lightblue-800"
-                                >
-                                  {role}
-                                </SelectItem>
-                              ))}
-                            </SelectContent>
-                          </Select>
-                        ) : (
-                          <Input
-                            className="w-full text-xl text-lightblue-700 border border-lightblue-700 rounded px-3 py-2 focus:outline-none focus:ring-2 focus:ring-lightblue-700 focus:text-xl"
-                            value={value}
-                            onChange={(e) =>
-                              handleFieldChange(key, e.target.value)
-                            }
-                          />
-                        )}
+                      {editingField === key ? (
+                        <div className="flex flex-col sm:flex-row sm:items-center gap-2 w-full sm:w-2/3">
+                          {key === "timezone" ? (
+                            <TimeZoneSelect
+                              value={formData.timezone}
+                              onChange={(val) =>
+                                handleFieldChange("timezone", val)
+                              }
+                            />
+                          ) : key === "departmentName" ? (
+                            <Select
+                              disabled={isLoadingDepartments}
+                              value={formData.department || ""}
+                              onValueChange={(val) =>
+                                handleFieldChange("departmentName", val)
+                              }
+                            >
+                              <SelectTrigger className="w-full border rounded-md p-2 text-xl text-lightblue-700">
+                                <SelectValue placeholder="Select Department" />
+                              </SelectTrigger>
+                              <SelectContent>
+                                {departments.map((dept) => (
+                                  <SelectItem
+                                    key={dept.id}
+                                    value={dept.id}
+                                    className="data-[highlighted]:bg-lightblue-100 data-[highlighted]:text-lightblue-700 data-[state=checked]:bg-lightblue-800 data-[state=checked]:text-white cursor-pointer text-lightblue-800"
+                                  >
+                                    {dept.name}
+                                  </SelectItem>
+                                ))}
+                              </SelectContent>
+                            </Select>
+                          ) : key === "role" ? (
+                            <Select
+                              value={formData.role}
+                              onValueChange={(val) =>
+                                handleFieldChange("role", val)
+                              }
+                            >
+                              <SelectTrigger className="w-full border rounded-md p-2 text-xl text-lightblue-700">
+                                <SelectValue placeholder="Select Role" />
+                              </SelectTrigger>
+                              <SelectContent>
+                                {[
+                                  "EMPLOYEE",
+                                  "INTERN",
+                                  "HR_INTERN",
+                                  "HR_EMPLOYEE",
+                                  "HR_MANAGER",
+                                  "MANAGER",
+                                  "ADMIN",
+                                ].map((role) => (
+                                  <SelectItem
+                                    key={role}
+                                    value={role}
+                                    className="data-[highlighted]:bg-lightblue-100 data-[highlighted]:text-lightblue-700 data-[state=checked]:bg-lightblue-800 data-[state=checked]:text-white cursor-pointer text-lightblue-800"
+                                  >
+                                    {role}
+                                  </SelectItem>
+                                ))}
+                              </SelectContent>
+                            </Select>
+                          ) : key === "phone" ? (
+                            <Input
+                              className="w-full text-xl text-lightblue-700 border border-lightblue-700 rounded px-3 py-2 focus:outline-none focus:ring-2 focus:ring-lightblue-700 focus:text-xl"
+                              value={value}
+                              onChange={(e) =>
+                                handlePhoneInputChange(e.target.value)
+                              }
+                            />
+                          ) : (
+                            <Input
+                              className="w-full text-xl text-lightblue-700 border border-lightblue-700 rounded px-3 py-2 focus:outline-none focus:ring-2 focus:ring-lightblue-700 focus:text-xl"
+                              value={value}
+                              onChange={(e) =>
+                                handleFieldChange(key, e.target.value)
+                              }
+                            />
+                          )}
 
                           <div className="flex gap-2">
                             <Button

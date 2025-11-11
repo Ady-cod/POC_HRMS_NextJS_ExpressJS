@@ -1,6 +1,5 @@
 "use client";
 
-// @ts-expect-error: side-effect import of CSS without type declarations
 import "../ModalForm/ModalForm.css";
 import { useState, useEffect, useMemo } from "react";
 import { ZodError } from "zod";

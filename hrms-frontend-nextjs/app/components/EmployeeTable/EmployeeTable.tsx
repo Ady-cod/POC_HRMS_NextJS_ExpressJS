@@ -136,76 +136,34 @@ const EmployeeTable: React.FC<EmployeeTableProps> = ({
   }).columns;
 
   const columns = React.useMemo(() => {
-  if (!selectMode) return baseColumns;
-  
-  const allSelected = selectedEmployees?.length === employees.length;
+    if (!selectMode) return baseColumns;
 
-  return [
-    {
-      name: (
-        <label className="flex items-center justify-center cursor-pointer">
-          <input
-            type="checkbox"
-            checked={allSelected}
-            onChange={(e) => {
-              if (e.target.checked) {
-                // Select all employees
-                setSelectedEmployees?.(employees.map(emp => emp.id));
-              } else {
-                // Deselect all
-                setSelectedEmployees?.([]);
-              }
-            }}
-            className="peer hidden"
-          />
-          <div
-            className={`
-              w-4 h-4 border-2 flex items-center justify-center
-              transition-all duration-150
-              border-lightblue-900 bg-white
-            `}
-          >
-            <svg
-              xmlns="http://www.w3.org/2000/svg"
-              fill="none"
-              viewBox="0 0 24 24"
-              strokeWidth="4"
-              stroke="#1E40AF"
-              className={`w-3 h-3 transition-opacity ${
-                allSelected ? "opacity-100" : "opacity-0"
-              }`}
-            >
-              <polyline points="20 6 9 17 4 12" />
-            </svg>
-          </div>
-        </label>
-      ),
-      width: "50px",
-      cell: (row: EmployeeListItem) => {
-        const isChecked = selectedEmployees?.includes(row.id);
+    const allSelected = selectedEmployees?.length === employees.length;
 
-        return (
+    return [
+      {
+        name: (
           <label className="flex items-center justify-center cursor-pointer">
             <input
               type="checkbox"
-              checked={isChecked}
+              checked={allSelected}
               onChange={(e) => {
                 if (e.target.checked) {
-                  setSelectedEmployees?.((prev) => [...prev, row.id]);
+                  // Select all employees
+                  setSelectedEmployees?.(employees.map((emp) => emp.id));
                 } else {
-                  setSelectedEmployees?.((prev) =>
-                    prev.filter((id) => id !== row.id)
-                  );
+                  // Deselect all
+                  setSelectedEmployees?.([]);
                 }
               }}
               className="peer hidden"
             />
             <div
               className={`
-                w-4 h-4 border-2 flex items-center justify-center
-                transition-all duration-150
-                ${isChecked ? "border-lightblue-900 bg-white" : "border-lightblue-900 bg-white"}
-              `}
+              w-4 h-4 border-2 flex items-center justify-center
+              transition-all duration-150
+              border-lightblue-900 bg-white
+            `}
             >
               <svg
                 xmlns="http://www.w3.org/2000/svg"
@@ -214,56 +172,107 @@ const EmployeeTable: React.FC<EmployeeTableProps> = ({
                 strokeWidth="4"
                 stroke="#1E40AF"
                 className={`w-3 h-3 transition-opacity ${
-                  isChecked ? "opacity-100" : "opacity-0"
+                  allSelected ? "opacity-100" : "opacity-0"
                 }`}
               >
                 <polyline points="20 6 9 17 4 12" />
               </svg>
             </div>
           </label>
-        );
+        ),
+        width: "50px",
+        cell: (row: EmployeeListItem) => {
+          const isChecked = selectedEmployees?.includes(row.id);
+
+          return (
+            <label className="flex items-center justify-center cursor-pointer">
+              <input
+                type="checkbox"
+                checked={isChecked}
+                onChange={(e) => {
+                  if (e.target.checked) {
+                    setSelectedEmployees?.((prev) => [...prev, row.id]);
+                  } else {
+                    setSelectedEmployees?.((prev) =>
+                      prev.filter((id) => id !== row.id)
+                    );
+                  }
+                }}
+                className="peer hidden"
+              />
+              <div
+                className={`
+                w-4 h-4 border-2 flex items-center justify-center
+                transition-all duration-150
+                ${
+                  isChecked
+                    ? "border-lightblue-900 bg-white"
+                    : "border-lightblue-900 bg-white"
+                }
+              `}
+              >
+                <svg
+                  xmlns="http://www.w3.org/2000/svg"
+                  fill="none"
+                  viewBox="0 0 24 24"
+                  strokeWidth="4"
+                  stroke="#1E40AF"
+                  className={`w-3 h-3 transition-opacity ${
+                    isChecked ? "opacity-100" : "opacity-0"
+                  }`}
+                >
+                  <polyline points="20 6 9 17 4 12" />
+                </svg>
+              </div>
+            </label>
+          );
+        },
       },
-    },
-    ...baseColumns,
-  ];
-  }, [selectMode, baseColumns, selectedEmployees, setSelectedEmployees]);
+      ...baseColumns,
+    ];
+  }, [
+    selectMode,
+    baseColumns,
+    selectedEmployees,
+    setSelectedEmployees,
+    employees,
+  ]);
 
   const customStyles = {
     pagination: {
       style: {
-        color: "#051A2B"
+        color: "#051A2B",
       },
       pageButtonsStyle: {
         "&:hover:not(:disabled)": {
           backgroundColor: "#D0DAE2",
         },
-        "&:focus":{
-          backgroundColor: "none"
+        "&:focus": {
+          backgroundColor: "none",
         },
         "& svg": {
           fill: "#008EC7",
-          transition: "fill 50ms ease-in-out"
+          transition: "fill 50ms ease-in-out",
         },
-        "&:hover svg":{
-          fill: "#0C3E66"
+        "&:hover svg": {
+          fill: "#0C3E66",
         },
         "&:disabled svg": {
-          fill: "#B4C3D0"
-        }
-      }
+          fill: "#B4C3D0",
+        },
+      },
     },
-     headCells: {
-    style: {
-      color: "#051A2B", 
-      
+    headCells: {
+      style: {
+        color: "#051A2B",
+      },
     },
-  },
-  cells: {
-    style: {
-      color: "#051A2B",  
+    cells: {
+      style: {
+        color: "#051A2B",
+      },
     },
-  }
-  }
+  };
 
   return (
     <div>

@@ -1,6 +1,4 @@
-import React, { useState } from "react";
-import TotalCountButton from "@/components/TotalCountButton/TotalCountButton";
-import AddNewDataButton from "@/components/AddNewDataButton/AddNewDataButton";
+import React from "react";
 
 const ProjectsPage = () => {
 

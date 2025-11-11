@@ -89,6 +89,7 @@ const DepartmentsPage = () => {
         refreshDepartments={refreshDepartments}
         departmentData={departmentData}
         employeeData={employees}
+        departments={departments}
       />
     </div>
   );

@@ -12,6 +12,7 @@ import { EmployeeStatus } from "@/types/types";
 import { useEmployeeModal } from "@/hooks/useEmployeeModal";
 import { useEmployeeData } from "@/hooks/useEmployeeData";
 import AddNewDataButton from "@/components/AddNewDataButton/AddNewDataButton";
+import { useDepartmentData } from "@/hooks/useDepartmentData";
 import { 
   FilterState, 
   getInitialFilterState, 
@@ -32,6 +33,7 @@ const WeekWisePage = () => {
     ...getInitialFilterState(),
     selectedStatus: EmployeeStatus.ACTIVE
   });
+  const [, setDepartmentCount] = useState(0);
   
 
   const {
@@ -54,6 +56,8 @@ const WeekWisePage = () => {
     confirmDelete,
     closeDeleteDialog,
   } = useEmployeeData({ refreshFlag, setEmployeeCount });
+
+  const { departments } = useDepartmentData({ refreshFlag, setDepartmentCount });
 
   // Filter state management
   const updateFilter = (key: keyof FilterState, value: string) => {
@@ -116,6 +120,7 @@ const handleToggleSelectMode = () => {
         updateFilter={updateFilter}
         clearAllFilters={clearAllFilters}
         employees={employees}
+        departments={departments}
       />
 
       {/* Export and Select/Deactivate Button */}

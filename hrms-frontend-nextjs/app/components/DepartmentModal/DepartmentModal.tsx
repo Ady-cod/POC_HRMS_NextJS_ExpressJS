@@ -1,7 +1,8 @@
 "use client";
 
+// @ts-expect-error: side-effect import of CSS without type declarations
 import "../ModalForm/ModalForm.css";
-import { useState, useEffect } from "react";
+import { useState, useEffect, useMemo } from "react";
 import { ZodError } from "zod";
 import { createDepartmentSchema, updateDepartmentSchema } from "@/schemas/departmentSchema";
 import { formatZodErrors } from "@/utils/formatZodErrors";
@@ -10,6 +11,9 @@ import { createDepartment, updateDepartment } from "@/actions/department";
 import { DepartmentListItem, EmployeeListItem } from "@/types/types";
 import HeadOfDepartmentModal from "../HeadOfDepartmentModal.tsx/HeadOfDepartmentModal";
 import { ICONS } from "../DepartmentIcons/DepartmentIcons";
+import ConfirmationModal from "../ConfirmationModal/ConfirmationModal";
+
+type ConfirmationType = "HEAD_ELSEWHERE" | "MEMBER_ELSEWHERE";
 
 interface DepartmentModalProps {
   isOpen: boolean;
@@ -17,6 +21,7 @@ interface DepartmentModalProps {
   refreshDepartments: () => void;
   departmentData: DepartmentListItem | null;
   employeeData: EmployeeListItem[];
+  departments: DepartmentListItem[];
 }
 
 const DepartmentModal: React.FC<DepartmentModalProps> = ({
@@ -25,6 +30,7 @@ const DepartmentModal: React.FC<DepartmentModalProps> = ({
   refreshDepartments,
   departmentData,
   employeeData,
+  departments,
 }) => {
   const [errors, setErrors] = useState<Record<string, string> | null>(null);
   const [name, setName] = useState("");
@@ -32,6 +38,18 @@ const DepartmentModal: React.FC<DepartmentModalProps> = ({
   const [headOfDep, setHeadOfDep] = useState("");
   const [icon, setIcon] = useState(""); // store as "icon-1", etc.
   const [isHeadModalOpen, setIsHeadModalOpen] = useState(false);
+  const [confirmationState, setConfirmationState] = useState<{
+    type: ConfirmationType;
+    employee: EmployeeListItem;
+    previousDepartmentName: string | null;
+    previousHeadDepartmentName: string | null;
+  } | null>(null);
+
+  const currentDepartmentId = departmentData?.id ?? null;
+
+  const currentDepartmentName = useMemo(() => {
+    return name.trim() || departmentData?.name || "this department";
+  }, [name, departmentData?.name]);
 
   // Initialize form values
   useEffect(() => {
@@ -55,6 +73,72 @@ const DepartmentModal: React.FC<DepartmentModalProps> = ({
     setDescription("");
     setHeadOfDep("");
     setIcon("");
+    setConfirmationState(null);
+  };
+
+  const applyHeadSelection = (employee: EmployeeListItem) => {
+    setHeadOfDep(employee.id);
+    setConfirmationState(null);
+    setIsHeadModalOpen(false);
+  };
+
+  const handleHeadSelection = (employeeId: string) => {
+    const selectedEmployee = employeeData.find((emp) => emp.id === employeeId);
+    if (!selectedEmployee) {
+      setIsHeadModalOpen(false);
+      return;
+    }
+
+    const employeeDeptId = selectedEmployee.department?.id ?? null;
+    const headDepartment = departments.find(
+      (dept) => dept.deptHeadEmployeeId === selectedEmployee.id
+    );
+    const headDepartmentId = headDepartment?.id ?? null;
+
+    const employeeIsHeadOfCurrentDept =
+      currentDepartmentId !== null && headDepartmentId === currentDepartmentId;
+
+    if (employeeIsHeadOfCurrentDept) {
+      applyHeadSelection(selectedEmployee);
+      return;
+    }
+
+    const belongsToDifferentDepartment =
+      employeeDeptId !== null && employeeDeptId !== currentDepartmentId;
+
+    if (headDepartment && headDepartmentId !== currentDepartmentId) {
+      setIsHeadModalOpen(false);
+      setConfirmationState({
+        type: "HEAD_ELSEWHERE",
+        employee: selectedEmployee,
+        previousDepartmentName: selectedEmployee.department?.name ?? null,
+        previousHeadDepartmentName: headDepartment.name,
+      });
+      return;
+    }
+
+    if (belongsToDifferentDepartment) {
+      setIsHeadModalOpen(false);
+      setConfirmationState({
+        type: "MEMBER_ELSEWHERE",
+        employee: selectedEmployee,
+        previousDepartmentName: selectedEmployee.department?.name ?? null,
+        previousHeadDepartmentName: headDepartment?.name ?? null,
+      });
+      return;
+    }
+
+    applyHeadSelection(selectedEmployee);
+  };
+
+  const handleConfirmationCancel = () => {
+    setConfirmationState(null);
+    setIsHeadModalOpen(true);
+  };
+
+  const handleConfirmationConfirm = () => {
+    if (!confirmationState) return;
+    applyHeadSelection(confirmationState.employee);
   };
 
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
@@ -133,6 +217,37 @@ const DepartmentModal: React.FC<DepartmentModalProps> = ({
     return employee ? employee.fullName : "Select Head of Department";
   };
 
+  const confirmationDescription = useMemo(() => {
+    if (!confirmationState) return "";
+
+    const employeeName = confirmationState.employee.fullName;
+    const previousDepartmentName =
+      confirmationState.previousDepartmentName ?? "their current department";
+    const previousHeadDepartmentName = confirmationState.previousHeadDepartmentName;
+
+    if (confirmationState.type === "HEAD_ELSEWHERE") {
+      const headDepartmentName = previousHeadDepartmentName || previousDepartmentName;
+      return `${employeeName} is currently Head of ${headDepartmentName}. If you proceed, they will become Head of ${currentDepartmentName} and will be removed as Head from ${headDepartmentName}. Continue?`;
+    }
+
+    const descriptionParts = [
+      `${employeeName} currently belongs to ${previousDepartmentName}. Setting them as Head of ${currentDepartmentName} will move their membership to ${currentDepartmentName}.`,
+    ];
+
+    if (
+      previousHeadDepartmentName &&
+      previousHeadDepartmentName !== previousDepartmentName
+    ) {
+      descriptionParts.push(
+        `${employeeName} previously served as Head of ${previousHeadDepartmentName}.`
+      );
+    }
+
+    descriptionParts.push("Continue?");
+
+    return descriptionParts.join(" ");
+  }, [confirmationState, currentDepartmentName]);
+
   if (!isOpen) return null;
 
   return (
@@ -174,10 +289,7 @@ const DepartmentModal: React.FC<DepartmentModalProps> = ({
             isOpen={isHeadModalOpen}
             onClose={() => setIsHeadModalOpen(false)}
             employees={employeeData}
-            onSelect={(employeeId: string) => {
-              setHeadOfDep(employeeId);
-              setIsHeadModalOpen(false);
-            }}
+            onSelect={handleHeadSelection}
           />
 
           {/* Description */}
@@ -198,40 +310,49 @@ const DepartmentModal: React.FC<DepartmentModalProps> = ({
           <div>
             <label className="text-sm font-medium text-darkblue-900">Select Icon</label>
             <div className={`input-group flex flex-col overflow-x-auto mt-2.5 ${errors?.icon ? "hasErrors" : ""}`}>
-              <div className="icon-grid flex gap-2 overflow-x-auto p-2 bg-white rounded-sm">
+              <div className="flex gap-4">
                 {ICONS.map((IconComponent, index) => {
-                  const iconId = `icon-${index + 1}`;
-                  const isSelected = icon === iconId;
+                  const iconValue = `icon-${index + 1}`;
+                  const isSelected = icon === iconValue;
                   return (
-                    <div key={iconId} className="relative">
-                      <input
-                        type="checkbox"
-                        checked={isSelected}
-                        readOnly
-                        className="absolute top-1 right-1 w-3 h-3 accent-lightblue-500"
-                      />
-                      <button
-                        type="button"
-                        className={`icon-button p-3 pb-2 pt-6 rounded transition-colors duration-200 ${
-                          isSelected ? "border border-darkblue-75" : ""
-                        }`}
-                        onClick={() => setIcon(iconId)}
-                      >
-                        <IconComponent className="w-12 h-12" />
-                      </button>
-                    </div>
+                    <button
+                      key={iconValue}
+                      type="button"
+                      className={`p-4 border rounded-lg flex flex-col items-center justify-center gap-2 transition transform hover:scale-105 ${
+                        isSelected ? "border-blue-500 bg-blue-50" : "border-gray-200 bg-white"
+                      }`}
+                      onClick={() => setIcon(iconValue)}
+                    >
+                      <IconComponent className={`w-8 h-8 ${isSelected ? "text-blue-500" : "text-gray-500"}`} />
+                      <span className="text-xs text-gray-600">Icon {index + 1}</span>
+                    </button>
                   );
                 })}
               </div>
-              {errors?.icon && <p className="error-message">{errors.icon}</p>}
             </div>
+            {errors?.icon && <p className="error-message">{errors.icon}</p>}
           </div>
 
-          <div className="submit-button-container">
-            <button type="submit" className="submit-button mt-2">Submit</button>
+          {/* Submit Button */}
+          <div className="flex justify-end mt-6">
+            <button type="submit" className="primary-button">
+              {departmentData ? "Update Department" : "Create Department"}
+            </button>
           </div>
         </form>
       </div>
+
+      <ConfirmationModal
+        isOpen={Boolean(confirmationState)}
+        onClose={handleConfirmationCancel}
+        onConfirm={handleConfirmationConfirm}
+        title={
+          confirmationState?.type === "HEAD_ELSEWHERE"
+            ? "Move current Head of Department?"
+            : "Move employee to new department?"
+        }
+        description={confirmationDescription}
+      />
     </div>
   );
 };

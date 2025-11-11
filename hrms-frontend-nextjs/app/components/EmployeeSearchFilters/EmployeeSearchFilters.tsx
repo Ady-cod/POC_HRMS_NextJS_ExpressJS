@@ -1,7 +1,14 @@
-import React from "react";
+"use client";
+
+import React, { useMemo } from "react";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faArrowsRotate, faSearch } from "@fortawesome/free-solid-svg-icons";
-import { EmployeeListItem, EmployeeRole, EmployeeStatus } from "@/types/types";
+import {
+  EmployeeListItem,
+  EmployeeRole,
+  EmployeeStatus,
+  DepartmentListItem,
+} from "@/types/types";
 import { FilterState, checkIfFiltersActive } from "@/utils/employeeFilters";
 
 interface EmployeeSearchFiltersProps {
@@ -9,6 +16,7 @@ interface EmployeeSearchFiltersProps {
   updateFilter: (key: keyof FilterState, value: string) => void;
   clearAllFilters: () => void;
   employees: EmployeeListItem[];
+  departments: DepartmentListItem[];
 }
 
 const EmployeeSearchFilters: React.FC<EmployeeSearchFiltersProps> = ({
@@ -16,17 +24,43 @@ const EmployeeSearchFilters: React.FC<EmployeeSearchFiltersProps> = ({
   updateFilter,
   clearAllFilters,
   employees,
+  departments,
 }) => {
   // Check if any filters are active
   const hasActiveFilters = checkIfFiltersActive(filterState);
 
-  // Get unique departments from employees
-  const uniqueDepartments = Array.from(
-    new Set(
-      employees
-        .map((emp) => emp.department?.name)
-        .filter((name): name is string => Boolean(name))
-    )
+  const departmentOptions = useMemo(() => {
+    if (departments.length > 0) {
+      return departments;
+    }
+
+    const uniqueNames = Array.from(
+      new Set(
+        employees
+          .map((emp) => emp.department?.name)
+          .filter((name): name is string => Boolean(name))
+      )
+    );
+
+    return uniqueNames.map(
+      (name) =>
+        ({
+          id: name,
+          name,
+          description: "",
+          deptHeadEmployeeId: "",
+          headName: "",
+          icon: "",
+        } as DepartmentListItem)
+    );
+  }, [departments, employees]);
+
+  const departmentNames = useMemo(
+    () =>
+      Array.from(
+        new Set(departmentOptions.map((dept) => dept.name).filter(Boolean))
+      ),
+    [departmentOptions]
   );
 
   return (
@@ -35,7 +69,7 @@ const EmployeeSearchFilters: React.FC<EmployeeSearchFiltersProps> = ({
         {/* Search Category Dropdown */}
         <select
           value={filterState.searchCategory}
-          onChange={(e) => updateFilter('searchCategory', e.target.value)}
+          onChange={(e) => updateFilter("searchCategory", e.target.value)}
           className="w-48 p-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 bg-white text-gray-700"
         >
           <option value="" disabled>
@@ -51,7 +85,8 @@ const EmployeeSearchFilters: React.FC<EmployeeSearchFiltersProps> = ({
         </select>
 
         {/* Conditional Inputs */}
-        {filterState.searchCategory === "name" || filterState.searchCategory === "email" ? (
+        {filterState.searchCategory === "name" ||
+        filterState.searchCategory === "email" ? (
           <div className="relative w-60">
             <FontAwesomeIcon
               icon={faSearch}
@@ -64,14 +99,14 @@ const EmployeeSearchFilters: React.FC<EmployeeSearchFiltersProps> = ({
                 .toLowerCase()
                 .replace(/^./, (str: string) => str.toUpperCase())}...`}
               value={filterState.searchText}
-              onChange={(e) => updateFilter('searchText', e.target.value)}
+              onChange={(e) => updateFilter("searchText", e.target.value)}
               className="w-full pl-10 p-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
             />
           </div>
         ) : filterState.searchCategory === "role" ? (
           <select
             value={filterState.selectedRole}
-            onChange={(e) => updateFilter('selectedRole', e.target.value)}
+            onChange={(e) => updateFilter("selectedRole", e.target.value)}
             className="w-60 p-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 bg-white"
           >
             <option value="">All Roles</option>
@@ -84,13 +119,13 @@ const EmployeeSearchFilters: React.FC<EmployeeSearchFiltersProps> = ({
         ) : filterState.searchCategory === "department" ? (
           <select
             value={filterState.selectedDepartment}
-            onChange={(e) => updateFilter('selectedDepartment', e.target.value)}
+            onChange={(e) => updateFilter("selectedDepartment", e.target.value)}
             className="w-60 p-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 bg-white"
           >
             <option value="">All Departments</option>
-            {uniqueDepartments.map((dept) => (
-              <option key={dept} value={dept}>
-                {dept}
+            {departmentNames.map((deptName) => (
+              <option key={deptName} value={deptName}>
+                {deptName}
               </option>
             ))}
           </select>
@@ -99,14 +134,16 @@ const EmployeeSearchFilters: React.FC<EmployeeSearchFiltersProps> = ({
             <input
               type="date"
               value={filterState.selectedStartDate}
-              onChange={(e) => updateFilter('selectedStartDate', e.target.value)}
+              onChange={(e) =>
+                updateFilter("selectedStartDate", e.target.value)
+              }
               className="w-40 p-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
             />
             <span className="text-gray-600 text-sm font-medium">to</span>
             <input
               type="date"
               value={filterState.selectedEndDate}
-              onChange={(e) => updateFilter('selectedEndDate', e.target.value)}
+              onChange={(e) => updateFilter("selectedEndDate", e.target.value)}
               className="w-40 p-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
             />
           </div>
@@ -115,21 +152,23 @@ const EmployeeSearchFilters: React.FC<EmployeeSearchFiltersProps> = ({
             <input
               type="date"
               value={filterState.selectedStartDOB}
-              onChange={(e) => updateFilter('selectedStartDOB', e.target.value)}
+              onChange={(e) => updateFilter("selectedStartDOB", e.target.value)}
               className="w-40 p-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
             />
             <span className="text-gray-600 text-sm font-medium">to</span>
             <input
               type="date"
               value={filterState.selectedEndDOB}
-              onChange={(e) => updateFilter('selectedEndDOB', e.target.value)}
+              onChange={(e) => updateFilter("selectedEndDOB", e.target.value)}
               className="w-40 p-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
             />
           </div>
         ) : filterState.searchCategory === "status" ? (
           <select
             value={filterState.selectedStatus}
-            onChange={(e) => updateFilter('selectedStatus', e.target.value as EmployeeStatus)}
+            onChange={(e) =>
+              updateFilter("selectedStatus", e.target.value as EmployeeStatus)
+            }
             className="w-60 p-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 bg-white"
           >
             <option value="">All Statuses</option>
@@ -156,4 +195,4 @@ const EmployeeSearchFilters: React.FC<EmployeeSearchFiltersProps> = ({
   );
 };
 
-export default EmployeeSearchFilters; 
+export default EmployeeSearchFilters;

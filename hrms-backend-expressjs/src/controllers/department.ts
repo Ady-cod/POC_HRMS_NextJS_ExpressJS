@@ -1,9 +1,25 @@
 import { Request, Response } from "express";
 import prisma from "../lib/client";
 import { z } from "zod";
-import { createDepartmentSchema, updateDepartmentSchema } from "../schemas/departmentSchema";
+import {
+  createDepartmentSchema,
+  updateDepartmentSchema,
+} from "../schemas/departmentSchema";
 import { Prisma } from "@prisma/client";
 
+type ControllerError = {
+  status: number;
+  message: string;
+};
+
+const isControllerError = (error: unknown): error is ControllerError => {
+  return (
+    typeof error === "object" &&
+    error !== null &&
+    "status" in error &&
+    "message" in error
+  );
+};
 
 // GET all departments
 export const getAllDepartments = async (req: Request, res: Response) => {
@@ -50,35 +66,75 @@ export const createDepartment = async (req: Request, res: Response) => {
   try {
     const parsed = await createDepartmentSchema.parseAsync(req.body);
 
-    let deptHeadEmployeeId: string | null = null;
-    if (parsed.headOfDep) {
-      const employeeExists = await prisma.employee.findUnique({ where: { id: parsed.headOfDep } });
-      if (!employeeExists) {
-        res.status(400).json({ error: "Head of department not found among employees" });
-        return;
-      }
-      deptHeadEmployeeId = parsed.headOfDep;
-    }
+    const department = await prisma.$transaction(async (tx) => {
+      let deptHeadEmployeeId: string | null = null;
 
-    const department = await prisma.department.create({
-      data: {
-        name: parsed.name,
-        description: parsed.description ?? null,
-        deptHeadEmployeeId,
-        icon: parsed.icon ?? null,
-      },
+      if (parsed.headOfDep) {
+        const employee = await tx.employee.findUnique({
+          where: { id: parsed.headOfDep },
+          select: { id: true },
+        });
+
+        if (!employee) {
+          throw {
+            status: 400,
+            message: "Head of department not found among employees",
+          } satisfies ControllerError;
+        }
+
+        const existingHeadDepartment = await tx.department.findFirst({
+          where: { deptHeadEmployeeId: parsed.headOfDep },
+          select: { id: true },
+        });
+
+        if (existingHeadDepartment) {
+          await tx.department.update({
+            where: { id: existingHeadDepartment.id },
+            data: { deptHeadEmployeeId: null },
+          });
+        }
+
+        deptHeadEmployeeId = parsed.headOfDep;
+      }
+
+      const createdDepartment = await tx.department.create({
+        data: {
+          name: parsed.name,
+          description: parsed.description ?? null,
+          deptHeadEmployeeId,
+          icon: parsed.icon ?? null,
+        },
+      });
+
+      if (deptHeadEmployeeId) {
+        await tx.employee.update({
+          where: { id: deptHeadEmployeeId },
+          data: { departmentId: createdDepartment.id },
+        });
+      }
+
+      return createdDepartment;
     });
 
     res.status(201).json({ success: true, department });
-
   } catch (error: unknown) {
     if (error instanceof z.ZodError) {
       res.status(400).json({ zodError: error });
       return;
     }
 
-    if (error instanceof Prisma.PrismaClientKnownRequestError && error.code === "P2002") {
-      res.status(409).json({ error: "A department with this name already exists." });
+    if (isControllerError(error)) {
+      res.status(error.status).json({ error: error.message });
+      return;
+    }
+
+    if (
+      error instanceof Prisma.PrismaClientKnownRequestError &&
+      error.code === "P2002"
+    ) {
+      res
+        .status(409)
+        .json({ error: "A department with this name already exists." });
       return;
     }
 
@@ -94,52 +150,94 @@ export const updateDepartment = async (req: Request, res: Response) => {
     const { id } = req.params;
     const validatedData = await updateDepartmentSchema.parseAsync(req.body);
 
-    const { headOfDep, ...departmentData } = validatedData;
-
-    // Check headOfDep if provided
-    let deptHeadEmployeeId: string | undefined = undefined;
-    if (headOfDep) {
-      const employeeExists = await prisma.employee.findUnique({ where: { id: headOfDep } });
-      if (!employeeExists) {
-        res.status(400).json({ success: false, error: "Head of department not found among employees" });
-        return;
+    const updatedDepartment = await prisma.$transaction(async (tx) => {
+      const currentDepartment = await tx.department.findUnique({
+        where: { id },
+      });
+      if (!currentDepartment) {
+        throw {
+          status: 404,
+          message: "Department not found",
+        } satisfies ControllerError;
       }
-      deptHeadEmployeeId = headOfDep;
-    }
 
-    // Get current department from DB
-    const currentDepartment = await prisma.department.findUnique({ where: { id } });
-    if (!currentDepartment) {
-      res.status(404).json({ success: false, error: "Department not found" });
-      return;
-    }
+      const { headOfDep, ...departmentData } = validatedData;
 
-    // Prepare update data
-    const updateData = {
-      name: departmentData.name ?? currentDepartment.name, // always required
-      description: departmentData.description ?? currentDepartment.description,
-      deptHeadEmployeeId: deptHeadEmployeeId ?? currentDepartment.deptHeadEmployeeId,
-      icon: departmentData.icon ?? currentDepartment.icon,
-    };
+      let nextDeptHeadEmployeeId = currentDepartment.deptHeadEmployeeId ?? null;
+      let shouldUpdateHeadEmployee = false;
 
-    const updatedDepartment = await prisma.department.update({
-      where: { id },
-      data: updateData,
+      if (headOfDep) {
+        const employeeExists = await tx.employee.findUnique({
+          where: { id: headOfDep },
+        });
+        if (!employeeExists) {
+          throw {
+            status: 400,
+            message: "Head of department not found among employees",
+          } satisfies ControllerError;
+        }
+
+        const existingHeadDepartment = await tx.department.findFirst({
+          where: { deptHeadEmployeeId: headOfDep },
+          select: { id: true },
+        });
+
+        if (existingHeadDepartment && existingHeadDepartment.id !== id) {
+          await tx.department.update({
+            where: { id: existingHeadDepartment.id },
+            data: { deptHeadEmployeeId: null },
+          });
+        }
+
+        nextDeptHeadEmployeeId = headOfDep;
+        shouldUpdateHeadEmployee =
+          headOfDep !== currentDepartment.deptHeadEmployeeId;
+      }
+
+      const departmentUpdateData: Prisma.DepartmentUncheckedUpdateInput = {
+        name: departmentData.name ?? currentDepartment.name,
+        description:
+          departmentData.description ?? currentDepartment.description,
+        deptHeadEmployeeId: nextDeptHeadEmployeeId,
+        icon: departmentData.icon ?? currentDepartment.icon,
+      };
+
+      const department = await tx.department.update({
+        where: { id },
+        data: departmentUpdateData,
+      });
+
+      if (shouldUpdateHeadEmployee && nextDeptHeadEmployeeId) {
+        await tx.employee.update({
+          where: { id: nextDeptHeadEmployeeId },
+          data: { departmentId: id },
+        });
+      }
+
+      return department;
     });
 
     res.status(200).json({ success: true, department: updatedDepartment });
-
   } catch (error: unknown) {
     if (error instanceof z.ZodError) {
       res.status(400).json({ success: false, zodError: error });
       return;
     }
+    if (isControllerError(error)) {
+      res.status(error.status).json({ success: false, error: error.message });
+      return;
+    }
     if (error instanceof Prisma.PrismaClientKnownRequestError) {
       if (error.code === "P2002") {
-        res.status(409).json({ success: false, error: "A department with this name already exists." });
+        res.status(409).json({
+          success: false,
+          error: "A department with this name already exists.",
+        });
         return;
       }
-      res.status(500).json({ success: false, error: "Database error occurred." });
+      res
+        .status(500)
+        .json({ success: false, error: "Database error occurred." });
       return;
     }
     console.error(error);

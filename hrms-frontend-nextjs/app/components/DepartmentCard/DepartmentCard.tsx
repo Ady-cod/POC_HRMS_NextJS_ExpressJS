@@ -31,7 +31,7 @@ export default function DepartmentCard({
   const [hoveredId, setHoveredId] = useState<string | null>(null);
 
   const getHeadName = (dep: DepartmentListItem) => {
-    if (!dep.deptHeadEmployeeId) return "Unknown";
+    if (!dep.deptHeadEmployeeId) return "N/A";
     const employee = employees.find((e) => e.id === dep.deptHeadEmployeeId);
     if (employee) return employee.fullName;
 

@@ -12,7 +12,7 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { showToast } from "@/utils/toastHelper";
-import { EmployeeListItem } from "@/types/types";
+import { DepartmentListItem, EmployeeListItem } from "@/types/types";
 import { Eye, EyeOff } from "lucide-react";
 import { updateEmployee } from "@/actions/employee";
 import AnimatedLoader from "@/components/LoaderScreen/AnimatedLoader";
@@ -94,6 +94,8 @@ export default function Profile() {
     confirm: "",
   });
   const [visible, setVisible] = useState<Record<string, boolean>>({});
+  const [departments, setDepartments] = useState<DepartmentListItem[]>([]);
+  const [isLoadingDepartments, setIsLoadingDepartments] = useState(false);
 
   const fileInputRef = useRef<HTMLInputElement>(null);
 
@@ -143,6 +145,37 @@ export default function Profile() {
     fetchProfile();
   }, []);
 
+  useEffect(() => {
+    const fetchDepartments = async () => {
+      setIsLoadingDepartments(true);
+      try {
+        const baseUrl = process.env.NEXT_PUBLIC_BACKEND_BASE_URL;
+        const endpoint = process.env.NEXT_PUBLIC_DEPARTMENT_ENDPOINT;
+
+        if (!baseUrl || !endpoint) {
+          throw new Error("Department API configuration is missing");
+        }
+
+        const res = await fetch(`${baseUrl}${endpoint}`);
+        if (!res.ok) {
+          throw new Error("Failed to fetch departments");
+        }
+
+        const departmentList: DepartmentListItem[] = await res.json();
+        setDepartments(departmentList);
+      } catch (error) {
+        console.error("Error fetching departments:", error);
+        showToast("error", "Unable to load departments", [
+          "Department list could not be retrieved. Try again later.",
+        ]);
+      } finally {
+        setIsLoadingDepartments(false);
+      }
+    };
+
+    fetchDepartments();
+  }, []);
+
   // Handlers
   const handleImageUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
@@ -167,8 +200,21 @@ export default function Profile() {
     e.target.value = "";
   };
 
-  const handleFieldChange = (key: string, value: string) =>
+  const handleFieldChange = (key: string, value: string) => {
+    if (key === "departmentName") {
+      const selectedDepartment = departments.find((dept) => dept.id === value);
+      if (selectedDepartment) {
+        setFormData((prev) => ({
+          ...prev,
+          department: selectedDepartment.id,
+          departmentName: selectedDepartment.name,
+        }));
+      }
+      return;
+    }
+
     setFormData((prev) => ({ ...prev, [key]: value }));
+  };
 
   const handleFieldSave = async (key: string) => {
     try {
@@ -177,13 +223,35 @@ export default function Profile() {
         email: "email",
         phone: "phoneNumber",
         timezone: "timezone",
-        departmentName: "departmentName",
+        departmentName: "departmentId",
         role: "role",
       };
 
-      await updateEmployee(employeeId, {
-        [map[key]]: formData[key as keyof typeof formData],
-      });
+      const targetField = map[key];
+
+      if (!targetField) {
+        showToast("error", "Update unsupported", [
+          "This field cannot be updated from the profile page yet.",
+        ]);
+        return;
+      }
+
+      if (targetField === "departmentId") {
+        if (!formData.department) {
+          showToast("error", "Select a department", [
+            "Please choose a department before saving.",
+          ]);
+          return;
+        }
+
+        await updateEmployee(employeeId, {
+          departmentId: formData.department,
+        });
+      } else {
+        await updateEmployee(employeeId, {
+          [targetField]: formData[key as keyof typeof formData],
+        });
+      }
       showToast("success", "Updated", [
         `${fieldLabels[key] || key} updated successfully`,
       ]);
@@ -197,10 +265,18 @@ export default function Profile() {
   };
 
   const handleCancel = (key: string) => {
-    setFormData((prev) => ({
-      ...prev,
-      [key]: originalData[key as keyof typeof originalData],
-    }));
+    if (key === "departmentName") {
+      setFormData((prev) => ({
+        ...prev,
+        department: originalData.department,
+        departmentName: originalData.departmentName,
+      }));
+    } else {
+      setFormData((prev) => ({
+        ...prev,
+        [key]: originalData[key as keyof typeof originalData],
+      }));
+    }
     setEditingField(null);
   };
 
@@ -381,7 +457,8 @@ export default function Profile() {
                           />
                         ) : key === "departmentName" ? (
                           <Select
-                            value={formData.departmentName}
+                            disabled={isLoadingDepartments}
+                            value={formData.department || ""}
                             onValueChange={(val) =>
                               handleFieldChange("departmentName", val)
                             }
@@ -390,20 +467,13 @@ export default function Profile() {
                               <SelectValue placeholder="Select Department" />
                             </SelectTrigger>
                             <SelectContent>
-                              {[
-                                "HR",
-                                "Web Development",
-                                "UI/UX",
-                                "QA",
-                                "BA",
-                                "SM",
-                              ].map((dept) => (
+                              {departments.map((dept) => (
                                 <SelectItem
-                                  key={dept}
-                                  value={dept}
+                                  key={dept.id}
+                                  value={dept.id}
                                   className="data-[highlighted]:bg-lightblue-100 data-[highlighted]:text-lightblue-700 data-[state=checked]:bg-lightblue-800 data-[state=checked]:text-white cursor-pointer text-lightblue-800"
                                 >
-                                  {dept}
+                                  {dept.name}
                                 </SelectItem>
                               ))}
                             </SelectContent>

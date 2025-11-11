@@ -319,7 +319,8 @@ export const updateEmployeeSchema = z
       .min(1, "Department selection is required")
       .refine((id) => /^[a-f\d]{24}$/i.test(id), {
         message: "Invalid department ID format",
-      }),
+      })
+      .optional(),
     gender: z.enum(["MALE", "FEMALE", "OTHER"]).optional(), // Based on radio buttons
     role: z.preprocess(
       (val) => (val === "" || val == null ? undefined : String(val).trim()),

@@ -3,7 +3,6 @@
 import React, { useRef, useEffect, useState } from "react";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faCaretLeft, faCaretRight } from "@fortawesome/free-solid-svg-icons";
-
 import "./WeekSlider.css";
 
 /**
@@ -25,8 +24,24 @@ const WeekSlider: React.FC<WeekSliderProps> = ({
   const scrollRef = useRef<HTMLDivElement>(null);
   const [isDesktop, setIsDesktop] = useState(false);
   const [stickySide, setStickySide] = useState<"left" | "right" | null>(null);
+  const [containerWidth, setContainerWidth] = useState(0);
 
   const weeks = Array.from({ length: 17 }, (_, i) => i + 1);
+
+  useEffect(() => {
+  const container = scrollRef.current;
+  if (!container) return;
+
+  const resizeObserver = new ResizeObserver((entries) => {
+    for (const entry of entries) {
+      setContainerWidth(entry.contentRect.width);
+    }
+  });
+
+  resizeObserver.observe(container);
+
+  return () => resizeObserver.disconnect();
+}, []);
 
   // Detect viewport width for showing/hiding navigation carets
   useEffect(() => {
@@ -136,12 +151,16 @@ const WeekSlider: React.FC<WeekSliderProps> = ({
       {/* Scrollable week buttons container */}
       <div
         ref={scrollRef}
-        className="flex gap-2 overflow-x-auto scroll-smooth w-full hide-scrollbar mx-2 mb-5"
+        className={`flex overflow-x-auto scroll-smooth w-full hide-scrollbar mx-2 mb-5 ${
+          containerWidth > 2300 - 125 ? "gap-6" : "gap-3"}`
+        }
       >
         {/* All weeks button */}
         <button
           onClick={() => setSelectedWeek(0)}
           className={`week-button px-8 py-3 rounded-md text-white text-sm transition ${
+          containerWidth > 2300 - 125 ? "px-12" : "px-4"}
+           ${
             selectedWeek === 0
               ? "bg-blue-500"
               : "bg-[#8fa6b9] hover:bg-[#5c7e98]"
@@ -162,6 +181,8 @@ const WeekSlider: React.FC<WeekSliderProps> = ({
               key={week}
               onClick={() => setSelectedWeek(week)}
               className={`week-button px-8 py-3 rounded-md text-white text-sm transition ${
+              containerWidth > 2300 - 125 ? "px-12" : "px-4"}
+              ${
                 isSelected ? "bg-green-500" : "bg-[#8fa6b9] hover:bg-[#5c7e98]"
               } ${isSelected && stickySide === "left" ? "sticky-left" : ""} ${
                 isSelected && stickySide === "right" ? "sticky-right" : ""

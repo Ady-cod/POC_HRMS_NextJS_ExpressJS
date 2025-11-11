@@ -7,10 +7,11 @@ import EmployeeSearchFilters from "@/components/EmployeeSearchFilters/EmployeeSe
 import ExportCSVButton from "@/components/ExportCSVButton/ExportCSVButton";
 import { useEmployeeModal } from "@/hooks/useEmployeeModal";
 import { useEmployeeData } from "@/hooks/useEmployeeData";
-import { 
-  FilterState, 
-  getInitialFilterState, 
-  applyAllFilters 
+import { useDepartmentData } from "@/hooks/useDepartmentData";
+import {
+  FilterState,
+  getInitialFilterState,
+  applyAllFilters,
 } from "@/utils/employeeFilters";
 
 import dynamic from "next/dynamic";
@@ -22,8 +23,11 @@ const ModalForm = dynamic(() => import("@/components/ModalForm/ModalForm"), {
 
 const EmployeePage = () => {
   const [employeeCount, setEmployeeCount] = useState(0);
-  const [filterState, setFilterState] = useState<FilterState>(getInitialFilterState());
-  
+  const [filterState, setFilterState] = useState<FilterState>(
+    getInitialFilterState()
+  );
+  const [, setDepartmentCount] = useState(0);
+
   // Use the custom hook for modal management
   const {
     isModalOpen,
@@ -45,6 +49,11 @@ const EmployeePage = () => {
     closeDeleteDialog,
   } = useEmployeeData({ refreshFlag, setEmployeeCount });
 
+  const { departments } = useDepartmentData({
+    refreshFlag,
+    setDepartmentCount,
+  });
+
   // Filter state management
   const updateFilter = (key: keyof FilterState, value: string) => {
     setFilterState((prev) => ({ ...prev, [key]: value }));
@@ -63,7 +72,7 @@ const EmployeePage = () => {
     <div>
       <div className="flex flex-row flex-wrap justify-between items-center mt-6 mb-4 px-4 gap-2 sm:gap-4">
         {/* Heading */}
-        <h2 className="text-2xl sm:text-3xl font-bold text-gray-900 whitespace-nowrap">
+        <h2 className="text-2xl sm:text-3xl font-bold text-darkblue-900 whitespace-nowrap">
           List
         </h2>
 
@@ -91,6 +100,7 @@ const EmployeePage = () => {
         updateFilter={updateFilter}
         clearAllFilters={clearAllFilters}
         employees={employees}
+        departments={departments}
       />
 
       {/* Export Button */}

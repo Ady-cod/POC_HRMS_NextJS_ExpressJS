@@ -14,10 +14,11 @@ import {
 } from "@/schemas/employeeSchema";
 import { formatZodErrors } from "@/utils/formatZodErrors";
 import { showToast } from "@/utils/toastHelper";
-import { EmployeeListItem, EmployeeRole, DepartmentName } from "@/types/types";
+import { EmployeeListItem, EmployeeRole, EmployeeStatus, DepartmentListItem } from "@/types/types";
 import CountryStateCitySelect from "@/components/CountryStateCitySelect/CountryStateCitySelect";
 import Select from "react-select";
 import { getBaseSelectStyles } from "@/lib/reactSelectStyles";
+import { getAllDepartments } from "@/actions/department";
 
 interface ModalFormProps {
   isOpen: boolean;
@@ -82,9 +83,27 @@ const ModalForm: React.FC<ModalFormProps> = ({
   const [city, setCity] = useState<string>("");
   const [hasFetched, setHasFetched] = useState<boolean>(false);
 
-  // Local state for Department and Role using react-select for Firefox parity
-  const [departmentName, setDepartmentName] = useState<string>("");
+  // Local state for Department, Role and Status using react-select for Firefox parity
+  const [departmentId, setDepartmentId] = useState<string>(""); 
   const [role, setRole] = useState<string>("");
+  const [status, setStatus] = useState<string>("");
+  const [departmentOptions, setDepartmentOptions] = useState<Option[]>([]);
+
+  useEffect(() => {
+    const fetchDepartments = async () => {
+      try {
+        const depts: DepartmentListItem[] = await getAllDepartments();
+        const options = depts.map((d) => ({
+          label: d.name,
+          value: d.id,
+        }));
+        setDepartmentOptions(options);
+      } catch (error) {
+        console.error("Failed to fetch departments:", error);
+      }
+    };
+    fetchDepartments();
+  }, []);
 
   useEffect(() => {
     if (employeeData) {
@@ -94,8 +113,9 @@ const ModalForm: React.FC<ModalFormProps> = ({
       setState(employeeData.state ?? "");
       setStateCode(employeeData.stateCode ?? "");
       setCity(employeeData.city);
-      setDepartmentName(employeeData.department?.name ?? "");
+      setDepartmentId(employeeData.department?.id ?? "");
       setRole(employeeData.role ?? "");
+      setStatus(employeeData.status ?? "")
     } else {
       setPhoneNumber("");
       setCountry("");
@@ -103,8 +123,9 @@ const ModalForm: React.FC<ModalFormProps> = ({
       setState("");
       setStateCode("");
       setCity("");
-      setDepartmentName("");
+      setDepartmentId("");
       setRole("");
+      setStatus("");
     }
   }, [employeeData]);
 
@@ -247,9 +268,9 @@ const ModalForm: React.FC<ModalFormProps> = ({
               // Handle date fields
               return value !== "" && value !== employeeData[key]?.split("T")[0];
             }
-            if (key === "departmentName") {
-              // Handle department name
-              return value !== "" && value !== employeeData.department?.name;
+            if (key === "departmentId") {
+              // Handle department id
+              return value !== "" && value !== employeeData.department?.id;
             }
             // Handle other fields
             return (
@@ -366,8 +387,9 @@ const ModalForm: React.FC<ModalFormProps> = ({
     setStateCode("");
     setCity("");
     setHasFetched(false);
-    setDepartmentName("");
+    setDepartmentId("");
     setRole("");
+    setStatus("");
   };
 
   const today = new Date();
@@ -407,11 +429,11 @@ const ModalForm: React.FC<ModalFormProps> = ({
   // Shared styles for react-select to match CountryStateCitySelect
   const selectStyles = getBaseSelectStyles<Option>();
 
-  const departmentOptions: Option[] = (
-    Object.values(DepartmentName) as string[]
-  ).map((value) => ({ label: value, value }));
-
   const roleOptions: Option[] = (Object.values(EmployeeRole) as string[]).map(
+    (value) => ({ label: value, value })
+  );
+
+  const statusOptions: Option[] = (Object.values(EmployeeStatus) as string[]).map(
     (value) => ({ label: value, value })
   );
 
@@ -701,21 +723,17 @@ const ModalForm: React.FC<ModalFormProps> = ({
                 options={departmentOptions}
                 styles={selectStyles}
                 placeholder={`Department${!employeeData ? "*" : ""}`}
-                value={
-                  departmentName
-                    ? departmentOptions.find((o) => o.label === departmentName || o.value === departmentName) ?? null
-                    : null
-                }
-                onChange={(opt) => setDepartmentName(opt ? opt.value : "")}
+                value={departmentId ? departmentOptions.find(o => o.value === departmentId) ?? null : null}
+                onChange={(opt) => setDepartmentId(opt ? opt.value : "")}
               />
-              <input type="hidden" name="departmentName" value={departmentName} required={!employeeData} />
-              {errors?.departmentName && (
+              <input type="hidden" name="departmentId" value={departmentId} required={!employeeData} />
+              {errors?.departmentId && (
                 <p
                   className="error-message"
-                  data-tooltip={errors.departmentName}
+                  data-tooltip={errors.departmentId}
                   onMouseEnter={handleTooltipPosition}
                 >
-                  {errors.departmentName}
+                  {errors.departmentId}
                 </p>
               )}
             </div>
@@ -740,11 +758,43 @@ const ModalForm: React.FC<ModalFormProps> = ({
               )}
             </div>
           </div>
+          <div>
+            {/* Row 6: Status */}
+            {employeeData && (
+              <div className="input-group flex flex-row items-center status-row">
+                <div className="input-wrapper title">
+                <h4 className="section-subtitle bold">
+                Please select your gender identity:
+                </h4>
+                </div>
+                <div className={`input-wrapper dropdown ${errors?.status ? "error" : ""}`}>
+                  <Select
+                    options={statusOptions}
+                    styles={selectStyles}
+                    placeholder="Status"
+                    value={status ? statusOptions.find((o) => o.value === status) ?? null : null}
+                   onChange={(opt) => setStatus(opt ? opt.value : "")}
+                  />
+                  <input type="hidden" name="status" value={status ?? EmployeeStatus.ACTIVE} />
+                  {errors?.status && (
+                    <p
+                      className="error-message"
+                      data-tooltip={errors.status}
+                      onMouseEnter={handleTooltipPosition}
+                    >
+                      {errors.status}
+                    </p>
+                  )}
+                </div>
+              </div>
+            )}
 
           <div className="input-group gender-selection">
+          {!employeeData && (
             <h4 className="section-subtitle bold">
               Please select your gender identity:
             </h4>
+            )}
             <label>
               <input
                 type="radio"
@@ -773,7 +823,7 @@ const ModalForm: React.FC<ModalFormProps> = ({
               Other
             </label>
           </div>
-
+          </div>
           {!employeeData && (
             <section>
               <h3 className="section-title">Terms and Mailing</h3>

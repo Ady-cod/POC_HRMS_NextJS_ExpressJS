@@ -26,17 +26,21 @@ export enum EmployeeStatus {
   ON_LEAVE = "ON_LEAVE",
 }
 
-// Define Department interface
-export interface DepartmentListItem {
-  id: number;
-  name: string;
-}
-
 // Define Employee gender enum
 export enum EmployeeGender {
   MALE = "MALE",
   FEMALE = "FEMALE",
   OTHER = "OTHER",
+}
+
+// Define DepartmentListItem interface
+export interface DepartmentListItem {
+  id: string;
+  name: string;
+  description: string;
+  deptHeadEmployeeId: string;
+  headName: string;
+  icon: string;
 }
 
 // Define EmployeeListItem interface

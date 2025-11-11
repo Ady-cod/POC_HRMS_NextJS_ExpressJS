@@ -1,4 +1,4 @@
-import { EmployeeListItem } from "@/types/types";
+import { EmployeeListItem, EmployeeStatus } from "@/types/types";
 
 export interface FilterState {
   searchText: string;
@@ -25,6 +25,7 @@ export const getInitialFilterState = (): FilterState => ({
 });
 
 export const checkIfFiltersActive = (filterState: FilterState): boolean => {
+  const statusIsDefaultActive = filterState.selectedStatus === EmployeeStatus.ACTIVE;
   return !!(
     filterState.searchCategory ||
     filterState.searchText ||
@@ -34,7 +35,7 @@ export const checkIfFiltersActive = (filterState: FilterState): boolean => {
     filterState.selectedEndDate ||
     filterState.selectedStartDOB ||
     filterState.selectedEndDOB ||
-    filterState.selectedStatus
+    (filterState.selectedStatus && !statusIsDefaultActive)
   );
 };
 
@@ -80,6 +81,8 @@ export const filterEmployeesBySearch = (
   const lowerSearch = searchText.toLowerCase();
 
   return employees.filter((emp) => {
+    if (selectedStatus && emp.status !== selectedStatus) return false;
+    
     let value = "";
 
     switch (searchCategory) {
@@ -93,8 +96,7 @@ export const filterEmployeesBySearch = (
         return selectedRole ? emp.role === selectedRole : true;
       case "department":
         return selectedDepartment ? emp.department?.name === selectedDepartment : true;
-      case "status":
-        return selectedStatus ? emp.status === selectedStatus : true;
+      
       case "dateOfJoining":
         if (!emp.dateOfJoining) return false;
         const doj = new Date(emp.dateOfJoining).toISOString().split("T")[0];

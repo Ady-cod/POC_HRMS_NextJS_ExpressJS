@@ -18,24 +18,31 @@ import {
   ResponsiveContainer,
 } from "recharts";
 import { format, parseISO, getYear } from "date-fns";
-import { EmployeeListItem } from "@/types/types";
+import { DepartmentListItem, EmployeeListItem } from "@/types/types";
+import { DEPARTMENT_UNASSIGNED_LABEL } from "@/constants/departments";
 import { showToast } from "@/utils/toastHelper";
 
 interface ProcessedEmployee extends EmployeeListItem {
   joinYear: number | null;
   joinDate: Date | null;
   joinMonthYear: string | null;
+  departmentName: string;
 }
 
 interface EnrollmentChartProps {
   employees: EmployeeListItem[];
+  departments?: DepartmentListItem[];
   hasError?: boolean;
 }
 
 // Add discriminated union for year filter
 type YearFilter = { kind: "all" } | { kind: "year"; value: number };
 
-export default function EnrollmentChart({ employees, hasError }: EnrollmentChartProps) {
+export default function EnrollmentChart({
+  employees,
+  departments = [],
+  hasError,
+}: EnrollmentChartProps) {
   const [selectedDept, setSelectedDept] = useState<string>("all");
   const [selectedYear, setSelectedYear] = useState<YearFilter>({ kind: "all" });
   const [loading, setLoading] = useState<boolean>(true);
@@ -47,11 +54,13 @@ export default function EnrollmentChart({ employees, hasError }: EnrollmentChart
   // Pre-process employee data to avoid redundant date parsing
   const processedEmployees = useMemo<ProcessedEmployee[]>(() => {
     if (hasError || !employees.length) return [];
-    
+
     return employees.map((emp) => {
       let joinYear: number | null = null;
       let joinDate: Date | null = null;
       let joinMonthYear: string | null = null;
+      const departmentName =
+        emp.department?.name ?? DEPARTMENT_UNASSIGNED_LABEL;
 
       if (emp.dateOfJoining) {
         try {
@@ -59,7 +68,10 @@ export default function EnrollmentChart({ employees, hasError }: EnrollmentChart
           joinYear = getYear(joinDate);
           joinMonthYear = format(joinDate, "MMM yyyy");
         } catch (error) {
-          console.warn(`Invalid date format for employee ${emp.id}: ${emp.dateOfJoining}`, error);
+          console.warn(
+            `Invalid date format for employee ${emp.id}: ${emp.dateOfJoining}`,
+            error
+          );
         }
       }
 
@@ -68,6 +80,7 @@ export default function EnrollmentChart({ employees, hasError }: EnrollmentChart
         joinYear,
         joinDate,
         joinMonthYear,
+        departmentName,
       };
     });
   }, [employees, hasError]);
@@ -77,8 +90,14 @@ export default function EnrollmentChart({ employees, hasError }: EnrollmentChart
     const deptSet = new Set<string>();
     const yearSet = new Set<number>();
 
+    departments.forEach((dept) => {
+      if (dept.name) {
+        deptSet.add(dept.name);
+      }
+    });
+
     processedEmployees.forEach((emp) => {
-      deptSet.add(emp.department?.name || "Unknown");
+      deptSet.add(emp.departmentName);
       if (emp.joinYear !== null) {
         yearSet.add(emp.joinYear);
       }
@@ -88,7 +107,7 @@ export default function EnrollmentChart({ employees, hasError }: EnrollmentChart
       uniqueDepartments: Array.from(deptSet),
       uniqueYears: Array.from(yearSet).sort((a, b) => b - a), // Newest first
     };
-  }, [processedEmployees]);
+  }, [processedEmployees, departments]);
 
   useEffect(() => {
     setLoading(true);
@@ -127,12 +146,18 @@ export default function EnrollmentChart({ employees, hasError }: EnrollmentChart
       if (selectedDept === "all") {
         // Department-wise view
         const deptMap: Record<string, number> = {};
+        uniqueDepartments.forEach((deptName) => {
+          if (deptName) {
+            deptMap[deptName] = 0;
+          }
+        });
         processedEmployees
-          .filter((emp) =>
-            selectedYear.kind === "all" || emp.joinYear === selectedYear.value
+          .filter(
+            (emp) =>
+              selectedYear.kind === "all" || emp.joinYear === selectedYear.value
           )
           .forEach((emp) => {
-            const dept = emp.department?.name || "Unknown";
+            const dept = emp.departmentName;
             deptMap[dept] = (deptMap[dept] || 0) + 1;
           });
 
@@ -144,11 +169,13 @@ export default function EnrollmentChart({ employees, hasError }: EnrollmentChart
         // Monthly view for selected department
         const monthMap: Record<string, { count: number; sortDate: Date }> = {};
         processedEmployees
-          .filter((emp) =>
-            emp.department?.name === selectedDept &&
-            emp.joinMonthYear !== null &&
-            emp.joinDate !== null &&
-            (selectedYear.kind === "all" || emp.joinYear === selectedYear.value)
+          .filter(
+            (emp) =>
+              emp.departmentName === selectedDept &&
+              emp.joinMonthYear !== null &&
+              emp.joinDate !== null &&
+              (selectedYear.kind === "all" ||
+                emp.joinYear === selectedYear.value)
           )
           .forEach((emp) => {
             const monthKey = emp.joinMonthYear!;
@@ -177,7 +204,7 @@ export default function EnrollmentChart({ employees, hasError }: EnrollmentChart
       ]);
       return []; // Return empty array as fallback
     }
-  }, [selectedDept, selectedYear, processedEmployees]);
+  }, [selectedDept, selectedYear, processedEmployees, uniqueDepartments]);
 
   return (
     <div className="rounded-2xl shadow-sm px-8 pt-8 justify-center bg-darkblue-50 border border-black-50 min-h-full flex flex-col">
@@ -234,13 +261,11 @@ export default function EnrollmentChart({ employees, hasError }: EnrollmentChart
                 <SelectItem value="all" className="text-darkblue-900">
                   Show All
                 </SelectItem>
-                {uniqueDepartments
-                  .filter((dept) => dept !== "Unknown")
-                  .map((dept) => (
-                    <SelectItem key={dept} value={dept}>
-                      {dept}
-                    </SelectItem>
-                  ))}
+                {uniqueDepartments.map((dept) => (
+                  <SelectItem key={dept} value={dept}>
+                    {dept}
+                  </SelectItem>
+                ))}
               </SelectContent>
             </Select>
           </div>

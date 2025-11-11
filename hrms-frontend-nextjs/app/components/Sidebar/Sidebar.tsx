@@ -1,10 +1,9 @@
 "use client";
 import React, { useEffect, useState } from "react";
 import Link from "next/link";
-import Image from "next/image";
+import SBIcons from "../SidebarIcons/SidebarIcons";
 import "./Sidebar.css";
 import { usePathname } from "next/navigation";
-
 import {
   Sheet,
   SheetContent,
@@ -15,20 +14,318 @@ import {
 } from "@/components/shadCN/shadCNDialog";
 import { logout } from "@/actions/auth";
 
+// Constants
+const SIDEBAR_PATHS = {
+  HOME: "/admin",
+  PROFILE: "/admin/profile",
+  EMPLOYEE: {
+    LIST: "/admin/employee/list",
+    WEEK_WISE: "/admin/employee/week-wise",
+  },
+  APPLICANTS: "/admin/applicants",
+  WORKFLOW: "/admin/workflow",
+  MASTERS: {
+    DEPARTMENTS: "/admin/masters/departments",
+    PROJECTS: "/admin/masters/projects"
+  },
+  HR: "/admin/hr",
+} as const;
+
+const ICONS = {
+  HOME: SBIcons.Home,
+  PROFILE: SBIcons.Profile,
+  EMPLOYEE: SBIcons.Employee,
+  APPLICANTS: SBIcons.Applicants,
+  WORKFLOW: SBIcons.Workflow,
+  MASTERS: SBIcons.Masters,
+  HR: SBIcons.Hr,
+  LOGOUT: SBIcons.Logout,
+  COLLAPSE: SBIcons.Collapse,
+  EXPAND: SBIcons.Expand,
+} as const;
+
+// Menu item configuration
+interface MenuItemConfig {
+  path: string;
+  label: string;
+  icons: React.FC<{ className?: string }>;
+  hasSubmenu?: boolean;
+  submenuItems?: SubmenuItemConfig[];
+}
+
+interface SubmenuItemConfig {
+  path: string;
+  label: string;
+}
+
+type MenuItemKey =
+  | "HOME"
+  | "PROFILE"
+  | "EMPLOYEE"
+  | "APPLICANTS"
+  | "WORKFLOW"
+  | "MASTERS"
+  | "HR"
+  | "LOGOUT";
+
+const MENU_CONFIG: Record<MenuItemKey, MenuItemConfig> = {
+  HOME: {
+    path: SIDEBAR_PATHS.HOME,
+    label: "Home",
+    icons: ICONS.HOME,
+  },
+  PROFILE: {
+    path: SIDEBAR_PATHS.PROFILE,
+    label: "My Profile",
+    icons: ICONS.PROFILE,
+  },
+  EMPLOYEE: {
+    path: "/admin/employee",
+    label: "Employee",
+    icons: ICONS.EMPLOYEE,
+    hasSubmenu: true,
+    submenuItems: [
+      { path: SIDEBAR_PATHS.EMPLOYEE.LIST, label: "List" },
+      { path: SIDEBAR_PATHS.EMPLOYEE.WEEK_WISE, label: "Week-wise" },
+    ],
+  },
+  APPLICANTS: {
+    path: SIDEBAR_PATHS.APPLICANTS,
+    label: "Applicants",
+    icons: ICONS.APPLICANTS,
+  },
+  WORKFLOW: {
+    path: SIDEBAR_PATHS.WORKFLOW,
+    label: "My Workflow",
+    icons: ICONS.WORKFLOW,
+  },
+  MASTERS: {
+    path: "/admin/masters",
+    label: "Masters",
+    icons: ICONS.MASTERS,
+    hasSubmenu: true,
+    submenuItems: [
+      { path: SIDEBAR_PATHS.MASTERS.DEPARTMENTS, label: "Departments" },
+      { path: SIDEBAR_PATHS.MASTERS.PROJECTS, label: "Projects" },
+    ]
+  },
+  HR: {
+    path: SIDEBAR_PATHS.HR,
+    label: "Core HR",
+    icons: ICONS.HR,
+  },
+  LOGOUT: {
+    path: "/",
+    label: "Logout",
+    icons: ICONS.LOGOUT,
+  },
+} as const;
+
+// Reusable MenuItem component
+interface MenuItemProps {
+  config: MenuItemConfig;
+  isActive: boolean;
+  isCollapsed: boolean;
+  onClick: () => void;
+  children?: React.ReactNode;
+}
+
+const MenuItem = ({
+  config,
+  isActive,
+  isCollapsed,
+  onClick,
+  children,
+}: MenuItemProps) => {
+  const getItemClasses = () => `group flex items-center rounded-lg transition-all duration-200
+    ${isCollapsed ? "justify-center px-0 py-1" : "justify-start px-3 py-1.5"}
+    ${isActive ? "bg-lightblue-500 border-r-8 border-orange-500 text-white" : "hover:bg-darkblue-500 hover:border-r-4 hover:border-orange-500 text-darkblue-900"}
+  `;
+
+  const getTextClasses = () => {
+    return `ml-2 transition-colors duration-200 ${
+      isActive ? "text-white" : "text-darkblue-900 group-hover:text-white"
+    }`;
+  };
+
+  return (
+    <li className="w-full">
+      <Link href={config.path} onClick={onClick} className={getItemClasses()}>
+        <div className="relative w-6 h-6 flex items-center justify-center transition-all duration-200">
+          <config.icons
+            className={`transition-colors duration-200 ${isActive ? "text-white" : "text-darkblue-900 group-hover:text-white"}`}
+          />
+        </div>
+        {!isCollapsed && (
+          <span className={getTextClasses()}>{config.label}</span>
+        )}
+      </Link>
+      {children}
+    </li>
+  );
+};
+
+// Reusable SubmenuItem component
+interface SubmenuItemProps {
+  path: string;
+  label: string;
+  isActive: boolean;
+  onClick: () => void;
+}
+
+const SubmenuItem = ({ path, label, isActive, onClick }: SubmenuItemProps) => {
+  return (
+    <li>
+      <Link
+        href={path}
+        onClick={onClick}
+        className={`group flex items-start gap-2 px-2 py-1 rounded-lg transition-all duration-200 ${
+          isActive ? "text-orange-500 cursor-default" : "text-darkblue-900 hover:bg-darkblue-500 hover:border-r-4 hover:border-orange-500"
+        }`}
+      >
+        <span className={`text-lg leading-none transition-colors duration-200 ${isActive ? "text-orange-500" : "group-hover:text-white"}`}>•</span>
+        <span className={`leading-tight transition-colors duration-200 ${isActive ? "text-orange-500" : "group-hover:text-white"}`}>
+          {label}
+        </span>
+      </Link>
+    </li>
+  );
+};
+
+// Submenu component for items with dropdowns
+interface SubmenuProps {
+  config: MenuItemConfig;
+  isActive: boolean;
+  isCollapsed: boolean;
+  isHovered: boolean;
+  pathname: string;
+  onMouseEnter: () => void;
+  onMouseLeave: () => void;
+  onItemClick: () => void;
+  onExpandClick?: () => void;
+}
+
+const Submenu = ({
+  config,
+  isActive,
+  isCollapsed,
+  isHovered,
+  pathname,
+  onMouseEnter,
+  onMouseLeave,
+  onItemClick,
+  onExpandClick,
+}: SubmenuProps) => {
+  const getContainerClasses = () => `group relative w-full flex items-center rounded-lg transition-all duration-200
+    ${isCollapsed ? "justify-center px-0 py-1" : "justify-start px-3 py-1.5"}
+    ${isActive ? "bg-lightblue-500 border-r-8 border-orange-500 text-white" : "hover:bg-darkblue-500 hover:border-r-4 hover:border-orange-500 text-darkblue-900"}
+  `;
+
+  const getSubmenuClasses = () =>
+    `ml-8 mt-1 list-inside sm:text-[13px] space-y-0.5 transition-all duration-300 ease-in-out ${
+      !isCollapsed && (isHovered || isActive)
+        ? "opacity-100 translate-y-0 max-h-[40vh] overflow-y-auto"
+        : "opacity-0 -translate-y-2 max-h-0 overflow-hidden"
+    }`;
+
+  return (
+    <li
+      className="relative w-full"
+      onMouseEnter={onMouseEnter}
+      onMouseLeave={onMouseLeave}
+    >
+      <div className={getContainerClasses()} onClick={onExpandClick}>
+        <div className="relative w-6 h-6 flex items-center justify-center transition-all duration-200">
+          <config.icons
+            className={`transition-colors duration-200 ${
+              isActive ? "text-white" : "text-darkblue-900 group-hover:text-white"
+            }`}
+          />
+        </div>
+        {!isCollapsed && <span className={`ml-2 transition-colors duration-200 ${isActive ? "text-white" : "text-darkblue-900 group-hover:text-white"}`}>{config.label}</span>}
+        {isCollapsed && isHovered && (
+          <span className="absolute left-full ml-2 bg-gray-800 text-white text-sm px-2 py-1 rounded whitespace-nowrap z-50">
+            {config.label}
+          </span>
+        )}
+      </div>
+
+      <ul className={getSubmenuClasses()}>
+        {config.submenuItems?.map((item) => (
+          <SubmenuItem
+            key={item.path}
+            path={item.path}
+            label={item.label}
+            isActive={pathname === item.path}
+            onClick={onItemClick}
+          />
+        ))}
+      </ul>
+    </li>
+  );
+};
+
+// Utility functions
+const getActiveState = (currentPath: string, itemPath: string): boolean => {
+  const pathsWithSubmenus = ["/admin/employee", "/admin/masters"];
+  if (pathsWithSubmenus.includes(itemPath)) {
+    return currentPath.startsWith(itemPath);
+  }
+  return currentPath === itemPath;
+};
+
+const getSidebarClasses = (isOpen: boolean, isCollapsed: boolean): string => {
+  return `
+  transition-all duration-300 ease-in-out bg-darkblue-75
+  ${
+    isOpen
+      ? "translate-x-0 opacity-100 sticky top-24 sm:mx-3"
+      : "-translate-x-full absolute opacity-0"
+  }
+  px-6 sm:px-6 pt-3 sidebar mb-2
+  ${isCollapsed ? "sm:w-28" : "sm:w-60"}
+  flex flex-col min-h-0
+  h-auto sm:max-h-[calc(100dvh-6rem-0.5rem)]
+  overflow-hidden
+`;
+};
+
+const getSidebarStyle = (isCollapsed: boolean): React.CSSProperties => ({
+  borderRadius: "45px",
+  width: isCollapsed ? "7rem" : "15rem",
+  minWidth: isCollapsed ? "7rem" : "15rem",
+  scrollbarWidth: "thin", // Firefox
+  scrollbarColor: "#0c3e66 #d0dae2", // Firefox
+});
+
+
+const getCollapseIcon = (isCollapsed: boolean) => {
+  return isCollapsed ? ICONS.EXPAND : ICONS.COLLAPSE;
+};
+
 interface SideBarProps {
   isOpen: boolean;
   toggleSidebar: (value: boolean) => void;
 }
 
 const Sidebar = ({ isOpen, toggleSidebar }: SideBarProps) => {
-  const [isSmBreakpoint, setIsSmBreakpoint] = useState(true);
+  const [isSmBreakpoint, setIsSmBreakpoint] = useState(() =>
+    typeof window !== "undefined"
+      ? window.matchMedia("(min-width: 640px)").matches
+      : true
+  );
   const pathname = usePathname();
-  const [isHovered, setIsHovered] = useState(false); // For Employee submenu
+  const [hoveredSubmenu, setHoveredSubmenu] = useState<string | null>(null);
+  const [isCollapsed, setIsCollapsed] = useState(false);
 
   useEffect(() => {
     if (pathname.startsWith("/admin/employee")) {
-      setIsHovered(true);
-    }
+    setHoveredSubmenu("employee");
+  } else if (pathname.startsWith("/admin/masters")) {
+    setHoveredSubmenu("masters");
+  } else {
+    setHoveredSubmenu(null);
+  }
   }, [pathname]);
 
   useEffect(() => {
@@ -73,232 +370,121 @@ const Sidebar = ({ isOpen, toggleSidebar }: SideBarProps) => {
     );
   };
 
+
   const renderSidebar = () => {
+    const CollapseIcon  = getCollapseIcon(isCollapsed);
+
     return (
       <div
-        className={`w-64 h-full transition-all duration-75 ease-in-out sm:border-r-2 ${
-          isOpen
-            ? "translate-x-0 relative opacity-100"
-            : "-translate-x-full absolute opacity-0"
-        } bg-white sm:bg-gradient-to-b from-gray-200 to-white sm:p-6 pt-10 sidebar`}
+        className={getSidebarClasses(isOpen, isCollapsed)}
+        style={getSidebarStyle(isCollapsed)}
       >
-        <ul className="whitespace-nowrap font-semibold sm:text-[15px] sticky top-28 flex flex-col gap-6 sidebaritems">
+        <div
+          className={`flex ${
+            !isCollapsed ? "justify-end" : "justify-center"
+          } mb-2`}
+        >
+          <CollapseIcon
+            className="transition-all duration-200 hover:cursor-pointer mt-4 mb-8"
+            onClick={() => setIsCollapsed(!isCollapsed)}
+          />
+        </div>
+
+        <ul className="whitespace-nowrap pr-1 pb-3 font-semibold sm:text-[14px] flex flex-col gap-3 sidebaritems flex-1 overflow-y-auto overflow-x-hidden">
           {/* Home */}
-          <li>
-            <Link
-              href="/admin"
-              onClick={handleSidebarItemClick}
-              className={`flex items-center gap-3 px-4 py-2 rounded-lg transition-all duration-200 ${
-                pathname === "/admin"
-                  ? "bg-blue-200 border-r-4 border-blue-500 text-blue-700 scale-110"
-                  : "hover:bg-gray-300 hover:border-r-2 hover:border-gray-500 hover:scale-110"
-              }`}
-            >
-              <Image
-                src="/images/home.png"
-                alt="Home icon"
-                width={24}
-                height={24}
-              />
-              Home
-            </Link>
-          </li>
+          <MenuItem
+            config={MENU_CONFIG.HOME}
+            isActive={getActiveState(pathname, SIDEBAR_PATHS.HOME)}
+            isCollapsed={isCollapsed}
+            onClick={handleSidebarItemClick}
+          />
 
           {/* Profile */}
-          <li>
-            <Link
-              href="/admin/profile"
-              onClick={handleSidebarItemClick}
-              className={`flex items-center gap-3 px-4 py-2 rounded-lg transition-all duration-200 ${
-                pathname === "/admin/profile"
-                  ? "bg-blue-200 border-r-4 border-blue-500 text-blue-700 scale-110"
-                  : "hover:bg-gray-300 hover:border-r-2 hover:border-gray-500 hover:scale-110"
-              }`}
-            >
-              <Image
-                src="/images/My profile icon.png"
-                alt="Profile icon"
-                width={24}
-                height={24}
-              />
-              My Profile
-            </Link>
-          </li>
+          <MenuItem
+            config={MENU_CONFIG.PROFILE}
+            isActive={getActiveState(pathname, SIDEBAR_PATHS.PROFILE)}
+            isCollapsed={isCollapsed}
+            onClick={handleSidebarItemClick}
+          />
 
           {/* Employee menu */}
-          <li
-            className="relative"
-            onMouseEnter={() => setIsHovered(true)}
-            onMouseLeave={() => setIsHovered(false)}
-          >
-            <div
-              className={`w-full flex items-center gap-3 px-4 py-2 rounded-lg cursor-default transition-all duration-200 ${
-                pathname.startsWith("/admin/employee")
-                  ? "bg-blue-200 border-r-4 border-blue-500 text-blue-700 scale-110"
-                  : "hover:bg-gray-300 hover:border-r-2 hover:border-gray-500 hover:scale-110"
-              }`}
-            >
-              <Image
-                src="/images/My learning path icon.png"
-                alt="Learning Path icon"
-                width={24}
-                height={24}
-              />
-              Employee
-            </div>
-
-            {/* Submenu */}
-            <ul
-              className={`ml-12 mt-1 list-inside text-sm space-y-1 transition-all duration-300 ease-in-out ${
-                isHovered || pathname.startsWith("/admin/employee")
-                  ? "opacity-100 translate-y-0 max-h-40"
-                  : "opacity-0 -translate-y-2 max-h-0 overflow-hidden"
-              }`}
-            >
-              <li>
-                <Link
-                  href="/admin/employee/list"
-                  onClick={handleSidebarItemClick}
-                  className={`flex items-start gap-2 px-2 py-1 rounded-lg transition-all duration-200 ${
-                    pathname === "/admin/employee/list"
-                      ? "text-blue-600"
-                      : "hover:bg-gray-300 hover:border-r-2 hover:border-gray-500 hover:scale-105 text-black"
-                  }`}
-                >
-                  <span
-                    className={`text-lg leading-none ${
-                      pathname === "/admin/employee/list" ? "text-blue-600" : ""
-                    }`}
-                  >
-                    •
-                  </span>
-                  <span className="leading-tight">List</span>
-                </Link>
-              </li>
-
-              <li>
-                <Link
-                  href="/admin/employee/week-wise"
-                  onClick={handleSidebarItemClick}
-                  className={`flex items-start gap-2 px-2 py-1 rounded-lg transition-all duration-200 ${
-                    pathname === "/admin/employee/week-wise"
-                      ? "text-blue-600"
-                      : "hover:bg-gray-300 hover:border-r-2 hover:border-gray-500 hover:scale-105 text-black"
-                  }`}
-                >
-                  <span
-                    className={`text-lg leading-none ${
-                      pathname === "/admin/employee/week-wise"
-                        ? "text-blue-600"
-                        : ""
-                    }`}
-                  >
-                    •
-                  </span>
-                  <span className="leading-tight">Week-wise</span>
-                </Link>
-              </li>
-            </ul>
-          </li>
+          <Submenu
+            config={MENU_CONFIG.EMPLOYEE}
+            isActive={getActiveState(pathname, "/admin/employee")}
+            isCollapsed={isCollapsed}
+            isHovered={hoveredSubmenu==="employee"}
+            pathname={pathname}
+            onMouseEnter={() => {setHoveredSubmenu("employee");}}
+            onMouseLeave={() => setHoveredSubmenu(null)}
+            onItemClick={handleSidebarItemClick}
+            onExpandClick={() => {
+              if (isCollapsed) {
+                setIsCollapsed(false);
+                setHoveredSubmenu("employee");
+              }
+            }}
+          />
 
           {/* Applicants */}
-          <li>
-            <Link
-              href="/admin/applicants"
-              onClick={handleSidebarItemClick}
-              className={`flex items-center gap-3 px-4 py-2 rounded-lg transition-all duration-200 ${
-                pathname === "/admin/applicants"
-                  ? "bg-blue-200 border-r-4 border-blue-500 text-blue-700 scale-110"
-                  : "hover:bg-gray-300 hover:border-r-2 hover:border-gray-500 hover:scale-110"
-              }`}
-            >
-              <Image
-                src="/images/Applicants.png"
-                alt="Applicant icon"
-                width={24}
-                height={24}
-              />
-              Applicants
-            </Link>
-          </li>
+          <MenuItem
+            config={MENU_CONFIG.APPLICANTS}
+            isActive={getActiveState(pathname, SIDEBAR_PATHS.APPLICANTS)}
+            isCollapsed={isCollapsed}
+            onClick={handleSidebarItemClick}
+          />
 
           {/* Workflow */}
-          <li>
-            <Link
-              href="/admin/workflow"
-              onClick={handleSidebarItemClick}
-              className={`flex items-center gap-3 px-4 py-2 rounded-lg transition-all duration-200 ${
-                pathname === "/admin/workflow"
-                  ? "bg-blue-200 border-r-4 border-blue-500 text-blue-700 scale-110"
-                  : "hover:bg-gray-300 hover:border-r-2 hover:border-gray-500 hover:scale-110"
-              }`}
-            >
-              <Image
-                src="/images/My workflow icon.png"
-                alt="Workflow icon"
-                width={24}
-                height={24}
-              />
-              My Workflow
-            </Link>
-          </li>
+          <MenuItem
+            config={MENU_CONFIG.WORKFLOW}
+            isActive={getActiveState(pathname, SIDEBAR_PATHS.WORKFLOW)}
+            isCollapsed={isCollapsed}
+            onClick={handleSidebarItemClick}
+          />
 
           {/* Masters */}
-          <li>
-            <Link
-              href="/admin/masters"
-              onClick={handleSidebarItemClick}
-              className={`flex items-center gap-3 px-4 py-2 rounded-lg transition-all duration-200 ${
-                pathname === "/admin/masters"
-                  ? "bg-blue-200 border-r-4 border-blue-500 text-blue-700 scale-110"
-                  : "hover:bg-gray-300 hover:border-r-2 hover:border-gray-500 hover:scale-110"
-              }`}
-            >
-              <Image
-                src="/images/Master.png"
-                alt="Master icon"
-                width={24}
-                height={24}
-              />
-              Masters
-            </Link>
-          </li>
+          <Submenu
+            config={MENU_CONFIG.MASTERS}
+            isActive={getActiveState(pathname, "/admin/masters")}
+            isCollapsed={isCollapsed}
+            isHovered={hoveredSubmenu === "masters"}
+            pathname={pathname}
+            onMouseEnter={() => setHoveredSubmenu("masters")}
+            onMouseLeave={() => setHoveredSubmenu(null)}
+            onItemClick={handleSidebarItemClick}
+            onExpandClick={() => {
+              if (isCollapsed) {
+                setIsCollapsed(false);
+                setHoveredSubmenu("masters");
+              }
+            }}
+          /> 
 
           {/* HR */}
-          <li>
-            <Link
-              href="/admin/hr"
-              onClick={handleSidebarItemClick}
-              className={`flex items-center gap-3 px-4 py-2 rounded-lg transition-all duration-200 ${
-                pathname === "/admin/hr"
-                  ? "bg-blue-200 border-r-4 border-blue-500 text-blue-700 scale-110"
-                  : "hover:bg-gray-300 hover:border-r-2 hover:border-gray-500 hover:scale-110"
-              }`}
-            >
-              <Image
-                src="/images/HR.png"
-                alt="HR icon"
-                width={24}
-                height={24}
-              />
-              Core HR
-            </Link>
-          </li>
+          <MenuItem
+            config={MENU_CONFIG.HR}
+            isActive={getActiveState(pathname, SIDEBAR_PATHS.HR)}
+            isCollapsed={isCollapsed}
+            onClick={handleSidebarItemClick}
+          />
 
           {/* Logout */}
-          <li className="logout bottom-3 mt-8">
-            <form action={logout}>
+          <li className="logout mb-3 mt-2">
+            <form
+              action={logout}
+              onSubmit={() => {
+                if (typeof window !== "undefined") {
+                  localStorage.removeItem("hrms_connection_status");
+                }
+              }}
+            >
               <button
-                type="submit" 
-                className="flex items-center gap-3 px-4 py-2 rounded-lg hover:bg-gray-300 hover:border-r-2 hover:border-gray-500 hover:scale-110 transition-all duration-200 w-full text-left"
+                type="submit"
+                className={`group flex items-center justify-${isCollapsed ? "center" : "start"} transition-all duration-200 w-full rounded-lg gap-2 px-3 py-1.5 hover:bg-darkblue-500 hover:border-r-4 hover:border-orange-500 text-darkblue-900`}
               >
-                <Image
-                  src="/images/Logout icon.png"
-                  alt="Logout icon"
-                  width={24}
-                  height={24}
-                />
-                Logout
+                <div className="w-6 h-6 flex items-center justify-center">
+                  <ICONS.LOGOUT className="transition-colors duration-200 group-hover:text-white text-darkblue-900" />
+                </div>
+                {!isCollapsed && <span className="  transition-colors duration-200 text-darkblue-900 group-hover:text-white">Logout</span>}
               </button>
             </form>
           </li>

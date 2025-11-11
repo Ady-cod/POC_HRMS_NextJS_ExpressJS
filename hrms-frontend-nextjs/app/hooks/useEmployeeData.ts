@@ -96,6 +96,7 @@ export const useEmployeeData = ({ refreshFlag, setEmployeeCount }: UseEmployeeDa
 
   return {
     employees,
+    setEmployees,
     selectedEmployee,
     showDialog,
     handleDeleteClick,

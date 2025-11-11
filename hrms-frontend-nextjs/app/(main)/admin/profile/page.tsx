@@ -12,7 +12,7 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { showToast } from "@/utils/toastHelper";
-import { EmployeeListItem } from "@/types/types";
+import { DepartmentListItem, EmployeeListItem } from "@/types/types";
 import { Eye, EyeOff } from "lucide-react";
 import { updateEmployee } from "@/actions/employee";
 import { AsYouType } from "libphonenumber-js";
@@ -100,6 +100,8 @@ export default function Profile() {
     confirm: "",
   });
   const [visible, setVisible] = useState<Record<string, boolean>>({});
+  const [departments, setDepartments] = useState<DepartmentListItem[]>([]);
+  const [isLoadingDepartments, setIsLoadingDepartments] = useState(false);
 
   const fileInputRef = useRef<HTMLInputElement>(null);
   const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
@@ -180,6 +182,37 @@ export default function Profile() {
     fetchProfile();
   }, []);
 
+  useEffect(() => {
+    const fetchDepartments = async () => {
+      setIsLoadingDepartments(true);
+      try {
+        const baseUrl = process.env.NEXT_PUBLIC_BACKEND_BASE_URL;
+        const endpoint = process.env.NEXT_PUBLIC_DEPARTMENT_ENDPOINT;
+
+        if (!baseUrl || !endpoint) {
+          throw new Error("Department API configuration is missing");
+        }
+
+        const res = await fetch(`${baseUrl}${endpoint}`);
+        if (!res.ok) {
+          throw new Error("Failed to fetch departments");
+        }
+
+        const departmentList: DepartmentListItem[] = await res.json();
+        setDepartments(departmentList);
+      } catch (error) {
+        console.error("Error fetching departments:", error);
+        showToast("error", "Unable to load departments", [
+          "Department list could not be retrieved. Try again later.",
+        ]);
+      } finally {
+        setIsLoadingDepartments(false);
+      }
+    };
+
+    fetchDepartments();
+  }, []);
+
   // Handlers
   const handleImageUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
@@ -204,8 +237,21 @@ export default function Profile() {
     e.target.value = "";
   };
 
-  const handleFieldChange = (key: string, value: string) =>
+  const handleFieldChange = (key: string, value: string) => {
+    if (key === "departmentName") {
+      const selectedDepartment = departments.find((dept) => dept.id === value);
+      if (selectedDepartment) {
+        setFormData((prev) => ({
+          ...prev,
+          department: selectedDepartment.id,
+          departmentName: selectedDepartment.name,
+        }));
+      }
+      return;
+    }
+
     setFormData((prev) => ({ ...prev, [key]: value }));
+  };
 
   // Format phone as user types, similar to ModalForm
   const handlePhoneInputChange = (value: string) => {
@@ -358,10 +404,18 @@ export default function Profile() {
   };
 
   const handleCancel = (key: string) => {
-    setFormData((prev) => ({
-      ...prev,
-      [key]: originalData[key as keyof typeof originalData],
-    }));
+    if (key === "departmentName") {
+      setFormData((prev) => ({
+        ...prev,
+        department: originalData.department,
+        departmentName: originalData.departmentName,
+      }));
+    } else {
+      setFormData((prev) => ({
+        ...prev,
+        [key]: originalData[key as keyof typeof originalData],
+      }));
+    }
     setEditingField(null);
   };
 
@@ -708,140 +762,77 @@ export default function Profile() {
                         {fieldLabels[key] || key}
                       </label>
 
-                      {editingField === key ? (
-                        <div className="flex flex-col sm:flex-row sm:items-center gap-2 w-full sm:w-2/3">
-                          <div className="w-full">
-                            {key === "timezone" ? (
-                              <>
-                                <TimeZoneSelect
-                                  value={formData.timezone}
-                                  onChange={(val) =>
-                                    handleFieldChange("timezone", val)
-                                  }
-                                />
-                                {errors?.[serverKey] && (
-                                  <p className="text-sm text-red-600 mt-1">
-                                    {errors[serverKey]}
-                                  </p>
-                                )}
-                              </>
-                            ) : key === "departmentName" ? (
-                              <>
-                                <Select
-                                  value={formData.departmentName}
-                                  onValueChange={(val) =>
-                                    handleFieldChange("departmentName", val)
-                                  }
+                    {editingField === key ? (
+                      <div className="flex flex-col sm:flex-row sm:items-center gap-2 w-full sm:w-2/3">
+                        {key === "timezone" ? (
+                          <TimeZoneSelect
+                            value={formData.timezone}
+                            onChange={(val) =>
+                              handleFieldChange("timezone", val)
+                            }
+                          />
+                        ) : key === "departmentName" ? (
+                          <Select
+                            disabled={isLoadingDepartments}
+                            value={formData.department || ""}
+                            onValueChange={(val) =>
+                              handleFieldChange("departmentName", val)
+                            }
+                          >
+                            <SelectTrigger className="w-full border rounded-md p-2 text-xl text-lightblue-700">
+                              <SelectValue placeholder="Select Department" />
+                            </SelectTrigger>
+                            <SelectContent>
+                              {departments.map((dept) => (
+                                <SelectItem
+                                  key={dept.id}
+                                  value={dept.id}
+                                  className="data-[highlighted]:bg-lightblue-100 data-[highlighted]:text-lightblue-700 data-[state=checked]:bg-lightblue-800 data-[state=checked]:text-white cursor-pointer text-lightblue-800"
                                 >
-                                  <SelectTrigger className="w-full border rounded-md p-2 text-base sm:text-xl text-lightblue-700">
-                                    <SelectValue placeholder="Select Department" />
-                                  </SelectTrigger>
-                                  <SelectContent>
-                                    {[
-                                      "HR",
-                                      "Web Development",
-                                      "UI/UX",
-                                      "QA",
-                                      "BA",
-                                      "SM",
-                                    ].map((dept) => (
-                                      <SelectItem
-                                        key={dept}
-                                        value={dept}
-                                        className="data-[highlighted]:bg-lightblue-100 data-[highlighted]:text-lightblue-700 data-[state=checked]:bg-lightblue-800 data-[state=checked]:text-white cursor-pointer text-lightblue-800"
-                                      >
-                                        {dept}
-                                      </SelectItem>
-                                    ))}
-                                  </SelectContent>
-                                </Select>
-                                <input
-                                  type="hidden"
-                                  name="departmentName"
-                                  value={formData.departmentName}
-                                  required={false}
-                                />
-                                {errors?.[serverKey] && (
-                                  <p className="text-sm text-red-600 mt-1">
-                                    {errors[serverKey]}
-                                  </p>
-                                )}
-                              </>
-                            ) : key === "role" ? (
-                              <>
-                                <Select
-                                  value={formData.role}
-                                  onValueChange={(val) =>
-                                    handleFieldChange("role", val)
-                                  }
+                                  {dept.name}
+                                </SelectItem>
+                              ))}
+                            </SelectContent>
+                          </Select>
+                        ) : key === "role" ? (
+                          <Select
+                            value={formData.role}
+                            onValueChange={(val) =>
+                              handleFieldChange("role", val)
+                            }
+                          >
+                            <SelectTrigger className="w-full border rounded-md p-2 text-xl text-lightblue-700">
+                              <SelectValue placeholder="Select Role" />
+                            </SelectTrigger>
+                            <SelectContent>
+                              {[
+                                "EMPLOYEE",
+                                "INTERN",
+                                "HR_INTERN",
+                                "HR_EMPLOYEE",
+                                "HR_MANAGER",
+                                "MANAGER",
+                                "ADMIN",
+                              ].map((role) => (
+                                <SelectItem
+                                  key={role}
+                                  value={role}
+                                  className="data-[highlighted]:bg-lightblue-100 data-[highlighted]:text-lightblue-700 data-[state=checked]:bg-lightblue-800 data-[state=checked]:text-white cursor-pointer text-lightblue-800"
                                 >
-                                  <SelectTrigger className="w-full border rounded-md p-2 text-base sm:text-xl text-lightblue-700">
-                                    <SelectValue placeholder="Select Role" />
-                                  </SelectTrigger>
-                                  <SelectContent>
-                                    {[
-                                      "EMPLOYEE",
-                                      "INTERN",
-                                      "HR_INTERN",
-                                      "HR_EMPLOYEE",
-                                      "HR_MANAGER",
-                                      "MANAGER",
-                                      "ADMIN",
-                                    ].map((r) => (
-                                      <SelectItem
-                                        key={r}
-                                        value={r}
-                                        className="data-[highlighted]:bg-lightblue-100 data-[highlighted]:text-lightblue-700 data-[state=checked]:bg-lightblue-800 data-[state=checked]:text-white cursor-pointer text-lightblue-800"
-                                      >
-                                        {r}
-                                      </SelectItem>
-                                    ))}
-                                  </SelectContent>
-                                </Select>
-                                <input
-                                  type="hidden"
-                                  name="role"
-                                  value={formData.role}
-                                />
-                                {errors?.[serverKey] && (
-                                  <p className="text-sm text-red-600 mt-1">
-                                    {errors[serverKey]}
-                                  </p>
-                                )}
-                              </>
-                            ) : key === "phone" ? (
-                              <>
-                                <Input
-                                  className="w-full text-base sm:text-xl text-lightblue-700 border border-lightblue-700 rounded px-3 py-2 focus:outline-none focus:ring-2 focus:ring-lightblue-700"
-                                  value={formData.phone}
-                                  onChange={(e) =>
-                                    handlePhoneInputChange(e.target.value)
-                                  }
-                                  placeholder={"e.g., +40715632783"}
-                                />
-                                {errors?.[serverKey] && (
-                                  <p className="text-sm text-red-600 mt-1">
-                                    {errors[serverKey]}
-                                  </p>
-                                )}
-                              </>
-                            ) : (
-                              <>
-                                <Input
-                                  className="w-full text-base sm:text-xl text-lightblue-700 border border-lightblue-700 rounded px-3 py-2 focus:outline-none focus:ring-2 focus:ring-lightblue-700"
-                                  value={value}
-                                  onChange={(e) =>
-                                    handleFieldChange(key, e.target.value)
-                                  }
-                                />
-                                {errors?.[serverKey] && (
-                                  <p className="text-sm text-red-600 mt-1">
-                                    {errors[serverKey]}
-                                  </p>
-                                )}
-                              </>
-                            )}
-                          </div>
+                                  {role}
+                                </SelectItem>
+                              ))}
+                            </SelectContent>
+                          </Select>
+                        ) : (
+                          <Input
+                            className="w-full text-xl text-lightblue-700 border border-lightblue-700 rounded px-3 py-2 focus:outline-none focus:ring-2 focus:ring-lightblue-700 focus:text-xl"
+                            value={value}
+                            onChange={(e) =>
+                              handleFieldChange(key, e.target.value)
+                            }
+                          />
+                        )}
 
                           <div className="flex gap-2">
                             <Button

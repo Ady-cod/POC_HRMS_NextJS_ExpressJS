@@ -93,8 +93,9 @@ export const useEmployeeTableColumns = ({
 
     return {
       name: "More columns ...",
+      center:true,
       cell: () => (
-        <div className="flex justify-center items-center gap-4 my-1 text-gray-500">
+        <div className="flex justify-center items-center gap-1 my-1 text-lightblue-500">
           <button
             onClick={() =>
               isSmallScreen ? setActiveColumnIndex(0) : setActiveSectionIndex(0)
@@ -102,7 +103,7 @@ export const useEmployeeTableColumns = ({
             disabled={
               isSmallScreen ? activeColumnIndex === 0 : activeSectionIndex === 0
             }
-            className="disabled:opacity-50"
+            className="w-7 h-7 disabled:opacity-50 disabled:hover:bg-transparent disabled:text-darkblue-100 hover:bg-darkblue-75 rounded-full hover:text-darkblue-500 transition-all"
             aria-label="First"
           >
             <FontAwesomeIcon icon={faBackwardStep} size="lg" />
@@ -116,7 +117,7 @@ export const useEmployeeTableColumns = ({
             disabled={
               isSmallScreen ? activeColumnIndex === 0 : activeSectionIndex === 0
             }
-            className="disabled:opacity-50"
+            className="w-7 h-7 disabled:opacity-50 disabled:hover:bg-transparent disabled:text-darkblue-100 hover:bg-darkblue-75 rounded-full  hover:text-darkblue-500 transition-all"
             aria-label="Previous"
           >
             <FontAwesomeIcon icon={faAngleLeft} size="lg" />
@@ -136,7 +137,7 @@ export const useEmployeeTableColumns = ({
                 ? activeColumnIndex === columnSectionsExpanded.length - 1
                 : activeSectionIndex === columnSections.length - 1
             }
-            className="disabled:opacity-50"
+            className="w-7 h-7 disabled:opacity-50 disabled:hover:bg-transparent disabled:text-darkblue-100 hover:bg-darkblue-75 rounded-full hover:text-darkblue-500 transition-all"
             aria-label="Next"
           >
             <FontAwesomeIcon icon={faAngleRight} size="lg" />
@@ -152,7 +153,7 @@ export const useEmployeeTableColumns = ({
                 ? activeColumnIndex === columnSectionsExpanded.length - 1
                 : activeSectionIndex === columnSections.length - 1
             }
-            className="disabled:opacity-50"
+            className="w-7 h-7 disabled:opacity-50 disabled:hover:bg-transparent disabled:text-darkblue-100  hover:bg-darkblue-75 rounded-full hover:text-darkblue-500 transition-all"
             aria-label="Last"
           >
             <FontAwesomeIcon icon={faForwardStep} size="lg" />

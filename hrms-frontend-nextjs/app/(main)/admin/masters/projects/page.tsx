@@ -1,15 +1,17 @@
 import React from "react";
 
-const MastersPage = () => {
+const ProjectsPage = () => {
+
+  
   return (
     <>
       <header className="bg-gray-300">
         <h1 className="text-center text-5xl font-bold">
-          Masters page in progress ...
+          Projects page in progress ...
         </h1>
       </header>
     </>
   );
 };
 
-export default MastersPage;
+export default ProjectsPage;

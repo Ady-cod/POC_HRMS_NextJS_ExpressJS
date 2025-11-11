@@ -13,6 +13,7 @@ const config: Config = {
       screens: {
         xxs: "300px",
         xs: "440px",
+        '3xl': "2440px"
       },
       colors: {
         background: "hsl(var(--background))",
@@ -70,7 +71,9 @@ const config: Config = {
           900: "#003C54",
         },
         darkblue: {
+          25: "#F2F5F7",
           50: "#E7ECF0",
+          75: "#D0DAE2",
           100: "#B4C3D0",
           200: "#8FA6B9",
           300: "#5C7E98",
@@ -78,6 +81,7 @@ const config: Config = {
           500: "#0C3E66",
           600: "#0B385D",
           700: "#092C48",
+          750: "#08273F",
           800: "#072238",
           900: "#051A2B",
         },

@@ -36,20 +36,20 @@ const ConfirmationModal: React.FC<ConfirmationModalProps> = ({
   return (
     <Sheet open={isOpen} onOpenChange={onClose}>
       <SheetContent
-        className="fixed top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 w-[50%] max-w-[90%] bg-white rounded-lg shadow-lg p-8 z-50"
+        className="fixed top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 w-[50%] max-w-[90%] bg-white rounded-lg shadow-lg p-8 z-[2000]"
         side="top"
       >
         <SheetHeader>
-          <SheetTitle className="text-xl font-bold mt-4">{title}</SheetTitle>
+          <SheetTitle className="text-3xl font-bold mt-4 text-darkblue-900">{title}</SheetTitle>
         </SheetHeader>
-        <SheetDescription className="text-gray-600 mt-4">
+        <SheetDescription className="text-darkblue-900 mt-4">
           {description}
         </SheetDescription>
         {children && <div className="mt-4">{children}</div>}
-        <SheetFooter className="mt-6 flex flex-col sm:flex-row justify-end sm:space-x-4 space-y-4 sm:space-y-0">
+        <SheetFooter className="mt-6 flex flex-col sm:flex-row justify-end sm:space-x-4 space-y-4 sm:space-y-0 text-xl">
           <button
             onClick={onClose}
-            className="bg-gray-300 text-black rounded-lg px-4 py-2 hover:bg-gray-400 transition"
+            className=" w-[160px] h-[52px] bg-white text-orange-500 border-2 border-solid font-bold border-orange-500 rounded-lg focus:outline-none focus:ring-2 focus: ring-orange-500 focus:ring-offset-2 hover:bg-orange-50 hover:text-orange-800 hover:border-orange-800 hover:focus:ring-orange-800 transition-all duration-200 hover:scale-105"
           >
             <FontAwesomeIcon icon={faTimesCircle} className="mr-2" />
             Cancel
@@ -57,7 +57,7 @@ const ConfirmationModal: React.FC<ConfirmationModalProps> = ({
           <button
             onClick={onConfirm}
             disabled={confirmDisabled}
-            className={`bg-red-500 text-white rounded-lg px-4 py-2 hover:bg-red-600 transition ${
+            className={` w-[160px] h-[52px] bg-lightblue-500 font-bold text-white rounded-lg hover:bg-darkblue-600 focus:outline-none focus:ring-2 focus: ring-lightblue-500 focus:ring-offset-2 transition-all duration-200 hover:scale-105 ${
               confirmDisabled ? "opacity-50 cursor-not-allowed" : ""
             }`}
           >

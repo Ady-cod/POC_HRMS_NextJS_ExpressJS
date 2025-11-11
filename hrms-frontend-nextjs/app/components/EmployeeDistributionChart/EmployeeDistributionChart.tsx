@@ -2,7 +2,8 @@
 
 import { useEffect, useState } from "react";
 import { Progress } from "@/components/ui/progress";
-import { EmployeeListItem } from "@/types/types";
+import { DepartmentListItem, EmployeeListItem } from "@/types/types";
+import { DEPARTMENT_UNASSIGNED_LABEL } from "@/constants/departments";
 import { showToast } from "@/utils/toastHelper";
 
 type TransformedEmployeeData = {
@@ -12,11 +13,13 @@ type TransformedEmployeeData = {
 
 interface EmployeeDistributionChartProps {
   employees: EmployeeListItem[];
+  departments?: DepartmentListItem[];
   hasError?: boolean;
 }
 
 const EmployeeDistributionChart = ({
   employees,
+  departments = [],
   hasError,
 }: EmployeeDistributionChartProps) => {
   const [employeeData, setEmployeeData] = useState<TransformedEmployeeData[]>(
@@ -35,11 +38,29 @@ const EmployeeDistributionChart = ({
           return;
         }
 
-        const departmentCounts: { [key: string]: number } = {};
-        employees.forEach((emp) => {
-          const deptName = emp.department?.name || "Unknown";
-          departmentCounts[deptName] = (departmentCounts[deptName] || 0) + 1;
+        const knownDepartmentNames = new Set<string>();
+        departments.forEach((dept) => {
+          if (dept.name) {
+            knownDepartmentNames.add(dept.name);
+          }
         });
+
+        const departmentCounts: { [key: string]: number } = {};
+
+        employees.forEach((emp) => {
+          const deptName = emp.department?.name || DEPARTMENT_UNASSIGNED_LABEL;
+          departmentCounts[deptName] = (departmentCounts[deptName] || 0) + 1;
+          if (!emp.department?.name) {
+            knownDepartmentNames.add(DEPARTMENT_UNASSIGNED_LABEL);
+          }
+        });
+
+        knownDepartmentNames.forEach((deptName) => {
+          if (!(deptName in departmentCounts)) {
+            departmentCounts[deptName] = 0;
+          }
+        });
+
         const transformedData = Object.entries(departmentCounts).map(
           ([name, value]) => ({
             name,
@@ -61,7 +82,7 @@ const EmployeeDistributionChart = ({
     };
 
     processEmployeeData();
-  }, [employees, hasError]);
+  }, [employees, departments, hasError]);
 
   if (loading) {
     return (

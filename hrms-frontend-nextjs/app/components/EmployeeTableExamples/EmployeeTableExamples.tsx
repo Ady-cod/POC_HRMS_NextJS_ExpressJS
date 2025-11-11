@@ -1,12 +1,23 @@
 import React, { useState } from "react";
 import EmployeeTable from "@/components/EmployeeTable/EmployeeTable";
-import { EmployeeListItem, EmployeeRole, EmployeeStatus, EmployeeGender } from "@/types/types";
-import { WEEK_WISE_COLUMN_CONFIG, DEPARTMENT_VIEW_COLUMN_CONFIG } from "@/types/columnConfig";
+import {
+  EmployeeListItem,
+  EmployeeRole,
+  EmployeeStatus,
+  EmployeeGender,
+} from "@/types/types";
+import {
+  WEEK_WISE_COLUMN_CONFIG,
+  DEPARTMENT_VIEW_COLUMN_CONFIG,
+} from "@/types/columnConfig";
 import { TableColumn } from "react-data-table-component";
 
 const EmployeeTableExamples: React.FC = () => {
-  const [activeView, setActiveView] = useState<'default' | 'week-wise' | 'department' | 'custom'>('default');
-  const [selectedEmployee, setSelectedEmployee] = useState<EmployeeListItem | null>(null);
+  const [activeView, setActiveView] = useState<
+    "default" | "week-wise" | "department" | "custom"
+  >("default");
+  const [selectedEmployee, setSelectedEmployee] =
+    useState<EmployeeListItem | null>(null);
   const [showDialog, setShowDialog] = useState(false);
 
   // Mock employee data for examples
@@ -21,13 +32,20 @@ const EmployeeTableExamples: React.FC = () => {
       city: "San Francisco",
       birthDate: "1990-05-15",
       dateOfJoining: "2023-01-15",
-      department: { id: 1, name: "Engineering" },
+      department: {
+        id: "1",
+        name: "Engineering",
+        description: "",
+        deptHeadEmployeeId: "",
+        headName: "",
+        icon: "",
+      },
       role: EmployeeRole.EMPLOYEE,
       status: EmployeeStatus.ACTIVE,
-      gender: EmployeeGender.MALE
+      gender: EmployeeGender.MALE,
     },
     {
-      id: "2", 
+      id: "2",
       fullName: "Jane Smith",
       email: "jane.smith@example.com",
       password: "password456",
@@ -36,15 +54,22 @@ const EmployeeTableExamples: React.FC = () => {
       city: "New York",
       birthDate: "1988-08-22",
       dateOfJoining: "2023-03-20",
-      department: { id: 2, name: "Marketing" },
+      department: {
+        id: "2",
+        name: "Marketing",
+        description: "",
+        deptHeadEmployeeId: "",
+        headName: "",
+        icon: "",
+      },
       role: EmployeeRole.EMPLOYEE,
       status: EmployeeStatus.ACTIVE,
-      gender: EmployeeGender.FEMALE
-    }
+      gender: EmployeeGender.FEMALE,
+    },
   ];
 
   const handleEdit = (employeeData: EmployeeListItem) => {
-    console.log('Edit employee:', employeeData.fullName);
+    console.log("Edit employee:", employeeData.fullName);
     // Handle edit logic here
   };
 
@@ -55,7 +80,7 @@ const EmployeeTableExamples: React.FC = () => {
 
   const confirmDelete = () => {
     if (selectedEmployee) {
-      console.log('Delete employee:', selectedEmployee.fullName);
+      console.log("Delete employee:", selectedEmployee.fullName);
       // Handle delete logic here
     }
     setShowDialog(false);
@@ -76,7 +101,7 @@ const EmployeeTableExamples: React.FC = () => {
     },
     {
       name: "Department",
-      selector: (employee) => employee.department?.name || "N/A", 
+      selector: (employee) => employee.department?.name || "N/A",
       sortable: true,
     },
     {
@@ -103,7 +128,7 @@ const EmployeeTableExamples: React.FC = () => {
   ];
 
   const customAnalyticsConfig = {
-    type: 'custom' as const,
+    type: "custom" as const,
     showSerialNumber: true,
     showMoreColumnsNavigation: false,
     showActions: true,
@@ -113,7 +138,7 @@ const EmployeeTableExamples: React.FC = () => {
 
   const renderTableView = () => {
     switch (activeView) {
-      case 'week-wise':
+      case "week-wise":
         return (
           <EmployeeTable
             employees={mockEmployees}
@@ -126,7 +151,7 @@ const EmployeeTableExamples: React.FC = () => {
             columnConfig={WEEK_WISE_COLUMN_CONFIG}
           />
         );
-      case 'department':
+      case "department":
         return (
           <EmployeeTable
             employees={mockEmployees}
@@ -139,7 +164,7 @@ const EmployeeTableExamples: React.FC = () => {
             columnConfig={DEPARTMENT_VIEW_COLUMN_CONFIG}
           />
         );
-      case 'custom':
+      case "custom":
         return (
           <EmployeeTable
             employees={mockEmployees}
@@ -174,47 +199,47 @@ const EmployeeTableExamples: React.FC = () => {
         <h1 className="text-3xl font-bold mb-4">Employee Table Views</h1>
         <div className="flex gap-4 mb-4">
           <button
-            onClick={() => setActiveView('default')}
+            onClick={() => setActiveView("default")}
             className={`px-4 py-2 rounded ${
-              activeView === 'default' 
-                ? 'bg-blue-500 text-white' 
-                : 'bg-gray-200 text-gray-700'
+              activeView === "default"
+                ? "bg-blue-500 text-white"
+                : "bg-gray-200 text-gray-700"
             }`}
           >
             Default View
           </button>
           <button
-            onClick={() => setActiveView('week-wise')}
+            onClick={() => setActiveView("week-wise")}
             className={`px-4 py-2 rounded ${
-              activeView === 'week-wise' 
-                ? 'bg-blue-500 text-white' 
-                : 'bg-gray-200 text-gray-700'
+              activeView === "week-wise"
+                ? "bg-blue-500 text-white"
+                : "bg-gray-200 text-gray-700"
             }`}
           >
             Week-wise View
           </button>
           <button
-            onClick={() => setActiveView('department')}
+            onClick={() => setActiveView("department")}
             className={`px-4 py-2 rounded ${
-              activeView === 'department' 
-                ? 'bg-blue-500 text-white' 
-                : 'bg-gray-200 text-gray-700'
+              activeView === "department"
+                ? "bg-blue-500 text-white"
+                : "bg-gray-200 text-gray-700"
             }`}
           >
             Department View
           </button>
           <button
-            onClick={() => setActiveView('custom')}
+            onClick={() => setActiveView("custom")}
             className={`px-4 py-2 rounded ${
-              activeView === 'custom' 
-                ? 'bg-blue-500 text-white' 
-                : 'bg-gray-200 text-gray-700'
+              activeView === "custom"
+                ? "bg-blue-500 text-white"
+                : "bg-gray-200 text-gray-700"
             }`}
           >
             Analytics View
           </button>
           <button
-            onClick={() => console.log('Refresh data functionality')}
+            onClick={() => console.log("Refresh data functionality")}
             className="px-4 py-2 bg-green-500 text-white rounded hover:bg-green-600"
           >
             Refresh Data
@@ -233,4 +258,4 @@ const EmployeeTableExamples: React.FC = () => {
   );
 };
 
-export default EmployeeTableExamples; 
+export default EmployeeTableExamples;

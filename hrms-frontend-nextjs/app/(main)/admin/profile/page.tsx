@@ -106,6 +106,7 @@ export default function Profile() {
   const fileInputRef = useRef<HTMLInputElement>(null);
   const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
   const [showEmailConfirm, setShowEmailConfirm] = useState(false);
+  const [showNameConfirm, setShowNameConfirm] = useState(false);
   const [showCoverRemoveConfirm, setShowCoverRemoveConfirm] = useState(false);
   const [showRoleDeptConfirm, setShowRoleDeptConfirm] = useState<{
     open: boolean;
@@ -114,14 +115,21 @@ export default function Profile() {
   // user must type the exact role/department name to confirm
   const [roleDeptConfirmText, setRoleDeptConfirmText] = useState("");
   const [emailConfirmPassword, setEmailConfirmPassword] = useState("");
+  // simple typed-confirm for name changes (type the new name to confirm)
+  const [nameConfirmText, setNameConfirmText] = useState("");
   const emailPasswordRef = useRef<HTMLInputElement | null>(null);
+  const nameConfirmRef = useRef<HTMLInputElement | null>(null);
 
   useEffect(() => {
     if (showEmailConfirm) {
       // autofocus the password input when modal opens
       setTimeout(() => emailPasswordRef.current?.focus(), 50);
     }
-  }, [showEmailConfirm]);
+    if (showNameConfirm) {
+      // autofocus the typed-confirm input for name
+      setTimeout(() => nameConfirmRef.current?.focus(), 50);
+    }
+  }, [showEmailConfirm, showNameConfirm]);
 
   const fieldLabels: Record<string, string> = {
     departmentName: "Department",
@@ -664,6 +672,49 @@ export default function Profile() {
             </div>
           </ConfirmationModal>
 
+          {/* Confirmation modal for updating name */}
+          <ConfirmationModal
+            isOpen={showNameConfirm}
+            onClose={() => {
+              setShowNameConfirm(false);
+              setNameConfirmText("");
+            }}
+            onConfirm={() => {
+              setShowNameConfirm(false);
+              // proceed with saving the name field (typed-confirm is enough)
+              void handleFieldSave("name");
+              setNameConfirmText("");
+            }}
+            title="Confirm Name Change"
+            description={
+              <span>
+                Are you sure you want to change your name to {" "}
+                {<strong className="font-semibold">{formData.name}</strong>}?
+                This will update your profile display name.
+              </span>
+            }
+            // disabled until user types the new name exactly (trim + case-insensitive)
+            confirmDisabled={
+              String(nameConfirmText || "").trim().toLowerCase() !==
+              String(formData.name || "").trim().toLowerCase()
+            }
+          >
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-2">
+                Type the new name to confirm
+              </label>
+              <input
+                ref={nameConfirmRef}
+                type="text"
+                value={nameConfirmText}
+                onChange={(e) => setNameConfirmText(e.target.value)}
+                className="w-full border border-gray-300 rounded-md px-3 py-2"
+                placeholder={`Type "${formData.name || ""}" to confirm`}
+                autoFocus
+              />
+            </div>
+          </ConfirmationModal>
+
           {/* Confirmation modal for removing cover image */}
           <ConfirmationModal
             isOpen={showCoverRemoveConfirm}
@@ -867,6 +918,9 @@ export default function Profile() {
                                 if (key === "email") {
                                   // show confirmation before changing email
                                   setShowEmailConfirm(true);
+                                } else if (key === "name") {
+                                  // show confirmation (with password) before changing name
+                                  setShowNameConfirm(true);
                                 } else if (
                                   key === "role" ||
                                   key === "departmentName"

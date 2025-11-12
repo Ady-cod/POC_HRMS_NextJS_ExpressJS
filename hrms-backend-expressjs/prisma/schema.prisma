@@ -45,6 +45,8 @@ model Employee {
 
   createdAt DateTime? @default(now()) // Records when the employee record was created
   updatedAt DateTime? @updatedAt // Records the last time the employee record was updated
+  // lastLogin stores the timestamp of the employee's most recent successful sign-in
+  lastLogin DateTime?
 
   @@index([departmentId]) // Adding an index on departmentId to make queries that filter by department faster
   @@map("employees")

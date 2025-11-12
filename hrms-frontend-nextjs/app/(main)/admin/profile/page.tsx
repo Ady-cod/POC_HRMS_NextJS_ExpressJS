@@ -19,7 +19,6 @@ import { AsYouType } from "libphonenumber-js";
 import { ZodError } from "zod";
 import { updateEmployeeSchema } from "@/schemas/employeeSchema";
 import { formatZodErrors } from "@/utils/formatZodErrors";
-// import AnimatedLoader from "@/components/LoaderScreen/AnimatedLoader";
 import TimeZoneSelect from "@/components/TimeZoneSelect/TimeZoneSelect";
 import moment from "moment-timezone";
 import ImageCropperModal from "@/components/ImageCropperModal/ImageCropperModal";
@@ -71,15 +70,15 @@ export default function Profile() {
   const [profileImage, setProfileImage] = useState<string | null>(null);
   const [showCropper, setShowCropper] = useState(false);
   const [tempImage, setTempImage] = useState<string | null>(null);
+  // store last login timestamp (ISO string) returned by the API (if any)
+  const [lastLogin, setLastLogin] = useState<string | null>(null);
   const [showPasswordChange, setShowPasswordChange] = useState(false);
   const [employeeId, setEmployeeId] = useState("");
-  // const [loading, setLoading] = useState(true);
+  // loading state removed (not used)
   const [coverImage, setCoverImage] = useState<string | null>(null);
   const [showCoverChooser, setShowCoverChooser] = useState(false);
 
   // TODO: Implement cover image preview & chooser modal
-  void coverImage;
-  void showCoverChooser;
 
   const [formData, setFormData] = useState<FormData>({
     name: "",
@@ -162,6 +161,18 @@ export default function Profile() {
         if (!res.ok) throw new Error("Failed to fetch profile");
 
         const current: EmployeeListItem = await res.json();
+        /* eslint-disable @typescript-eslint/no-explicit-any */
+        // try a few common field names that APIs use for "last login"
+        const rawLastLogin =
+          (current as any).lastLogin ||
+          (current as any).last_login ||
+          (current as any).lastLoginAt ||
+          (current as any).last_login_at ||
+          (current as any).lastLoginTime ||
+          null;
+        /* eslint-enable @typescript-eslint/no-explicit-any */
+        console.debug("detected lastLogin:", rawLastLogin);
+
         const employeeDetails = {
           name: current.fullName || "",
           email: current.email || "",
@@ -173,18 +184,16 @@ export default function Profile() {
           password: "**********",
         };
 
-        setFormData(employeeDetails);
-        setOriginalData(employeeDetails);
-        setEmployeeId(current.id || "");
+  setFormData(employeeDetails);
+  setOriginalData(employeeDetails);
+  setEmployeeId(current.id || "");
+  setLastLogin(rawLastLogin);
       } catch (err) {
         showToast("error", "Failed to load profile", [
           "Unable to fetch employee information.",
         ]);
         console.error(err);
       }
-      // finally {
-      //   setLoading(false);
-      // }
     };
 
     fetchProfile();
@@ -1035,6 +1044,31 @@ export default function Profile() {
           )}
         </div>
       </div>
+        {/* Last login (localized) */}
+        <div className="px-4 sm:px-8 mt-6 mb-8 text-right text-sm text-lightblue-500">
+          {lastLogin ? (
+            (() => {
+              try {
+                const localTz = moment.tz.guess();
+                const m = moment(lastLogin).tz(localTz);
+                // e.g. "11th Nov, 2025. 8:21 PM"
+                const formatted = m.format("Do MMM, YYYY. h:mm A");
+                // timezone abbreviation (e.g., IST) — fallback to last segment of tz id
+                const tzAbbr = m.format("z") || String(localTz).split("/").pop();
+                return (
+                  <span>
+                    Last login: {formatted} ({tzAbbr})
+                  </span>
+                );
+              } catch {
+                // fallback: show raw timestamp
+                return <span>Last login: {String(lastLogin)}</span>;
+              }
+            })()
+          ) : (
+            <span>Last login: Not available</span>
+          )}
+        </div>
 
       {/* Cover chooser modal */}
       {showCoverChooser && (

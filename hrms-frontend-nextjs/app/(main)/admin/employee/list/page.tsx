@@ -1,5 +1,5 @@
 "use client";
-import React, { useState, useMemo, useEffect, useEffect } from "react";
+import React, { useState, useMemo, useEffect } from "react";
 import AddNewDataButton from "@/components/AddNewDataButton/AddNewDataButton";
 import TotalCountButton from "@/components/TotalCountButton/TotalCountButton";
 import EmployeeTable from "@/components/EmployeeTable/EmployeeTable";

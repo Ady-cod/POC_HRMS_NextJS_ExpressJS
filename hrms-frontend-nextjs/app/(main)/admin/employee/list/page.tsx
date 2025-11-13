@@ -21,11 +21,11 @@ import { showToast } from "@/utils/toastHelper";
 const ModalForm = dynamic(() => import("@/components/ModalForm/ModalForm"), {
   ssr: false,
 });
-
+import { useDepartmentData } from "@/hooks/useDepartmentData";
 const EmployeePage = () => {
   const [employeeCount, setEmployeeCount] = useState(0);
   const [filterState, setFilterState] = useState<FilterState>(getInitialFilterState());
-
+  const [, setDepartmentCount] = useState(0); 
   const sp = useSearchParams();
 
 useEffect(() => {
@@ -72,6 +72,11 @@ useEffect(() => {
     return applyAllFilters(employees, filterState);
   }, [employees, filterState]);
 
+  const { departments } = useDepartmentData({
+    refreshFlag,
+    setDepartmentCount,
+  });
+
   return (
     <div>
       <div className="flex flex-row flex-wrap justify-between items-center mt-6 mb-4 px-4 gap-2 sm:gap-4">
@@ -104,6 +109,7 @@ useEffect(() => {
         updateFilter={updateFilter}
         clearAllFilters={clearAllFilters}
         employees={employees}
+        departments={departments}
       />
 
       {/* Export Button */}

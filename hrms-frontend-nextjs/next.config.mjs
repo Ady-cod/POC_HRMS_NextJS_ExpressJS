@@ -27,24 +27,10 @@ const nextConfig = {
   async rewrites() {
     return {
       beforeFiles: [
-        {
-          source: "/admin/workflow",
-          destination: "/admin/applicants"
-        },
-        {
-          source: "/admin/masters/:path*",
-          destination: "/admin/employee/:path*",
-        },
         // details → moved + path param (keeps original URL)
         {
           source: "/admin/employee/details",
           destination: "/moved/admin/employee/list",
-        },
-      ],
-      fallback: [
-        {
-          source: "/admin/employee/:path*",
-          destination: "/admin/masters/:path*",
         },
       ],
     };

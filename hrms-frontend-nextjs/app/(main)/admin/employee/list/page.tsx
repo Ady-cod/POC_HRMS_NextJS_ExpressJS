@@ -1,5 +1,5 @@
 "use client";
-import React, { useState, useMemo } from "react";
+import React, { useState, useMemo, useEffect } from "react";
 import AddNewDataButton from "@/components/AddNewDataButton/AddNewDataButton";
 import TotalCountButton from "@/components/TotalCountButton/TotalCountButton";
 import EmployeeTable from "@/components/EmployeeTable/EmployeeTable";
@@ -7,7 +7,6 @@ import EmployeeSearchFilters from "@/components/EmployeeSearchFilters/EmployeeSe
 import ExportCSVButton from "@/components/ExportCSVButton/ExportCSVButton";
 import { useEmployeeModal } from "@/hooks/useEmployeeModal";
 import { useEmployeeData } from "@/hooks/useEmployeeData";
-import { useDepartmentData } from "@/hooks/useDepartmentData";
 import {
   FilterState,
   getInitialFilterState,
@@ -15,18 +14,28 @@ import {
 } from "@/utils/employeeFilters";
 
 import dynamic from "next/dynamic";
+import { useSearchParams } from "next/navigation";
+import { showToast } from "@/utils/toastHelper";
 
 // Dynamically import the ModalForm component to reduce the initial bundle size
 const ModalForm = dynamic(() => import("@/components/ModalForm/ModalForm"), {
   ssr: false,
 });
-
+import { useDepartmentData } from "@/hooks/useDepartmentData";
 const EmployeePage = () => {
   const [employeeCount, setEmployeeCount] = useState(0);
-  const [filterState, setFilterState] = useState<FilterState>(
-    getInitialFilterState()
-  );
+  const [filterState, setFilterState] = useState<FilterState>(getInitialFilterState());
   const [, setDepartmentCount] = useState(0);
+  const sp = useSearchParams();
+
+useEffect(() => {
+  if (sp.get("migrated") === "table") {
+    showToast("success", "Page Migration", [
+      'Heads up: the old "admin/employee/table" page moved to "admin/employee/list" ',
+      "You’re in the right place!",
+    ]);
+  }
+}, [sp]);
 
   // Use the custom hook for modal management
   const {
@@ -49,11 +58,6 @@ const EmployeePage = () => {
     closeDeleteDialog,
   } = useEmployeeData({ refreshFlag, setEmployeeCount });
 
-  const { departments } = useDepartmentData({
-    refreshFlag,
-    setDepartmentCount,
-  });
-
   // Filter state management
   const updateFilter = (key: keyof FilterState, value: string) => {
     setFilterState((prev) => ({ ...prev, [key]: value }));
@@ -67,6 +71,11 @@ const EmployeePage = () => {
   const filteredEmployees = useMemo(() => {
     return applyAllFilters(employees, filterState);
   }, [employees, filterState]);
+
+  const { departments } = useDepartmentData({
+    refreshFlag,
+    setDepartmentCount,
+  });
 
   return (
     <div>

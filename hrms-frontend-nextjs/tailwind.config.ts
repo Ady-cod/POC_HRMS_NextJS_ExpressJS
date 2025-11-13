@@ -103,6 +103,31 @@ const config: Config = {
         md: "calc(var(--radius) - 2px)",
         sm: "calc(var(--radius) - 4px)",
       },
+      spacing: {
+        "18": "4.5rem", // 72px - for top margin
+        "6": "1.5rem", // 24px - for bottom margin
+        "24": "6rem", // 96px - new top margin for sidebar
+      },
+      height: {
+        "screen-72": "calc(100dvh - 4.5rem)", // 100dvh minus top margin
+        "screen-70dvh": "70dvh",
+        "screen-600": "600px",
+        "screen-650": "650px",
+        "screen-700": "700px",
+        "screen-80": "calc(100dvh - 10rem)", // 100dvh minus new margins (96px top + 24px bottom + 24px left + 24px right)
+      },
+      animation: {
+        shake: "shake 0.5s ease-in-out",
+        "pulse-slow": "pulse 2s cubic-bezier(0.4, 0, 0.6, 1) infinite",
+        "bounce-slow": "bounce 2s infinite",
+      },
+      keyframes: {
+        shake: {
+          "0%, 100%": { transform: "translateX(0)" },
+          "25%": { transform: "translateX(-5px)" },
+          "75%": { transform: "translateX(5px)" },
+        },
+      },
     },
   },
   plugins: [tailwindcssAnimate],

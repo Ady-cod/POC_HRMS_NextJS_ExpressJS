@@ -1,0 +1,82 @@
+/* Connection Status Indicator Custom Styles */
+
+/* Additional hover effects for better UX */
+.connection-indicator {
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.connection-indicator:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 8px 25px rgba(0, 0, 0, 0.15);
+}
+
+.connection-indicator:active {
+  transform: translateY(0);
+}
+
+/* Status-specific hover effects */
+.connection-indicator.connected:hover {
+  box-shadow: 0 8px 25px rgba(34, 197, 94, 0.3);
+}
+
+.connection-indicator.disconnected:hover {
+  box-shadow: 0 8px 25px rgba(239, 68, 68, 0.3);
+}
+
+.connection-indicator.loading:hover {
+  box-shadow: 0 8px 25px rgba(245, 158, 11, 0.3);
+}
+
+.connection-indicator.error:hover {
+  box-shadow: 0 8px 25px rgba(249, 115, 22, 0.3);
+}
+
+/* Smooth transitions for status changes */
+.connection-indicator > * {
+  transition: all 0.3s ease;
+}
+
+/* Loading spinner enhancement */
+.connection-indicator.loading .loading-spinner {
+  animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+  from {
+    transform: rotate(0deg);
+  }
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+/* Connection success effect */
+.connection-indicator.connected::after {
+  content: "";
+  position: absolute;
+  top: -2px;
+  left: -2px;
+  right: -2px;
+  bottom: -2px;
+  background: conic-gradient(
+    from 0deg,
+    transparent,
+    rgba(34, 197, 94, 0.3),
+    transparent
+  );
+  border-radius: inherit;
+  opacity: 0;
+  animation: connected-glow 2s ease-in-out infinite;
+}
+
+@keyframes connected-glow {
+  0%,
+  100% {
+    opacity: 0;
+    transform: scale(1);
+  }
+  50% {
+    opacity: 0.6;
+    transform: scale(1.05);
+  }
+}

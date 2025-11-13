@@ -72,7 +72,10 @@ export async function login(
 export async function logout(): Promise<void> {
   // Clear the JWT token from cookies
   cookies().delete("token");
-  
+
+  // Note: Connection status will be cleared on the client side via the logout form submission
+  // The client-side cleanup happens in the Sidebar component when the form is submitted
+
   // Redirect to landing page
   redirect("/");
 }

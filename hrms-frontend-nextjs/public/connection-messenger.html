@@ -1,0 +1,54 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Connection Messenger</title>
+    <script>
+        // Simple connection messenger for external services
+        // Include this script on your OAuth callback pages
+
+        function sendConnectionMessage(service, success, error = null) {
+            const message = success
+                ? { type: "CONNECTION_SUCCESS", service: service }
+                : { type: "CONNECTION_FAILURE", service: service, error: error };
+
+            // Send to parent window (the HRMS app)
+            if (window.parent && window.parent !== window) {
+                window.parent.postMessage(message, "*");
+            }
+        }
+
+        // Auto-detect connection status from URL parameters
+        function autoDetectConnection() {
+            const urlParams = new URLSearchParams(window.location.search);
+            const service = urlParams.get('service');
+
+            if (service) {
+                const success = urlParams.has('success') || urlParams.has('connected') || urlParams.has('authorized');
+                const error = urlParams.get('error') || urlParams.get('error_description');
+
+                if (success || error) {
+                    sendConnectionMessage(service, success, error);
+                }
+            }
+        }
+
+        // Initialize when page loads
+        window.addEventListener('load', autoDetectConnection);
+
+        // Expose functions globally for manual use
+        window.ConnectionMessenger = {
+            sendSuccess: (service) => sendConnectionMessage(service, true),
+            sendFailure: (service, error) => sendConnectionMessage(service, false, error)
+        };
+    </script>
+</head>
+
+<body>
+    <!-- This page can be empty or contain your normal OAuth callback content -->
+    <!-- The messenger script will automatically detect success/failure and communicate with parent -->
+</body>
+
+</html>

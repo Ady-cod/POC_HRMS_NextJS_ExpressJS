@@ -177,10 +177,10 @@ export default function Profile() {
           password: "**********",
         };
 
-  setFormData(employeeDetails);
-  setOriginalData(employeeDetails);
-  setEmployeeId(current.id || "");
-  setLastLogin(rawLastLogin);
+        setFormData(employeeDetails);
+        setOriginalData(employeeDetails);
+        setEmployeeId(current.id || "");
+        setLastLogin(rawLastLogin);
       } catch (err) {
         showToast("error", "Failed to load profile", [
           "Unable to fetch employee information.",
@@ -444,6 +444,22 @@ export default function Profile() {
   const toggleVisibility = (field: string) =>
     setVisible((prev) => ({ ...prev, [field]: !prev[field] }));
 
+  const renderLastLogin = () => {
+    if (!lastLogin) {
+      return "Last login: Not available";
+    }
+
+    try {
+      const localTz = moment.tz.guess();
+      const m = moment(lastLogin).tz(localTz);
+      const formatted = m.format("Do MMM, YYYY. h:mm A");
+      const tzAbbr = m.format("z") || String(localTz).split("/").pop();
+      return `Last login: ${formatted} (${tzAbbr})`;
+    } catch {
+      return `Last login: ${String(lastLogin)}`;
+    }
+  };
+
   const handlePasswordUpdate = async () => {
     const { current, new: newPass, confirm } = passwordData;
 
@@ -522,13 +538,13 @@ export default function Profile() {
           )}
 
           {/* Cover Image Action Buttons */}
-          <div className="absolute top-0 right-0 md:top-auto md:bottom-0 flex flex-wrap md:flex-nowrap gap-1 md:gap-2 bg-black/50 md:bg-transparent p-1 md:p-0 rounded-md z-1">
+          <div className="absolute top-0 right-0 md:top-auto md:bottom-0 flex flex-wrap md:flex-nowrap gap-1 md:gap-2 bg-black/50 md:bg-transparent p-1 md:p-0 rounded-md">
             {coverImage ? (
               <Button
                 variant="outline"
                 onClick={() => setShowCoverRemoveConfirm(true)}
                 aria-label="Remove Cover Image"
-                className="flex items-center justify-center px-2 md:px-3 py-1 text-xs md:text-sm font-medium border-orange-400 text-orange-500 transition hover:text-orange-700"
+                className="relative z-10 flex items-center justify-center px-2 md:px-3 py-1 text-xs md:text-sm font-medium border-orange-400 text-orange-500 transition hover:text-orange-700"
               >
                 <Trash2 className="w-4 h-4 md:hidden" />
                 <span className="hidden md:inline">Remove</span>
@@ -537,7 +553,7 @@ export default function Profile() {
 
             <Button
               onClick={() => setShowCoverChooser(true)}
-              className="flex items-center justify-center gap-1 px-2 md:px-3 py-1 text-xs md:text-sm font-medium text-white bg-lightblue-600 rounded-md hover:bg-lightblue-700 transition"
+              className="relative z-10 flex items-center justify-center gap-1 px-2 md:px-3 py-1 text-xs md:text-sm font-medium text-white bg-lightblue-600 rounded-md hover:bg-lightblue-700 transition"
             >
               <Plus className="w-3 h-3 md:w-4 md:h-4" />
               <span className="hidden md:inline">
@@ -548,9 +564,9 @@ export default function Profile() {
         </div>
 
         {/* Profile Image - overlap cover (50% inside cover area) */}
-        <div className="-z-2 relative mx-auto md:ml-8 -mt-24 md:-mt-32 flex flex-col md:flex-row items-center md:items-end gap-2 md:gap-6 w-full md:w-auto">
+        <div className="-z-2 relative mx-auto md:ml-8 -mt-24 md:-mt-32 flex flex-col md:flex-row items-center md:items-end gap-2 md:gap-6 w-full md:w-full">
           {/* Profile Image with Hover Actions */}
-          <div className="relative w-48 h-48 md:w-60 md:h-60 bg-white rounded-full border overflow-hidden flex items-center justify-center group ring-4 ring-lightblue-300">
+          <div className="relative w-48 h-48 md:w-60 md:h-60 bg-white rounded-full border overflow-hidden flex items-center justify-center group ring-4 ring-lightblue-300 shrink-0">
             {profileImage ? (
               <Image
                 src={profileImage}
@@ -776,11 +792,21 @@ export default function Profile() {
           </ConfirmationModal>
 
           {/* Profile Info */}
-          <div className="flex flex-col md:mb-8 mb-0 items-center md:items-start text-center md:text-left">
-            <h2 className="text-2xl sm:text-4xl font-semibold text-darkblue-900">
-              {formData.name}
-            </h2>
-            <p className="text-sm text-lightblue-400">{formData.email}</p>
+          <div className="flex flex-col md:flex-row md:items-end md:justify-between w-full gap-3 md:gap-6 px-4 sm:px-8">
+            <div className="flex flex-col md:mb-8 mb-0 items-center md:items-start text-center md:text-left">
+              <h2 className="text-2xl sm:text-4xl font-semibold text-darkblue-900">
+                {formData.name}
+              </h2>
+              <p className="text-sm text-lightblue-400">{formData.email}</p>
+            </div>
+            {/* Last login (localized) */}
+            <div className="text-sm text-lightblue-500 text-center md:text-right md:ml-auto md:self-end pr-7">
+              <div className="inline-flex flex-col items-center md:items-end gap-1">
+                <span className="inline-flex items-center justify-center gap-1 rounded-full border-2 border-orange-300 bg-lightblue-50 px-4 py-1 font-semibold text-lightblue-700 shadow-sm">
+                  {renderLastLogin()}
+                </span>
+              </div>
+            </div>
           </div>
         </div>
 
@@ -1015,32 +1041,6 @@ export default function Profile() {
           )}
         </div>
       </div>
-        {/* Last login (localized) */}
-        <div className="px-4 sm:px-8 mt-6 mb-8 text-right text-sm text-lightblue-500">
-          {lastLogin ? (
-            (() => {
-              try {
-                const localTz = moment.tz.guess();
-                const m = moment(lastLogin).tz(localTz);
-                // e.g. "11th Nov, 2025. 8:21 PM"
-                const formatted = m.format("Do MMM, YYYY. h:mm A");
-                // timezone abbreviation (e.g., IST) — fallback to last segment of tz id
-                const tzAbbr = m.format("z") || String(localTz).split("/").pop();
-                return (
-                  <span>
-                    Last login: {formatted} ({tzAbbr})
-                  </span>
-                );
-              } catch {
-                // fallback: show raw timestamp
-                return <span>Last login: {String(lastLogin)}</span>;
-              }
-            })()
-          ) : (
-            <span>Last login: Not available</span>
-          )}
-        </div>
-
       {/* Cover chooser modal */}
       {showCoverChooser && (
         <CoverImage

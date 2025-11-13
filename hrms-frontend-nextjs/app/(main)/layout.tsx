@@ -18,7 +18,7 @@ export default function MainLayout({
   return (
     <div className="flex flex-col h-dvh">
       {/* Header containing Sticky Navbar*/}
-      <header className="sticky top-0 z-10 bg-white shadow-lg">
+      <header className="sticky top-0 z-20 bg-white shadow-lg">
         <NavBar toggleSideBar={toggleSideBar} />
       </header>
 

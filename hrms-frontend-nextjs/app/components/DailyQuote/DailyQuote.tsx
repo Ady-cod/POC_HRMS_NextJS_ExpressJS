@@ -8,11 +8,11 @@ const DailyQuote = async () => {
 
   return (
     <Card
-      className={`p-6 text-center bg-black/10  text-xl md:text-2xl lg:text-3xl xl:text-4xl`}
+      className={`p-6 text-center bg-darkblue-50  text-xl md:text-2xl lg:text-3xl xl:text-4xl`}
     >
-      <h2 className="font-bold">Today&apos;s Quote</h2>
-      <p className="text-gray-700 mt-4">&ldquo;{quote.quote}&rdquo;</p>
-      <p className="text-gray-500 mt-2 text-lg md:text-xl lg:text-2xl xl:text-3xl text-end">
+      <h2 className="font-bold text-darkblue-700">Today&apos;s Quote</h2>
+      <p className="text-darkblue-400 mt-6 text-3xl">&ldquo;{quote.quote}&rdquo;</p>
+      <p className="text-darkblue-300 mt-6 text-lg md:text-xl lg:text-2xl xl:text-3xl text-end font-bold">
         – {quote.name}
       </p>
     </Card>

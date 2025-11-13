@@ -12,14 +12,19 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { showToast } from "@/utils/toastHelper";
-import { EmployeeListItem } from "@/types/types";
+import { DepartmentListItem, EmployeeListItem } from "@/types/types";
 import { Eye, EyeOff } from "lucide-react";
 import { updateEmployee } from "@/actions/employee";
-import AnimatedLoader from "@/components/LoaderScreen/AnimatedLoader";
+import { AsYouType } from "libphonenumber-js";
+import { ZodError } from "zod";
+import { updateEmployeeSchema } from "@/schemas/employeeSchema";
+import { formatZodErrors } from "@/utils/formatZodErrors";
 import TimeZoneSelect from "@/components/TimeZoneSelect/TimeZoneSelect";
 import moment from "moment-timezone";
 import ImageCropperModal from "@/components/ImageCropperModal/ImageCropperModal";
-import { Upload, Trash2, User, Briefcase, Shield } from "lucide-react";
+import CoverImage from "@/components/CoverImage/CoverImage";
+import ConfirmationModal from "@/components/ConfirmationModal/ConfirmationModal";
+import { Upload, Trash2, User, Briefcase, Shield, Plus } from "lucide-react";
 
 // helper to format time zones
 const formatTimeZone = (tz: string) =>
@@ -65,15 +70,15 @@ export default function Profile() {
   const [profileImage, setProfileImage] = useState<string | null>(null);
   const [showCropper, setShowCropper] = useState(false);
   const [tempImage, setTempImage] = useState<string | null>(null);
+  // store last login timestamp (ISO string) returned by the API (if any)
+  const [lastLogin, setLastLogin] = useState<string | null>(null);
   const [showPasswordChange, setShowPasswordChange] = useState(false);
   const [employeeId, setEmployeeId] = useState("");
-  const [loading, setLoading] = useState(true);
+  // loading state removed (not used)
   const [coverImage, setCoverImage] = useState<string | null>(null);
   const [showCoverChooser, setShowCoverChooser] = useState(false);
 
   // TODO: Implement cover image preview & chooser modal
-  void coverImage;
-  void showCoverChooser;
 
   const [formData, setFormData] = useState<FormData>({
     name: "",
@@ -94,8 +99,29 @@ export default function Profile() {
     confirm: "",
   });
   const [visible, setVisible] = useState<Record<string, boolean>>({});
+  const [departments, setDepartments] = useState<DepartmentListItem[]>([]);
+  const [isLoadingDepartments, setIsLoadingDepartments] = useState(false);
 
   const fileInputRef = useRef<HTMLInputElement>(null);
+  const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
+  const [showEmailConfirm, setShowEmailConfirm] = useState(false);
+  const [showNameConfirm, setShowNameConfirm] = useState(false);
+  const [showCoverRemoveConfirm, setShowCoverRemoveConfirm] = useState(false);
+  const [showRoleDeptConfirm, setShowRoleDeptConfirm] = useState<{
+    open: boolean;
+    key?: string;
+  }>({ open: false });
+  // user must type the exact role/department name to confirm
+  const [roleDeptConfirmText, setRoleDeptConfirmText] = useState("");
+  const [emailConfirmPassword, setEmailConfirmPassword] = useState("");
+  const emailPasswordRef = useRef<HTMLInputElement | null>(null);
+
+  useEffect(() => {
+    if (showEmailConfirm) {
+      // autofocus the password input when modal opens
+      setTimeout(() => emailPasswordRef.current?.focus(), 50);
+    }
+  }, [showEmailConfirm]);
 
   const fieldLabels: Record<string, string> = {
     departmentName: "Department",
@@ -108,6 +134,18 @@ export default function Profile() {
     password: "Password",
   };
 
+  // map local form keys to server schema keys
+  const serverKeyMap: Record<string, string> = {
+    name: "fullName",
+    email: "email",
+    phone: "phoneNumber",
+    timezone: "timezone",
+    departmentName: "departmentId",
+    role: "role",
+  };
+
+  const [errors, setErrors] = useState<Record<string, string> | null>(null);
+
   // Fetch profile
   useEffect(() => {
     const fetchProfile = async () => {
@@ -116,6 +154,18 @@ export default function Profile() {
         if (!res.ok) throw new Error("Failed to fetch profile");
 
         const current: EmployeeListItem = await res.json();
+        /* eslint-disable @typescript-eslint/no-explicit-any */
+        // try a few common field names that APIs use for "last login"
+        const rawLastLogin =
+          (current as any).lastLogin ||
+          (current as any).last_login ||
+          (current as any).lastLoginAt ||
+          (current as any).last_login_at ||
+          (current as any).lastLoginTime ||
+          null;
+        /* eslint-enable @typescript-eslint/no-explicit-any */
+        console.debug("detected lastLogin:", rawLastLogin);
+
         const employeeDetails = {
           name: current.fullName || "",
           email: current.email || "",
@@ -130,17 +180,47 @@ export default function Profile() {
         setFormData(employeeDetails);
         setOriginalData(employeeDetails);
         setEmployeeId(current.id || "");
+        setLastLogin(rawLastLogin);
       } catch (err) {
         showToast("error", "Failed to load profile", [
           "Unable to fetch employee information.",
         ]);
         console.error(err);
-      } finally {
-        setLoading(false);
       }
     };
 
     fetchProfile();
+  }, []);
+
+  useEffect(() => {
+    const fetchDepartments = async () => {
+      setIsLoadingDepartments(true);
+      try {
+        const baseUrl = process.env.NEXT_PUBLIC_BACKEND_BASE_URL;
+        const endpoint = process.env.NEXT_PUBLIC_DEPARTMENT_ENDPOINT;
+
+        if (!baseUrl || !endpoint) {
+          throw new Error("Department API configuration is missing");
+        }
+
+        const res = await fetch(`${baseUrl}${endpoint}`);
+        if (!res.ok) {
+          throw new Error("Failed to fetch departments");
+        }
+
+        const departmentList: DepartmentListItem[] = await res.json();
+        setDepartments(departmentList);
+      } catch (error) {
+        console.error("Error fetching departments:", error);
+        showToast("error", "Unable to load departments", [
+          "Department list could not be retrieved. Try again later.",
+        ]);
+      } finally {
+        setIsLoadingDepartments(false);
+      }
+    };
+
+    fetchDepartments();
   }, []);
 
   // Handlers
@@ -167,45 +247,218 @@ export default function Profile() {
     e.target.value = "";
   };
 
-  const handleFieldChange = (key: string, value: string) =>
+  const handleFieldChange = (key: string, value: string) => {
+    if (key === "departmentName") {
+      const selectedDepartment = departments.find((dept) => dept.id === value);
+      if (selectedDepartment) {
+        setFormData((prev) => ({
+          ...prev,
+          department: selectedDepartment.id,
+          departmentName: selectedDepartment.name,
+        }));
+      }
+      return;
+    }
+
     setFormData((prev) => ({ ...prev, [key]: value }));
+  };
 
-  const handleFieldSave = async (key: string) => {
+  // Format phone as user types, similar to ModalForm
+  const handlePhoneInputChange = (value: string) => {
+    let newValue = value;
+
+    // Ensure leading + if user types digits without it
+    if (!newValue.startsWith("+") && newValue.length > 0) {
+      if (/^\d+$/.test(newValue)) {
+        newValue = "+" + newValue;
+      }
+    }
+
+    const formatted = new AsYouType().input(newValue);
+
+    // Limit to 15 digits (E.164)
+    const digitCount = formatted.replace(/\D/g, "").length;
+    if (digitCount > 15) return;
+
+    // clear phone related error when user starts editing
+    handleFieldChange("phone", formatted);
+    setErrors((prev) => {
+      if (!prev) return prev;
+      const copy = { ...prev };
+      delete copy[serverKeyMap.phone];
+      return Object.keys(copy).length ? copy : null;
+    });
+  };
+
+  const handleFieldSave = async (key: string, currentPassword?: string) => {
     try {
-      const map: Record<string, string> = {
-        name: "fullName",
-        email: "email",
-        phone: "phoneNumber",
-        timezone: "timezone",
-        departmentName: "departmentName",
-        role: "role",
-      };
+      const serverKey = serverKeyMap[key] || key;
 
-      await updateEmployee(employeeId, {
-        [map[key]]: formData[key as keyof typeof formData],
-      });
+      // Basic client-side quick validations preserved
+      if (key === "name") {
+        if (!formData.name || formData.name.trim().length === 0) {
+          showToast("error", "Validation Error", ["Name cannot be empty"]);
+          return;
+        }
+      }
+
+      if (key === "email") {
+        const email = String(formData.email || "");
+        const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+        if (!emailRegex.test(email)) {
+          showToast("error", "Validation Error", ["Invalid email address"]);
+          return;
+        }
+      }
+
+      if (key === "phone") {
+        const phone = String(formData.phone || "");
+        const digits = phone.replace(/\D/g, "");
+        if (digits.length < 6 || digits.length > 15) {
+          showToast("error", "Validation Error", [
+            "Phone number must have between 6 and 15 digits (E.164).",
+          ]);
+          return;
+        }
+        // Ensure phone has leading +
+        if (!phone.startsWith("+")) {
+          formData.phone = "+" + digits;
+        }
+      }
+
+      // Build payload and validate against zod partial schema (single-field validation)
+      if (key === "departmentName" && !formData.department) {
+        showToast("error", "Select a department", [
+          "Please choose a department before saving.",
+        ]);
+        return;
+      }
+
+      const valueForPayload =
+        key === "departmentName"
+          ? formData.department
+          : formData[key as keyof typeof formData];
+
+      const payload: Record<string, unknown> = {
+        [serverKey]: valueForPayload,
+      };
+      // if caller provided current password (for sensitive updates), include it
+      if (currentPassword) {
+        payload.currentPassword = currentPassword;
+      }
+
+      try {
+        // updateEmployeeSchema already marks update fields as optional,
+        // so validating the single-field payload directly is sufficient.
+        updateEmployeeSchema.parse(payload);
+      } catch (e) {
+        if (e instanceof ZodError) {
+          const formatted = formatZodErrors(e);
+          setErrors(formatted);
+          const errorMessages = e.issues.map((i) => i.message);
+          showToast("error", "Validation Error(s):", errorMessages);
+          return;
+        }
+        throw e;
+      }
+
+      const result = await updateEmployee(employeeId, payload);
+
+      // updateEmployee returns an object with success/message (and optional zodError)
+      if (!result || !result.success) {
+        // Server-side validation errors (zod) might be returned as zodError
+        type ServerErrorLike = {
+          zodError?: unknown;
+          message?: string;
+          [key: string]: unknown;
+        };
+
+        if (result && typeof result === "object") {
+          const resObj = result as ServerErrorLike;
+          if (resObj.zodError) {
+            try {
+              // If backend returned a zod-like error payload, show its message.
+              setErrors(
+                (prev) => prev || { [serverKey]: String(resObj.message) }
+              );
+            } catch {
+              // ignore formatting errors
+            }
+          }
+        }
+
+        const message =
+          result && typeof result === "object"
+            ? (result as ServerErrorLike).message
+            : undefined;
+
+        showToast("error", "Update failed", [message || "Unknown error"]);
+        return;
+      }
+
       showToast("success", "Updated", [
         `${fieldLabels[key] || key} updated successfully`,
       ]);
 
       setEditingField(null);
       setOriginalData(formData);
+      // clear errors on success
+      setErrors((prev) => {
+        if (!prev) return null;
+        const copy = { ...prev };
+        delete copy[serverKey];
+        return Object.keys(copy).length ? copy : null;
+      });
     } catch (err) {
-      showToast("error", "Update failed", [String(err)]);
-      console.error(err);
+      if (err instanceof ZodError) {
+        const formatted = formatZodErrors(err);
+        setErrors(formatted);
+        const errorMessages = err.issues.map((i) => i.message);
+        showToast("error", "Validation Error(s):", errorMessages);
+      } else if (err instanceof Error) {
+        showToast("error", "Update failed", [err.message]);
+        console.error(err);
+      } else {
+        showToast("error", "Update failed", [String(err)]);
+        console.error(err);
+      }
     }
   };
 
   const handleCancel = (key: string) => {
-    setFormData((prev) => ({
-      ...prev,
-      [key]: originalData[key as keyof typeof originalData],
-    }));
+    if (key === "departmentName") {
+      setFormData((prev) => ({
+        ...prev,
+        department: originalData.department,
+        departmentName: originalData.departmentName,
+      }));
+    } else {
+      setFormData((prev) => ({
+        ...prev,
+        [key]: originalData[key as keyof typeof originalData],
+      }));
+    }
     setEditingField(null);
   };
 
   const toggleVisibility = (field: string) =>
     setVisible((prev) => ({ ...prev, [field]: !prev[field] }));
+
+  const renderLastLogin = () => {
+    if (!lastLogin) {
+      return "Last login: Not available";
+    }
+
+    try {
+      const localTz = moment.tz.guess();
+      const m = moment(lastLogin).tz(localTz);
+      const formatted = m.format("Do MMM, YYYY. h:mm A");
+      const tzAbbr = m.format("z") || String(localTz).split("/").pop();
+      return `Last login: ${formatted} (${tzAbbr})`;
+    } catch {
+      return `Last login: ${String(lastLogin)}`;
+    }
+  };
 
   const handlePasswordUpdate = async () => {
     const { current, new: newPass, confirm } = passwordData;
@@ -218,10 +471,32 @@ export default function Profile() {
       ]);
 
     try {
+      // Validate password against shared Zod schema before sending to server
+      try {
+        updateEmployeeSchema.parse({ password: newPass });
+      } catch (e) {
+        if (e instanceof ZodError) {
+          const formatted = formatZodErrors(e);
+          setErrors(formatted);
+          const errorMessages = e.issues.map((i) => i.message);
+          showToast("error", "Validation Error(s):", errorMessages);
+          return;
+        }
+        throw e;
+      }
+
       await updateEmployee(employeeId, { password: newPass });
       showToast("success", "Password Updated", [
         "Your password has been updated",
       ]);
+      // clear password errors on success
+      setErrors((prev) => {
+        if (!prev) return null;
+        const copy = { ...prev };
+        delete copy["password"];
+        return Object.keys(copy).length ? copy : null;
+      });
+
       setPasswordData({ current: "", new: "", confirm: "" });
       setShowPasswordChange(false);
     } catch (err) {
@@ -232,51 +507,66 @@ export default function Profile() {
 
   // UI
   return (
-    <div className="flex flex-col my-8 px-4 gap-2 sm:gap-4">
-      {loading && <AnimatedLoader isVisible={loading} />}
-      <h1 className="text-2xl sm:text-3xl font-bold text-gray-900">
-        My Profile
-      </h1>
-
-      {/* Profile Header */}
-      <div className="bg-orange-500 rounded-lg p-6 m-6 relative h-60 mb-36 flex justify-center items-center">
-        <h1 className="font-bold text-orange-300 text-6xl text-center">
-          Cover Image
+    <>
+      <div className="flex flex-col my-8 px-4 gap-2 sm:gap-4">
+        {/* {loading && <AnimatedLoader isVisible={loading} />} */}
+        <h1 className="text-2xl sm:text-3xl font-bold text-gray-900">
+          My Profile
         </h1>
 
-        {/* Action Buttons (Top-Right of Cover Block) */}
-        <div className="absolute bottom-0 right-0 flex gap-2 bg-black/30 p-2 rounded-br-lg rounded-tl-lg">
-          <button
-            onClick={() => setCoverImage(null)}
-            className="px-3 py-1 text-sm font-medium text-orange-200 transition"
-          >
-            Remove
-          </button>
-          <button
-            onClick={() => setShowCoverChooser(true)}
-            className="px-3 py-1 text-sm font-medium text-white bg-lightblue-600 rounded-md hover:bg-lightblue-700 transition flex items-center gap-1"
-          >
-            <svg
-              xmlns="http://www.w3.org/2000/svg"
-              className="h-4 w-4"
-              fill="none"
-              viewBox="0 0 24 24"
-              stroke="currentColor"
-            >
-              <path
-                strokeLinecap="round"
-                strokeLinejoin="round"
-                strokeWidth={2}
-                d="M11 5h2M12 4v16m8-8H4"
+        {/* Profile Cover Image */}
+        <div
+          className={`rounded-lg p-6 mx-4 relative h-40 md:h-60 flex justify-center items-center overflow-hidden ${
+            coverImage ? "" : "bg-orange-500"
+          }`}
+        >
+          {/* If a cover image is set, render it as the background (fill + object-cover). Otherwise show the placeholder title. */}
+          {coverImage ? (
+            <>
+              <Image
+                src={coverImage}
+                alt="Cover photo"
+                fill
+                className="object-cover"
               />
-            </svg>
-            Edit Image
-          </button>
+              <div className="absolute inset-0 bg-black/10 pointer-events-none" />
+            </>
+          ) : (
+            <h1 className="font-bold text-orange-300 text-2xl sm:text-6xl text-center">
+              Cover Photo
+            </h1>
+          )}
+
+          {/* Cover Image Action Buttons */}
+          <div className="absolute top-0 right-0 md:top-auto md:bottom-0 flex flex-wrap md:flex-nowrap gap-1 md:gap-2 bg-black/50 md:bg-transparent p-1 md:p-0 rounded-md">
+            {coverImage ? (
+              <Button
+                variant="outline"
+                onClick={() => setShowCoverRemoveConfirm(true)}
+                aria-label="Remove Cover Image"
+                className="relative z-10 flex items-center justify-center px-2 md:px-3 py-1 text-xs md:text-sm font-medium border-orange-400 text-orange-500 transition hover:text-orange-700"
+              >
+                <Trash2 className="w-4 h-4 md:hidden" />
+                <span className="hidden md:inline">Remove</span>
+              </Button>
+            ) : null}
+
+            <Button
+              onClick={() => setShowCoverChooser(true)}
+              className="relative z-10 flex items-center justify-center gap-1 px-2 md:px-3 py-1 text-xs md:text-sm font-medium text-white bg-lightblue-600 rounded-md hover:bg-lightblue-700 transition"
+            >
+              <Plus className="w-3 h-3 md:w-4 md:h-4" />
+              <span className="hidden md:inline">
+                {coverImage ? "Edit Image" : "Add Image"}
+              </span>
+            </Button>
+          </div>
         </div>
 
-        <div className="flex items-end gap-6 absolute -bottom-32 left-8">
+        {/* Profile Image - overlap cover (50% inside cover area) */}
+        <div className="-z-2 relative mx-auto md:ml-8 -mt-24 md:-mt-32 flex flex-col md:flex-row items-center md:items-end gap-2 md:gap-6 w-full md:w-full">
           {/* Profile Image with Hover Actions */}
-          <div className="relative w-60 h-60 bg-white rounded-full border overflow-hidden flex items-center justify-center group">
+          <div className="relative w-48 h-48 md:w-60 md:h-60 bg-white rounded-full border overflow-hidden flex items-center justify-center group ring-4 ring-lightblue-300 shrink-0">
             {profileImage ? (
               <Image
                 src={profileImage}
@@ -287,7 +577,7 @@ export default function Profile() {
             ) : (
               <div className="text-gray-400 flex items-center justify-center w-full h-full">
                 <svg
-                  className="w-16 h-16"
+                  className="w-12 h-12 sm:w-16 sm:h-16"
                   fill="currentColor"
                   viewBox="0 0 24 24"
                 >
@@ -305,6 +595,9 @@ export default function Profile() {
                 onSave={(croppedImg) => {
                   setProfileImage(croppedImg);
                   setShowCropper(false);
+                  showToast("success", "Image saved", [
+                    "Profile image updated.",
+                  ]);
                 }}
               />
             )}
@@ -314,21 +607,23 @@ export default function Profile() {
               <Button
                 size="sm"
                 variant="link"
-                className="text-white flex items-center gap-2 no-underline font-bold text-xl"
+                className="flex items-center gap-2 no-underline font-bold text-sm sm:text-xl text-lightblue-200"
                 onClick={() => fileInputRef.current?.click()}
               >
-                <Upload className="w-4 h-4 font-bold text-xl" />
+                <Upload className="w-4 h-4 text-lightblue-200" />
                 Upload
               </Button>
-              <Button
-                size="sm"
-                variant="link"
-                className="text-red-200 flex items-center gap-2 no-underline font-bold text-xl"
-                onClick={() => setProfileImage(null)}
-              >
-                <Trash2 className="w-4 h-4" />
-                Delete
-              </Button>
+              {profileImage && (
+                <Button
+                  size="sm"
+                  variant="link"
+                  className="text-orange-200 flex items-center gap-2 no-underline font-bold text-sm sm:text-xl"
+                  onClick={() => setShowDeleteConfirm(true)}
+                >
+                  <Trash2 className="w-4 h-4" />
+                  Delete
+                </Button>
+              )}
             </div>
 
             <input
@@ -340,221 +635,425 @@ export default function Profile() {
             />
           </div>
 
+          {/* Confirmation modal for deleting profile image */}
+          <ConfirmationModal
+            isOpen={showDeleteConfirm}
+            onClose={() => setShowDeleteConfirm(false)}
+            onConfirm={() => {
+              setProfileImage(null);
+              setShowDeleteConfirm(false);
+              showToast("success", "Image deleted", [
+                "Profile image has been removed.",
+              ]);
+            }}
+            title="Delete Profile Image"
+            description="Are you sure you want to delete your profile image? This action cannot be undone."
+          />
+
+          {/* Confirmation modal for updating email address */}
+          <ConfirmationModal
+            isOpen={showEmailConfirm}
+            onClose={() => {
+              setShowEmailConfirm(false);
+              setEmailConfirmPassword("");
+            }}
+            onConfirm={() => {
+              setShowEmailConfirm(false);
+              // proceed with saving the email field and send current password for verification/audit
+              void handleFieldSave("email", emailConfirmPassword);
+              setEmailConfirmPassword("");
+            }}
+            title="Confirm Email Change"
+            description={
+              <span>
+                Are you sure you want to change your email to{" "}
+                {<strong className="font-semibold">{formData.email}</strong>}?
+                Changing your email may affect sign-in and you may need to
+                verify the new address.
+              </span>
+            }
+            confirmDisabled={!emailConfirmPassword}
+          >
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-2">
+                Enter current password to confirm
+              </label>
+              <input
+                ref={emailPasswordRef}
+                type="password"
+                value={emailConfirmPassword}
+                onChange={(e) => setEmailConfirmPassword(e.target.value)}
+                className="w-full border border-gray-300 rounded-md px-3 py-2"
+                placeholder="Current password"
+                autoFocus
+              />
+            </div>
+          </ConfirmationModal>
+
+          {/* Confirmation modal for updating name */}
+          <ConfirmationModal
+            isOpen={showNameConfirm}
+            onClose={() => {
+              setShowNameConfirm(false);
+            }}
+            onConfirm={() => {
+              setShowNameConfirm(false);
+              // proceed with saving the name field
+              void handleFieldSave("name");
+            }}
+            title="Confirm Name Change"
+            description={
+              <span>
+                Are you sure you want to change your name to {" "}
+                {<strong className="font-semibold">{formData.name}</strong>}?
+                This will update your profile display name.
+              </span>
+            }
+          />
+
+          {/* Confirmation modal for removing cover image */}
+          <ConfirmationModal
+            isOpen={showCoverRemoveConfirm}
+            onClose={() => setShowCoverRemoveConfirm(false)}
+            onConfirm={() => {
+              setCoverImage(null);
+              setShowCoverRemoveConfirm(false);
+              showToast("success", "Cover removed", [
+                "Cover image has been removed.",
+              ]);
+            }}
+            title="Remove cover image"
+            description="Are you sure you want to remove your cover image? This action cannot be undone."
+          />
+
+          {/* Confirmation modal for role / department changes (type exact name to confirm) */}
+          <ConfirmationModal
+            isOpen={showRoleDeptConfirm.open}
+            onClose={() => {
+              setShowRoleDeptConfirm({ open: false });
+              setRoleDeptConfirmText("");
+            }}
+            onConfirm={() => {
+              // call handleFieldSave without password; the typed confirmation already validated
+              if (showRoleDeptConfirm.key) {
+                void handleFieldSave(showRoleDeptConfirm.key);
+              }
+              setShowRoleDeptConfirm({ open: false });
+              setRoleDeptConfirmText("");
+            }}
+            title="Confirm change"
+            description={
+              <span>
+                Are you sure you want to change your{" "}
+                <strong>
+                  {showRoleDeptConfirm.key === "departmentName"
+                    ? "Department"
+                    : showRoleDeptConfirm.key}
+                </strong>
+                ? This may affect access and permissions.
+              </span>
+            }
+            // disabled unless user typed the exact value (case-insensitive, trimmed)
+            confirmDisabled={
+              !(
+                showRoleDeptConfirm.key &&
+                String(
+                  formData[showRoleDeptConfirm.key as keyof FormData] || ""
+                )
+                  .trim()
+                  .toLowerCase() === roleDeptConfirmText.trim().toLowerCase()
+              )
+            }
+          >
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-2">
+                Type the exact{" "}
+                {showRoleDeptConfirm.key === "departmentName"
+                  ? "department"
+                  : "role"}{" "}
+                name to confirm
+              </label>
+              <input
+                type="text"
+                value={roleDeptConfirmText}
+                onChange={(e) => setRoleDeptConfirmText(e.target.value)}
+                className="w-full border border-gray-300 rounded-md px-3 py-2"
+                placeholder={
+                  showRoleDeptConfirm.key
+                    ? `Type "${String(
+                        formData[showRoleDeptConfirm.key as keyof FormData] ||
+                          ""
+                      )}" to confirm`
+                    : "Type the exact name to confirm"
+                }
+                autoFocus
+              />
+            </div>
+          </ConfirmationModal>
+
           {/* Profile Info */}
-          <div className="flex flex-col mb-8">
-            <h2 className="text-4xl font-semibold text-darkblue-900">
-              {formData.name}
-            </h2>
-            <p className="text-sm text-lightblue-400">{formData.email}</p>
+          <div className="flex flex-col md:flex-row md:items-end md:justify-between w-full gap-3 md:gap-6 px-4 sm:px-8">
+            <div className="flex flex-col md:mb-8 mb-0 items-center md:items-start text-center md:text-left">
+              <h2 className="text-2xl sm:text-4xl font-semibold text-darkblue-900">
+                {formData.name}
+              </h2>
+              <p className="text-sm text-lightblue-400">{formData.email}</p>
+            </div>
+            {/* Last login (localized) */}
+            <div className="text-sm text-lightblue-500 text-center md:text-right md:ml-auto md:self-end pr-7">
+              <div className="inline-flex flex-col items-center md:items-end gap-1">
+                <span className="inline-flex items-center justify-center gap-1 rounded-full border-2 border-orange-300 bg-lightblue-50 px-4 py-1 font-semibold text-lightblue-700 shadow-sm">
+                  {renderLastLogin()}
+                </span>
+              </div>
+            </div>
           </div>
         </div>
-      </div>
 
-      {/* Profile Fields */}
-      <div className="space-y-8 px-8">
-        {fieldGroups.map((group) => (
-          <div key={group.title}>
-            <h2 className="text-xl font-bold text-lightblue-400 mb-4 flex items-center gap-2">
-              <group.icon className="w-5 h-5 text-orange-500" />
-              {group.title}
-            </h2>
-            <div className="space-y-4 bg-[#E7ECF0] p-6 rounded-lg">
-              {group.fields.map((key) => {
-                const value = formData[key];
-                return (
-                  <div
-                    key={key}
-                    className="border-b border-b-black-600 py-3 flex flex-col sm:flex-row sm:items-center sm:justify-between"
-                  >
-                    <label className="text-2xl font-bold text-darkblue-900 capitalize">
-                      {fieldLabels[key] || key}
-                    </label>
+        {/* Profile Fields */}
+        <div className="space-y-8 px-4 sm:px-8">
+          {fieldGroups.map((group) => (
+            <div key={group.title}>
+              <h2 className="text-xl font-bold text-lightblue-400 mb-4 flex items-center gap-2">
+                <group.icon className="w-5 h-5 text-orange-500" />
+                {group.title}
+              </h2>
+              <div className="space-y-4 bg-[#E7ECF0] p-4 sm:p-6 rounded-lg">
+                {group.fields.map((key) => {
+                  const value = formData[key];
+                  return (
+                    <div
+                      key={key}
+                      className="border-b border-b-black-600 py-3 flex flex-col sm:flex-row sm:items-center sm:justify-between"
+                    >
+                      <label className="text-lg sm:text-2xl font-bold text-darkblue-900 capitalize">
+                        {fieldLabels[key] || key}
+                      </label>
 
-                    {editingField === key ? (
-                      <div className="flex flex-col sm:flex-row sm:items-center gap-2 w-full sm:w-2/3">
-                        {key === "timezone" ? (
-                          <TimeZoneSelect
-                            value={formData.timezone}
-                            onChange={(val) =>
-                              handleFieldChange("timezone", val)
-                            }
-                          />
-                        ) : key === "departmentName" ? (
-                          <Select
-                            value={formData.departmentName}
-                            onValueChange={(val) =>
-                              handleFieldChange("departmentName", val)
-                            }
-                          >
-                            <SelectTrigger className="w-full border rounded-md p-2 text-xl text-lightblue-700">
-                              <SelectValue placeholder="Select Department" />
-                            </SelectTrigger>
-                            <SelectContent>
-                              {[
-                                "HR",
-                                "Web Development",
-                                "UI/UX",
-                                "QA",
-                                "BA",
-                                "SM",
-                              ].map((dept) => (
-                                <SelectItem
-                                  key={dept}
-                                  value={dept}
-                                  className="data-[highlighted]:bg-lightblue-100 data-[highlighted]:text-lightblue-700 data-[state=checked]:bg-lightblue-800 data-[state=checked]:text-white cursor-pointer text-lightblue-800"
-                                >
-                                  {dept}
-                                </SelectItem>
-                              ))}
-                            </SelectContent>
-                          </Select>
-                        ) : key === "role" ? (
-                          <Select
-                            value={formData.role}
-                            onValueChange={(val) =>
-                              handleFieldChange("role", val)
-                            }
-                          >
-                            <SelectTrigger className="w-full border rounded-md p-2 text-xl text-lightblue-700">
-                              <SelectValue placeholder="Select Role" />
-                            </SelectTrigger>
-                            <SelectContent>
-                              {[
-                                "EMPLOYEE",
-                                "INTERN",
-                                "HR_INTERN",
-                                "HR_EMPLOYEE",
-                                "HR_MANAGER",
-                                "MANAGER",
-                                "ADMIN",
-                              ].map((role) => (
-                                <SelectItem
-                                  key={role}
-                                  value={role}
-                                  className="data-[highlighted]:bg-lightblue-100 data-[highlighted]:text-lightblue-700 data-[state=checked]:bg-lightblue-800 data-[state=checked]:text-white cursor-pointer text-lightblue-800"
-                                >
-                                  {role}
-                                </SelectItem>
-                              ))}
-                            </SelectContent>
-                          </Select>
-                        ) : (
-                          <Input
-                            className="w-full text-xl text-lightblue-700 border border-lightblue-700 rounded px-3 py-2 focus:outline-none focus:ring-2 focus:ring-lightblue-700 focus:text-xl"
-                            value={value}
-                            onChange={(e) =>
-                              handleFieldChange(key, e.target.value)
-                            }
-                          />
-                        )}
+                      {editingField === key ? (
+                        <div className="flex flex-col sm:flex-row sm:items-center gap-2 w-full sm:w-2/3">
+                          {key === "timezone" ? (
+                            <TimeZoneSelect
+                              value={formData.timezone}
+                              onChange={(val) =>
+                                handleFieldChange("timezone", val)
+                              }
+                            />
+                          ) : key === "departmentName" ? (
+                            <Select
+                              disabled={isLoadingDepartments}
+                              value={formData.department || ""}
+                              onValueChange={(val) =>
+                                handleFieldChange("departmentName", val)
+                              }
+                            >
+                              <SelectTrigger className="w-full border rounded-md p-2 text-xl text-lightblue-700">
+                                <SelectValue placeholder="Select Department" />
+                              </SelectTrigger>
+                              <SelectContent>
+                                {departments.map((dept) => (
+                                  <SelectItem
+                                    key={dept.id}
+                                    value={dept.id}
+                                    className="data-[highlighted]:bg-lightblue-100 data-[highlighted]:text-lightblue-700 data-[state=checked]:bg-lightblue-800 data-[state=checked]:text-white cursor-pointer text-lightblue-800"
+                                  >
+                                    {dept.name}
+                                  </SelectItem>
+                                ))}
+                              </SelectContent>
+                            </Select>
+                          ) : key === "role" ? (
+                            <Select
+                              value={formData.role}
+                              onValueChange={(val) =>
+                                handleFieldChange("role", val)
+                              }
+                            >
+                              <SelectTrigger className="w-full border rounded-md p-2 text-xl text-lightblue-700">
+                                <SelectValue placeholder="Select Role" />
+                              </SelectTrigger>
+                              <SelectContent>
+                                {[
+                                  "EMPLOYEE",
+                                  "INTERN",
+                                  "HR_INTERN",
+                                  "HR_EMPLOYEE",
+                                  "HR_MANAGER",
+                                  "MANAGER",
+                                  "ADMIN",
+                                ].map((role) => (
+                                  <SelectItem
+                                    key={role}
+                                    value={role}
+                                    className="data-[highlighted]:bg-lightblue-100 data-[highlighted]:text-lightblue-700 data-[state=checked]:bg-lightblue-800 data-[state=checked]:text-white cursor-pointer text-lightblue-800"
+                                  >
+                                    {role}
+                                  </SelectItem>
+                                ))}
+                              </SelectContent>
+                            </Select>
+                          ) : key === "phone" ? (
+                            <Input
+                              className="w-full text-xl text-lightblue-700 border border-lightblue-700 rounded px-3 py-2 focus:outline-none focus:ring-2 focus:ring-lightblue-700 focus:text-xl"
+                              value={value}
+                              onChange={(e) =>
+                                handlePhoneInputChange(e.target.value)
+                              }
+                            />
+                          ) : (
+                            <Input
+                              className="w-full text-xl text-lightblue-700 border border-lightblue-700 rounded px-3 py-2 focus:outline-none focus:ring-2 focus:ring-lightblue-700 focus:text-xl"
+                              value={value}
+                              onChange={(e) =>
+                                handleFieldChange(key, e.target.value)
+                              }
+                            />
+                          )}
 
-                        <div className="flex gap-2">
-                          <Button
-                            variant="outline"
-                            onClick={() => handleCancel(key)}
-                            className="border-lightblue-800 text-lightblue-800 hover:bg-lightblue-50 hover:text-lightblue-900"
-                          >
-                            Cancel
-                          </Button>
-                          <Button
-                            className="bg-lightblue-800 hover:bg-lightblue-600"
-                            onClick={() => handleFieldSave(key)}
-                          >
-                            Save Changes
-                          </Button>
+                          <div className="flex gap-2">
+                            <Button
+                              variant="outline"
+                              onClick={() => handleCancel(key)}
+                              className="text-orange-500 border-orange-500 hover:bg-orange-50"
+                            >
+                              Cancel
+                            </Button>
+                            <Button
+                              className="bg-lightblue-800 hover:bg-lightblue-600"
+                              onClick={() => {
+                                if (key === "email") {
+                                  // show confirmation before changing email
+                                  setShowEmailConfirm(true);
+                                } else if (key === "name") {
+                                  // show confirmation (with password) before changing name
+                                  setShowNameConfirm(true);
+                                } else if (
+                                  key === "role" ||
+                                  key === "departmentName"
+                                ) {
+                                  // require confirmation (and password) for role/department changes
+                                  setShowRoleDeptConfirm({ open: true, key });
+                                } else {
+                                  void handleFieldSave(key);
+                                }
+                              }}
+                            >
+                              Save Changes
+                            </Button>
+                          </div>
                         </div>
-                      </div>
-                    ) : (
-                      <div className="flex items-center justify-between w-full sm:w-2/3">
-                        <span className="text-lightblue-700 text-xl">
-                          {key === "timezone"
-                            ? formatTimeZone(formData.timezone)
-                            : value || "Not set"}
-                        </span>
-                        {key !== "employeeId" &&
-                          (key === "password" ? (
-                            !showPasswordChange && (
+                      ) : (
+                        <div className="flex items-center justify-between w-full sm:w-2/3">
+                          <span className="text-lightblue-700 text-sm sm:text-xl">
+                            {key === "timezone"
+                              ? formatTimeZone(formData.timezone)
+                              : value || "Not set"}
+                          </span>
+                          {key !== "employeeId" &&
+                            (key === "password" ? (
+                              !showPasswordChange && (
+                                <Button
+                                  variant="link"
+                                  className="text-lightblue-700 p-0 font-bold text-sm sm:text-lg"
+                                  onClick={() => setShowPasswordChange(true)}
+                                >
+                                  Change Password
+                                </Button>
+                              )
+                            ) : (
                               <Button
                                 variant="link"
-                                className="text-lightblue-700 p-0 font-bold text-lg"
-                                onClick={() => setShowPasswordChange(true)}
+                                className="text-lightblue-700 p-0 font-bold text-sm sm:text-lg"
+                                onClick={() => {
+                                  setEditingField(key);
+                                  setErrors(null);
+                                }}
                               >
-                                Change Password
+                                Edit
                               </Button>
-                            )
-                          ) : (
-                            <Button
-                              variant="link"
-                              className="text-lightblue-700 p-0 font-bold text-lg"
-                              onClick={() => setEditingField(key)}
-                            >
-                              Edit
-                            </Button>
-                          ))}
-                      </div>
-                    )}
-                  </div>
-                );
-              })}
-            </div>
-          </div>
-        ))}
-      </div>
-
-      {/* Password Update */}
-      <div className="flex justify-end px-8">
-        {showPasswordChange && (
-          <div className="space-y-4 md:w-3/4 w-full rounded-lg">
-            {["current", "new", "confirm"].map((field) => (
-              <div key={field} className="relative">
-                <input
-                  type={visible[field] ? "text" : "password"}
-                  placeholder={`${
-                    field === "confirm"
-                      ? "Confirm New"
-                      : field.charAt(0).toUpperCase() + field.slice(1)
-                  } Password`}
-                  value={passwordData[field as keyof typeof passwordData]}
-                  onChange={(e) =>
-                    setPasswordData({
-                      ...passwordData,
-                      [field]: e.target.value,
-                    })
-                  }
-                  className="w-full border border-lightblue-600 rounded-md px-4 py-2 text-base sm:text-lg focus:outline-none focus:ring-2 focus:ring-lightblue-600 text-lightblue-600"
-                />
-                <button
-                  type="button"
-                  className="absolute right-3 top-1/2 transform -translate-y-1/2"
-                  onClick={() => toggleVisibility(field)}
-                >
-                  {visible[field] ? (
-                    <Eye className="w-5 h-5 text-lightblue-600" />
-                  ) : (
-                    <EyeOff className="w-5 h-5 text-lightblue-600" />
-                  )}
-                </button>
+                            ))}
+                        </div>
+                      )}
+                    </div>
+                  );
+                })}
               </div>
-            ))}
-
-            <div className="flex flex-col sm:flex-row gap-2 sm:justify-end">
-              <Button
-                variant="outline"
-                className="border-lightblue-800 text-lightblue-800 hover:bg-lightblue-50 hover:text-lightblue-900 w-full sm:w-auto"
-                onClick={() => setShowPasswordChange(false)}
-              >
-                Cancel
-              </Button>
-              <Button
-                onClick={handlePasswordUpdate}
-                className="bg-lightblue-800 hover:bg-lightblue-600 w-full sm:w-auto"
-              >
-                Update Password
-              </Button>
             </div>
-          </div>
-        )}
+          ))}
+        </div>
+
+        {/* Password Update */}
+        <div className="flex justify-end px-4 sm:px-8">
+          {showPasswordChange && (
+            <div className="space-y-4 md:w-3/4 w-full rounded-lg">
+              {["current", "new", "confirm"].map((field) => (
+                <div key={field} className="relative">
+                  <input
+                    type={visible[field] ? "text" : "password"}
+                    placeholder={`${
+                      field === "confirm"
+                        ? "Confirm New"
+                        : field.charAt(0).toUpperCase() + field.slice(1)
+                    } Password`}
+                    value={passwordData[field as keyof typeof passwordData]}
+                    onChange={(e) =>
+                      setPasswordData({
+                        ...passwordData,
+                        [field]: e.target.value,
+                      })
+                    }
+                    className="w-full border border-lightblue-600 rounded-md px-4 py-2 text-base sm:text-lg focus:outline-none focus:ring-2 focus:ring-lightblue-600 text-lightblue-600"
+                  />
+                  <button
+                    type="button"
+                    className="absolute right-3 top-1/2 transform -translate-y-1/2"
+                    onClick={() => toggleVisibility(field)}
+                  >
+                    {visible[field] ? (
+                      <EyeOff className="w-5 h-5 text-lightblue-600" />
+                    ) : (
+                      <Eye className="w-5 h-5 text-lightblue-600" />
+                    )}
+                  </button>
+                </div>
+              ))}
+
+              {errors?.password && (
+                <p className="text-sm text-red-600 mt-1">{errors.password}</p>
+              )}
+
+              <div className="flex flex-col sm:flex-row gap-2 sm:justify-end">
+                <Button
+                  variant="outline"
+                  className="text-orange-500 border-orange-500 hover:bg-orange-50 w-full sm:w-auto"
+                  onClick={() => setShowPasswordChange(false)}
+                >
+                  Cancel
+                </Button>
+                <Button
+                  onClick={handlePasswordUpdate}
+                  className="bg-lightblue-800 hover:bg-lightblue-600 w-full sm:w-auto"
+                >
+                  Update Password
+                </Button>
+              </div>
+            </div>
+          )}
+        </div>
       </div>
-    </div>
+      {/* Cover chooser modal */}
+      {showCoverChooser && (
+        <CoverImage
+          isOpen={true}
+          onClose={() => setShowCoverChooser(false)}
+          onSelect={(img: string) => {
+            setCoverImage(img);
+            setShowCoverChooser(false);
+            showToast("success", "Cover updated", ["Cover image updated."]);
+          }}
+          current={coverImage}
+        />
+      )}
+    </>
   );
 }

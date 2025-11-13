@@ -1,5 +1,5 @@
 "use client";
-import React, { useState, useMemo, useEffect } from "react";
+import React, { useState, useMemo, useEffect, useEffect } from "react";
 import AddNewDataButton from "@/components/AddNewDataButton/AddNewDataButton";
 import TotalCountButton from "@/components/TotalCountButton/TotalCountButton";
 import EmployeeTable from "@/components/EmployeeTable/EmployeeTable";
@@ -7,10 +7,10 @@ import EmployeeSearchFilters from "@/components/EmployeeSearchFilters/EmployeeSe
 import ExportCSVButton from "@/components/ExportCSVButton/ExportCSVButton";
 import { useEmployeeModal } from "@/hooks/useEmployeeModal";
 import { useEmployeeData } from "@/hooks/useEmployeeData";
-import { 
-  FilterState, 
-  getInitialFilterState, 
-  applyAllFilters 
+import {
+  FilterState,
+  getInitialFilterState,
+  applyAllFilters,
 } from "@/utils/employeeFilters";
 
 import dynamic from "next/dynamic";
@@ -25,17 +25,17 @@ import { useDepartmentData } from "@/hooks/useDepartmentData";
 const EmployeePage = () => {
   const [employeeCount, setEmployeeCount] = useState(0);
   const [filterState, setFilterState] = useState<FilterState>(getInitialFilterState());
-  const [, setDepartmentCount] = useState(0); 
+  const [, setDepartmentCount] = useState(0);
   const sp = useSearchParams();
 
 useEffect(() => {
-    if (sp.get("migrated") === "table") {
-      showToast("success", "Page Migration", [
-        "Heads up: the old \"admin/employee/table\" page moved to \"admin/employee/list\" ",
-        "You’re in the right place!"
-      ]);
-    }
-  }, [sp]);
+  if (sp.get("migrated") === "table") {
+    showToast("success", "Page Migration", [
+      'Heads up: the old "admin/employee/table" page moved to "admin/employee/list" ',
+      "You’re in the right place!",
+    ]);
+  }
+}, [sp]);
 
   // Use the custom hook for modal management
   const {

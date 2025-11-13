@@ -224,9 +224,10 @@ export const getDefaultColumnSections = (builder: ColumnBuilder) => [
 export const getWeekWiseColumns = (builder: ColumnBuilder) => [
   builder.buildSerialNumberColumn(),
   builder.buildFullNameColumn(),
-  builder.buildDepartmentColumn(),
-  builder.buildJoiningDateColumn(),
+  builder.buildStatusColumn(),
   builder.buildDaysSinceJoiningColumn(),
+  builder.buildJoiningDateColumn(),
+  builder.buildDepartmentColumn()
 ];
 
 export const getDepartmentViewColumns = (builder: ColumnBuilder) => [

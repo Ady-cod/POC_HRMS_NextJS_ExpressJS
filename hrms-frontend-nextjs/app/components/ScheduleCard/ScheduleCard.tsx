@@ -18,20 +18,18 @@ const ScheduleCard = () => {
   ];
 
   return (
-    <Card
-      className={`p-6 rounded-xl bg-black/10 h-full pt-14 shadow-none`}
-    >
+    <Card className={`p-6 rounded-xl bg-darkblue-50 h-full pt-14 shadow-none`}>
       <div className="flex justify-between items-center mb-4">
         <div className="text-center">
-          <div className="text-lg font-normal">MON</div>
-          <div className="text-4xl font-bold">20</div>
+          <div className="text-lg font-normal text-darkblue-700">MON</div>
+          <div className="text-4xl font-bold text-darkblue-700">20</div>
         </div>
         <Button
           variant="outline"
           size="icon"
-          className="rounded-full bg-black/40 h-[39px] w-[39px] hover:bg-black/50"
+          className="rounded-full bg-darkblue-150 h-[39px] w-[39px] hover:bg-darkblue-300"
         >
-          <Plus size={25} />
+          <Plus size={30} />
         </Button>
       </div>
 
@@ -40,15 +38,15 @@ const ScheduleCard = () => {
           <Card
             key={idx}
             className={`shadow-none flex justify-between items-center p-3 rounded-lg ${
-              task.active ? "bg-white" : "bg-black/20"
+              task.active ? "bg-white" : "bg-darkblue-100"
             }`}
           >
             <CardContent className="p-0">
-              <div className="font-semibold text-sm">{task.time}</div>
-              <div className="text-xs">{task.title}</div>
+              <div className="font-semibold text-sm text-darkblue-700">{task.time}</div>
+              <div className="text-xs text-darkblue-700">{task.title}</div>
             </CardContent>
             {task.video && (
-              <div className="bg-gray-200 p-2 rounded-full">
+              <div className="bg-darkblue-75 p-2 rounded-full hover:bg-darkblue-200 cursor-pointer">
                 <Video size={16} />
               </div>
             )}

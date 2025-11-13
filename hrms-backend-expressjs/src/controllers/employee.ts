@@ -124,20 +124,20 @@ export const createEmployee = async (
     const validatedData: CreateEmployeeInput =
       await createEmployeeSchema.parseAsync(req.body);
 
-    const { departmentName, password, ...employeeData } = validatedData;
+    const { departmentId, password, ...employeeData } = validatedData;
 
     // Hash the password
     const hashedPassword = await hashPassword(password);
 
     // Find or create department
     let department = await prisma.department.findUnique({
-      where: { name: departmentName },
+      where: { id: departmentId },
     });
 
     if (!department) {
       if (DEMO_MODE) {
         department = await prisma.department.create({
-          data: { name: departmentName },
+          data: { name: departmentId },
         });
       } else {
         res.status(400).json({ error: "Department not found." });
@@ -231,7 +231,7 @@ export const updateEmployee = async (
 
     // console.log("Validated data after Zod:", validatedData);
 
-    const { departmentName, password, ...employeeData } = validatedData;
+    const { departmentId, password, ...employeeData } = validatedData;
 
     // Filter out undefined properties from employeeData in order to match Prisma's update type
     // and filter out null values to avoid frontend empty values (left unfilled) being set as null in the database
@@ -248,23 +248,62 @@ export const updateEmployee = async (
     }
 
     let department: Department | null = null;
-    if (departmentName) {
+    if (departmentId) {
       // Find or create department
       department = await prisma.department.findUnique({
-        where: { name: departmentName },
+        where: { id: departmentId },
       });
 
       if (!department) {
         if (DEMO_MODE) {
           // Create department in demo mode
           department = await prisma.department.create({
-            data: { name: departmentName },
+            data: { 
+                    name: `Demo Department (${departmentId.slice(0, 6)})`,
+                    description: "Auto-generated department (DEMO_MODE)" 
+            },
           });
         } else {
           // Return error in strict mode
           res.status(400).json({ error: "Department not found." });
           return;
         }
+      }
+    }
+
+    // If email is being changed, require currentPassword in the raw request body
+    // and verify it against the stored hashed password. This prevents changing
+    // the email with any arbitrary password from the client side.
+    const rawBody = req.body as Record<string, unknown>;
+    if (validatedData.email) {
+      const currentPasswordFromBody =
+        typeof rawBody.currentPassword === "string"
+          ? rawBody.currentPassword
+          : null;
+      if (!currentPasswordFromBody) {
+        res
+          .status(400)
+          .json({ error: "Current password is required to change email." });
+        return;
+      }
+
+      // Fetch existing employee to validate password
+      const existingEmployee = await prisma.employee.findUnique({
+        where: { id },
+      });
+      if (!existingEmployee) {
+        res.status(404).json({ error: "Employee not found." });
+        return;
+      }
+
+      // Verify provided password matches stored hash
+      const passwordMatches = await verifyPassword(
+        currentPasswordFromBody,
+        existingEmployee.password as string
+      );
+      if (!passwordMatches) {
+        res.status(401).json({ error: "Invalid current password provided." });
+        return;
       }
     }
 

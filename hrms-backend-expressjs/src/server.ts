@@ -4,7 +4,7 @@ import cors from "cors";
 import employeeRouter from "./routes/employee";
 import learningPathRouter from "./routes/learningPath";
 import authenticateRouter from "./routes/authentication";
-
+import departmentRouter from "./routes/department";
 // Load environment variables from .env file
 dotenv.config();
 
@@ -25,6 +25,7 @@ app.get("/", (req: Request, res: Response) => {
 });
 
 app.use("/api/v1/employee" , employeeRouter);
+app.use("/api/v1/department", departmentRouter);
 app.use("/api/v1/learningPath", learningPathRouter);
 app.use("/api/v1/auth", authenticateRouter);
 

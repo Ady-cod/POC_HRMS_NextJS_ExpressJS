@@ -7,7 +7,8 @@ import MetricsCards from "@/components/MetricsCards/MetricsCards";
 import EmployeeDistributionChart from "@/components/EmployeeDistributionChart/EmployeeDistributionChart";
 import EnrollmentChart from "@/components/EnrollmentChart/EnrollmentChart";
 import { getAllEmployees } from "@/actions/employee";
-import { EmployeeListItem } from "@/types/types";
+import { getAllDepartments } from "@/actions/department";
+import { EmployeeListItem, DepartmentListItem } from "@/types/types";
 import ErrorToast from "@/components/ErrorToast/ErrorToast";
 import { getOptionalAuth, getUserDisplayName } from "@/utils/auth";
 import { headers, cookies } from "next/headers";
@@ -39,11 +40,11 @@ const AdminHomePage = async () => {
   const h = headers();
   const tz =
     h.get("x-vercel-ip-timezone") || cookies().get("tz")?.value || undefined;
-  
+
   // console.log("Timezone from headers/cookies:", tz);
 
   const greeting = greetingForTZ(tz);
-  
+
   // Get the current user information from the JWT token (optional for testing)
   const currentUser = getOptionalAuth();
   const name = getUserDisplayName(currentUser);
@@ -52,21 +53,44 @@ const AdminHomePage = async () => {
   // Trello: Supports email pre-filling via URL parameter
   // Slack: Uses modern workspace signin flow (email pre-filling no longer supported)
   // If no user (testing mode): use general login pages
-  const slackUrl = 'https://slack.com/workspace-signin';
-  
-  const trelloUrl = currentUser && currentUser.email
-    ? `https://trello.com/login?email=${encodeURIComponent(currentUser.email)}`
-    : 'https://trello.com/login';
+  const slackUrl = "https://slack.com/workspace-signin";
+
+  const trelloUrl =
+    currentUser && currentUser.email
+      ? `https://trello.com/login?email=${encodeURIComponent(
+          currentUser.email
+        )}`
+      : "https://trello.com/login";
 
   // Fetch employee data once in the server component
   let employees: EmployeeListItem[] = [];
+  let departments: DepartmentListItem[] = [];
   let employeeDataError: unknown = null;
+  let departmentDataError: unknown = null;
 
-  try {
-    employees = await getAllEmployees();
-  } catch (error) {
-    console.error("Error fetching employees in AdminHomePage:", error);
-    employeeDataError = error;
+  const [employeesResult, departmentsResult] = await Promise.allSettled([
+    getAllEmployees(),
+    getAllDepartments(),
+  ]);
+
+  if (employeesResult.status === "fulfilled") {
+    employees = employeesResult.value;
+  } else {
+    console.error(
+      "Error fetching employees in AdminHomePage:",
+      employeesResult.reason
+    );
+    employeeDataError = employeesResult.reason;
+  }
+
+  if (departmentsResult.status === "fulfilled") {
+    departments = departmentsResult.value;
+  } else {
+    console.error(
+      "Error fetching departments in AdminHomePage:",
+      departmentsResult.reason
+    );
+    departmentDataError = departmentsResult.reason;
   }
 
   return (
@@ -140,13 +164,15 @@ const AdminHomePage = async () => {
         <div className="lg:col-span-1 min-h-full">
           <EmployeeDistributionChart
             employees={employees}
-            hasError={!!employeeDataError}
+            departments={departments}
+            hasError={!!employeeDataError || !!departmentDataError}
           />
         </div>
         <div className="lg:col-span-2 min-h-full">
           <EnrollmentChart
             employees={employees}
-            hasError={!!employeeDataError}
+            departments={departments}
+            hasError={!!employeeDataError || !!departmentDataError}
           />
         </div>
       </div>

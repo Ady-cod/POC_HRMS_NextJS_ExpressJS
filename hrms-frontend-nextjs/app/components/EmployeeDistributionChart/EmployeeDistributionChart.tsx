@@ -2,7 +2,8 @@
 
 import { useEffect, useState } from "react";
 import { Progress } from "@/components/ui/progress";
-import { EmployeeListItem } from "@/types/types";
+import { DepartmentListItem, EmployeeListItem } from "@/types/types";
+import { DEPARTMENT_UNASSIGNED_LABEL } from "@/constants/departments";
 import { showToast } from "@/utils/toastHelper";
 
 type TransformedEmployeeData = {
@@ -12,11 +13,13 @@ type TransformedEmployeeData = {
 
 interface EmployeeDistributionChartProps {
   employees: EmployeeListItem[];
+  departments?: DepartmentListItem[];
   hasError?: boolean;
 }
 
 const EmployeeDistributionChart = ({
   employees,
+  departments = [],
   hasError,
 }: EmployeeDistributionChartProps) => {
   const [employeeData, setEmployeeData] = useState<TransformedEmployeeData[]>(
@@ -35,11 +38,29 @@ const EmployeeDistributionChart = ({
           return;
         }
 
-        const departmentCounts: { [key: string]: number } = {};
-        employees.forEach((emp) => {
-          const deptName = emp.department?.name || "Unknown";
-          departmentCounts[deptName] = (departmentCounts[deptName] || 0) + 1;
+        const knownDepartmentNames = new Set<string>();
+        departments.forEach((dept) => {
+          if (dept.name) {
+            knownDepartmentNames.add(dept.name);
+          }
         });
+
+        const departmentCounts: { [key: string]: number } = {};
+
+        employees.forEach((emp) => {
+          const deptName = emp.department?.name || DEPARTMENT_UNASSIGNED_LABEL;
+          departmentCounts[deptName] = (departmentCounts[deptName] || 0) + 1;
+          if (!emp.department?.name) {
+            knownDepartmentNames.add(DEPARTMENT_UNASSIGNED_LABEL);
+          }
+        });
+
+        knownDepartmentNames.forEach((deptName) => {
+          if (!(deptName in departmentCounts)) {
+            departmentCounts[deptName] = 0;
+          }
+        });
+
         const transformedData = Object.entries(departmentCounts).map(
           ([name, value]) => ({
             name,
@@ -61,7 +82,7 @@ const EmployeeDistributionChart = ({
     };
 
     processEmployeeData();
-  }, [employees, hasError]);
+  }, [employees, departments, hasError]);
 
   if (loading) {
     return (
@@ -79,9 +100,9 @@ const EmployeeDistributionChart = ({
   );
 
   return (
-    <div className="rounded-2xl shadow-sm px-8 pt-8 justify-center bg-black/10 border border-black-50 min-h-full flex flex-col">
+    <div className="rounded-2xl shadow-sm px-8 pt-8 justify-center bg-darkblue-50 border border-black-50 min-h-full flex flex-col">
       <div className="flex items-start mb-4">
-        <h2 className="font-semibold text-lg">
+        <h2 className="font-semibold text-lg text-darkblue-700">
           Employee Department Distribution
         </h2>
       </div>
@@ -97,7 +118,7 @@ const EmployeeDistributionChart = ({
           </div>
         </div>
       ) : (
-        <div className="flex-1 flex flex-col gap-y-6 mb-6">
+        <div className="flex-1 flex flex-col gap-y-6 mb-6 text-darkblue-700">
           {/* total line */}
           <div className="text-3xl font-bold">
             {totalEmployees}{" "}
@@ -108,13 +129,13 @@ const EmployeeDistributionChart = ({
           <div className="grid grid-cols-1 sm:grid-cols-2 auto-rows-min gap-x-8 gap-y-8 flex-1">
             {employeeData.map(({ name, value }) => (
               <div key={name} className="flex flex-col space-y-1 min-w-0">
-                <div className="flex justify-between text-sm mb-1">
+                <div className="flex justify-between text-sm mb-1 text-darkblue-700">
                   <span className="truncate mr-2">{name}</span>
                   <span className="flex-shrink-0">{value}</span>
                 </div>
                 <Progress
                   value={(value / totalEmployees) * 100}
-                  className="h-2 bg-black/15 [&>div]:bg-[#6b767f]"
+                  className="h-2 bg-darkblue-100 [&>div]:bg-darkblue-400"
                 />
               </div>
             ))}

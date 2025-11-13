@@ -203,10 +203,12 @@ export const createEmployeeSchema = z.object({
       message: "Joining date cannot be less than 2021.",
     })
     .transform((date) => `${date}T00:00:00.000Z`), // Appends time to the date to match Prisma's DateTime
-  departmentName: z
+  departmentId: z
     .string()
-    .min(2, "Department name is required")
-    .transform(capitalizeEachWord),
+    .min(1, "Please select a department")
+    .refine((id) => /^[a-f\d]{24}$/i.test(id), {
+          message: "Invalid department ID format",
+        }),
   gender: z.nativeEnum(Gender).optional().default(Gender.OTHER), // Based on radio buttons
   inductionCompleted: z.boolean().optional().default(false), // Default to false
   // Role is optional. If not provided, default to INTERN. If provided but not
@@ -345,11 +347,13 @@ export const updateEmployeeSchema = z.object({
     .transform((date) => `${date}T00:00:00.000Z`) // Appends time to the date to match Prisma's DateTime
     .optional()
     .transform((value) => (!value ? null : value)),
-  departmentName: z
+  departmentId: z
     .string()
-    .min(2, "Department name must contain at least 2 characters")
-    .optional()
-    .transform((value) => (!value ? null : capitalizeEachWord(value))),
+    .min(1, "Please select a department")
+    .refine((id) => /^[a-f\d]{24}$/i.test(id), {
+        message: "Invalid department ID format",
+      })
+    .optional(),
   gender: z
     .nativeEnum(Gender) // Based on radio buttons
     .optional()

@@ -34,7 +34,24 @@ export const login = async (req: Request, res: Response): Promise<void> => {
       email: employee.email,
     });
 
-    res.status(200).json({ token });
+    // Update the employee's lastLogin timestamp so clients can display it
+    // Capture the returned updated record from Prisma (no extra find required)
+    let updatedLastLogin: Date | null = null;
+    try {
+      console.debug("Attempting to update lastLogin for employee:", employee.id);
+      const updated = await prisma.employee.update({
+        where: { id: employee.id },
+        data: { lastLogin: new Date() },
+      });
+      updatedLastLogin = updated?.lastLogin ?? null;
+      console.debug("lastLogin updated successfully for employee:", employee.id, "->", updatedLastLogin);
+    } catch (updateErr) {
+      // Log but don't fail login if we can't update lastLogin
+      console.error("Failed to update lastLogin for employee:", employee.id, updateErr);
+    }
+
+    // Return token and lastLogin so frontend can show it immediately without an extra fetch
+    res.status(200).json({ token, lastLogin: updatedLastLogin });
   } catch (error) {
     console.error("Error during login:", error);
     res.status(500).json({ message: "An error occurred in the sever during the login" });

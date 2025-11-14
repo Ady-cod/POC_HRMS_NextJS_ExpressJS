@@ -1,4 +1,5 @@
 "use client";
+export const dynamic = "force-dynamic";
 import React, { useState, useMemo, useEffect } from "react";
 import AddNewDataButton from "@/components/AddNewDataButton/AddNewDataButton";
 import TotalCountButton from "@/components/TotalCountButton/TotalCountButton";
@@ -13,29 +14,37 @@ import {
   applyAllFilters,
 } from "@/utils/employeeFilters";
 
-import dynamic from "next/dynamic";
-import { useSearchParams } from "next/navigation";
+import nextDynamic from "next/dynamic";
 import { showToast } from "@/utils/toastHelper";
 
 // Dynamically import the ModalForm component to reduce the initial bundle size
-const ModalForm = dynamic(() => import("@/components/ModalForm/ModalForm"), {
-  ssr: false,
-});
+const ModalForm = nextDynamic(
+  () => import("@/components/ModalForm/ModalForm"),
+  {
+    ssr: false,
+  }
+);
 import { useDepartmentData } from "@/hooks/useDepartmentData";
 const EmployeePage = () => {
   const [employeeCount, setEmployeeCount] = useState(0);
-  const [filterState, setFilterState] = useState<FilterState>(getInitialFilterState());
+  const [filterState, setFilterState] = useState<FilterState>(
+    getInitialFilterState()
+  );
   const [, setDepartmentCount] = useState(0);
-  const sp = useSearchParams();
 
-useEffect(() => {
-  if (sp.get("migrated") === "table") {
-    showToast("success", "Page Migration", [
-      'Heads up: the old "admin/employee/table" page moved to "admin/employee/list" ',
-      "You’re in the right place!",
-    ]);
-  }
-}, [sp]);
+  useEffect(() => {
+    if (typeof window === "undefined") {
+      return;
+    }
+
+    const params = new URLSearchParams(window.location.search);
+    if (params.get("migrated") === "table") {
+      showToast("success", "Page Migration", [
+        'Heads up: the old "admin/employee/table" page moved to "admin/employee/list" ',
+        "You’re in the right place!",
+      ]);
+    }
+  }, []);
 
   // Use the custom hook for modal management
   const {

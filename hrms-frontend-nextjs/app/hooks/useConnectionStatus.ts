@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef, useCallback } from "react";
 
 export type ConnectionStatus =
   | "connected"
@@ -14,68 +14,333 @@ interface ConnectionState {
   trello: ConnectionStatus;
 }
 
-// For now, we'll use localStorage to persist connection states
-// In a real application, this would come from an API or user settings
-const STORAGE_KEY = "hrms_connection_status";
+type Service = "slack" | "trello";
 
 const defaultState: ConnectionState = {
   slack: "disconnected",
   trello: "disconnected",
 };
 
-export const useConnectionStatus = () => {
-  const [connectionState, setConnectionState] =
-    useState<ConnectionState>(defaultState);
-  const [isLoading, setIsLoading] = useState(true);
-  const [popupWindow, setPopupWindow] = useState<Window | null>(null);
+const STORAGE_PREFIX = "hrms_connection_status_v2";
 
-  // Load connection state from localStorage on mount
-  useEffect(() => {
+interface UseConnectionStatusOptions {
+  userId?: string | null;
+  scope?: string;
+}
+
+const isWindowAvailable = () => typeof window !== "undefined";
+
+export const useConnectionStatus = (
+  options: UseConnectionStatusOptions = {}
+) => {
+  const userId = options.userId ?? null;
+  const scope = options.scope ?? "default";
+  const normalizedScope = encodeURIComponent(scope);
+  const normalizedUserId = userId ? encodeURIComponent(userId) : "";
+  const storageKey = userId
+    ? `${STORAGE_PREFIX}:user:${normalizedScope}:${normalizedUserId}`
+    : `${STORAGE_PREFIX}:guest:${normalizedScope}`;
+  const isPersistentUser = Boolean(userId);
+
+  const getStorage = useCallback(() => {
+    if (!isWindowAvailable()) {
+      return null;
+    }
+
     try {
-      const stored = localStorage.getItem(STORAGE_KEY);
-      if (stored) {
-        const parsedState = JSON.parse(stored);
-        setConnectionState({ ...defaultState, ...parsedState });
+      return isPersistentUser ? window.localStorage : window.sessionStorage;
+    } catch (error) {
+      console.warn("ConnectionStatus: Unable to access storage:", error);
+      return null;
+    }
+  }, [isPersistentUser]);
+
+  const readStoredState = useCallback((): ConnectionState | null => {
+    if (!isWindowAvailable()) {
+      return null;
+    }
+
+    const storage = getStorage();
+    if (!storage) {
+      return null;
+    }
+
+    try {
+      const raw = storage.getItem(storageKey);
+      if (!raw) {
+        return null;
+      }
+
+      const parsed = JSON.parse(raw) as Partial<ConnectionState>;
+      return {
+        ...defaultState,
+        ...parsed,
+      };
+    } catch (error) {
+      console.warn("ConnectionStatus: Failed to parse stored state:", error);
+      return null;
+    }
+  }, [getStorage, storageKey]);
+
+  const [connectionState, setConnectionState] = useState<ConnectionState>(
+    () => {
+      const stored = readStoredState();
+      return stored ?? defaultState;
+    }
+  );
+  const [isInitialized, setIsInitialized] = useState(false);
+
+  const clearStoredState = useCallback(() => {
+    const storage = getStorage();
+    if (!storage) {
+      return;
+    }
+
+    try {
+      storage.removeItem(storageKey);
+    } catch (error) {
+      console.warn("ConnectionStatus: Failed to clear stored state:", error);
+    }
+  }, [getStorage, storageKey]);
+  const [popupWindow, setPopupWindow] = useState<Window | null>(null);
+  const connectionStateRef = useRef(connectionState);
+  const pendingDetectionRef = useRef<Record<Service, boolean>>({
+    slack: false,
+    trello: false,
+  });
+  const detectionTimeoutRef = useRef<
+    Record<Service, ReturnType<typeof setTimeout> | null>
+  >({
+    slack: null,
+    trello: null,
+  });
+  const lastTriggeredServiceRef = useRef<Service | null>(null);
+
+  const log = (..._unused: unknown[]) => {
+    void _unused;
+    // Debug logging disabled. Uncomment for verbose diagnostics.
+    // console.log("[ConnectionStatus]", ..._unused);
+  };
+
+  useEffect(() => {
+    connectionStateRef.current = connectionState;
+  }, [connectionState]);
+
+  useEffect(() => {
+    const stored = readStoredState();
+    if (stored) {
+      setConnectionState((prev) => {
+        if (prev.slack === stored.slack && prev.trello === stored.trello) {
+          return prev;
+        }
+        return stored;
+      });
+    } else {
+      setConnectionState(defaultState);
+    }
+    setIsInitialized(true);
+  }, [readStoredState]);
+
+  useEffect(() => {
+    const storage = getStorage();
+    if (!storage) {
+      return;
+    }
+
+    try {
+      const isDefaultState =
+        connectionState.slack === "disconnected" &&
+        connectionState.trello === "disconnected";
+
+      if (isDefaultState) {
+        storage.removeItem(storageKey);
+      } else {
+        storage.setItem(storageKey, JSON.stringify(connectionState));
       }
     } catch (error) {
-      console.warn(
-        "Failed to load connection status from localStorage:",
-        error
-      );
-    } finally {
-      setIsLoading(false);
+      console.warn("ConnectionStatus: Failed to persist state:", error);
+    }
+  }, [connectionState, getStorage, storageKey]);
+
+  const isLoading = !isInitialized;
+
+  const markServiceDetecting = useCallback((service: Service) => {
+    log("markServiceDetecting:start", { service });
+    pendingDetectionRef.current[service] = true;
+    lastTriggeredServiceRef.current = service;
+
+    // Clear any existing timeout before scheduling a new one
+    const existingTimeout = detectionTimeoutRef.current[service];
+    if (existingTimeout) {
+      clearTimeout(existingTimeout);
+      log("markServiceDetecting:clearedExistingTimeout", { service });
+    }
+
+    detectionTimeoutRef.current[service] = setTimeout(() => {
+      log("markServiceDetecting:timeoutTriggered", { service });
+      setConnectionState((prev) => {
+        if (prev[service] !== "detecting") {
+          log("markServiceDetecting:timeoutIgnored", {
+            service,
+            state: prev[service],
+          });
+          return prev;
+        }
+
+        pendingDetectionRef.current[service] = false;
+        detectionTimeoutRef.current[service] = null;
+        if (lastTriggeredServiceRef.current === service) {
+          lastTriggeredServiceRef.current = null;
+        }
+
+        log("markServiceDetecting:timeoutMarkConnected", { service });
+        return {
+          ...prev,
+          [service]: "connected",
+        };
+      });
+    }, 4000);
+    log("markServiceDetecting:timeoutScheduled", { service });
+  }, []);
+
+  const clearServiceDetecting = useCallback((service: Service) => {
+    log("clearServiceDetecting", { service });
+    pendingDetectionRef.current[service] = false;
+    const existingTimeout = detectionTimeoutRef.current[service];
+    if (existingTimeout) {
+      clearTimeout(existingTimeout);
+      log("clearServiceDetecting:clearedTimeout", { service });
+      detectionTimeoutRef.current[service] = null;
+    }
+    if (lastTriggeredServiceRef.current === service) {
+      lastTriggeredServiceRef.current = null;
     }
   }, []);
 
-  // Save connection state to localStorage whenever it changes
+  type CompleteReason =
+    | "focus"
+    | "visibility"
+    | "pageshow"
+    | "manual"
+    | "initial";
+
+  const completePendingConnections = useCallback((reason: CompleteReason) => {
+    log("completePendingConnections:invoked", {
+      reason,
+      pending: { ...pendingDetectionRef.current },
+      visibility: document.visibilityState,
+    });
+    setConnectionState((prev) => {
+      let updated = false;
+      const nextState: ConnectionState = { ...prev };
+
+      (["slack", "trello"] as Service[]).forEach((service) => {
+        if (prev[service] === "detecting") {
+          const shouldComplete =
+            pendingDetectionRef.current[service] ||
+            lastTriggeredServiceRef.current === service;
+          if (shouldComplete) {
+            pendingDetectionRef.current[service] = false;
+            const existingTimeout = detectionTimeoutRef.current[service];
+            if (existingTimeout) {
+              clearTimeout(existingTimeout);
+              log("completePendingConnections:clearedTimeout", {
+                service,
+                reason,
+              });
+              detectionTimeoutRef.current[service] = null;
+            }
+            nextState[service] = "connected";
+            updated = true;
+            lastTriggeredServiceRef.current = null;
+            log("completePendingConnections:markedConnected", {
+              service,
+              reason,
+            });
+          } else {
+            log("completePendingConnections:skipped", {
+              service,
+              reason,
+              pending: pendingDetectionRef.current[service],
+              lastTriggered: lastTriggeredServiceRef.current,
+            });
+          }
+        }
+      });
+
+      return updated ? nextState : prev;
+    });
+  }, []);
+
   useEffect(() => {
-    if (!isLoading) {
-      try {
-        localStorage.setItem(STORAGE_KEY, JSON.stringify(connectionState));
-      } catch (error) {
-        console.warn(
-          "Failed to save connection status to localStorage:",
-          error
-        );
+    log("connectionState:update", connectionState);
+  }, [connectionState]);
+
+  useEffect(() => {
+    const handleFocus = () => {
+      log("window:focus");
+      completePendingConnections("focus");
+    };
+
+    const handleVisibilityChange = () => {
+      log("document:visibilitychange", {
+        visibility: document.visibilityState,
+      });
+      if (document.visibilityState === "visible") {
+        completePendingConnections("visibility");
       }
-    }
-  }, [connectionState, isLoading]);
+    };
+
+    const handlePageShow = () => {
+      log("window:pageshow");
+      completePendingConnections("pageshow");
+    };
+
+    window.addEventListener("focus", handleFocus);
+    window.addEventListener("pageshow", handlePageShow);
+    document.addEventListener("visibilitychange", handleVisibilityChange);
+
+    return () => {
+      window.removeEventListener("focus", handleFocus);
+      window.removeEventListener("pageshow", handlePageShow);
+      document.removeEventListener("visibilitychange", handleVisibilityChange);
+    };
+  }, [completePendingConnections]);
+
+  useEffect(() => {
+    (["slack", "trello"] as Service[]).forEach((service) => {
+      if (
+        connectionState[service] === "detecting" &&
+        !pendingDetectionRef.current[service]
+      ) {
+        log("initialDetectingState:detected", { service });
+        markServiceDetecting(service);
+        completePendingConnections("initial");
+      }
+    });
+  }, [connectionState, markServiceDetecting, completePendingConnections]);
 
   const updateConnectionStatus = (
-    service: "slack" | "trello",
+    service: Service,
     status: ConnectionStatus
   ) => {
     setConnectionState((prev) => ({
       ...prev,
       [service]: status,
     }));
+    if (status === "detecting") {
+      markServiceDetecting(service);
+    } else {
+      clearServiceDetecting(service);
+    }
   };
 
-  const connectService = async (service: "slack" | "trello") => {
+  const connectService = async (service: Service) => {
     setConnectionState((prev) => ({
       ...prev,
       [service]: "loading",
     }));
+    clearServiceDetecting(service);
 
     try {
       // Simulate connection process
@@ -90,11 +355,13 @@ export const useConnectionStatus = () => {
           ...prev,
           [service]: "connected",
         }));
+        clearServiceDetecting(service);
       } else {
         setConnectionState((prev) => ({
           ...prev,
           [service]: "error",
         }));
+        clearServiceDetecting(service);
       }
     } catch (error) {
       console.error(error);
@@ -102,38 +369,40 @@ export const useConnectionStatus = () => {
         ...prev,
         [service]: "error",
       }));
+      clearServiceDetecting(service);
     }
   };
 
-  const disconnectService = (service: "slack" | "trello") => {
+  const disconnectService = (service: Service) => {
     setConnectionState((prev) => ({
       ...prev,
       [service]: "disconnected",
     }));
+    clearServiceDetecting(service);
   };
 
-  const resetConnectionError = (service: "slack" | "trello") => {
+  const resetConnectionError = (service: Service) => {
     setConnectionState((prev) => ({
       ...prev,
       [service]: "disconnected",
     }));
+    clearServiceDetecting(service);
   };
 
   // Handle popup connection flow
-  const connectServiceViaPopup = async (
-    service: "slack" | "trello",
-    url: string
-  ) => {
-    console.log(`🔄 Setting ${service} state to detecting...`);
+  const connectServiceViaPopup = async (service: Service, url: string) => {
+    log("connectServiceViaPopup:start", { service, url });
     setConnectionState((prev) => {
-      console.log(
-        `🔄 State change for ${service}: ${prev[service]} -> detecting`
-      );
+      log("connectServiceViaPopup:setDetecting", {
+        service,
+        previous: prev[service],
+      });
       return {
         ...prev,
         [service]: "detecting",
       };
     });
+    markServiceDetecting(service);
 
     // Open popup window
     const popup = window.open(
@@ -143,43 +412,48 @@ export const useConnectionStatus = () => {
     );
 
     if (!popup) {
-      console.log(`❌ Popup blocked for ${service}, setting to error`);
+      log("connectServiceViaPopup:popupBlocked", { service });
       // Popup blocked, fallback to error state
-      setConnectionState((prev) => ({
-        ...prev,
-        [service]: "error",
-      }));
+      setConnectionState((prev) => {
+        clearServiceDetecting(service);
+        return {
+          ...prev,
+          [service]: "error",
+        };
+      });
       return;
     }
 
-    console.log(`✅ Popup opened successfully for ${service}`);
+    log("connectServiceViaPopup:popupOpened", { service });
     setPopupWindow(popup);
 
     // Listen for messages from popup
     const messageHandler = (event: MessageEvent) => {
-      console.log(
-        "Received message in parent:",
-        event.data,
-        "from origin:",
-        event.origin
-      );
+      log("connectServiceViaPopup:messageReceived", {
+        service,
+        data: event.data,
+        origin: event.origin,
+      });
 
       // Handle explicit success/failure messages from our messenger
       if (event.data && event.data.type === "CONNECTION_SUCCESS") {
         const { service: connectedService } = event.data;
         if (connectedService === service) {
-          console.log(`Connection success detected for ${service}`);
+          log("connectServiceViaPopup:messageSuccess", { service });
           handleConnectionSuccess(service, popup, messageHandler);
         }
       } else if (event.data && event.data.type === "CONNECTION_FAILURE") {
         const { service: failedService } = event.data;
         if (failedService === service) {
-          console.log(`Connection failure detected for ${service}`);
+          log("connectServiceViaPopup:messageFailure", { service });
           handleConnectionFailure(service, popup, messageHandler);
         }
       } else if (event.data && typeof event.data === "string") {
         // Handle simple string messages for debugging
-        console.log("String message received:", event.data);
+        log("connectServiceViaPopup:messageString", {
+          service,
+          data: event.data,
+        });
       }
     };
 
@@ -188,13 +462,13 @@ export const useConnectionStatus = () => {
     // Fallback: check if popup is closed without message
     const checkClosed = setInterval(() => {
       if (popup.closed) {
-        console.log(`🚪 Popup for ${service} closed, cleaning up...`);
+        log("connectServiceViaPopup:popupClosedDetected", { service });
         setPopupWindow(null);
         window.removeEventListener("message", messageHandler);
         clearInterval(checkClosed);
 
         // Note: The main polling logic will handle success/error detection when popup closes
-        console.log(`🚪 Cleanup completed for ${service} popup closure`);
+        log("connectServiceViaPopup:popupCleanupComplete", { service });
       }
     }, 1000);
 
@@ -203,10 +477,11 @@ export const useConnectionStatus = () => {
   };
 
   const handleConnectionSuccess = (
-    service: "slack" | "trello",
+    service: Service,
     popup: Window,
     messageHandler: (event: MessageEvent) => void
   ) => {
+    clearServiceDetecting(service);
     setConnectionState((prev) => ({
       ...prev,
       [service]: "connected",
@@ -217,10 +492,11 @@ export const useConnectionStatus = () => {
   };
 
   const handleConnectionFailure = (
-    service: "slack" | "trello",
+    service: Service,
     popup: Window,
     messageHandler: (event: MessageEvent) => void
   ) => {
+    clearServiceDetecting(service);
     setConnectionState((prev) => ({
       ...prev,
       [service]: "error",
@@ -231,7 +507,7 @@ export const useConnectionStatus = () => {
   };
 
   const startPollingForConnection = (
-    service: "slack" | "trello",
+    service: Service,
     popup: Window,
     messageHandler: (event: MessageEvent) => void,
     checkClosed: NodeJS.Timeout
@@ -244,9 +520,12 @@ export const useConnectionStatus = () => {
 
       // Check if popup is still open and loading
       if (!popup.closed) {
-        console.log(
-          `Polling ${service} popup - attempt ${pollCount}/${maxPolls}, popup still open: ${!popup.closed}`
-        );
+        log("startPollingForConnection:polling", {
+          service,
+          pollCount,
+          maxPolls,
+          popupClosed: popup.closed,
+        });
 
         // Try to detect user interaction (focus/blur events suggest user is interacting)
         try {
@@ -255,9 +534,10 @@ export const useConnectionStatus = () => {
             popup.document.hasFocus &&
             popup.document.hasFocus()
           ) {
-            console.log(
-              `User interaction detected for ${service} popup - likely completing OAuth`
-            );
+            log("startPollingForConnection:userInteractionDetected", {
+              service,
+              pollCount,
+            });
           }
         } catch {
           // Cross-origin, expected
@@ -267,7 +547,11 @@ export const useConnectionStatus = () => {
         try {
           const currentTitle = popup.document?.title || "";
           if (currentTitle) {
-            console.log(`Popup title for ${service}: "${currentTitle}"`);
+            log("startPollingForConnection:title", {
+              service,
+              pollCount,
+              title: currentTitle,
+            });
 
             // Check for success indicators in title
             if (
@@ -275,7 +559,10 @@ export const useConnectionStatus = () => {
               currentTitle.toLowerCase().includes("connected") ||
               currentTitle.toLowerCase().includes("authorized")
             ) {
-              console.log(`Detected success in popup title for ${service}`);
+              log("startPollingForConnection:titleSuccess", {
+                service,
+                title: currentTitle,
+              });
               handleConnectionSuccess(service, popup, messageHandler);
               clearInterval(pollInterval);
               clearInterval(checkClosed);
@@ -290,9 +577,10 @@ export const useConnectionStatus = () => {
 
         // Method 1: Duration-based (if popup stays open 45+ seconds, assume success)
         if (pollCount >= 45) {
-          console.log(
-            `🎯 DURATION DETECTION: Popup for ${service} has been open for 45+ seconds - likely OAuth completed`
-          );
+          log("startPollingForConnection:durationDetection", {
+            service,
+            pollCount,
+          });
 
           // Assume success and close popup
           handleConnectionSuccess(service, popup, messageHandler);
@@ -306,7 +594,10 @@ export const useConnectionStatus = () => {
         try {
           if (popup.location && popup.location.href) {
             const currentUrl = popup.location.href;
-            console.log(`Popup URL for ${service}: ${currentUrl}`);
+            log("startPollingForConnection:url", {
+              service,
+              url: currentUrl,
+            });
 
             // Check for OAuth completion indicators
             if (
@@ -315,9 +606,10 @@ export const useConnectionStatus = () => {
               currentUrl.includes("code=") ||
               currentUrl.includes("token=")
             ) {
-              console.log(
-                `🔗 URL DETECTION: OAuth completion detected in URL for ${service}`
-              );
+              log("startPollingForConnection:urlSuccess", {
+                service,
+                url: currentUrl,
+              });
               handleConnectionSuccess(service, popup, messageHandler);
               clearInterval(pollInterval);
               clearInterval(checkClosed);
@@ -339,9 +631,10 @@ export const useConnectionStatus = () => {
               title.toLowerCase().includes("welcome") ||
               title.toLowerCase().includes("dashboard"))
           ) {
-            console.log(
-              `📋 TITLE DETECTION: Success detected in title "${title}" for ${service}`
-            );
+            log("startPollingForConnection:titleSuccessFallback", {
+              service,
+              title,
+            });
             handleConnectionSuccess(service, popup, messageHandler);
             clearInterval(pollInterval);
             clearInterval(checkClosed);
@@ -353,60 +646,97 @@ export const useConnectionStatus = () => {
 
         // If popup is still open after 30 seconds, it's likely waiting for user interaction
         if (pollCount === 30) {
-          console.log(
-            `Popup for ${service} is still open after 30 seconds - user may be completing OAuth flow`
-          );
+          log("startPollingForConnection:stillOpen30s", {
+            service,
+            pollCount,
+          });
         }
       }
 
       // Stop polling if max attempts reached or popup closed
       if (pollCount >= maxPolls || popup.closed) {
-        console.log(
-          `Stopping polling for ${service} after ${pollCount} attempts, popup closed: ${popup.closed}`
-        );
+        log("startPollingForConnection:stopPolling", {
+          service,
+          pollCount,
+          popupClosed: popup.closed,
+        });
 
         if (popup.closed) {
           clearInterval(pollInterval);
           clearInterval(checkClosed);
 
           // Popup closed - immediately check if it was due to successful OAuth completion
-          console.log(
-            `🚪 POPUP CLOSED: Popup for ${service} closed after ${pollCount} seconds - analyzing...`
-          );
+          log("startPollingForConnection:popupClosedAnalyze", {
+            service,
+            pollCount,
+          });
 
           // Check immediately without setTimeout to avoid race conditions
-          const currentState = connectionState[service];
-          console.log(`Current state when popup closed: ${currentState}`);
+          const currentState = connectionStateRef.current[service];
+          log("startPollingForConnection:stateAtClose", {
+            service,
+            currentState,
+          });
 
           if (currentState === "loading" || currentState === "detecting") {
             // If popup was open for more than 10 seconds, likely OAuth was completed
             if (pollCount >= 10) {
-              console.log(
-                `✅ SUCCESS: Popup for ${service} closed after ${pollCount} seconds with ${currentState} state - marking as connected`
-              );
-              setConnectionState((prev) => ({
-                ...prev,
-                [service]: "connected",
-              }));
+              log("startPollingForConnection:markConnectedAfterClose", {
+                service,
+                pollCount,
+                currentState,
+              });
+              setConnectionState((prev) => {
+                clearServiceDetecting(service);
+                return {
+                  ...prev,
+                  [service]: "connected",
+                };
+              });
             } else {
-              console.log(
-                `❌ CANCELLED: Popup for ${service} closed after ${pollCount} seconds - likely cancelled by user, resetting to disconnected`
-              );
-              setConnectionState((prev) => ({
-                ...prev,
-                [service]: "disconnected",
-              }));
+              const shouldAssumeSuccess =
+                pendingDetectionRef.current[service] ||
+                lastTriggeredServiceRef.current === service;
+              if (shouldAssumeSuccess) {
+                log("startPollingForConnection:assumeSuccessAfterQuickClose", {
+                  service,
+                  pollCount,
+                  currentState,
+                });
+                setConnectionState((prev) => {
+                  clearServiceDetecting(service);
+                  return {
+                    ...prev,
+                    [service]: "connected",
+                  };
+                });
+              } else {
+                log("startPollingForConnection:markDisconnectedAfterClose", {
+                  service,
+                  pollCount,
+                  currentState,
+                });
+                setConnectionState((prev) => {
+                  clearServiceDetecting(service);
+                  return {
+                    ...prev,
+                    [service]: "disconnected",
+                  };
+                });
+              }
             }
           } else {
-            console.log(
-              `ℹ️ STATE ALREADY SET: Popup for ${service} closed but state was already: ${currentState} (no change needed)`
-            );
+            log("startPollingForConnection:stateAlreadySet", {
+              service,
+              currentState,
+            });
           }
         } else {
           // Max polls reached, popup still open
-          console.log(
-            `⏰ MAX POLLS REACHED: Popup for ${service} still open after ${maxPolls} attempts`
-          );
+          log("startPollingForConnection:maxPollsReached", {
+            service,
+            pollCount,
+          });
 
           clearInterval(pollInterval);
           clearInterval(checkClosed);
@@ -418,17 +748,21 @@ export const useConnectionStatus = () => {
                 prev[service] === "loading" ||
                 prev[service] === "detecting"
               ) {
-                console.log(
-                  `⏰ FORCE SUCCESS: Popup for ${service} still open after ${maxPolls} seconds - forcing success due to timeout`
-                );
+                log("startPollingForConnection:forceSuccessTimeout", {
+                  service,
+                  pollCount,
+                });
+                clearServiceDetecting(service);
                 return {
                   ...prev,
                   [service]: "connected",
                 };
               }
-              console.log(
-                `⏰ NO ACTION NEEDED: Popup for ${service} reached timeout but state was already: ${prev[service]}`
-              );
+              log("startPollingForConnection:noActionNeeded", {
+                service,
+                state: prev[service],
+              });
+              clearServiceDetecting(service);
               return prev;
             });
           }, 500);
@@ -437,68 +771,69 @@ export const useConnectionStatus = () => {
     }, 1000);
   };
 
-  // Check URL parameters for connection success (for callback flow)
-  const checkUrlForConnectionStatus = () => {
-    const urlParams = new URLSearchParams(window.location.search);
-
-    if (urlParams.has("connected")) {
-      const service = urlParams.get("service") as "slack" | "trello";
-      if (service && ["slack", "trello"].includes(service)) {
-        setConnectionState((prev) => ({
-          ...prev,
-          [service]: "connected",
-        }));
-
-        // Clean URL
-        window.history.replaceState(
-          {},
-          document.title,
-          window.location.pathname
-        );
-      }
-    } else if (urlParams.has("connection_error")) {
-      const service = urlParams.get("service") as "slack" | "trello";
-      if (service && ["slack", "trello"].includes(service)) {
-        setConnectionState((prev) => ({
-          ...prev,
-          [service]: "error",
-        }));
-
-        // Clean URL
-        window.history.replaceState(
-          {},
-          document.title,
-          window.location.pathname
-        );
-      }
-    }
-  };
-
   // Initialize URL check on mount
   useEffect(() => {
-    checkUrlForConnectionStatus();
-  }, []);
+    const urlParams = new URLSearchParams(window.location.search);
+
+    const service = urlParams.get("service") as Service | null;
+    const isValidService = service && ["slack", "trello"].includes(service);
+
+    if (urlParams.has("connected") && isValidService) {
+      setConnectionState((prev) => {
+        clearServiceDetecting(service as Service);
+        return {
+          ...prev,
+          [service as Service]: "connected",
+        };
+      });
+
+      window.history.replaceState({}, document.title, window.location.pathname);
+    } else if (urlParams.has("connection_error") && isValidService) {
+      setConnectionState((prev) => {
+        clearServiceDetecting(service as Service);
+        return {
+          ...prev,
+          [service as Service]: "error",
+        };
+      });
+
+      window.history.replaceState({}, document.title, window.location.pathname);
+    }
+  }, [clearServiceDetecting]);
 
   // Manual success detection for cases where automatic detection fails
-  const manuallyMarkConnected = (service: "slack" | "trello") => {
-    console.log(`Manually marking ${service} as connected`);
+  const manuallyMarkConnected = (service: Service) => {
+    log("manuallyMarkConnected", { service });
+    clearServiceDetecting(service);
     setConnectionState((prev) => ({
       ...prev,
       [service]: "connected",
     }));
+    if (lastTriggeredServiceRef.current === service) {
+      lastTriggeredServiceRef.current = null;
+    }
   };
 
   // Reset all connection states (useful for logout)
   const resetAllConnections = () => {
-    console.log("🔄 Resetting all connection states to disconnected");
+    log("resetAllConnections");
     setConnectionState({
       slack: "disconnected",
       trello: "disconnected",
     });
-    // Also clear from localStorage
-    if (typeof window !== "undefined") {
-      localStorage.removeItem(STORAGE_KEY);
-    }
+    pendingDetectionRef.current = {
+      slack: false,
+      trello: false,
+    };
+    lastTriggeredServiceRef.current = null;
+    (["slack", "trello"] as Service[]).forEach((service) => {
+      const existingTimeout = detectionTimeoutRef.current[service];
+      if (existingTimeout) {
+        clearTimeout(existingTimeout);
+        detectionTimeoutRef.current[service] = null;
+      }
+    });
+    clearStoredState();
   };
 
   return {

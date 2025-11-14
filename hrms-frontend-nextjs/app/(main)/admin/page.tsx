@@ -125,6 +125,8 @@ const AdminHomePage = async () => {
           slackUrl={slackUrl}
           trelloUrl={trelloUrl}
           className="text-[20px]"
+          userId={currentUser?.email || currentUser?.employeeId || null}
+          scope="admin"
         />
       </div>
 

@@ -473,7 +473,27 @@ const Sidebar = ({ isOpen, toggleSidebar }: SideBarProps) => {
               action={logout}
               onSubmit={() => {
                 if (typeof window !== "undefined") {
+                  const clearConnectionKeys = (storage: Storage | null) => {
+                    if (!storage) {
+                      return;
+                    }
+                    const keysToRemove: string[] = [];
+                    for (let i = 0; i < storage.length; i += 1) {
+                      const key = storage.key(i);
+                      if (
+                        key &&
+                        (key === "hrms_connection_status" ||
+                          key.startsWith("hrms_connection_status_v2"))
+                      ) {
+                        keysToRemove.push(key);
+                      }
+                    }
+                    keysToRemove.forEach((key) => storage.removeItem(key));
+                  };
+
                   localStorage.removeItem("hrms_connection_status");
+                  clearConnectionKeys(window.localStorage);
+                  clearConnectionKeys(window.sessionStorage);
                 }
               }}
             >

@@ -10,6 +10,8 @@ interface ConnectionStatusSectionProps {
   showLabels?: boolean;
   className?: string;
   usePopup?: boolean;
+  userId?: string | null;
+  scope?: string;
 }
 
 const ConnectionStatusSection: React.FC<ConnectionStatusSectionProps> = ({
@@ -18,9 +20,11 @@ const ConnectionStatusSection: React.FC<ConnectionStatusSectionProps> = ({
   showLabels = false,
   className = "",
   usePopup = true,
+  userId = null,
+  scope = "default",
 }) => {
   const { connectionState, isLoading, connectService, connectServiceViaPopup } =
-    useConnectionStatus();
+    useConnectionStatus({ userId, scope });
 
   const handleConnectionClick = async (service: "slack" | "trello") => {
     const currentStatus = connectionState[service];
@@ -31,26 +35,8 @@ const ConnectionStatusSection: React.FC<ConnectionStatusSectionProps> = ({
         // Note: External services may not use callback parameters, so we'll use URL monitoring instead
         const baseUrl = service === "slack" ? slackUrl : trelloUrl;
 
-        console.log(`🚀 Starting ${service} connection process...`);
-        console.log(`📍 Service: ${service}`);
-        console.log(`🔗 Base URL: ${baseUrl}`);
-        console.log(`⏱️ Expect detection in 30-60 seconds via:`);
-        console.log(
-          `   🎯 Duration (45s+), 🔗 URL patterns, 📋 Title keywords, 🚪 Closure detection`
-        );
-
         try {
           await connectServiceViaPopup(service, baseUrl);
-          console.log(`✅ Popup connection attempt initiated for ${service}`);
-          console.log(
-            `👀 System is now actively monitoring for OAuth completion...`
-          );
-          console.log(
-            `🔵 Connection status should change to "detecting" (blue spinner)`
-          );
-          console.log(
-            `🟢 Expect success detection in 30-60 seconds via multiple methods`
-          );
         } catch (error) {
           console.error(
             `❌ Error during popup connection for ${service}:`,

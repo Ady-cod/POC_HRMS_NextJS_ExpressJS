@@ -26,7 +26,7 @@ export default function LoginModal({ isOpen, onClose }: LoginModalProps) {
 
   // --- EASING (typed tuples to keep TS happy) ---
   const EASE_OUT = [0.22, 1, 0.36, 1] as const;
-  const OVERLAY_ACTIVE_OPACITY = 0.8;
+  const OVERLAY_ACTIVE_OPACITY = 0.85;
 
   // --- OVERLAY: keep it simple; no blur; we leave it visible during shrink ---
   const overlayVariants: Variants = {

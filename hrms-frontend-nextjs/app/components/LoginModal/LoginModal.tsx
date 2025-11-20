@@ -26,6 +26,7 @@ export default function LoginModal({ isOpen, onClose }: LoginModalProps) {
 
   // --- EASING (typed tuples to keep TS happy) ---
   const EASE_OUT = [0.22, 1, 0.36, 1] as const;
+  const OVERLAY_ACTIVE_OPACITY = 0.8;
 
   // --- OVERLAY: keep it simple; no blur; we leave it visible during shrink ---
   const overlayVariants: Variants = {
@@ -95,196 +96,196 @@ export default function LoginModal({ isOpen, onClose }: LoginModalProps) {
   }
 
   const DnaLogo = ({ className }: { className?: string }) => (
-  <svg
-    className={className}
-    width="300"
-    height="305"
-    viewBox="0 0 300 305"
-    fill="none"
-    xmlns="http://www.w3.org/2000/svg"
-  >
-    <g filter="url(#filter0_d_4325_16976)">
-      <path
-        d="M45 82.5L177.5 10V57.5L45 132.5L135 182.5V230L45 185V132.5V82.5Z"
-        fill="#E97128"
-      />
-      <path
-        d="M45 132.5V185L135 230V182.5L45 132.5ZM45 132.5V82.5L177.5 10V57.5L45 132.5Z"
-        stroke="#E97128"
-        strokeWidth="6.66667"
-      />
-    </g>
-    <g filter="url(#filter1_d_4325_16976)">
-      <path
-        d="M105 160L157.5 72.5L52.5 132.5L105 160Z"
-        fill="#008EC7"
-        stroke="#008EC7"
-        strokeWidth="6.66667"
-      />
-    </g>
-    <g filter="url(#filter2_d_4325_16976)">
-      <path
-        d="M247.869 173.895L138.911 233.581L193.602 144.974L247.869 173.895Z"
-        fill="#008EC7"
-        stroke="#008EC7"
-        strokeWidth="6.66667"
-      />
-    </g>
-    <g filter="url(#filter3_d_4325_16976)">
-      <path
-        d="M162.5 70L252.5 115V172.5V177.5V225L122.5 287.5V245L252.5 177.5V172.5L162.5 127.5V70Z"
-        fill="#0C3E66"
-      />
-      <path
-        d="M252.5 172.5V115L162.5 70V127.5L252.5 172.5ZM252.5 172.5V177.5M252.5 177.5V225L122.5 287.5V245L252.5 177.5Z"
-        stroke="#0C3E66"
-        strokeWidth="6.66667"
-      />
-    </g>
-    <defs>
-      <filter
-        id="filter0_d_4325_16976"
-        x="37.2665"
-        y="1.97598"
-        width="151.967"
-        height="243.818"
-        filterUnits="userSpaceOnUse"
-        colorInterpolationFilters="sRGB"
-      >
-        <feFlood floodOpacity="0" result="BackgroundImageFix" />
-        <feColorMatrix
-          in="SourceAlpha"
-          type="matrix"
-          values="0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 127 0"
-          result="hardAlpha"
+    <svg
+      className={className}
+      width="300"
+      height="305"
+      viewBox="0 0 300 305"
+      fill="none"
+      xmlns="http://www.w3.org/2000/svg"
+    >
+      <g filter="url(#filter0_d_4325_16976)">
+        <path
+          d="M45 82.5L177.5 10V57.5L45 132.5L135 182.5V230L45 185V132.5V82.5Z"
+          fill="#E97128"
         />
-        <feOffset dx="2" dy="4" />
-        <feGaussianBlur stdDeviation="3.2" />
-        <feComposite in2="hardAlpha" operator="out" />
-        <feColorMatrix
-          type="matrix"
-          values="0 0 0 0 1 0 0 0 0 1 0 0 0 0 1 0 0 0 1 0"
+        <path
+          d="M45 132.5V185L135 230V182.5L45 132.5ZM45 132.5V82.5L177.5 10V57.5L45 132.5Z"
+          stroke="#E97128"
+          strokeWidth="6.66667"
         />
-        <feBlend
-          mode="normal"
-          in2="BackgroundImageFix"
-          result="effect1_dropShadow_4325_16976"
+      </g>
+      <g filter="url(#filter1_d_4325_16976)">
+        <path
+          d="M105 160L157.5 72.5L52.5 132.5L105 160Z"
+          fill="#008EC7"
+          stroke="#008EC7"
+          strokeWidth="6.66667"
         />
-        <feBlend
-          mode="normal"
-          in="SourceGraphic"
-          in2="effect1_dropShadow_4325_16976"
-          result="shape"
+      </g>
+      <g filter="url(#filter2_d_4325_16976)">
+        <path
+          d="M247.869 173.895L138.911 233.581L193.602 144.974L247.869 173.895Z"
+          fill="#008EC7"
+          stroke="#008EC7"
+          strokeWidth="6.66667"
         />
-      </filter>
-      <filter
-        id="filter1_d_4325_16976"
-        x="41.5591"
-        y="63.2773"
-        width="129.362"
-        height="109.135"
-        filterUnits="userSpaceOnUse"
-        colorInterpolationFilters="sRGB"
-      >
-        <feFlood floodOpacity="0" result="BackgroundImageFix" />
-        <feColorMatrix
-          in="SourceAlpha"
-          type="matrix"
-          values="0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 127 0"
-          result="hardAlpha"
+      </g>
+      <g filter="url(#filter3_d_4325_16976)">
+        <path
+          d="M162.5 70L252.5 115V172.5V177.5V225L122.5 287.5V245L252.5 177.5V172.5L162.5 127.5V70Z"
+          fill="#0C3E66"
         />
-        <feOffset dy="4" />
-        <feGaussianBlur stdDeviation="2" />
-        <feComposite in2="hardAlpha" operator="out" />
-        <feColorMatrix
-          type="matrix"
-          values="0 0 0 0 1 0 0 0 0 1 0 0 0 0 1 0 0 0 0.25 0"
+        <path
+          d="M252.5 172.5V115L162.5 70V127.5L252.5 172.5ZM252.5 172.5V177.5M252.5 177.5V225L122.5 287.5V245L252.5 177.5Z"
+          stroke="#0C3E66"
+          strokeWidth="6.66667"
         />
-        <feBlend
-          mode="normal"
-          in2="BackgroundImageFix"
-          result="effect1_dropShadow_4325_16976"
-        />
-        <feBlend
-          mode="normal"
-          in="SourceGraphic"
-          in2="effect1_dropShadow_4325_16976"
-          result="shape"
-        />
-      </filter>
-      <filter
-        id="filter2_d_4325_16976"
-        x="125.448"
-        y="140.562"
-        width="133.433"
-        height="110.004"
-        filterUnits="userSpaceOnUse"
-        colorInterpolationFilters="sRGB"
-      >
-        <feFlood floodOpacity="0" result="BackgroundImageFix" />
-        <feColorMatrix
-          in="SourceAlpha"
-          type="matrix"
-          values="0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 127 0"
-          result="hardAlpha"
-        />
-        <feOffset dy="4" />
-        <feGaussianBlur stdDeviation="2" />
-        <feComposite in2="hardAlpha" operator="out" />
-        <feColorMatrix
-          type="matrix"
-          values="0 0 0 0 1 0 0 0 0 1 0 0 0 0 1 0 0 0 0.25 0"
-        />
-        <feBlend
-          mode="normal"
-          in2="BackgroundImageFix"
-          result="effect1_dropShadow_4325_16976"
-        />
-        <feBlend
-          mode="normal"
-          in="SourceGraphic"
-          in2="effect1_dropShadow_4325_16976"
-          result="shape"
-        />
-      </filter>
-      <filter
-        id="filter3_d_4325_16976"
-        x="113.767"
-        y="61.2064"
-        width="151.467"
-        height="242.994"
-        filterUnits="userSpaceOnUse"
-        colorInterpolationFilters="sRGB"
-      >
-        <feFlood floodOpacity="0" result="BackgroundImageFix" />
-        <feColorMatrix
-          in="SourceAlpha"
-          type="matrix"
-          values="0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 127 0"
-          result="hardAlpha"
-        />
-        <feOffset dx="2" dy="4" />
-        <feGaussianBlur stdDeviation="3.7" />
-        <feComposite in2="hardAlpha" operator="out" />
-        <feColorMatrix
-          type="matrix"
-          values="0 0 0 0 1 0 0 0 0 1 0 0 0 0 1 0 0 0 1 0"
-        />
-        <feBlend
-          mode="normal"
-          in2="BackgroundImageFix"
-          result="effect1_dropShadow_4325_16976"
-        />
-        <feBlend
-          mode="normal"
-          in="SourceGraphic"
-          in2="effect1_dropShadow_4325_16976"
-          result="shape"
-        />
-      </filter>
-    </defs>
-  </svg>
-);
+      </g>
+      <defs>
+        <filter
+          id="filter0_d_4325_16976"
+          x="37.2665"
+          y="1.97598"
+          width="151.967"
+          height="243.818"
+          filterUnits="userSpaceOnUse"
+          colorInterpolationFilters="sRGB"
+        >
+          <feFlood floodOpacity="0" result="BackgroundImageFix" />
+          <feColorMatrix
+            in="SourceAlpha"
+            type="matrix"
+            values="0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 127 0"
+            result="hardAlpha"
+          />
+          <feOffset dx="2" dy="4" />
+          <feGaussianBlur stdDeviation="3.2" />
+          <feComposite in2="hardAlpha" operator="out" />
+          <feColorMatrix
+            type="matrix"
+            values="0 0 0 0 1 0 0 0 0 1 0 0 0 0 1 0 0 0 1 0"
+          />
+          <feBlend
+            mode="normal"
+            in2="BackgroundImageFix"
+            result="effect1_dropShadow_4325_16976"
+          />
+          <feBlend
+            mode="normal"
+            in="SourceGraphic"
+            in2="effect1_dropShadow_4325_16976"
+            result="shape"
+          />
+        </filter>
+        <filter
+          id="filter1_d_4325_16976"
+          x="41.5591"
+          y="63.2773"
+          width="129.362"
+          height="109.135"
+          filterUnits="userSpaceOnUse"
+          colorInterpolationFilters="sRGB"
+        >
+          <feFlood floodOpacity="0" result="BackgroundImageFix" />
+          <feColorMatrix
+            in="SourceAlpha"
+            type="matrix"
+            values="0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 127 0"
+            result="hardAlpha"
+          />
+          <feOffset dy="4" />
+          <feGaussianBlur stdDeviation="2" />
+          <feComposite in2="hardAlpha" operator="out" />
+          <feColorMatrix
+            type="matrix"
+            values="0 0 0 0 1 0 0 0 0 1 0 0 0 0 1 0 0 0 0.25 0"
+          />
+          <feBlend
+            mode="normal"
+            in2="BackgroundImageFix"
+            result="effect1_dropShadow_4325_16976"
+          />
+          <feBlend
+            mode="normal"
+            in="SourceGraphic"
+            in2="effect1_dropShadow_4325_16976"
+            result="shape"
+          />
+        </filter>
+        <filter
+          id="filter2_d_4325_16976"
+          x="125.448"
+          y="140.562"
+          width="133.433"
+          height="110.004"
+          filterUnits="userSpaceOnUse"
+          colorInterpolationFilters="sRGB"
+        >
+          <feFlood floodOpacity="0" result="BackgroundImageFix" />
+          <feColorMatrix
+            in="SourceAlpha"
+            type="matrix"
+            values="0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 127 0"
+            result="hardAlpha"
+          />
+          <feOffset dy="4" />
+          <feGaussianBlur stdDeviation="2" />
+          <feComposite in2="hardAlpha" operator="out" />
+          <feColorMatrix
+            type="matrix"
+            values="0 0 0 0 1 0 0 0 0 1 0 0 0 0 1 0 0 0 0.25 0"
+          />
+          <feBlend
+            mode="normal"
+            in2="BackgroundImageFix"
+            result="effect1_dropShadow_4325_16976"
+          />
+          <feBlend
+            mode="normal"
+            in="SourceGraphic"
+            in2="effect1_dropShadow_4325_16976"
+            result="shape"
+          />
+        </filter>
+        <filter
+          id="filter3_d_4325_16976"
+          x="113.767"
+          y="61.2064"
+          width="151.467"
+          height="242.994"
+          filterUnits="userSpaceOnUse"
+          colorInterpolationFilters="sRGB"
+        >
+          <feFlood floodOpacity="0" result="BackgroundImageFix" />
+          <feColorMatrix
+            in="SourceAlpha"
+            type="matrix"
+            values="0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 127 0"
+            result="hardAlpha"
+          />
+          <feOffset dx="2" dy="4" />
+          <feGaussianBlur stdDeviation="3.7" />
+          <feComposite in2="hardAlpha" operator="out" />
+          <feColorMatrix
+            type="matrix"
+            values="0 0 0 0 1 0 0 0 0 1 0 0 0 0 1 0 0 0 1 0"
+          />
+          <feBlend
+            mode="normal"
+            in2="BackgroundImageFix"
+            result="effect1_dropShadow_4325_16976"
+          />
+          <feBlend
+            mode="normal"
+            in="SourceGraphic"
+            in2="effect1_dropShadow_4325_16976"
+            result="shape"
+          />
+        </filter>
+      </defs>
+    </svg>
+  );
 
   // --- Escape to close + lock page scroll while open ---
   useEffect(() => {
@@ -318,10 +319,13 @@ export default function LoginModal({ isOpen, onClose }: LoginModalProps) {
               backgroundImage: "url('/images/loginModal.png')",
               filter: "blur(32px)",
               transform: "scale(1.15)",
-             }} // initial blur
+            }} // initial blur
             variants={{
               initial: { opacity: 0, backdropFilter: "blur(0px)" },
-              animate: { opacity: 1, backdropFilter: "blur(8px)" },
+              animate: {
+                opacity: OVERLAY_ACTIVE_OPACITY,
+                backdropFilter: "blur(8px)",
+              },
             }}
             initial="initial"
             animate="animate"
@@ -335,7 +339,7 @@ export default function LoginModal({ isOpen, onClose }: LoginModalProps) {
             ref={panelRef}
             role="dialog"
             aria-modal="true"
-            className={`relative flex items-center justify-center w-[80%] h-[83%] max-w-[1440px] rounded-lg overflow-hidden ${
+            className={`relative flex items-center justify-center w-[85%] md:w-[80%] h-[83%] max-w-[1200px] xl:max-w-[75vw]  rounded-lg overflow-hidden ${
               isShrinking
                 ? "bg-transparent shadow-none"
                 : "bg-darkblue-50 shadow-xl"
@@ -379,29 +383,30 @@ export default function LoginModal({ isOpen, onClose }: LoginModalProps) {
                 opacity: isShrinking ? 0 : 1, // hide when the ghost takes over
               }}
             >
-              {/* Left trapezoidal black section */}
-              <motion.div
-                className="w-1/2 h-full"
-                style={{
-                clipPath: "polygon(0% 0%, 100% 0%, 60% 100%, 0% 100%)",
-                backgroundImage: "url('/images/blueBackground.png')",
-                backgroundSize: "cover",
-                }}
-                variants={leftVariants}
-                transition={{ duration: 6.0, delay: 0.02, ease: "easeOut" }}
-              />
+              {/* Left trapezoidal black section + logo */}
+              <div className="relative w-1/2 h-full">
+                <motion.div
+                  className="absolute inset-0"
+                  style={{
+                    clipPath: "polygon(0% 0%, 100% 0%, 60% 100%, 0% 100%)",
+                    backgroundImage: "url('/images/blueBackground.png')",
+                    backgroundSize: "cover",
+                  }}
+                  variants={leftVariants}
+                  transition={{ duration: 6.0, delay: 0.02, ease: "easeOut" }}
+                />
 
-              {/* DNA Logo design overlay (final touch after ~1.0s) */}
-              <motion.div
-                id="letter-design-overlay"
-                className="absolute top-1/2 -translate-y-1/2 left-[20%] min-[520px]:left-1/4 w-[27%] aspect-[4/3] flex items-center justify-center"
-                initial={{ opacity: 0, scale: 0.96 }}
-                animate={{ opacity: 1, scale: 1 }}
-                // Deliberately late: adjust delay to 1.0–1.6s to taste
-                transition={{ duration: 1.0, delay: 1.0, ease: "easeOut" }}
-              >
-                <DnaLogo className="w-full h-full" />
-              </motion.div>
+                {/* DNA Logo design overlay (final touch after ~1.0s) */}
+                <motion.div
+                  id="letter-design-overlay"
+                  className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[60%] min-[441px]:w-[52%] sm:w-[50%] md:w-[48%] lg:w-[44%] xl:w-[42%] 2xl:w-[40%] "
+                  initial={{ opacity: 0, scale: 0.96 }}
+                  animate={{ opacity: 1, scale: 1 }}
+                  transition={{ duration: 1.0, delay: 1.0, ease: "easeOut" }}
+                >
+                  <DnaLogo className="w-full h-full" />
+                </motion.div>
+              </div>
 
               {/* Right section with Login Form (quick) */}
               <motion.div
@@ -439,22 +444,24 @@ export default function LoginModal({ isOpen, onClose }: LoginModalProps) {
                   transformOrigin: "center",
                   pointerEvents: "none",
                   width: "100%",
-                  height: "100%"
+                  height: "100%",
                 }}
               >
                 {/* Left trapezoid clone */}
-                <div
-                  className="absolute left-0 top-0 h-full w-1/2 bg-[#353535]"
-                  style={{
-                    clipPath: "polygon(0% 0%, 100% 0%, 60% 100%, 0% 100%)",
-                    backgroundImage: "url('/images/blueBackground.png')",
-                    backgroundSize: "cover",
-                  }}
-                />
+                <div className="absolute inset-y-0 left-0 h-full w-1/2">
+                  <div
+                    className="absolute inset-0 bg-[#353535]"
+                    style={{
+                      clipPath: "polygon(0% 0%, 100% 0%, 60% 100%, 0% 100%)",
+                      backgroundImage: "url('/images/blueBackground.png')",
+                      backgroundSize: "cover",
+                    }}
+                  />
 
-                {/* Letter overlay clone */}
-                <div className="absolute top-1/2 -translate-y-1/2 left-[20%] min-[520px]:left-1/4 w-[25%] aspect-[4/3] flex items-center justify-center">
-                  <DnaLogo className="w-full h-full" />
+                  {/* Letter overlay clone */}
+                  <div className="absolute top-1/2 left-1/2 -translate-x-1/2 md:-translate-x-[45%] lg:-translate-x-[42%] xl:-translate-x-[40%] 2xl:-translate-x-[38%] -translate-y-1/2 w-[60%] min-[520px]:w-[52%] sm:w-[48%] md:w-[44%] lg:w-[40%] xl:w-[36%] 2xl:w-[32%] max-w-[260px] aspect-[4/3] flex items-center justify-center">
+                    <DnaLogo className="w-full h-full" />
+                  </div>
                 </div>
 
                 {/* Right side (ghost) – give it its own positioning context */}
@@ -472,8 +479,17 @@ export default function LoginModal({ isOpen, onClose }: LoginModalProps) {
                   className="absolute bottom-4 left-6 flex flex-col items-center p-2 rounded text-white border border-transparent"
                   style={{ pointerEvents: "none" }}
                 >
-                  <svg width="20" height="23" viewBox="0 0 20 23" fill="none" xmlns="http://www.w3.org/2000/svg">
-                    <path d="M2.5 20H6.25V12.5H13.75V20H17.5V8.75L10 3.125L2.5 8.75V20ZM0 22.5V7.5L10 0L20 7.5V22.5H11.25V15H8.75V22.5H0Z" fill="white"/>
+                  <svg
+                    width="20"
+                    height="23"
+                    viewBox="0 0 20 23"
+                    fill="none"
+                    xmlns="http://www.w3.org/2000/svg"
+                  >
+                    <path
+                      d="M2.5 20H6.25V12.5H13.75V20H17.5V8.75L10 3.125L2.5 8.75V20ZM0 22.5V7.5L10 0L20 7.5V22.5H11.25V15H8.75V22.5H0Z"
+                      fill="white"
+                    />
                   </svg>
                   <span className="text-sm mt-2">Back Home</span>
                 </div>

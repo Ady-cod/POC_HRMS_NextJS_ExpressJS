@@ -26,7 +26,7 @@ export default function LoginModal({ isOpen, onClose }: LoginModalProps) {
 
   // --- EASING (typed tuples to keep TS happy) ---
   const EASE_OUT = [0.22, 1, 0.36, 1] as const;
-  const OVERLAY_ACTIVE_OPACITY = 0.70;
+  const OVERLAY_ACTIVE_OPACITY = 0.7;
 
   // --- OVERLAY: keep it simple; no blur; we leave it visible during shrink ---
   const overlayVariants: Variants = {
@@ -314,12 +314,16 @@ export default function LoginModal({ isOpen, onClose }: LoginModalProps) {
           {/* Overlay (click outside to close) */}
           <motion.button
             aria-label="Close overlay"
-            className="absolute inset-0 bg-cover bg-center bg-no-repeat"
+            className="absolute inset-0"
             style={{
-              backgroundImage: "url('/images/loginModal.png')",
+              backgroundImage:
+                "url('/images/loginModal.png'), linear-gradient(135deg, #1a1a2e 0%, #16213e 50%, #0f3460 100%)",
+              backgroundSize: "cover",
+              backgroundPosition: "center",
+              backgroundRepeat: "no-repeat",
               filter: "blur(32px)",
               transform: "scale(1.15)",
-            }} // initial blur
+            }} // image with gradient fallback
             variants={{
               initial: { opacity: 0, backdropFilter: "blur(0px)" },
               animate: {

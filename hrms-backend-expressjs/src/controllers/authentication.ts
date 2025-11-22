@@ -18,13 +18,16 @@ export const login = async (req: Request, res: Response): Promise<void> => {
       return;
     }
 
-    // Compare the password with the hashed password  
+    // Compare the password with the hashed password
     const isPasswordValid = await bcrypt.compare(password, employee.password);
     if (!isPasswordValid) {
-      console.error("Invalid password for employee with the email: ", employee.email);
+      console.error(
+        "Invalid password for employee with the email: ",
+        employee.email
+      );
       res.status(401).json({ message: "Invalid credentials" });
       return;
-      }
+    }
 
     // Generate JWT
     const token = generateToken({
@@ -34,26 +37,60 @@ export const login = async (req: Request, res: Response): Promise<void> => {
       email: employee.email,
     });
 
-    // Update the employee's lastLogin timestamp so clients can display it
-    // Capture the returned updated record from Prisma (no extra find required)
+    // Update the employee's lastLogin and maintain a rolling list `lastLogins` (max 30 entries)
+    // Capture the returned updated record from Prisma so we can return the history to clients
     let updatedLastLogin: Date | null = null;
+    let updatedLastLogins: Date[] = [];
     try {
-      console.debug("Attempting to update lastLogin for employee:", employee.id);
+      const now = new Date();
+      console.debug(
+        "Attempting to update lastLogins for employee:",
+        employee.id
+      );
+
+      // Read existing list from the initial `employee` read (may be undefined)
+      const existingList: Date[] = (employee as any).lastLogins ?? [];
+
+      // Append current login and keep only the last 30 (most recent)
+      const newList = [...existingList, now].slice(-30);
+
       const updated = await prisma.employee.update({
         where: { id: employee.id },
-        data: { lastLogin: new Date() },
+        data: {
+          lastLogin: now,
+          lastLogins: newList,
+        },
       });
+
       updatedLastLogin = updated?.lastLogin ?? null;
-      console.debug("lastLogin updated successfully for employee:", employee.id, "->", updatedLastLogin);
+      updatedLastLogins = updated?.lastLogins ?? [];
+      console.debug(
+        "lastLogins updated successfully for employee:",
+        employee.id,
+        "-> count:",
+        updatedLastLogins.length
+      );
     } catch (updateErr) {
-      // Log but don't fail login if we can't update lastLogin
-      console.error("Failed to update lastLogin for employee:", employee.id, updateErr);
+      // Log but don't fail login if we can't update lastLogin history
+      console.error(
+        "Failed to update lastLogins for employee:",
+        employee.id,
+        updateErr
+      );
     }
 
-    // Return token and lastLogin so frontend can show it immediately without an extra fetch
-    res.status(200).json({ token, lastLogin: updatedLastLogin });
+    // Return token and lastLogin/history so frontend can show it immediately without an extra fetch
+    res
+      .status(200)
+      .json({
+        token,
+        lastLogin: updatedLastLogin,
+        lastLogins: updatedLastLogins,
+      });
   } catch (error) {
     console.error("Error during login:", error);
-    res.status(500).json({ message: "An error occurred in the sever during the login" });
+    res
+      .status(500)
+      .json({ message: "An error occurred in the sever during the login" });
   }
 };

@@ -47,6 +47,8 @@ model Employee {
   updatedAt DateTime? @updatedAt // Records the last time the employee record was updated
   // lastLogin stores the timestamp of the employee's most recent successful sign-in
   lastLogin DateTime?
+  // Keep history of recent logins (most recent entries retained). Limited to 30 in application logic.
+  lastLogins DateTime[]
 
   @@index([departmentId]) // Adding an index on departmentId to make queries that filter by department faster
   @@map("employees")

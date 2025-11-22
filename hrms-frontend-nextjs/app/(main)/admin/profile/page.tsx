@@ -72,6 +72,8 @@ export default function Profile() {
   const [tempImage, setTempImage] = useState<string | null>(null);
   // store last login timestamp (ISO string) returned by the API (if any)
   const [lastLogin, setLastLogin] = useState<string | null>(null);
+  // keep last 10 login timestamps (from backend `lastLogins`)
+  const [lastLogins, setLastLogins] = useState<string[]>([]);
   const [showPasswordChange, setShowPasswordChange] = useState(false);
   const [employeeId, setEmployeeId] = useState("");
   // loading state removed (not used)
@@ -155,16 +157,19 @@ export default function Profile() {
 
         const current: EmployeeListItem = await res.json();
         /* eslint-disable @typescript-eslint/no-explicit-any */
-        // try a few common field names that APIs use for "last login"
+        // Prefer `lastLogins` array (new field). Fallback to legacy single-timestamp fields.
+        const rawLastLogins = (current as any).lastLogins || (current as any).last_logins || null;
         const rawLastLogin =
-          (current as any).lastLogin ||
-          (current as any).last_login ||
-          (current as any).lastLoginAt ||
-          (current as any).last_login_at ||
-          (current as any).lastLoginTime ||
-          null;
+          rawLastLogins?.length
+            ? rawLastLogins[rawLastLogins.length - 1]
+            : (current as any).lastLogin ||
+              (current as any).last_login ||
+              (current as any).lastLoginAt ||
+              (current as any).last_login_at ||
+              (current as any).lastLoginTime ||
+              null;
         /* eslint-enable @typescript-eslint/no-explicit-any */
-        console.debug("detected lastLogin:", rawLastLogin);
+        console.debug("detected lastLogins:", rawLastLogins, "detected lastLogin:", rawLastLogin);
 
         const employeeDetails = {
           name: current.fullName || "",
@@ -181,6 +186,10 @@ export default function Profile() {
         setOriginalData(employeeDetails);
         setEmployeeId(current.id || "");
         setLastLogin(rawLastLogin);
+        if (rawLastLogins && Array.isArray(rawLastLogins)) {
+          // normalize to string representation
+          setLastLogins(rawLastLogins.map((d: unknown) => String(d)));
+        }
       } catch (err) {
         showToast("error", "Failed to load profile", [
           "Unable to fetch employee information.",
@@ -445,18 +454,31 @@ export default function Profile() {
     setVisible((prev) => ({ ...prev, [field]: !prev[field] }));
 
   const renderLastLogin = () => {
-    if (!lastLogin) {
-      return "Last login: Not available";
+    // Requirement: show the 2nd-latest login timestamp (previous login), not the most recent.
+    // Priority: use `lastLogins` array (where backend keeps history). If at least 2 entries,
+    // pick the second-last entry. If only one entry exists, show that. Otherwise fallback
+    // to legacy `lastLogin` value.
+    let ts: string | null = null;
+
+    if (lastLogins && lastLogins.length >= 2) {
+      // lastLogins stored oldest->newest; second-latest is at length-2
+      ts = lastLogins[lastLogins.length - 2];
+    } else if (lastLogins && lastLogins.length === 1) {
+      ts = lastLogins[0];
+    } else if (lastLogin) {
+      ts = lastLogin;
     }
+
+    if (!ts) return "Last login: Not available";
 
     try {
       const localTz = moment.tz.guess();
-      const m = moment(lastLogin).tz(localTz);
+      const m = moment(ts).tz(localTz);
       const formatted = m.format("Do MMM, YYYY. h:mm A");
       const tzAbbr = m.format("z") || String(localTz).split("/").pop();
       return `Last login: ${formatted} (${tzAbbr})`;
     } catch {
-      return `Last login: ${String(lastLogin)}`;
+      return `Last login: ${String(ts)}`;
     }
   };
 

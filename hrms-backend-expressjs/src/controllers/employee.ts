@@ -217,10 +217,10 @@ export const updateEmployee = async (
     // console.log("Employee ID:", id);
     // console.log("Request body received:", req.body);
 
-    if (!ObjectId.isValid(id)) {
+    if (!id || typeof id !== "string") {
       res.status(400).json({
         error:
-          "The update cannot be performed without a valid employee ID. \nContact support.",
+          "The update cannot be performed without a valid employee ID. Contact support.",
       });
       return;
     }
@@ -258,9 +258,9 @@ export const updateEmployee = async (
         if (DEMO_MODE) {
           // Create department in demo mode
           department = await prisma.department.create({
-            data: { 
-                    name: `Demo Department (${departmentId.slice(0, 6)})`,
-                    description: "Auto-generated department (DEMO_MODE)" 
+            data: {
+              name: `Demo Department (${departmentId.slice(0, 6)})`,
+              description: "Auto-generated department (DEMO_MODE)",
             },
           });
         } else {
@@ -271,24 +271,24 @@ export const updateEmployee = async (
       }
     }
 
-    // If email is being changed, require currentPassword in the raw request body
-    // and verify it against the stored hashed password. This prevents changing
-    // the email with any arbitrary password from the client side.
     const rawBody = req.body as Record<string, unknown>;
-    if (validatedData.email) {
+    const needsVerification = !!validatedData.email || !!validatedData.password;
+    let existingEmployee: Employee | null = null;
+    if (needsVerification) {
+      // currentPassword must be provided when changing email or password
       const currentPasswordFromBody =
         typeof rawBody.currentPassword === "string"
           ? rawBody.currentPassword
           : null;
       if (!currentPasswordFromBody) {
-        res
-          .status(400)
-          .json({ error: "Current password is required to change email." });
+        res.status(400).json({
+          error: "Current password is required to change email or password.",
+        });
         return;
       }
 
       // Fetch existing employee to validate password
-      const existingEmployee = await prisma.employee.findUnique({
+      existingEmployee = await prisma.employee.findUnique({
         where: { id },
       });
       if (!existingEmployee) {
@@ -304,6 +304,21 @@ export const updateEmployee = async (
       if (!passwordMatches) {
         res.status(401).json({ error: "Invalid current password provided." });
         return;
+      }
+
+      // Prevent changing to the same password
+      if (validatedData.password) {
+        // Note: When validatedData.password exists, it's the new password
+        const sameAsCurrent = await verifyPassword(
+          validatedData.password,
+          existingEmployee.password as string
+        );
+        if (sameAsCurrent) {
+          res
+            .status(400)
+            .json({ error: "New password must differ from current password." });
+          return;
+        }
       }
     }
 
@@ -348,6 +363,16 @@ export const updateEmployee = async (
           error: "A database error occurred. Please try again later.",
         });
       }
+    } else if (error instanceof Error) {
+      // Generic JS Error fallback
+      console.error("Error updating employee:", error.message);
+      res.status(500).json({ error: error.message });
+    } else {
+      // Unknown non-Error throwables
+      console.error("Unknown error while updating employee:", error);
+      res.status(500).json({
+        error: "An unknown error occurred. Please try again later.",
+      });
     }
   }
 };

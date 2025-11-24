@@ -29,7 +29,6 @@ import { Upload, Trash2, User, Briefcase, Shield, Plus } from "lucide-react";
 // helper to format time zones
 const formatTimeZone = (tz: string) =>
   tz ? `(UTC${moment.tz(tz).format("Z")}) ${tz}` : "Not set";
-
 type FormData = {
   name: string;
   email: string;
@@ -158,18 +157,23 @@ export default function Profile() {
         const current: EmployeeListItem = await res.json();
         /* eslint-disable @typescript-eslint/no-explicit-any */
         // Prefer `lastLogins` array (new field). Fallback to legacy single-timestamp fields.
-        const rawLastLogins = (current as any).lastLogins || (current as any).last_logins || null;
-        const rawLastLogin =
-          rawLastLogins?.length
-            ? rawLastLogins[rawLastLogins.length - 1]
-            : (current as any).lastLogin ||
-              (current as any).last_login ||
-              (current as any).lastLoginAt ||
-              (current as any).last_login_at ||
-              (current as any).lastLoginTime ||
-              null;
+        const rawLastLogins =
+          (current as any).lastLogins || (current as any).last_logins || null;
+        const rawLastLogin = rawLastLogins?.length
+          ? rawLastLogins[rawLastLogins.length - 1]
+          : (current as any).lastLogin ||
+            (current as any).last_login ||
+            (current as any).lastLoginAt ||
+            (current as any).last_login_at ||
+            (current as any).lastLoginTime ||
+            null;
         /* eslint-enable @typescript-eslint/no-explicit-any */
-        console.debug("detected lastLogins:", rawLastLogins, "detected lastLogin:", rawLastLogin);
+        console.debug(
+          "detected lastLogins:",
+          rawLastLogins,
+          "detected lastLogin:",
+          rawLastLogin
+        );
 
         const employeeDetails = {
           name: current.fullName || "",
@@ -386,21 +390,69 @@ export default function Profile() {
           const resObj = result as ServerErrorLike;
           if (resObj.zodError) {
             try {
-              // If backend returned a zod-like error payload, show its message.
+              type SerializedZodIssue = {
+                path?: Array<string | number> | string;
+                message?: string;
+              };
+              const z = resObj.zodError as unknown as {
+                issues?: SerializedZodIssue[];
+              };
+              if (z.issues && Array.isArray(z.issues)) {
+                const formattedFromServer: Record<string, string> = {};
+                z.issues.forEach((issue) => {
+                  try {
+                    const field = Array.isArray(issue.path)
+                      ? issue.path.join(".")
+                      : String(issue.path || serverKey);
+                    formattedFromServer[field] = issue.message || String(issue);
+                  } catch {
+                    // ignore per-issue formatting errors
+                  }
+                });
+
+                setErrors((prev) => ({
+                  ...(prev || {}),
+                  ...formattedFromServer,
+                }));
+                // show toast with the collection of messages
+                const msgs = (z.issues || [])
+                  .map((i) => (i && i.message ? String(i.message) : ""))
+                  .filter(Boolean) as string[];
+                if (msgs.length) {
+                  showToast("error", "Validation Error(s):", msgs);
+                  return; // already handled as Zod validation errors, avoid generic failure toast
+                }
+              } else {
+                // Fallback: set a generic field error using message from server
+                setErrors(
+                  (prev) => prev || { [serverKey]: String(resObj.message) }
+                );
+                // Show server message if available, then stop further generic handling
+                if (resObj.message) {
+                  showToast("error", "Validation Error", [
+                    String(resObj.message),
+                  ]);
+                }
+                return;
+              }
+            } catch {
+              // ignore formatting errors and fallback to generic message
               setErrors(
                 (prev) => prev || { [serverKey]: String(resObj.message) }
               );
-            } catch {
-              // ignore formatting errors
+              if (resObj.message) {
+                showToast("error", "Validation Error", [
+                  String(resObj.message),
+                ]);
+              }
+              return;
             }
           }
         }
-
         const message =
           result && typeof result === "object"
             ? (result as ServerErrorLike).message
             : undefined;
-
         showToast("error", "Update failed", [message || "Unknown error"]);
         return;
       }
@@ -487,6 +539,11 @@ export default function Profile() {
 
     if (newPass !== confirm)
       return showToast("error", "Mismatch", ["New passwords do not match"]);
+    if (!current || current.trim().length === 0)
+      return showToast("error", "Current Password Required", [
+        "Please enter your current password to confirm the change",
+      ]);
+
     if (current === newPass)
       return showToast("error", "Invalid Password", [
         "New password must differ from current password",
@@ -507,7 +564,30 @@ export default function Profile() {
         throw e;
       }
 
-      await updateEmployee(employeeId, { password: newPass });
+      // include currentPassword for server-side verification
+      const result = await updateEmployee(employeeId, {
+        password: newPass,
+        currentPassword: current,
+      });
+
+      if (!result || !result.success) {
+        // Server returned an error; show its message if available
+        const message =
+          result && typeof result === "object" ? result.message : undefined;
+        showToast("error", "Password update failed", [
+          message || "Unknown error",
+        ]);
+        // If backend returned zod validation errors, surface them
+        if (result && (result as unknown as { zodError?: unknown }).zodError) {
+          // set a generic password error to show below the input
+          setErrors((prev) => ({
+            ...(prev || {}),
+            password: String(message || "Invalid password"),
+          }));
+        }
+        return;
+      }
+
       showToast("success", "Password Updated", [
         "Your password has been updated",
       ]);
@@ -726,7 +806,7 @@ export default function Profile() {
             title="Confirm Name Change"
             description={
               <span>
-                Are you sure you want to change your name to {" "}
+                Are you sure you want to change your name to{" "}
                 {<strong className="font-semibold">{formData.name}</strong>}?
                 This will update your profile display name.
               </span>

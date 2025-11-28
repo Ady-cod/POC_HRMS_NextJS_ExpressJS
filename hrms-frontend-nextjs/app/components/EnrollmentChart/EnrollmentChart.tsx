@@ -206,6 +206,63 @@ export default function EnrollmentChart({
     }
   }, [selectedDept, selectedYear, processedEmployees, uniqueDepartments]);
 
+  // Calculate dynamic width and XAxis height based on department name lengths
+  const { chartWidth, xAxisHeight } = useMemo(() => {
+    if (chartData.length === 0) {
+      return {
+        chartWidth: 600,
+        xAxisHeight: 90,
+      };
+    }
+
+    if (selectedDept !== "all") {
+      // Monthly view - use fixed calculation
+      return {
+        chartWidth: Math.max(600, chartData.length * 60),
+        xAxisHeight: 90, // Default height for monthly view
+      };
+    }
+
+    // Department-wise view - calculate based on department name lengths
+    // Find the longest department name in the chart data
+    const maxNameLength = Math.max(
+      ...chartData.map((item) => {
+        if ("department" in item) {
+          return (item.department || "").length;
+        }
+        return 0;
+      }),
+      0
+    );
+
+    // X-axis width: Simple calculation without multiplier
+    // Use MIN_BAR_PX per bar (was working fine before)
+    const chartWidth = Math.max(chartData.length * MIN_BAR_PX, 600);
+
+    // Y-axis height: Calculate based on -35 degree rotation
+    // For rotated text at -35 degrees:
+    // - Average character width ≈ 7px
+    // - sin(35°) ≈ 0.574
+    // - Vertical space needed = (textWidth * sin(35°)) + padding
+    // - Simplified: height ≈ maxNameLength * 7 * 0.574 + basePadding
+    // - Final: height ≈ maxNameLength * 4 + 30
+    const basePadding = 30;
+    const charWidth = 7; // Average character width in pixels
+    const rotationAngle = 35; // degrees
+    const sin35 = Math.sin((rotationAngle * Math.PI) / 180); // ≈ 0.574
+    const calculatedHeight = maxNameLength * charWidth * sin35 + basePadding;
+    const maxXAxisHeight = 140; // Prevent excessive spacing for very long labels
+    const xAxisHeight = Math.min(
+      Math.max(calculatedHeight, 90),
+      maxXAxisHeight
+    );
+
+    return {
+      chartWidth,
+      xAxisHeight,
+    };
+  }, [chartData, selectedDept]);
+
   return (
     <div className="rounded-2xl shadow-sm px-8 pt-8 justify-center bg-darkblue-50 border border-black-50 min-h-full flex flex-col">
       <div className="flex justify-between items-start mb-4 text-darkblue-700">
@@ -279,10 +336,7 @@ export default function EnrollmentChart({
               <div
                 className="min-w-full h-full"
                 style={{
-                  width:
-                    selectedDept !== "all"
-                      ? Math.max(600, chartData.length * 60) + "px"
-                      : Math.max(chartData.length * MIN_BAR_PX, 600) + "px",
+                  width: chartWidth + "px",
                 }}
               >
                 {chartData.length === 0 ? (
@@ -325,7 +379,7 @@ export default function EnrollmentChart({
                         interval={0}
                         angle={selectedDept === "all" ? -35 : -45}
                         textAnchor="end"
-                        height={90}
+                        height={xAxisHeight}
                         tick={{ fill: "#0b385b" }}
                       />
                       <YAxis

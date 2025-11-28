@@ -31,6 +31,8 @@
     "libphonenumber-js": "^1.11.14",
     "lodash": "^4.17.21",
     "lucide-react": "^0.471.1",
+    "html2canvas": "^1.4.1",
+    "jspdf": "^2.5.1",
     "moment-timezone": "^0.6.0",
     "next": "14.2.15",
     "normalize.css": "^8.0.1",

@@ -29,6 +29,7 @@ import { Upload, Trash2, User, Briefcase, Shield, Plus } from "lucide-react";
 // helper to format time zones
 const formatTimeZone = (tz: string) =>
   tz ? `(UTC${moment.tz(tz).format("Z")}) ${tz}` : "Not set";
+
 type FormData = {
   name: string;
   email: string;
@@ -69,10 +70,7 @@ export default function Profile() {
   const [profileImage, setProfileImage] = useState<string | null>(null);
   const [showCropper, setShowCropper] = useState(false);
   const [tempImage, setTempImage] = useState<string | null>(null);
-  // store last login timestamp (ISO string) returned by the API (if any)
-  const [lastLogin, setLastLogin] = useState<string | null>(null);
-  // keep last 10 login timestamps (from backend `lastLogins`)
-  const [lastLogins, setLastLogins] = useState<string[]>([]);
+
   const [showPasswordChange, setShowPasswordChange] = useState(false);
   const [employeeId, setEmployeeId] = useState("");
   // loading state removed (not used)
@@ -189,11 +187,7 @@ export default function Profile() {
         setFormData(employeeDetails);
         setOriginalData(employeeDetails);
         setEmployeeId(current.id || "");
-        setLastLogin(rawLastLogin);
-        if (rawLastLogins && Array.isArray(rawLastLogins)) {
-          // normalize to string representation
-          setLastLogins(rawLastLogins.map((d: unknown) => String(d)));
-        }
+        // Note: last-login timestamps are now handled on the admin page component.
       } catch (err) {
         showToast("error", "Failed to load profile", [
           "Unable to fetch employee information.",
@@ -390,69 +384,21 @@ export default function Profile() {
           const resObj = result as ServerErrorLike;
           if (resObj.zodError) {
             try {
-              type SerializedZodIssue = {
-                path?: Array<string | number> | string;
-                message?: string;
-              };
-              const z = resObj.zodError as unknown as {
-                issues?: SerializedZodIssue[];
-              };
-              if (z.issues && Array.isArray(z.issues)) {
-                const formattedFromServer: Record<string, string> = {};
-                z.issues.forEach((issue) => {
-                  try {
-                    const field = Array.isArray(issue.path)
-                      ? issue.path.join(".")
-                      : String(issue.path || serverKey);
-                    formattedFromServer[field] = issue.message || String(issue);
-                  } catch {
-                    // ignore per-issue formatting errors
-                  }
-                });
-
-                setErrors((prev) => ({
-                  ...(prev || {}),
-                  ...formattedFromServer,
-                }));
-                // show toast with the collection of messages
-                const msgs = (z.issues || [])
-                  .map((i) => (i && i.message ? String(i.message) : ""))
-                  .filter(Boolean) as string[];
-                if (msgs.length) {
-                  showToast("error", "Validation Error(s):", msgs);
-                  return; // already handled as Zod validation errors, avoid generic failure toast
-                }
-              } else {
-                // Fallback: set a generic field error using message from server
-                setErrors(
-                  (prev) => prev || { [serverKey]: String(resObj.message) }
-                );
-                // Show server message if available, then stop further generic handling
-                if (resObj.message) {
-                  showToast("error", "Validation Error", [
-                    String(resObj.message),
-                  ]);
-                }
-                return;
-              }
-            } catch {
-              // ignore formatting errors and fallback to generic message
+              // If backend returned a zod-like error payload, show its message.
               setErrors(
                 (prev) => prev || { [serverKey]: String(resObj.message) }
               );
-              if (resObj.message) {
-                showToast("error", "Validation Error", [
-                  String(resObj.message),
-                ]);
-              }
-              return;
+            } catch {
+              // ignore formatting errors
             }
           }
         }
+
         const message =
           result && typeof result === "object"
             ? (result as ServerErrorLike).message
             : undefined;
+
         showToast("error", "Update failed", [message || "Unknown error"]);
         return;
       }
@@ -505,45 +451,11 @@ export default function Profile() {
   const toggleVisibility = (field: string) =>
     setVisible((prev) => ({ ...prev, [field]: !prev[field] }));
 
-  const renderLastLogin = () => {
-    // Requirement: show the 2nd-latest login timestamp (previous login), not the most recent.
-    // Priority: use `lastLogins` array (where backend keeps history). If at least 2 entries,
-    // pick the second-last entry. If only one entry exists, show that. Otherwise fallback
-    // to legacy `lastLogin` value.
-    let ts: string | null = null;
-
-    if (lastLogins && lastLogins.length >= 2) {
-      // lastLogins stored oldest->newest; second-latest is at length-2
-      ts = lastLogins[lastLogins.length - 2];
-    } else if (lastLogins && lastLogins.length === 1) {
-      ts = lastLogins[0];
-    } else if (lastLogin) {
-      ts = lastLogin;
-    }
-
-    if (!ts) return "Last login: Not available";
-
-    try {
-      const localTz = moment.tz.guess();
-      const m = moment(ts).tz(localTz);
-      const formatted = m.format("Do MMM, YYYY. h:mm A");
-      const tzAbbr = m.format("z") || String(localTz).split("/").pop();
-      return `Last login: ${formatted} (${tzAbbr})`;
-    } catch {
-      return `Last login: ${String(ts)}`;
-    }
-  };
-
   const handlePasswordUpdate = async () => {
     const { current, new: newPass, confirm } = passwordData;
 
     if (newPass !== confirm)
       return showToast("error", "Mismatch", ["New passwords do not match"]);
-    if (!current || current.trim().length === 0)
-      return showToast("error", "Current Password Required", [
-        "Please enter your current password to confirm the change",
-      ]);
-
     if (current === newPass)
       return showToast("error", "Invalid Password", [
         "New password must differ from current password",
@@ -564,30 +476,7 @@ export default function Profile() {
         throw e;
       }
 
-      // include currentPassword for server-side verification
-      const result = await updateEmployee(employeeId, {
-        password: newPass,
-        currentPassword: current,
-      });
-
-      if (!result || !result.success) {
-        // Server returned an error; show its message if available
-        const message =
-          result && typeof result === "object" ? result.message : undefined;
-        showToast("error", "Password update failed", [
-          message || "Unknown error",
-        ]);
-        // If backend returned zod validation errors, surface them
-        if (result && (result as unknown as { zodError?: unknown }).zodError) {
-          // set a generic password error to show below the input
-          setErrors((prev) => ({
-            ...(prev || {}),
-            password: String(message || "Invalid password"),
-          }));
-        }
-        return;
-      }
-
+      await updateEmployee(employeeId, { password: newPass });
       showToast("success", "Password Updated", [
         "Your password has been updated",
       ]);
@@ -901,14 +790,7 @@ export default function Profile() {
               </h2>
               <p className="text-sm text-lightblue-400">{formData.email}</p>
             </div>
-            {/* Last login (localized) */}
-            <div className="text-sm text-lightblue-500 text-center md:text-right md:ml-auto md:self-end pr-7">
-              <div className="inline-flex flex-col items-center md:items-end gap-1">
-                <span className="inline-flex items-center justify-center gap-1 rounded-full border-2 border-orange-300 bg-lightblue-50 px-4 py-1 font-semibold text-lightblue-700 shadow-sm">
-                  {renderLastLogin()}
-                </span>
-              </div>
-            </div>
+            {/* Last login removed from profile - now displayed on admin home */}
           </div>
         </div>
 

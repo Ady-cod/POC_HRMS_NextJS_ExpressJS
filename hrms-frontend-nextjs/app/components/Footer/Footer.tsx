@@ -21,7 +21,7 @@ const Footer = () => {
           <div className="text-lg font-semibold">
             Digital Nexus AI &copy; {year}
           </div>
-          <div className="text-sm text-darkblue-300">Founded 2023</div>
+          <div className="text-sm text-darkblue-300">Founded 2024</div>
         </div>
 
         <div className="flex flex-col items-center sm:items-center sm:flex-row gap-3">

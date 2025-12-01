@@ -10,6 +10,7 @@ import { getAllDepartments } from "@/actions/department";
 import { EmployeeListItem, DepartmentListItem } from "@/types/types";
 import ErrorToast from "@/components/ErrorToast/ErrorToast";
 import { getOptionalAuth, getUserDisplayName } from "@/utils/auth";
+import LastLogin from "@/components/LastLogin/LastLogin";
 import { headers, cookies } from "next/headers";
 
 const getTimeBasedGreeting = (h: number) =>
@@ -121,13 +122,16 @@ const AdminHomePage = async () => {
             </div>
           )}
         </div>
-        <ConnectionStatusSection
-          slackUrl={slackUrl}
-          trelloUrl={trelloUrl}
-          className="text-[20px]"
-          userId={currentUser?.email || currentUser?.employeeId || null}
-          scope="admin"
-        />
+        <div className="flex flex-col items-end gap-2">
+          <ConnectionStatusSection
+            slackUrl={slackUrl}
+            trelloUrl={trelloUrl}
+            className="text-[20px]"
+            userId={currentUser?.email || currentUser?.employeeId || null}
+            scope="admin"
+          />
+          <LastLogin />
+        </div>
       </div>
 
       {/* Centralized error message for employee data */}
@@ -148,7 +152,7 @@ const AdminHomePage = async () => {
         </div>
       )}
 
-      <div className="grid grid-cols-1 lg:grid-cols-4 gap-4 min-h-[480px] mb-8">
+      <div className="grid grid-cols-1 lg:grid-cols-4 gap-4 min-h-[480px]">
         <div className="lg:col-span-1 min-h-full">
           <ScheduleCard />
         </div>

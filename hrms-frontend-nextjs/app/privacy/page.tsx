@@ -11,21 +11,21 @@ export const metadata = {
 
 export default function PrivacyPage() {
   return (
-    <main className="min-h-screen bg-darkblue-50 py-16">
+    <main className="min-h-screen bg-darkblue-50 py-12 sm:py-16">
       <div
         id="privacy-content"
-        className="max-w-4xl mx-auto bg-white rounded-lg shadow-md p-8 text-darkblue-900"
+        className="w-full max-w-4xl mx-auto bg-white rounded-lg shadow-md p-4 sm:p-8 text-darkblue-900"
       >
-        <header className="mb-6">
-          <h1 className="text-2xl font-bold text-darkblue-900">
+        <header className="mb-6 px-0 sm:px-0">
+          <h1 className="text-xl sm:text-2xl md:text-3xl font-bold text-darkblue-900">
             Privacy Policy
           </h1>
-          <p className="text-sm text-darkblue-300 mt-1">
+          <p className="text-xs sm:text-sm text-darkblue-300 mt-1">
             Last updated: May 28, 2024
           </p>
         </header>
 
-        <section className="space-y-4 text-sm text-darkblue-700">
+        <section className="space-y-4 text-sm sm:text-base text-darkblue-700">
           <p>
             This Privacy Policy describes Our policies and procedures on the
             collection, use and disclosure of Your information when You use the
@@ -276,7 +276,7 @@ export default function PrivacyPage() {
           {/* ------------------------ */}
 
           <h2 className="font-semibold text-lg mt-6">
-            Children &apos; s Privacy
+            Children&apos;s Privacy
           </h2>
           <p>
             We do not knowingly collect information from anyone under the age of
@@ -336,15 +336,10 @@ export default function PrivacyPage() {
           </ul>
         </section>
 
-        <footer className="mt-8 flex items-center justify-between">
-          <div>
-            <BackButton />
-          </div>
+        <footer className="mt-10 flex flex-row items-center justify-between gap-4">
+          <BackButton />
 
-          {/* PrintButton is a client component that triggers PDF generation */}
-          <div>
-            <PrintButton />
-          </div>
+          <PrintButton />
         </footer>
       </div>
     </main>

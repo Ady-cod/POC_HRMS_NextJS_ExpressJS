@@ -16,42 +16,56 @@ const Footer = () => {
 
   return (
     <footer className="border-t bg-darkblue-50">
-      <div className="max-w-7xl mx-auto py-8 flex flex-col gap-6 sm:flex-row sm:items-center sm:justify-between">
-        <div className="flex flex-col items-center sm:items-start text-darkblue-600">
-          <div className="text-lg font-semibold">
-            Digital Nexus AI &copy; {year}
+      <div
+        className="
+          max-w-7xl mx-auto py-10 px-4
+          grid grid-cols-1 md:grid-cols-3
+          gap-8
+          items-center
+          text-darkblue-700
+        "
+      >
+        {/* LEFT — Copy Info */}
+        <div className="text-center md:text-left">
+          <div className="text-lg font-semibold text-darkblue-600">
+            Digital Nexus AI © {year}
           </div>
           <div className="text-sm text-darkblue-300">Founded 2024</div>
         </div>
 
-        <div className="flex flex-col items-center sm:items-center sm:flex-row gap-3">
-          <Link
-            href={`/privacy?from=${encodeURIComponent(currentPath)}`}
-            // target="_blank"
-            // rel="noopener noreferrer"
-            className="text-sm font-medium text-darkblue-700 hover:text-darkblue-900"
-          >
-            Privacy Policy
-          </Link>
-          <div className="font-medium text-sm text-darkblue-300">|</div>
-          <button
-            onClick={() => setShowTerms(true)}
-            className="text-sm font-medium text-darkblue-700 hover:text-darkblue-900"
-            aria-haspopup="dialog"
-          >
-            Terms &amp; Conditions
-          </button>
+        {/* CENTER — Links */}
+        <div className="flex justify-center">
+          <div className="flex flex-col md:flex-row items-center gap-2 md:gap-4">
+            <Link
+              href={`/privacy?from=${encodeURIComponent(currentPath)}`}
+              className="text-sm font-medium hover:text-darkblue-900 transition"
+            >
+              Privacy Policy
+            </Link>
+
+            {/* Desktop Separator */}
+            <span className="hidden md:inline text-darkblue-300">|</span>
+
+            <button
+              onClick={() => setShowTerms(true)}
+              aria-haspopup="dialog"
+              className="text-sm font-medium hover:text-darkblue-900 transition"
+            >
+              Terms &amp; Conditions
+            </button>
+          </div>
         </div>
 
-        <div className="flex items-center space-x-4">
+        {/* RIGHT — Social Icons */}
+        <div className="flex justify-center md:justify-end items-center space-x-5">
           <a
             href="https://www.facebook.com/share/1BUHBCLGEp/"
             target="_blank"
             rel="noopener noreferrer"
             aria-label="Digital Nexus AI on Facebook"
-            className="text-darkblue-600 hover:text-blue-600"
+            className="text-darkblue-600 hover:text-blue-600 transition"
           >
-            <Facebook size={20} />
+            <Facebook size={22} />
           </a>
 
           <a
@@ -59,9 +73,9 @@ const Footer = () => {
             target="_blank"
             rel="noopener noreferrer"
             aria-label="Digital Nexus AI on LinkedIn"
-            className="text-darkblue-600 hover:text-blue-700"
+            className="text-darkblue-600 hover:text-blue-700 transition"
           >
-            <Linkedin size={20} />
+            <Linkedin size={22} />
           </a>
 
           <a
@@ -69,9 +83,9 @@ const Footer = () => {
             target="_blank"
             rel="noopener noreferrer"
             aria-label="Digital Nexus AI on YouTube"
-            className="text-darkblue-600 hover:text-red-600"
+            className="text-darkblue-600 hover:text-red-600 transition"
           >
-            <Youtube size={20} />
+            <Youtube size={22} />
           </a>
         </div>
       </div>

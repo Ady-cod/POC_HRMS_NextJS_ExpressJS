@@ -44,7 +44,7 @@ const TermsModal: React.FC<Props> = ({ onClose }) => {
     <motion.div
       role="dialog"
       aria-modal="true"
-      className="fixed inset-0 z-50 flex items-center justify-center p-4"
+      className="fixed inset-0 z-50 flex items-center justify-center p-2 sm:p-4"
       initial={{ opacity: 0 }}
       animate={{ opacity: isClosing ? 0 : 1 }}
       transition={{ duration: 0.18 }}
@@ -58,7 +58,7 @@ const TermsModal: React.FC<Props> = ({ onClose }) => {
       />
 
       <motion.div
-        className="relative w-full max-w-2xl max-h-[80vh] overflow-auto bg-darkblue-50 rounded-md shadow-lg"
+        className="relative w-full max-w-full sm:max-w-2xl max-h-[90vh] sm:max-h-[80vh] mx-2 sm:mx-0 overflow-auto bg-darkblue-50 rounded-md shadow-lg"
         initial={{ opacity: 0, y: 12, scale: 0.98 }}
         animate={
           isClosing
@@ -69,7 +69,7 @@ const TermsModal: React.FC<Props> = ({ onClose }) => {
         // onAnimationComplete may fire for multiple child animations;
         // we rely on the timeout-based close above to reliably unmount
       >
-        <div className="sticky top-0 z-20 bg-darkblue-50 border-b px-6 py-4">
+        <div className="sticky top-0 z-20 bg-darkblue-50 border-b px-4 sm:px-6 py-3 sm:py-4">
           <div className="flex items-center justify-between">
             <h2 className="text-lg font-semibold">Terms &amp; Conditions</h2>
             <button
@@ -84,7 +84,7 @@ const TermsModal: React.FC<Props> = ({ onClose }) => {
           </div>
         </div>
 
-        <div className="px-6 py-4 text-sm leading-relaxed space-y-4 text-darkblue-900">
+        <div className="px-4 sm:px-6 py-4 text-sm sm:text-base leading-relaxed space-y-4 text-darkblue-900">
           <p>
             <strong>Effective Date: 28 May 2024</strong>
           </p>

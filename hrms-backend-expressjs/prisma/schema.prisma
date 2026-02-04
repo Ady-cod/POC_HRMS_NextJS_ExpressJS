@@ -9,15 +9,17 @@ generator client {
 }
 
 datasource db {
-  provider = "mongodb"
-  url      = env("DATABASE_URL")
+  provider  = "postgresql"
+  url       = env("DATABASE_URL")
+  directUrl = env("DIRECT_URL")
 }
 
 model Employee {
-  id                  String              @id @default(auto()) @map("_id") @db.ObjectId // Using `@map("_id")` to map the id field to MongoDB's default `_id` field for ObjectId. This ensures compatibility with MongoDB conventions, which expect a unique `_id` field as the primary identifier.
+  id                  String              @id @default(uuid()) @db.Uuid
+  appId               String?
   fullName            String
   email               String              @unique
-  password            String               // Storing hashed passwords for security
+  password            String // Storing hashed passwords for security
   phoneNumber         String
   country             String
   countryCode         String?
@@ -26,9 +28,9 @@ model Employee {
   stateCode           String?
   streetAddress       String?
   birthDate           DateTime
-  dateOfJoining       DateTime            // Date when the employee joined the company
+  dateOfJoining       DateTime // Date when the employee joined the company
   gender              Gender // Enum representing the employee gender
-  inductionCompleted  Boolean?             @default(false) // Indicates whether the employee has completed the induction process
+  inductionCompleted  Boolean             @default(false) // Indicates whether the employee has completed the induction process
   profilePhotoUrl     String? // Optional URL for the employee's profile photo
   timezone            String? // IANA time zone identifier (e.g., "America/New_York"). Chosen for its global standard and flexibility in representing time across different regions.
   role                Role // Enum representing the employee role (e.g., "EMPLOYEE", "INTERN", "MANAGER")
@@ -37,14 +39,24 @@ model Employee {
   attendanceRecords   Attendance[] // Link to the Attendance model for tracking attendance
   attendanceSummaries AttendanceSummary[] // Link to the AttendanceSummary model for aggregated attendance data
 
-  departmentId String?     @db.ObjectId
+  departmentId String?     @db.Uuid
   department   Department? @relation(fields: [departmentId], references: [id], onDelete: SetNull) // Reference to the Department model will be set to null if the department is deleted
 
-  headOfDepartment    Department?  @relation("HeadOfDepartment")
-  employeeLearningPathProgress EmployeeLearningPathProgress? // One-to-one relationship with EmployeeLearningPathProgress
+  headOfDepartment             Department?                    @relation("HeadOfDepartment")
+  employeeLearningPathProgress EmployeeLearningPathProgress[] // One-to-many relationship with EmployeeLearningPathProgress
 
-  createdAt DateTime? @default(now()) // Records when the employee record was created
-  updatedAt DateTime? @updatedAt // Records the last time the employee record was updated
+  leaveBalance             LeaveBalance?
+  remarksReceived          EmployeeRemark[]       @relation("EmployeeRemarkTarget")
+  remarksAuthored          EmployeeRemark[]       @relation("EmployeeRemarkAuthor")
+  applicantInterviews      ApplicantInterviewer[]
+  applicantsCreated        Applicant[]            @relation("ApplicantCreatedBy")
+  applicantsEdited         Applicant[]            @relation("ApplicantEditedBy")
+  applicantsSourceAdded    Applicant[]            @relation("ApplicationSourceAddedBy")
+  applicantRemarksAuthored ApplicantRemark[]
+  applicantEditHistories   ApplicantEditHistory[] @relation("ApplicantEditHistoryAuthor")
+
+  createdAt DateTime  @default(now()) // Records when the employee record was created
+  updatedAt DateTime  @updatedAt // Records the last time the employee record was updated
   // lastLogin stores the timestamp of the employee's most recent successful sign-in
   lastLogin DateTime?
 
@@ -53,15 +65,16 @@ model Employee {
 }
 
 model Department {
-  id                 String  @id @default(auto()) @map("_id") @db.ObjectId
+  id                 String  @id @default(uuid()) @db.Uuid
   name               String  @unique // e.g., "HR", "Web Dev", etc.
   description        String?
   timezone           String? // IANA time zone identifier for the department (e.g., "America/New_York"). Chosen for its global standard and flexibility in representing time across different regions.
-  deptHeadEmployeeId String? @unique @db.ObjectId // Optional reference to an employee ID representing the head of the department                       // Reference to an employee ID for tracking the department head
+  deptHeadEmployeeId String? @unique @db.Uuid // Optional reference to an employee ID representing the head of the department
   icon               String?
 
-  head Employee? @relation("HeadOfDepartment", fields: [deptHeadEmployeeId], references: [id], onDelete: NoAction, onUpdate: NoAction)
-  employees Employee[]
+  head       Employee?   @relation("HeadOfDepartment", fields: [deptHeadEmployeeId], references: [id], onDelete: SetNull, onUpdate: NoAction)
+  employees  Employee[]
+  applicants Applicant[]
 
   createdAt DateTime @default(now()) // Records when the department was created
   updatedAt DateTime @updatedAt // Records the last time the department was updated
@@ -70,11 +83,12 @@ model Department {
 }
 
 model Project {
-  id          String    @id @default(auto()) @map("_id") @db.ObjectId
+  id          String        @id @default(uuid()) @db.Uuid
   name        String
   description String?
   startDate   DateTime?
   endDate     DateTime?
+  status      ProjectStatus @default(ACTIVE)
 
   employeeProjects EmployeeProject[] // This field will track all employees associated with the project
 
@@ -85,7 +99,7 @@ model Project {
 }
 
 model EmployeeProject {
-  id        String                @id @default(auto()) @map("_id") @db.ObjectId
+  id        String                @id @default(uuid()) @db.Uuid
   role      ProjectRole // Enum to specify the employee's role in the project (e.g., "DEVELOPER", "SCRUM_MASTER")
   status    EmployeeProjectStatus @default(ACTIVE) // Enum to track if the employee is "ACTIVE", "PAUSED", or "LEFT" the project
   startDate DateTime? // When the employee joined the project
@@ -94,10 +108,10 @@ model EmployeeProject {
 
   pauseIntervals PauseInterval[] // Array of pause intervals, each with a start and end date
 
-  employeeId String   @db.ObjectId
+  employeeId String   @db.Uuid
   employee   Employee @relation(fields: [employeeId], references: [id], onDelete: Cascade) // Cascade delete if the employee is deleted
 
-  projectId String  @db.ObjectId
+  projectId String  @db.Uuid
   project   Project @relation(fields: [projectId], references: [id], onDelete: Cascade) // Cascade delete if the project is deleted
 
   createdAt DateTime @default(now()) // Records when the employee-project assignment was created
@@ -105,29 +119,31 @@ model EmployeeProject {
 
   @@index([employeeId]) // Adding an index on employeeId to optimize queries involving employee lookups
   @@index([projectId]) // Adding an index on projectId to optimize queries involving project lookups
+  @@index([employeeId, projectId])
   @@map("employee_projects")
 }
 
 model Attendance {
-  id           String           @id @default(auto()) @map("_id") @db.ObjectId
+  id           String           @id @default(uuid()) @db.Uuid
   date         DateTime // Date of the attendance record
   status       AttendanceStatus // Enum to indicate attendance status: PRESENT, ABSENT, ON_LEAVE
   checkInTime  DateTime? // Optional, for employees who check in
   checkOutTime DateTime? // Optional, for employees who check out
 
-  employeeId String   @db.ObjectId
+  employeeId String   @db.Uuid
   employee   Employee @relation(fields: [employeeId], references: [id], onDelete: Cascade) // Cascade delete if the employee is deleted
 
   createdAt DateTime @default(now()) // Records when the attendance record was created
   updatedAt DateTime @updatedAt // Records the last time the attendance record was updated
 
+  @@unique([employeeId, date])
   @@index([employeeId]) // Adding an index on employeeId to optimize queries involving employee lookups
   @@map("attendances")
 }
 
 model AttendanceSummary {
-  id          String @id @default(auto()) @map("_id") @db.ObjectId
-  employeeId  String @db.ObjectId
+  id          String @id @default(uuid()) @db.Uuid
+  employeeId  String @db.Uuid
   month       Int // The month for which the summary is recorded (e.g., 1 for January)
   year        Int // The year for which the summary is recorded (e.g., 2024)
   presentDays Int // Number of days employee was present in that month
@@ -139,18 +155,18 @@ model AttendanceSummary {
   createdAt DateTime @default(now()) // Records when the attendance summary was created
   updatedAt DateTime @updatedAt // Records the last time the attendance summary was updated
 
-  @@index([employeeId, month, year]) // Adding a composite index for efficiently querying by employee, month, and year
+  @@unique([employeeId, month, year])
   @@index([month, year]) // Adding a composite index for queries filtering by month and year
   @@map("attendance_summaries")
 }
 
 model PauseInterval {
-  id        String    @id @default(auto()) @map("_id") @db.ObjectId
+  id        String    @id @default(uuid()) @db.Uuid
   startDate DateTime // Start of the pause period
   endDate   DateTime? // End of the pause period (optional if ongoing)
 
-  employeeProjectId String?          @db.ObjectId
-  EmployeeProject   EmployeeProject? @relation(fields: [employeeProjectId], references: [id], onDelete: Cascade)
+  employeeProjectId String          @db.Uuid
+  employeeProject   EmployeeProject @relation(fields: [employeeProjectId], references: [id], onDelete: Cascade)
 
   createdAt DateTime @default(now()) // Records when the pause interval was created
   updatedAt DateTime @updatedAt // Records the last time the pause interval was updated
@@ -160,7 +176,7 @@ model PauseInterval {
 }
 
 model LearningPath {
-  id          String  @id @default(auto()) @map("_id") @db.ObjectId
+  id          String  @id @default(uuid()) @db.Uuid
   name        String // Name of the learning path (e.g., "Full Stack Developer Learning Path")
   description String? // A brief description of what the path covers
 
@@ -168,65 +184,198 @@ model LearningPath {
 
   employeeLearningPathProgress EmployeeLearningPathProgress[] // Tracking progress for all employees following this path
 
-  createdAt DateTime? @default(now()) // Records when the learning path was created
-  updatedAt DateTime? @updatedAt // Records the last time the learning path was updated
+  createdAt DateTime @default(now()) // Records when the learning path was created
+  updatedAt DateTime @updatedAt // Records the last time the learning path was updated
 
   @@map("learning_paths")
 }
 
 model LearningModule {
-  id            String  @id @default(auto()) @map("_id") @db.ObjectId
+  id            String  @id @default(uuid()) @db.Uuid
   title         String // Title of the learning module
   contentUrl    String? // Link to the module content (e.g., video, document, or quiz)
   estimatedTime Int? // Estimated time to complete the module (in minutes)
 
-  learningPathId String       @db.ObjectId // Link to the LearningPath that this module belongs to
+  learningPathId String       @db.Uuid // Link to the LearningPath that this module belongs to
   learningPath   LearningPath @relation(fields: [learningPathId], references: [id], onDelete: Cascade)
 
   moduleProgress ModuleProgress[] // Tracking module progress for all employees
 
-  createdAt DateTime? @default(now()) // Records when the learning module was created
-  updatedAt DateTime? @updatedAt // Records the last time the learning module was updated
+  createdAt DateTime @default(now()) // Records when the learning module was created
+  updatedAt DateTime @updatedAt // Records the last time the learning module was updated
 
   @@index([learningPathId]) // Adding an index on learningPathId to optimize queries involving module lookups by learning path
   @@map("learning_modules")
 }
 
 model EmployeeLearningPathProgress {
-  id               String         @id @default(auto()) @map("_id") @db.ObjectId
+  id               String         @id @default(uuid()) @db.Uuid
   completionStatus LearningStatus @default(IN_PROGRESS) // Enum: NOT_STARTED, IN_PROGRESS, COMPLETED
 
-  employeeId String   @unique @db.ObjectId // Foreign key pointing to Employee
+  employeeId String   @db.Uuid // Foreign key pointing to Employee
   employee   Employee @relation(fields: [employeeId], references: [id], onDelete: Cascade)
 
-  learningPathId String       @db.ObjectId
+  learningPathId String       @db.Uuid
   learningPath   LearningPath @relation(fields: [learningPathId], references: [id], onDelete: Cascade)
 
   moduleProgress ModuleProgress[] // Tracking individual module progress within this path
 
-  createdAt DateTime? @default(now()) // Records when the employee learning path progress was created
-  updatedAt DateTime? @updatedAt // Records the last time the employee learning path progress was updated
+  createdAt DateTime @default(now()) // Records when the employee learning path progress was created
+  updatedAt DateTime @updatedAt // Records the last time the employee learning path progress was updated
 
+  @@unique([employeeId, learningPathId])
+  @@index([learningPathId])
   @@map("employee_learning_path_progress")
 }
 
 model ModuleProgress {
-  id               String         @id @default(auto()) @map("_id") @db.ObjectId
+  id               String         @id @default(uuid()) @db.Uuid
   completionStatus LearningStatus @default(NOT_STARTED) // Enum: NOT_STARTED, IN_PROGRESS, COMPLETED
   startDate        DateTime? // The date the module was started
   completionDate   DateTime? // The date the module was completed
 
-  learningModuleId String         @db.ObjectId
+  learningModuleId String         @db.Uuid
   learningModule   LearningModule @relation(fields: [learningModuleId], references: [id], onDelete: Cascade)
 
-  employeeLearningPathProgressId String                       @db.ObjectId
+  employeeLearningPathProgressId String                       @db.Uuid
   employeeLearningPathProgress   EmployeeLearningPathProgress @relation(fields: [employeeLearningPathProgressId], references: [id], onDelete: Cascade)
 
   createdAt DateTime @default(now()) // Records when the module progress was created
   updatedAt DateTime @updatedAt // Records the last time the module progress was updated
 
+  @@unique([employeeLearningPathProgressId, learningModuleId])
   @@index([learningModuleId]) // Adding an index on learningModuleId to optimize queries involving module lookups
+  @@index([employeeLearningPathProgressId])
   @@map("module_progress")
+}
+
+model LeaveBalance {
+  id         String   @id @default(uuid()) @db.Uuid
+  casual     Int      @default(0)
+  sick       Int      @default(0)
+  earned     Int      @default(0)
+  employeeId String   @unique @db.Uuid
+  employee   Employee @relation(fields: [employeeId], references: [id], onDelete: Cascade)
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@map("leave_balances")
+}
+
+model EmployeeRemark {
+  id                 String             @id @default(uuid()) @db.Uuid
+  appId              String?
+  employeeId         String             @db.Uuid
+  employee           Employee           @relation("EmployeeRemarkTarget", fields: [employeeId], references: [id], onDelete: Cascade)
+  authorId           String?            @db.Uuid
+  author             Employee?          @relation("EmployeeRemarkAuthor", fields: [authorId], references: [id], onDelete: SetNull)
+  timestamp          DateTime           @default(now())
+  type               EmployeeRemarkType
+  text               String
+  relatedDocumentUrl String?
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([employeeId])
+  @@index([authorId])
+  @@map("employee_remarks")
+}
+
+model Applicant {
+  id                         String                 @id @default(uuid()) @db.Uuid
+  appId                      String?
+  firstName                  String
+  lastName                   String
+  email                      String                 @unique
+  phoneNumber                String
+  country                    String
+  educationStatus            String?
+  appliedAt                  DateTime
+  status                     ApplicantStatus
+  departmentId               String?                @db.Uuid
+  department                 Department?            @relation(fields: [departmentId], references: [id], onDelete: SetNull)
+  resumeUrl                  String?
+  applicationSourceType      ApplicationSourceType?
+  applicationSourceNotes     String?
+  applicationSourceAddedById String?                @db.Uuid
+  applicationSourceAddedBy   Employee?              @relation("ApplicationSourceAddedBy", fields: [applicationSourceAddedById], references: [id], onDelete: SetNull)
+  interviews                 ApplicantInterview[]
+  remarks                    ApplicantRemark[]
+  editHistory                ApplicantEditHistory[]
+  createdById                String?                @db.Uuid
+  createdBy                  Employee?              @relation("ApplicantCreatedBy", fields: [createdById], references: [id], onDelete: SetNull)
+  lastEditedById             String?                @db.Uuid
+  lastEditedBy               Employee?              @relation("ApplicantEditedBy", fields: [lastEditedById], references: [id], onDelete: SetNull)
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([departmentId])
+  @@map("applicants")
+}
+
+model ApplicantInterview {
+  id           String                 @id @default(uuid()) @db.Uuid
+  appId        String?
+  date         DateTime
+  result       InterviewResult?
+  feedback     String?
+  applicantId  String                 @db.Uuid
+  applicant    Applicant              @relation(fields: [applicantId], references: [id], onDelete: Cascade)
+  interviewers ApplicantInterviewer[]
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([applicantId])
+  @@map("applicant_interviews")
+}
+
+model ApplicantInterviewer {
+  applicantInterviewId String             @db.Uuid
+  applicantInterview   ApplicantInterview @relation(fields: [applicantInterviewId], references: [id], onDelete: Cascade)
+  employeeId           String             @db.Uuid
+  employee             Employee           @relation(fields: [employeeId], references: [id], onDelete: Cascade)
+
+  @@id([applicantInterviewId, employeeId])
+  @@map("applicant_interviewers")
+}
+
+model ApplicantRemark {
+  id          String    @id @default(uuid()) @db.Uuid
+  appId       String?
+  timestamp   DateTime  @default(now())
+  authorId    String?   @db.Uuid
+  author      Employee? @relation(fields: [authorId], references: [id], onDelete: SetNull)
+  applicantId String    @db.Uuid
+  applicant   Applicant @relation(fields: [applicantId], references: [id], onDelete: Cascade)
+  text        String
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([applicantId])
+  @@index([authorId])
+  @@map("applicant_remarks")
+}
+
+model ApplicantEditHistory {
+  id          String    @id @default(uuid()) @db.Uuid
+  timestamp   DateTime  @default(now())
+  applicantId String    @db.Uuid
+  applicant   Applicant @relation(fields: [applicantId], references: [id], onDelete: Cascade)
+  editedById  String?   @db.Uuid
+  editedBy    Employee? @relation("ApplicantEditHistoryAuthor", fields: [editedById], references: [id], onDelete: SetNull)
+  changes     Json
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([applicantId])
+  @@index([editedById])
+  @@map("applicant_edit_history")
 }
 
 // Enums
@@ -285,6 +434,43 @@ enum LearningStatus {
   NOT_STARTED
   IN_PROGRESS
   COMPLETED
+}
+
+enum ApplicationSourceType {
+  LINKEDIN
+  REFERRAL
+  MANUAL
+  CAREER_PORTAL
+  CAMPUS
+  OTHER
+}
+
+enum ApplicantStatus {
+  APPLIED
+  UNDER_REVIEW
+  SHORTLISTED
+  SCHEDULED
+  SELECTED
+  ON_HOLD
+  OFFER_LETTER
+  REJECTED
+}
+
+enum InterviewResult {
+  PASS
+  FAIL
+  ON_HOLD
+  NO_SHOW
+  CANCELLED
+}
+
+enum EmployeeRemarkType {
+  PERFORMANCE
+  BEHAVIOR
+  ATTENDANCE
+  COMPLIANCE
+  DISCIPLINARY
+  GENERAL
 }
 
 // Additional Note: We could extend these enums and models to define relations, validations, and other aspects to complete the HRMS as needed.

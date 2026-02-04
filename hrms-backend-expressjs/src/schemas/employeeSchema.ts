@@ -206,9 +206,7 @@ export const createEmployeeSchema = z.object({
   departmentId: z
     .string()
     .min(1, "Please select a department")
-    .refine((id) => /^[a-f\d]{24}$/i.test(id), {
-          message: "Invalid department ID format",
-        }),
+    .uuid("Invalid department ID format"),
   gender: z.nativeEnum(Gender).optional().default(Gender.OTHER), // Based on radio buttons
   inductionCompleted: z.boolean().optional().default(false), // Default to false
   // Role is optional. If not provided, default to INTERN. If provided but not
@@ -350,9 +348,7 @@ export const updateEmployeeSchema = z.object({
   departmentId: z
     .string()
     .min(1, "Please select a department")
-    .refine((id) => /^[a-f\d]{24}$/i.test(id), {
-        message: "Invalid department ID format",
-      })
+    .uuid("Invalid department ID format")
     .optional(),
   gender: z
     .nativeEnum(Gender) // Based on radio buttons

@@ -12,6 +12,11 @@ const isSafeString = (input: string): boolean => {
 const isValidUnicodeName = (input: string): boolean =>
   /^[\p{L}][\p{L}\s'\-]*[\p{L}]$/u.test(input);
 
+const optionalUuid = z.preprocess(
+  (value) => (value === "" ? undefined : value),
+  z.string().uuid().optional().nullable()
+);
+
 const allowedIcons = [
   "icon-1",
   "icon-2",
@@ -44,8 +49,7 @@ export const createDepartmentSchema = z.object({
     .string()
     .min(1, "Description is required")
     .refine(isSafeString, {
-      message:
-        'Description contains unsafe characters like <, >, ", `, or &',
+      message: 'Description contains unsafe characters like <, >, ", `, or &',
     })
     .refine((val) => val.trim().split(/\s+/).length <= 24, {
       message: "Description must be 24 words or less",
@@ -53,13 +57,11 @@ export const createDepartmentSchema = z.object({
     .optional()
     .transform((value) => (!value ? null : value)),
 
-  headOfDep: z
-    .string()
-    .refine((val) => val !== "", { message: "Head of department is required" }),
+  headOfDep: optionalUuid,
 
-   icon: z
-    .string()
-    .refine((val) => allowedIcons.includes(val), { message: "Invalid icon selected" }),
+  icon: z.string().refine((val) => allowedIcons.includes(val), {
+    message: "Invalid icon selected",
+  }),
 });
 
 // UPDATE schema
@@ -84,8 +86,7 @@ export const updateDepartmentSchema = z.object({
     .string()
     .min(1, "Description is required")
     .refine(isSafeString, {
-      message:
-        'Description contains unsafe characters like <, >, ", `, or &',
+      message: 'Description contains unsafe characters like <, >, ", `, or &',
     })
     .refine((val) => val.trim().split(/\s+/).length <= 24, {
       message: "Description must be 24 words or less",
@@ -93,15 +94,12 @@ export const updateDepartmentSchema = z.object({
     .optional()
     .transform((value) => (value ? value : undefined)),
 
-  headOfDep: z
-    .string()
-    .optional()
-    .refine((id) => id === undefined || id !== "", {
-      message: "Head of department must be selected"
-    }),
+  headOfDep: optionalUuid,
 
   icon: z
     .string()
     .optional()
-    .refine((val) => !val || allowedIcons.includes(val), { message: "Invalid icon selected" }),
+    .refine((val) => !val || allowedIcons.includes(val), {
+      message: "Invalid icon selected",
+    }),
 });

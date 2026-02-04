@@ -180,9 +180,7 @@ export const createEmployeeSchema = (hasFetched: boolean) =>
       departmentId: z
         .string()
         .min(1, "Department selection is required")
-        .refine((id) => /^[a-f\d]{24}$/i.test(id), {
-          message: "Invalid department ID format",
-        }),
+        .uuid("Invalid department ID format"),
       gender: z.enum(["MALE", "FEMALE", "OTHER"]).optional(), // Based on radio buttons
       // Role is optional; default to INTERN if missing/empty; validate if provided
       role: z
@@ -317,9 +315,7 @@ export const updateEmployeeSchema = z
     departmentId: z
       .string()
       .min(1, "Department selection is required")
-      .refine((id) => /^[a-f\d]{24}$/i.test(id), {
-        message: "Invalid department ID format",
-      })
+      .uuid("Invalid department ID format")
       .optional(),
     gender: z.enum(["MALE", "FEMALE", "OTHER"]).optional(), // Based on radio buttons
     role: z.preprocess(

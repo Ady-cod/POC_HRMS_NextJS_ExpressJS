@@ -13,6 +13,10 @@ const isSafeString = (input: string): boolean => {
 const isValidUnicodeName = (input: string): boolean =>
   /^[\p{L}][\p{L}\s'\-]*[\p{L}]$/u.test(input);
 
+const optionalUuid = z.preprocess(
+  (value) => (value === "" ? undefined : value),
+  z.string().uuid().optional().nullable()
+);
 
 // CREATE schema
 export const createDepartmentSchema = z.object({
@@ -37,16 +41,15 @@ export const createDepartmentSchema = z.object({
       message: "Description must be 24 words or less",
     }),
 
-   headOfDep: z
-   .string()
-   .optional(),
+  headOfDep: optionalUuid,
 
-    icon: z
+  icon: z
     .string()
     .optional()
     .refine(
       (val) =>
-        !val || [
+        !val ||
+        [
           "icon-1",
           "icon-2",
           "icon-3",
@@ -57,7 +60,7 @@ export const createDepartmentSchema = z.object({
           "icon-8",
         ].includes(val),
       { message: "Invalid icon selected" }
-    )
+    ),
 });
 
 // UPDATE schema
@@ -84,17 +87,15 @@ export const updateDepartmentSchema = z.object({
       message: "Description must be 24 words or less",
     }),
 
-  headOfDep: z
-    .string()
-    .min(2)
-    .optional(),
+  headOfDep: optionalUuid,
 
   icon: z
     .string()
     .optional()
     .refine(
       (val) =>
-        !val || [
+        !val ||
+        [
           "icon-1",
           "icon-2",
           "icon-3",

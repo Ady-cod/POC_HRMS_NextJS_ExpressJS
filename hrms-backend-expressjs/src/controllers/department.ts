@@ -166,7 +166,9 @@ export const updateDepartment = async (req: Request, res: Response) => {
       let nextDeptHeadEmployeeId = currentDepartment.deptHeadEmployeeId ?? null;
       let shouldUpdateHeadEmployee = false;
 
-      if (headOfDep) {
+      if (headOfDep === null) {
+        nextDeptHeadEmployeeId = null;
+      } else if (headOfDep) {
         const employeeExists = await tx.employee.findUnique({
           where: { id: headOfDep },
         });

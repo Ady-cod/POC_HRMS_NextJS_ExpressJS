@@ -1,6 +1,4 @@
 import { Request, Response } from "express";
-import { ObjectId } from "mongodb";
-
 import prisma from "../lib/client";
 import { Prisma, Employee, Department } from "@prisma/client";
 
@@ -28,6 +26,11 @@ const verifyPassword = async (
 ): Promise<boolean> => {
   return bcrypt.compare(password, hashedPassword);
 };
+
+const UUID_REGEX =
+  /^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i;
+
+const isValidUuid = (value: string): boolean => UUID_REGEX.test(value);
 
 export const getAllEmployees = async (
   req: Request,
@@ -74,7 +77,7 @@ export const getEmployee = async (
 ): Promise<void> => {
   try {
     const { id } = req.params;
-    if (!ObjectId.isValid(id)) {
+    if (!isValidUuid(id)) {
       res.status(400).json({ error: "Employee ID is required" });
       return;
     }
@@ -191,7 +194,7 @@ export const deleteEmployee = async (
 ): Promise<void> => {
   try {
     const { id } = req.params;
-    if (!ObjectId.isValid(id)) {
+    if (!isValidUuid(id)) {
       res.status(400).json({ error: "Employee ID is required" });
       return;
     }
@@ -217,7 +220,7 @@ export const updateEmployee = async (
     // console.log("Employee ID:", id);
     // console.log("Request body received:", req.body);
 
-    if (!ObjectId.isValid(id)) {
+    if (!isValidUuid(id)) {
       res.status(400).json({
         error:
           "The update cannot be performed without a valid employee ID. \nContact support.",
@@ -258,9 +261,9 @@ export const updateEmployee = async (
         if (DEMO_MODE) {
           // Create department in demo mode
           department = await prisma.department.create({
-            data: { 
-                    name: `Demo Department (${departmentId.slice(0, 6)})`,
-                    description: "Auto-generated department (DEMO_MODE)" 
+            data: {
+              name: `Demo Department (${departmentId.slice(0, 6)})`,
+              description: "Auto-generated department (DEMO_MODE)",
             },
           });
         } else {

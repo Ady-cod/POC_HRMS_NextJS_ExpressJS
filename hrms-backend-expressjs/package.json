@@ -13,7 +13,10 @@
     "add-js-extension": "ts-add-js-extension --dir=dist",
     "build": "npm-run-all clean compile add-js-extension",
     "prod": "npm-run-all build start",
-    "postinstall": "pnpm prisma generate"
+    "postinstall": "pnpm prisma generate",
+    "migrate:mongo-to-postgres": "tsx scripts/migrate-mongo-to-postgres.ts",
+    "smoke:postgres": "tsx scripts/smoke-test-postgres.ts",
+    "validate:migration": "tsx scripts/validate-migration.ts"
   },
   "keywords": [
     "HRMS",

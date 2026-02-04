@@ -33,3 +33,6 @@ pnpm-debug.log*
 
 # Debug or dump files
 *.dmp
+
+# MongoDB -> Postgres data migration ID map (ObjectId -> UUID)
+scripts/migration-id-map.json

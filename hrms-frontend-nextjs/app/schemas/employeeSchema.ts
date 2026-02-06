@@ -254,6 +254,7 @@ export const updateEmployeeSchema = z
         "Password must include at least one special character"
       )
       .optional(),
+  currentPassword: z.string().optional(),
     phoneNumber: z
       .string()
       .refine(isValidPhoneNumber, {

@@ -225,6 +225,27 @@ const ModalForm: React.FC<ModalFormProps> = ({
 
     // Access the Confirm Password value using the ref
     const confirmPassword = confirmPasswordRef.current?.value;
+    const isEdit = Boolean(employeeData);
+    const emailInput =
+      typeof employeeInputData.email === "string" ? employeeInputData.email : "";
+    const emailChanged =
+      isEdit && emailInput !== "" && emailInput !== (employeeData?.email ?? "");
+    const currentPasswordInput =
+      typeof employeeInputData.currentPassword === "string"
+        ? employeeInputData.currentPassword
+        : "";
+    const hasCurrentPasswordInput = currentPasswordInput.length > 0;
+
+    if (emailChanged && !hasCurrentPasswordInput) {
+      setErrors((prev) => ({
+        ...(prev ?? {}),
+        currentPassword: "Current password is required to change email.",
+      }));
+      showToast("error", "Missing current password:", [
+        "Please enter the current password to confirm the email change.",
+      ]);
+      return;
+    }
 
     // Validate the password and confirm password match
     if (employeeInputData.password !== confirmPassword) {
@@ -264,6 +285,13 @@ const ModalForm: React.FC<ModalFormProps> = ({
         // Filter the data that has not been updated or empty values
         const filteredData = Object.fromEntries(
           Object.entries(employeeInputData).filter(([key, value]) => {
+            if (key === "currentPassword") {
+              return (
+                emailChanged &&
+                typeof value === "string" &&
+                value.length > 0
+              );
+            }
             if (key === "birthDate" || key === "dateOfJoining") {
               // Handle date fields
               return value !== "" && value !== employeeData[key]?.split("T")[0];
@@ -533,6 +561,29 @@ const ModalForm: React.FC<ModalFormProps> = ({
                 </p>
               )}
             </div>
+            {employeeData && (
+              <div
+                className={`input-wrapper ${
+                  errors?.currentPassword ? "error" : ""
+                }`}
+              >
+                <input
+                  name="currentPassword"
+                  type="password"
+                  placeholder="Current password (required to change email)"
+                  className="input-field"
+                />
+                {errors?.currentPassword && (
+                  <p
+                    className="error-message"
+                    data-tooltip={errors.currentPassword}
+                    onMouseEnter={handleTooltipPosition}
+                  >
+                    {errors.currentPassword}
+                  </p>
+                )}
+              </div>
+            )}
           </div>
 
           <h3 className="section-title">Personal Information</h3>

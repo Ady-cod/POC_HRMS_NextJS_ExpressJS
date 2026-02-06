@@ -3,7 +3,8 @@ import prisma from "../lib/client";
 import { z } from "zod";
 import { isValid, parseISO } from "date-fns";
 import { parsePhoneNumberFromString } from "libphonenumber-js";
-import dns from "dns/promises";
+import { Resolver } from "node:dns/promises";
+import * as dns from "node:dns/promises";
 
 // Helper function to capitalize the first letter of each word in a name
 const capitalizeEachWord = (name: string): string =>
@@ -66,15 +67,132 @@ interface DomainValidationResult {
   priority: number;
 }
 
+type ValidationMode = "strict" | "warn" | "off";
+
+const DNS_SERVERS = process.env.DNS_SERVERS?.split(",")
+  .map((server) => server.trim())
+  .filter(Boolean);
+
+const EMAIL_RESOLVER =
+  DNS_SERVERS && DNS_SERVERS.length > 0
+    ? (() => {
+        const resolver = new Resolver();
+        resolver.setServers(DNS_SERVERS);
+        return resolver;
+      })()
+    : null;
+
+const DNS_TIMEOUT_MS = 5000;
+const DNS_WARN_INTERVAL_MS = 60_000;
+let lastDnsWarningAt = 0;
+
+const getValidationMode = (): ValidationMode => {
+  const rawMode = process.env.EMAIL_DOMAIN_VALIDATION_MODE?.toLowerCase();
+  if (rawMode === "strict" || rawMode === "warn" || rawMode === "off") {
+    return rawMode;
+  }
+  return process.env.NODE_ENV === "production" ? "strict" : "warn";
+};
+
+const withTimeout = async <T>(promise: Promise<T>): Promise<T> => {
+  const timeoutError = new Error("DNS_TIMEOUT") as NodeJS.ErrnoException;
+  timeoutError.code = "ETIMEDOUT";
+  return Promise.race([
+    promise,
+    new Promise<T>((_, reject) =>
+      setTimeout(() => reject(timeoutError), DNS_TIMEOUT_MS)
+    ),
+  ]);
+};
+
+const logDnsWarning = (message: string): void => {
+  const now = Date.now();
+  if (now - lastDnsWarningAt < DNS_WARN_INTERVAL_MS) {
+    return;
+  }
+  lastDnsWarningAt = now;
+  console.warn(message);
+};
+
+const getResolver = (): Resolver | null => EMAIL_RESOLVER;
+
 async function isDomainValid(email: string): Promise<boolean> {
-  // Extract the domain part of the email
-  const domain = email.split("@")[1];
+  const mode = getValidationMode();
+  if (mode === "off") {
+    return true;
+  }
+
+  const domain = email.split("@")[1]?.trim();
   if (!domain) return false; // Invalid if no domain part exists
+
+  const resolver = getResolver();
+  const resolveMx = resolver
+    ? resolver.resolveMx.bind(resolver)
+    : dns.resolveMx;
+  const resolve4 = resolver
+    ? resolver.resolve4.bind(resolver)
+    : dns.resolve4;
+  const resolve6 = resolver
+    ? resolver.resolve6.bind(resolver)
+    : dns.resolve6;
+
+  const fallbackToAddressRecords = async (): Promise<boolean> => {
+    const [aResult, aaaaResult] = await Promise.allSettled([
+      withTimeout(resolve4(domain)),
+      withTimeout(resolve6(domain)),
+    ]);
+
+    const hasA =
+      aResult.status === "fulfilled" && aResult.value.length > 0;
+    const hasAAAA =
+      aaaaResult.status === "fulfilled" && aaaaResult.value.length > 0;
+
+    return hasA || hasAAAA;
+  };
+
   try {
-    const records: DomainValidationResult[] = await dns.resolveMx(domain); // Checks for MX records
-    return records.length > 0; // Valid if there are mail servers
-  } catch {
-    return false; // Invalid if no MX records
+    const records: DomainValidationResult[] = await withTimeout(resolveMx(domain));
+    if (records.length > 0) {
+      return true;
+    }
+    return await fallbackToAddressRecords();
+  } catch (error) {
+    const err = error as NodeJS.ErrnoException;
+    const code = err.code ?? "UNKNOWN";
+
+    if (code === "ENOTFOUND") {
+      return false;
+    }
+
+    if (code === "ENODATA") {
+      return await fallbackToAddressRecords();
+    }
+
+    const isNetworkError = [
+      "ECONNREFUSED",
+      "ETIMEDOUT",
+      "EAI_AGAIN",
+      "SERVFAIL",
+    ].includes(code);
+
+    if (isNetworkError) {
+      if (mode === "warn") {
+        logDnsWarning(
+          `[email-validation] DNS lookup failed for ${domain} (code=${code}) -> allowing`
+        );
+        return true;
+      }
+      return false;
+    }
+
+    if (mode === "warn") {
+      logDnsWarning(
+        `[email-validation] DNS lookup error for ${domain} (code=${code}) -> allowing`
+      );
+      return true;
+    }
+
+    return false;
   }
 }
 

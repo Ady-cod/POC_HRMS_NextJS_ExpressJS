@@ -34,9 +34,6 @@ Dockerfile
 docker-compose.yml
 .env.docker
 
-# Generated Documentation
-/docs/
-
 # Logs
 logs
 *.log

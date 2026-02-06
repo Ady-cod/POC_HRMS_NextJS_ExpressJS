@@ -116,3 +116,15 @@ If you plan to run the MongoDB → PostgreSQL migration script, also set:
 
 - `MONGO_DATABASE_URL` (MongoDB connection string)
 - `MONGO_DATABASE_NAME` (optional, if not present in the MongoDB URL)
+
+### Email Domain Validation (DNS)
+
+The backend validates email domains using DNS lookups. To avoid local DNS resolver issues in dev environments, you can optionally configure:
+
+- `DNS_SERVERS`: comma-separated DNS servers used **only** for email validation (e.g. `1.1.1.1,8.8.8.8`)
+- `EMAIL_DOMAIN_VALIDATION_MODE`: `strict | warn | off`
+  - `strict`: DNS lookup failures reject the email
+  - `warn`: DNS lookup failures allow the email and log a warning
+  - `off`: skip DNS validation entirely
+
+If `EMAIL_DOMAIN_VALIDATION_MODE` is unset, it defaults to `strict` in production and `warn` in non-production.

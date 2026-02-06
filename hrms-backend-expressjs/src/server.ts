@@ -8,6 +8,24 @@ import departmentRouter from "./routes/department";
 // Load environment variables from .env file
 dotenv.config();
 
+const resolveValidationMode = (): string => {
+  const rawMode = process.env.EMAIL_DOMAIN_VALIDATION_MODE?.toLowerCase();
+  if (rawMode === "strict" || rawMode === "warn" || rawMode === "off") {
+    return rawMode;
+  }
+  return process.env.NODE_ENV === "production" ? "strict" : "warn";
+};
+
+const dnsServers = process.env.DNS_SERVERS?.split(",")
+  .map((server) => server.trim())
+  .filter(Boolean);
+
+console.log(
+  `[email-validation] mode=${resolveValidationMode()} dnsOverride=${
+    dnsServers && dnsServers.length > 0 ? "enabled" : "disabled"
+  }`
+);
+
 const app = express();
 const PORT = process.env.PORT || 5001;
 
